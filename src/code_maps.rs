@@ -1,4 +1,8 @@
 mod scan;
+mod select;
+mod staleness;
+#[cfg(test)]
+mod tests;
 mod types;
 
 use std::fs;
@@ -6,6 +10,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use chrono::Utc;
+use serde::de::DeserializeOwned;
 
 use crate::agent_dir::AgentPaths;
 
@@ -70,42 +75,60 @@ pub fn write(root: &Path) -> Result<WorkspaceMaps> {
 }
 
 pub fn read_existing(root: &Path) -> Result<serde_json::Value> {
-    let paths = AgentPaths::new(root);
-    let routes = read_json(paths.maps.join("routes.map.json").as_path())?;
-    let components = read_json(paths.maps.join("components.map.json").as_path())?;
-    let exports = read_json(paths.maps.join("exports.map.json").as_path())?;
+    let entries = read_entries(root)?;
     Ok(serde_json::json!({
-        "routes": routes,
-        "components": components,
-        "exports": exports,
+        "routes": entries.routes,
+        "components": entries.components,
+        "exports": entries.exports,
     }))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn read_entries(root: &Path) -> Result<WorkspaceMapEntries> {
+    let paths = AgentPaths::new(root);
+    Ok(WorkspaceMapEntries {
+        routes: read_map_file(paths.maps.join("routes.map.json").as_path())?,
+        components: read_map_file(paths.maps.join("components.map.json").as_path())?,
+        exports: read_map_file(paths.maps.join("exports.map.json").as_path())?,
+    })
+}
 
-    #[test]
-    fn detects_nextjs_routes_components_and_exports() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let page = dir.path().join("src/app/courses/page.tsx");
-        let component = dir.path().join("src/components/CourseCard.tsx");
-        fs::create_dir_all(page.parent().unwrap())?;
-        fs::create_dir_all(component.parent().unwrap())?;
-        fs::write(&page, "export function CoursesPage() { return null }\n")?;
-        fs::write(&component, "export const CourseCard = () => null\n")?;
+pub fn validate_existing(root: &Path) -> Result<MapValidation> {
+    let entries = read_entries(root)?;
+    validate_entries(root, &entries)
+}
 
-        let maps = build(dir.path())?;
+pub fn select_context(root: &Path, spec: &crate::spec::AgentSpec) -> Result<MapContextSelection> {
+    let entries = read_entries(root)?;
+    let validation = validate_entries(root, &entries)?;
+    select::for_spec(spec, entries, validation)
+}
 
-        assert!(maps.routes.iter().any(|route| route.route == "/courses"));
-        assert!(maps
-            .components
-            .iter()
-            .any(|component| component.name == "CourseCard"));
-        assert!(maps
-            .exports
-            .iter()
-            .any(|export| export.symbol == "CourseCard"));
-        Ok(())
+fn validate_entries(root: &Path, entries: &WorkspaceMapEntries) -> Result<MapValidation> {
+    let mut validation = staleness::validate(root, entries)?;
+    validation.missing_maps = missing_map_files(root);
+    validation.stale = !validation.missing_maps.is_empty() || !validation.stale_entries.is_empty();
+    Ok(validation)
+}
+
+fn read_map_file<T: DeserializeOwned>(path: &Path) -> Result<Vec<T>> {
+    if !path.exists() {
+        return Ok(Vec::new());
     }
+    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    Ok(serde_json::from_str(&content)?)
+}
+
+fn missing_map_files(root: &Path) -> Vec<String> {
+    let paths = AgentPaths::new(root);
+    [
+        ("routes.map.json", paths.maps.join("routes.map.json")),
+        (
+            "components.map.json",
+            paths.maps.join("components.map.json"),
+        ),
+        ("exports.map.json", paths.maps.join("exports.map.json")),
+    ]
+    .into_iter()
+    .filter_map(|(name, path)| (!path.exists()).then_some(name.to_string()))
+    .collect()
 }

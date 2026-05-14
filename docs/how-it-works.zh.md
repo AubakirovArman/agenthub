@@ -203,6 +203,8 @@ agenthub workspace scan --write-maps
 
 这些 maps 会进入后续 context packs。
 
+每个事务还会写入 `map_context`：根据 `scope.allow` 和 task hints 选择出的 maps 子集。AgentHub 会重新计算 mapped files 的 hashes；stale 或 missing map entries 会出现在 `map_context.validation`。参见 [Context maps](context-maps.zh.md)。
+
 ## VS Code Extension
 
 `editors/vscode` 中的 extension 提供：

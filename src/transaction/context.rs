@@ -67,6 +67,22 @@ pub(super) fn write_context_pack(
 ) -> Result<serde_json::Value> {
     let memory = memory::retrieve_recent(project_root, 10)?;
     let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
+    let map_context = code_maps::select_context(project_root, spec)
+        .ok()
+        .and_then(|selection| serde_json::to_value(selection).ok())
+        .unwrap_or_else(|| {
+            json!({
+            "routes": [],
+            "components": [],
+            "exports": [],
+            "validation": { "stale": true, "missing_maps": ["unreadable"], "stale_entries": [] },
+            "policy": {
+                "map_based": true,
+                "full_files_included": false,
+                "selector": "unavailable"
+            }
+        })
+        });
     let context = json!({
         "agent_spec": spec,
         "agent_routes": agent_routes,
@@ -82,6 +98,7 @@ pub(super) fn write_context_pack(
         "skills": skills,
         "memory": memory,
         "maps": maps,
+        "map_context": map_context,
         "policy": { "least_context": true, "scope_only": true }
     });
     observability::write_context_pack_artifacts(tx_dir, &context)

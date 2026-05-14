@@ -203,6 +203,8 @@ agenthub workspace scan --write-maps
 
 Эти maps попадут в следующие context packs.
 
+Каждая транзакция также пишет `map_context`: subset maps, выбранный по `scope.allow` и task hints. AgentHub пересчитывает hashes mapped files; stale или missing map entries отражаются в `map_context.validation`. См. [Context maps](context-maps.ru.md).
+
 ## VS Code Extension
 
 Extension в `editors/vscode` даёт:

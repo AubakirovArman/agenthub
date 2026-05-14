@@ -106,14 +106,6 @@ fn exported_symbol(line: &str, prefix: &str) -> Option<String> {
         .map(str::to_string)
 }
 
-pub(super) fn read_json(path: &Path) -> Result<serde_json::Value> {
-    if !path.exists() {
-        return Ok(serde_json::json!([]));
-    }
-    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    Ok(serde_json::from_str(&content)?)
-}
-
 pub(super) fn file_hash(path: &Path) -> Result<String> {
     let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
     let mut hasher = Sha256::new();

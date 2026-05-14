@@ -203,6 +203,8 @@ Generated files:
 
 These maps are included in future context packs.
 
+Each transaction also writes `map_context`, a selected subset of maps based on `scope.allow` and task hints. AgentHub recalculates mapped file hashes; stale or missing map entries are reported under `map_context.validation`. See [Context maps](context-maps.en.md).
+
 ## VS Code Extension
 
 The extension in `editors/vscode` provides:
