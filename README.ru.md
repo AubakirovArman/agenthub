@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Natural language](docs/natural-language.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [Natural language](docs/natural-language.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -24,6 +24,7 @@ AgentHub — транзакционная runtime-основа для работ
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
 - VS Code extension v0 для просмотра транзакций, памяти и DAG.
 - локальная enterprise policy, RBAC checks, audit log и compliance report generation.
+- PRD tracker разбит на `prd/done` и `prd/todo`.
 
 ## Установка и сборка
 
