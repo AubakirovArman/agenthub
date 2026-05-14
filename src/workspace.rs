@@ -33,7 +33,11 @@ pub fn scan(root: &Path) -> Result<WorkspaceScan> {
     })
 }
 
-pub fn prepare_code_worktree(root: &Path, paths: &AgentPaths, tx_id: &str) -> Result<PreparedWorkspace> {
+pub fn prepare_code_worktree(
+    root: &Path,
+    paths: &AgentPaths,
+    tx_id: &str,
+) -> Result<PreparedWorkspace> {
     if !git::is_repo(root) {
         return Err(anyhow!("project root is not a git repository"));
     }

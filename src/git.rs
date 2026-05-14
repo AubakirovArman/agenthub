@@ -6,7 +6,6 @@ use anyhow::{anyhow, Context, Result};
 #[derive(Debug, Clone)]
 pub struct GitOutput {
     pub stdout: String,
-    pub stderr: String,
 }
 
 pub fn is_repo(root: &Path) -> bool {
@@ -52,17 +51,12 @@ pub fn dirty_blockers(root: &Path) -> Result<Vec<String>> {
 
 pub fn create_worktree(root: &Path, branch: &str, path: &Path) -> Result<()> {
     let path_arg = path.to_string_lossy().to_string();
-    run(
-        root,
-        &["worktree", "add", "-b", branch, &path_arg],
-    )
-    .map(|_| ())
+    run(root, &["worktree", "add", "-b", branch, &path_arg]).map(|_| ())
 }
 
 pub fn remove_worktree(root: &Path, path: &Path) -> Result<()> {
     let path_arg = path.to_string_lossy().to_string();
-    run(root, &["worktree", "remove", "--force", &path_arg])
-    .map(|_| ())
+    run(root, &["worktree", "remove", "--force", &path_arg]).map(|_| ())
 }
 
 pub fn add_all(root: &Path) -> Result<()> {
@@ -85,7 +79,6 @@ pub fn diff_numstat(root: &Path) -> Result<String> {
     Ok(run(root, &["diff", "--numstat", "HEAD"])
         .unwrap_or_else(|_| GitOutput {
             stdout: String::new(),
-            stderr: String::new(),
         })
         .stdout)
 }
@@ -141,6 +134,5 @@ pub fn run(root: &Path, args: &[&str]) -> Result<GitOutput> {
 
     Ok(GitOutput {
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
-        stderr: String::from_utf8_lossy(&output.stderr).to_string(),
     })
 }

@@ -10,21 +10,33 @@ rollback, sync check, and transaction reports.
 
 ```bash
 agenthub init
+agenthub ask "Добавь страницу курсов в стиле dashboard"
 agenthub run examples/command-task.yaml
 agenthub tx status
 agenthub tx report tx-...
-agenthub workspace scan
+agenthub workspace scan --write-maps
 agenthub memory inspect
+agenthub skills list
+agenthub agents list
 ```
 
-## Phase 1 Scope
+## Implemented Foundation
 
-This repository currently implements the execution kernel without an LLM
-adapter. A transaction can run deterministic shell commands from an AgentSpec,
-then verify and either merge or rollback the isolated worktree.
+This repository currently implements the foundation slices from the PRD:
 
-Later phases will add context packs, VCM-OS memory retrieval, skills, and agent
-adapters.
+- transactional execution kernel;
+- worktree-isolated `CodeWorkspace`;
+- journal/report artifacts;
+- diff guard and sync check;
+- verifier commands and runtime smoke checks;
+- bounded repair loop;
+- VCM staging, promotion, failed attempts, and compacted state;
+- observability artifacts, context pack trace, redaction, and cost placeholder;
+- AgentSpec YAML, AgentIR, and execution DAG;
+- skill manifests and dependency loading;
+- agent adapter routing/traces;
+- context maps for routes/components/exports;
+- heuristic `ask` command for AgentSpec preview.
 
 ## Local Build
 
@@ -33,5 +45,5 @@ Rust is required:
 ```bash
 cargo build
 cargo test
+cargo clippy -- -D warnings
 ```
-

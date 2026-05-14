@@ -1,0 +1,592 @@
+[
+  {
+    "symbol": "AgentCommands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "AgentConfig",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "AgentPaths",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "AgentRoute",
+    "file": "src/agent_adapter.rs",
+    "hash": "5e272048f4894ea8a8eb0986b118a19373cf68b0c06fab879ca3f57dfb87c272"
+  },
+  {
+    "symbol": "AgentSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "Cli",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "CommandResult",
+    "file": "src/command_runner.rs",
+    "hash": "0b7383f214774ec137cb68edd9cfcd2fc85ebf39345abd899abf9a2c8fdf49b8"
+  },
+  {
+    "symbol": "Commands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "ComponentMapEntry",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "ContextPackTrace",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "CostItem",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "CostProfile",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "DagEdge",
+    "file": "src/compiler.rs",
+    "hash": "9f29fdd54d04dbc76233d7cceda2423ad9f9b805bc4e085e46254fc101546017"
+  },
+  {
+    "symbol": "DagNode",
+    "file": "src/compiler.rs",
+    "hash": "9f29fdd54d04dbc76233d7cceda2423ad9f9b805bc4e085e46254fc101546017"
+  },
+  {
+    "symbol": "DiffGuardResult",
+    "file": "src/diff_guard.rs",
+    "hash": "739fa59400d51d3db6778aa1917366e371aa97b14af964ab692f4a948e102703"
+  },
+  {
+    "symbol": "DiffLimitsSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "DiffSummary",
+    "file": "src/diff_guard.rs",
+    "hash": "739fa59400d51d3db6778aa1917366e371aa97b14af964ab692f4a948e102703"
+  },
+  {
+    "symbol": "ErrorFingerprint",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "ExecutionDag",
+    "file": "src/compiler.rs",
+    "hash": "9f29fdd54d04dbc76233d7cceda2423ad9f9b805bc4e085e46254fc101546017"
+  },
+  {
+    "symbol": "ExecutionSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "ExportMapEntry",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "GitOutput",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "IntentPreview",
+    "file": "src/intent.rs",
+    "hash": "d45ebe2fc7b17d2945a771e4a4d221fc52d5c23c424d43c10adbdcd39bb2d3e0"
+  },
+  {
+    "symbol": "Journal",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "JournalEvent",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "MemoryCommands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "MemoryRecord",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "MemoryStats",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "ObservabilityArtifacts",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "PreparedWorkspace",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "RepairSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "RouteCheckResult",
+    "file": "src/verifier.rs",
+    "hash": "a339f409c9b1c9c9c6e35c38cd981591aa196b292b93ea6639a5baa25ef47bf5"
+  },
+  {
+    "symbol": "RouteCheckSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "RouteMapEntry",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "RuntimeSmokeResult",
+    "file": "src/verifier.rs",
+    "hash": "a339f409c9b1c9c9c6e35c38cd981591aa196b292b93ea6639a5baa25ef47bf5"
+  },
+  {
+    "symbol": "RuntimeSmokeSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "ScopeSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "SkillCommands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "SkillManifest",
+    "file": "src/skill_registry.rs",
+    "hash": "29eae500c5ca652a24358f2b66e18b4c12fa9135cb9bd517877efce21d0d1619"
+  },
+  {
+    "symbol": "SkillMeta",
+    "file": "src/skill_registry.rs",
+    "hash": "29eae500c5ca652a24358f2b66e18b4c12fa9135cb9bd517877efce21d0d1619"
+  },
+  {
+    "symbol": "SupervisedChild",
+    "file": "src/command_runner.rs",
+    "hash": "0b7383f214774ec137cb68edd9cfcd2fc85ebf39345abd899abf9a2c8fdf49b8"
+  },
+  {
+    "symbol": "TaskSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "TransactionOutcome",
+    "file": "src/transaction.rs",
+    "hash": "34347c65a21c0104f9eee2c9388bff07c9363520d6729800672b814da35d060a"
+  },
+  {
+    "symbol": "TransactionReport",
+    "file": "src/report.rs",
+    "hash": "7c03a748862d0696a2e251439b7841a867d54267e1d4bdbdfb1d197b23d96ff9"
+  },
+  {
+    "symbol": "TransactionRow",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "TransactionSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "TransactionStatus",
+    "file": "src/transaction.rs",
+    "hash": "34347c65a21c0104f9eee2c9388bff07c9363520d6729800672b814da35d060a"
+  },
+  {
+    "symbol": "TxCommands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "VerifierResult",
+    "file": "src/verifier.rs",
+    "hash": "a339f409c9b1c9c9c6e35c38cd981591aa196b292b93ea6639a5baa25ef47bf5"
+  },
+  {
+    "symbol": "VerifySpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "WorkspaceCommands",
+    "file": "src/cli.rs",
+    "hash": "8993547d49a050cf741bd9bba7753924de44b6a70a5b562b57eedb7f1dd6e24d"
+  },
+  {
+    "symbol": "WorkspaceMaps",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "WorkspaceScan",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "WorkspaceSpec",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "add_all",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "append",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "append_data",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "as_str",
+    "file": "src/transaction.rs",
+    "hash": "34347c65a21c0104f9eee2c9388bff07c9363520d6729800672b814da35d060a"
+  },
+  {
+    "symbol": "build",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "changed_files",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "check",
+    "file": "src/diff_guard.rs",
+    "hash": "739fa59400d51d3db6778aa1917366e371aa97b14af964ab692f4a948e102703"
+  },
+  {
+    "symbol": "commit",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "commit_and_merge",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "compact_project_state",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "compile",
+    "file": "src/compiler.rs",
+    "hash": "9f29fdd54d04dbc76233d7cceda2423ad9f9b805bc4e085e46254fc101546017"
+  },
+  {
+    "symbol": "create_worktree",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "current_branch",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "detects_missing_env",
+    "file": "src/verifier.rs",
+    "hash": "a339f409c9b1c9c9c6e35c38cd981591aa196b292b93ea6639a5baa25ef47bf5"
+  },
+  {
+    "symbol": "diff_numstat",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "dirty",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "dirty_blockers",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "ensure_runtime_dirs",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "head",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "init_project",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "inspect",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "is_repo",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "list_available",
+    "file": "src/skill_registry.rs",
+    "hash": "29eae500c5ca652a24358f2b66e18b4c12fa9135cb9bd517877efce21d0d1619"
+  },
+  {
+    "symbol": "list_transactions",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "load",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "load_requested",
+    "file": "src/skill_registry.rs",
+    "hash": "29eae500c5ca652a24358f2b66e18b4c12fa9135cb9bd517877efce21d0d1619"
+  },
+  {
+    "symbol": "merge_ff_only",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "new",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "new",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "normalize_to_spec",
+    "file": "src/intent.rs",
+    "hash": "d45ebe2fc7b17d2945a771e4a4d221fc52d5c23c424d43c10adbdcd39bb2d3e0"
+  },
+  {
+    "symbol": "prepare_code_worktree",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "promote_staging",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "read_existing",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "read_latest_status",
+    "file": "src/journal.rs",
+    "hash": "c1f7dd5dfcff99384d75af1744fa94aeeaf2b9ec8297afd3f7b509beed14481f"
+  },
+  {
+    "symbol": "read_report",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "record_failed_attempt",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "redact_text",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "remove_worktree",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "retrieve_recent",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "rollback",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "route",
+    "file": "src/agent_adapter.rs",
+    "hash": "5e272048f4894ea8a8eb0986b118a19373cf68b0c06fab879ca3f57dfb87c272"
+  },
+  {
+    "symbol": "run",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "run",
+    "file": "src/transaction.rs",
+    "hash": "34347c65a21c0104f9eee2c9388bff07c9363520d6729800672b814da35d060a"
+  },
+  {
+    "symbol": "run",
+    "file": "src/verifier.rs",
+    "hash": "a339f409c9b1c9c9c6e35c38cd981591aa196b292b93ea6639a5baa25ef47bf5"
+  },
+  {
+    "symbol": "run_shell",
+    "file": "src/command_runner.rs",
+    "hash": "0b7383f214774ec137cb68edd9cfcd2fc85ebf39345abd899abf9a2c8fdf49b8"
+  },
+  {
+    "symbol": "scan",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "spawn_shell",
+    "file": "src/command_runner.rs",
+    "hash": "0b7383f214774ec137cb68edd9cfcd2fc85ebf39345abd899abf9a2c8fdf49b8"
+  },
+  {
+    "symbol": "stage_code_change",
+    "file": "src/memory.rs",
+    "hash": "ec0ebff6297cb1b89fcb924ffd13873a127dd2a822946b31acfba1e91ccedc14"
+  },
+  {
+    "symbol": "status_porcelain",
+    "file": "src/git.rs",
+    "hash": "37ffb703c97abab833aef3717b0941380f004a25d3e404885db30465a57a38f3"
+  },
+  {
+    "symbol": "supported_adapters",
+    "file": "src/agent_adapter.rs",
+    "hash": "5e272048f4894ea8a8eb0986b118a19373cf68b0c06fab879ca3f57dfb87c272"
+  },
+  {
+    "symbol": "sync_check",
+    "file": "src/workspace.rs",
+    "hash": "6572606ae241ec72fcb65eb1405546085835942985f679395990db7ea2d9ccae"
+  },
+  {
+    "symbol": "terminate",
+    "file": "src/command_runner.rs",
+    "hash": "0b7383f214774ec137cb68edd9cfcd2fc85ebf39345abd899abf9a2c8fdf49b8"
+  },
+  {
+    "symbol": "to_agent_ir",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "to_markdown",
+    "file": "src/report.rs",
+    "hash": "7c03a748862d0696a2e251439b7841a867d54267e1d4bdbdfb1d197b23d96ff9"
+  },
+  {
+    "symbol": "tx_dir",
+    "file": "src/agent_dir.rs",
+    "hash": "4b1703e01966c3129d10467a63b4c9dfc11414d16e29b07e77a9c1559f55b593"
+  },
+  {
+    "symbol": "validate",
+    "file": "src/spec.rs",
+    "hash": "585d4c611f1401d4bbd62ca6bbb9e459ead3f462047aa60060897faceac7c083"
+  },
+  {
+    "symbol": "validate_policy",
+    "file": "src/compiler.rs",
+    "hash": "9f29fdd54d04dbc76233d7cceda2423ad9f9b805bc4e085e46254fc101546017"
+  },
+  {
+    "symbol": "write",
+    "file": "src/code_maps.rs",
+    "hash": "e478d7197b93e066f899a68ba617dad43ef6d6a3a48461537cd1cbe3eb6712ac"
+  },
+  {
+    "symbol": "write_agent_trace",
+    "file": "src/agent_adapter.rs",
+    "hash": "5e272048f4894ea8a8eb0986b118a19373cf68b0c06fab879ca3f57dfb87c272"
+  },
+  {
+    "symbol": "write_error_fingerprint",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "write_markdown",
+    "file": "src/report.rs",
+    "hash": "7c03a748862d0696a2e251439b7841a867d54267e1d4bdbdfb1d197b23d96ff9"
+  },
+  {
+    "symbol": "write_preview",
+    "file": "src/intent.rs",
+    "hash": "d45ebe2fc7b17d2945a771e4a4d221fc52d5c23c424d43c10adbdcd39bb2d3e0"
+  },
+  {
+    "symbol": "write_start_artifacts",
+    "file": "src/observability.rs",
+    "hash": "6cad1e248e08e6d94231f0950fb12e2f08aea48e0771e8a8a670b3a7ad6b9a44"
+  },
+  {
+    "symbol": "write_transcript",
+    "file": "src/agent_adapter.rs",
+    "hash": "5e272048f4894ea8a8eb0986b118a19373cf68b0c06fab879ca3f57dfb87c272"
+  }
+]

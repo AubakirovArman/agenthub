@@ -1,0 +1,24 @@
+skill:
+  id: design.reuse_existing_style
+  version: 1.0.0
+  description: Reuses existing product styling and component conventions.
+
+requires:
+  workspace: code.git
+
+provides:
+  actions:
+    - inspect_style_sources
+    - reuse_components
+
+policies:
+  allow_package_change: false
+  prefer_existing_components: true
+
+common_errors:
+  - one_off_visual_language
+  - duplicate_component_pattern
+
+prompt_fragments:
+  - Prefer existing components, spacing, tokens, and layout patterns over creating a new visual system.
+

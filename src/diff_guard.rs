@@ -22,7 +22,11 @@ pub struct DiffGuardResult {
     pub violations: Vec<String>,
 }
 
-pub fn check(worktree: &Path, scope: &ScopeSpec, limits: &DiffLimitsSpec) -> Result<DiffGuardResult> {
+pub fn check(
+    worktree: &Path,
+    scope: &ScopeSpec,
+    limits: &DiffLimitsSpec,
+) -> Result<DiffGuardResult> {
     let changed_files = git::changed_files(worktree)?;
     let (lines_added, lines_deleted) = count_numstat(worktree)?;
     let summary = DiffSummary {
@@ -98,8 +102,8 @@ fn compile_globs(patterns: &[String]) -> Result<Option<GlobSet>> {
     }
     let mut builder = GlobSetBuilder::new();
     for pattern in patterns {
-        builder.add(Glob::new(pattern).map_err(|error| anyhow!("invalid glob `{pattern}`: {error}"))?);
+        builder
+            .add(Glob::new(pattern).map_err(|error| anyhow!("invalid glob `{pattern}`: {error}"))?);
     }
     Ok(Some(builder.build()?))
 }
-

@@ -19,6 +19,12 @@ pub enum Commands {
         #[arg(long)]
         force: bool,
     },
+    Ask {
+        request: String,
+
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
     Run {
         spec: PathBuf,
 
@@ -37,6 +43,14 @@ pub enum Commands {
         #[command(subcommand)]
         command: MemoryCommands,
     },
+    Skills {
+        #[command(subcommand)]
+        command: SkillCommands,
+    },
+    Agents {
+        #[command(subcommand)]
+        command: AgentCommands,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -47,7 +61,10 @@ pub enum TxCommands {
 
 #[derive(Debug, Subcommand)]
 pub enum WorkspaceCommands {
-    Scan,
+    Scan {
+        #[arg(long)]
+        write_maps: bool,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -55,3 +72,12 @@ pub enum MemoryCommands {
     Inspect,
 }
 
+#[derive(Debug, Subcommand)]
+pub enum SkillCommands {
+    List,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AgentCommands {
+    List,
+}

@@ -1,20 +1,15 @@
-mod agent_dir;
 mod cli;
-mod command_runner;
-mod diff_guard;
-mod git;
-mod journal;
-mod memory;
-mod report;
-mod spec;
-mod transaction;
-mod verifier;
-mod workspace;
 
 use anyhow::Result;
 use clap::Parser;
 
-use crate::cli::{Cli, Commands, MemoryCommands, TxCommands, WorkspaceCommands};
+use agenthub::{
+    agent_adapter, agent_dir, code_maps, intent, memory, skill_registry, transaction, workspace,
+};
+
+use crate::cli::{
+    AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands, WorkspaceCommands,
+};
 
 fn main() {
     if let Err(error) = run() {
@@ -31,6 +26,18 @@ fn run() -> Result<()> {
         Commands::Init { force } => {
             agent_dir::init_project(&project_root, force)?;
             println!("initialized AgentHub project at {}", project_root.display());
+        }
+        Commands::Ask { request, output } => {
+            let preview = intent::normalize_to_spec(&request);
+            if let Some(output) = output {
+                let path = intent::write_preview(&preview, &output)?;
+                println!("{}", path.display());
+            } else {
+                print!("{}", preview.agent_spec_yaml);
+            }
+            if !preview.unknowns.is_empty() {
+                eprintln!("unknowns: {}", preview.unknowns.join(", "));
+            }
         }
         Commands::Run { spec, no_commit } => {
             let outcome = transaction::run(&project_root, &spec, no_commit)?;
@@ -53,11 +60,20 @@ fn run() -> Result<()> {
             }
         },
         Commands::Workspace { command } => match command {
-            WorkspaceCommands::Scan => {
+            WorkspaceCommands::Scan { write_maps } => {
                 let scan = workspace::scan(&project_root)?;
                 println!("git_repo: {}", scan.git_repo);
-                println!("head: {}", scan.head.unwrap_or_else(|| "<none>".to_string()));
+                println!(
+                    "head: {}",
+                    scan.head.unwrap_or_else(|| "<none>".to_string())
+                );
                 println!("dirty: {}", scan.dirty);
+                if write_maps {
+                    let maps = code_maps::write(&project_root)?;
+                    println!("routes: {}", maps.routes.len());
+                    println!("components: {}", maps.components.len());
+                    println!("exports: {}", maps.exports.len());
+                }
             }
         },
         Commands::Memory { command } => match command {
@@ -67,8 +83,24 @@ fn run() -> Result<()> {
                 println!("failed_attempts: {}", stats.failed_attempts);
             }
         },
+        Commands::Skills { command } => match command {
+            SkillCommands::List => {
+                for manifest in skill_registry::list_available(&project_root)? {
+                    println!(
+                        "{}\t{}\t{}",
+                        manifest.skill.id, manifest.skill.version, manifest.skill.description
+                    );
+                }
+            }
+        },
+        Commands::Agents { command } => match command {
+            AgentCommands::List => {
+                for adapter in agent_adapter::supported_adapters() {
+                    println!("{adapter}");
+                }
+            }
+        },
     }
 
     Ok(())
 }
-

@@ -1,0 +1,42 @@
+skill:
+  id: code.nextjs.add_page
+  version: 1.0.0
+  description: Adds a page to a Next.js App Router project.
+
+inputs:
+  route: string
+  style_source: optional<string>
+
+requires:
+  workspace: code.git
+  memory_schema:
+    - code.routes
+    - code.components
+
+provides:
+  actions:
+    - inspect_routes
+    - generate_page
+    - update_navigation_optional
+
+policies:
+  max_files_changed: 8
+  allow_package_change: false
+  require_scope: true
+
+verifiers:
+  - npm_build
+  - runtime_route_smoke
+
+dependencies:
+  - design.reuse_existing_style
+
+common_errors:
+  - missing_use_client
+  - wrong_app_router_path
+  - component_import_not_exported
+
+prompt_fragments:
+  - Reuse the existing App Router structure and colocate route files under src/app when present.
+  - Inspect existing page/layout conventions before adding new UI.
+

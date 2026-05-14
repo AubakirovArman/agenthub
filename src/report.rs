@@ -6,6 +6,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::diff_guard::DiffGuardResult;
+use crate::observability::CostProfile;
 use crate::verifier::VerifierResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,6 +21,8 @@ pub struct TransactionReport {
     pub report_path: PathBuf,
     pub diff_guard: Option<DiffGuardResult>,
     pub verifier: Option<VerifierResult>,
+    pub cost_profile: Option<CostProfile>,
+    pub error_fingerprint: Option<String>,
     pub failure_reason: Option<String>,
 }
 
@@ -51,7 +54,10 @@ impl TransactionReport {
                 "- Files changed: `{}`\n",
                 diff_guard.summary.files_changed
             ));
-            md.push_str(&format!("- Lines added: `{}`\n", diff_guard.summary.lines_added));
+            md.push_str(&format!(
+                "- Lines added: `{}`\n",
+                diff_guard.summary.lines_added
+            ));
             md.push_str(&format!(
                 "- Lines deleted: `{}`\n",
                 diff_guard.summary.lines_deleted
@@ -83,6 +89,27 @@ impl TransactionReport {
                     command.command, command.success, command.exit_code, command.timed_out
                 ));
             }
+            if let Some(runtime) = &verifier.runtime_smoke {
+                md.push_str(&format!("- Runtime smoke: `{}`\n", runtime.passed));
+                for check in &runtime.checks {
+                    md.push_str(&format!(
+                        "- `{}` expected `{}` actual `{:?}`\n",
+                        check.path, check.expected, check.actual
+                    ));
+                }
+            }
+        }
+
+        if let Some(cost) = &self.cost_profile {
+            md.push_str("\n## Observability\n\n");
+            md.push_str(&format!(
+                "- Estimated tokens: `{}`\n",
+                cost.estimated_tokens
+            ));
+            md.push_str(&format!("- Total cost: `${:.6}`\n", cost.total_usd));
+            if let Some(fingerprint) = &self.error_fingerprint {
+                md.push_str(&format!("- Error fingerprint: `{fingerprint}`\n"));
+            }
         }
 
         if let Some(reason) = &self.failure_reason {
@@ -94,4 +121,3 @@ impl TransactionReport {
         md
     }
 }
-

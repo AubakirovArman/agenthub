@@ -7,12 +7,17 @@ use chrono::Utc;
 use serde_json::json;
 use uuid::Uuid;
 
+use crate::agent_adapter::{self, AgentRoute};
 use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
+use crate::code_maps;
 use crate::command_runner::{run_shell, CommandResult};
+use crate::compiler;
 use crate::diff_guard::{self, DiffGuardResult};
 use crate::journal::Journal;
 use crate::memory;
+use crate::observability::{self, CostProfile};
 use crate::report::TransactionReport;
+use crate::skill_registry::{self, SkillManifest};
 use crate::spec::AgentSpec;
 use crate::verifier::{self, VerifierResult};
 use crate::workspace::{self, PreparedWorkspace};
@@ -52,8 +57,13 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     fs::create_dir_all(&tx_dir).with_context(|| format!("create {}", tx_dir.display()))?;
     fs::copy(spec_path, tx_dir.join("plan.yaml"))
         .with_context(|| format!("copy {}", spec_path.display()))?;
+    let skill_manifests = skill_registry::load_requested(project_root, &spec.skills)?;
+    let agent_route = agent_adapter::route(&spec.agent)?;
+    let dag = compiler::compile(&spec)?;
     fs::write(tx_dir.join("agent_ir.txt"), spec.to_agent_ir())
         .with_context(|| format!("write {}", tx_dir.join("agent_ir.txt").display()))?;
+    fs::write(tx_dir.join("dag.json"), serde_json::to_string_pretty(&dag)?)
+        .with_context(|| format!("write {}", tx_dir.join("dag.json").display()))?;
 
     let journal = Journal::new(&tx_id, tx_dir.join("journal.jsonl"));
     journal.append("CREATED", "transaction created")?;
@@ -66,6 +76,8 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let mut prepared = None;
     let mut diff_guard_result = None;
     let mut verifier_result = None;
+    let mut cost_profile = None;
+    let mut error_fingerprint = None;
     let mut failure_reason = None;
     let mut committed = false;
     let mut status = TransactionStatus::RolledBack;
@@ -77,10 +89,13 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         &tx_id,
         &tx_dir,
         &journal,
+        &skill_manifests,
+        &agent_route,
         no_commit,
         &mut prepared,
         &mut diff_guard_result,
         &mut verifier_result,
+        &mut cost_profile,
         &mut failure_reason,
         &mut committed,
         &mut status,
@@ -105,6 +120,13 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
                 let _ = workspace::rollback(prepared);
             }
             memory::record_failed_attempt(project_root, &tx_id, &spec.task.id, &error.to_string())?;
+            let fingerprint = observability::write_error_fingerprint(
+                &tx_dir,
+                &tx_id,
+                &spec.task.id,
+                &error_text,
+            )?;
+            error_fingerprint = Some(fingerprint.fingerprint);
             status = TransactionStatus::RolledBack;
             journal.append("ROLLED_BACK", "transaction rolled back")?;
         }
@@ -117,11 +139,15 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         status: status.as_str().to_string(),
         started_at,
         finished_at: Utc::now(),
-        base_head: prepared.as_ref().map(|workspace| workspace.base_head.clone()),
+        base_head: prepared
+            .as_ref()
+            .map(|workspace| workspace.base_head.clone()),
         committed,
         report_path: report_path.clone(),
         diff_guard: diff_guard_result,
         verifier: verifier_result,
+        cost_profile,
+        error_fingerprint,
         failure_reason,
     };
     report.write_markdown(&report_path)?;
@@ -142,10 +168,13 @@ fn run_inner(
     tx_id: &str,
     tx_dir: &Path,
     journal: &Journal,
+    skill_manifests: &[SkillManifest],
+    agent_route: &AgentRoute,
     no_commit: bool,
     prepared_slot: &mut Option<PreparedWorkspace>,
     diff_guard_slot: &mut Option<DiffGuardResult>,
     verifier_slot: &mut Option<VerifierResult>,
+    cost_profile_slot: &mut Option<CostProfile>,
     failure_reason_slot: &mut Option<String>,
     committed_slot: &mut bool,
     status_slot: &mut TransactionStatus,
@@ -162,8 +191,34 @@ fn run_inner(
         }),
     )?;
     *prepared_slot = Some(prepared.clone());
+    agent_adapter::write_agent_trace(tx_dir, agent_route)?;
 
-    write_context_pack(tx_dir, spec, &prepared)?;
+    let context_pack = write_context_pack(
+        project_root,
+        tx_dir,
+        spec,
+        skill_manifests,
+        agent_route,
+        &prepared,
+    )?;
+    let memory_ids = context_pack
+        .get("memory")
+        .and_then(|value| value.as_array())
+        .map(|records| {
+            records
+                .iter()
+                .filter_map(|record| record.get("id").and_then(|id| id.as_str()))
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let skill_ids = skill_manifests
+        .iter()
+        .map(|manifest| manifest.skill.id.clone())
+        .collect::<Vec<_>>();
+    let observability =
+        observability::write_start_artifacts(tx_dir, &context_pack, &skill_ids, &memory_ids)?;
+    *cost_profile_slot = Some(observability.cost_profile);
     journal.append("CONTEXT_PACK_BUILT", "minimal context pack written")?;
 
     journal.append("EXECUTING", "running execution commands")?;
@@ -172,6 +227,7 @@ fn run_inner(
         tx_dir.join("execution.json"),
         serde_json::to_string_pretty(&execution_results)?,
     )?;
+    agent_adapter::write_transcript(tx_dir, agent_route, &execution_results)?;
     if let Some(failed) = execution_results.iter().find(|result| !result.success) {
         return Err(anyhow!(
             "execution command failed: `{}` exit {:?}",
@@ -196,11 +252,22 @@ fn run_inner(
         return Err(anyhow!(reason));
     }
     *diff_guard_slot = Some(diff_guard);
+    memory::stage_code_change(
+        tx_dir,
+        tx_id,
+        &spec.task.id,
+        &diff_guard_slot
+            .as_ref()
+            .map(|result| result.summary.changed_files.clone())
+            .unwrap_or_default(),
+    )?;
 
     journal.append("VERIFYING", "running verifier commands")?;
-    let verifier = verifier::run(
-        &spec.verify,
+    let verifier = run_verifier_with_repair(
+        spec,
         &prepared.worktree_path,
+        tx_dir,
+        journal,
         &tx_dir.join("verifier.log"),
     )?;
     fs::write(
@@ -208,6 +275,14 @@ fn run_inner(
         serde_json::to_string_pretty(&verifier)?,
     )?;
     if !verifier.passed {
+        if verifier::detects_missing_env(&verifier) {
+            let reason =
+                "verifier failed because required environment appears to be missing".to_string();
+            *status_slot = TransactionStatus::BlockedOnHuman;
+            *verifier_slot = Some(verifier);
+            *failure_reason_slot = Some(reason.clone());
+            return Err(anyhow!(reason));
+        }
         let reason = "verifier failed".to_string();
         *verifier_slot = Some(verifier);
         *failure_reason_slot = Some(reason.clone());
@@ -218,28 +293,69 @@ fn run_inner(
     journal.append("SYNC_CHECK", "checking that project HEAD did not move")?;
     if !workspace::sync_check(&prepared)? {
         *status_slot = TransactionStatus::BlockedOnHuman;
-        return Err(anyhow!("sync check failed: project HEAD changed during transaction"));
+        return Err(anyhow!(
+            "sync check failed: project HEAD changed during transaction"
+        ));
     }
 
     if no_commit || !spec.transaction.commit_on_success {
-        journal.append("CLOSED", "transaction passed without committing");
+        journal.append("CLOSED", "transaction passed without committing")?;
         *status_slot = TransactionStatus::Noop;
         return Ok(());
     }
 
-    journal.append("COMMITTING", "committing and fast-forward merging transaction branch")?;
-    let committed = workspace::commit_and_merge(
-        &prepared,
-        &format!("AgentHub {tx_id}: {}", spec.task.id),
+    journal.append(
+        "COMMITTING",
+        "committing and fast-forward merging transaction branch",
     )?;
+    let committed =
+        workspace::commit_and_merge(&prepared, &format!("AgentHub {tx_id}: {}", spec.task.id))?;
     *committed_slot = committed;
     if spec.transaction.memory_promotion == "on_success" {
-        memory::promote_success(project_root, tx_id, &spec.task.id)?;
+        memory::promote_staging(project_root, tx_dir)?;
     }
     let _ = workspace::rollback(&prepared);
     *status_slot = TransactionStatus::Committed;
     journal.append("COMMITTED", "transaction committed")?;
     Ok(())
+}
+
+fn run_verifier_with_repair(
+    spec: &AgentSpec,
+    worktree: &Path,
+    tx_dir: &Path,
+    journal: &Journal,
+    log_path: &Path,
+) -> Result<VerifierResult> {
+    let mut verifier = verifier::run(&spec.verify, worktree, log_path)?;
+    let mut repair_results = Vec::new();
+
+    for attempt in 1..=spec.transaction.max_repair_attempts {
+        if verifier.passed || spec.repair.commands.is_empty() {
+            break;
+        }
+
+        journal.append_data(
+            "REPAIRING",
+            "running repair commands",
+            json!({ "attempt": attempt }),
+        )?;
+        let results = run_repair_commands(spec, worktree)?;
+        repair_results.push(json!({
+            "attempt": attempt,
+            "commands": results,
+        }));
+        verifier = verifier::run(&spec.verify, worktree, log_path)?;
+    }
+
+    if !repair_results.is_empty() {
+        fs::write(
+            tx_dir.join("repair.json"),
+            serde_json::to_string_pretty(&repair_results)?,
+        )?;
+    }
+
+    Ok(verifier)
 }
 
 fn run_execution_commands(spec: &AgentSpec, worktree: &Path) -> Result<Vec<CommandResult>> {
@@ -255,16 +371,40 @@ fn run_execution_commands(spec: &AgentSpec, worktree: &Path) -> Result<Vec<Comma
     Ok(results)
 }
 
-fn write_context_pack(tx_dir: &Path, spec: &AgentSpec, prepared: &PreparedWorkspace) -> Result<()> {
+fn run_repair_commands(spec: &AgentSpec, worktree: &Path) -> Result<Vec<CommandResult>> {
+    let mut results = Vec::new();
+    for command in &spec.repair.commands {
+        let result = run_shell(command, worktree, Duration::from_secs(300))?;
+        let success = result.success;
+        results.push(result);
+        if !success {
+            break;
+        }
+    }
+    Ok(results)
+}
+
+fn write_context_pack(
+    project_root: &Path,
+    tx_dir: &Path,
+    spec: &AgentSpec,
+    skill_manifests: &[SkillManifest],
+    agent_route: &AgentRoute,
+    prepared: &PreparedWorkspace,
+) -> Result<serde_json::Value> {
+    let memory = memory::retrieve_recent(project_root, 10)?;
+    let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
     let context = json!({
         "agent_spec": spec,
+        "agent_route": agent_route,
         "workspace": {
             "base_head": &prepared.base_head,
             "base_branch": &prepared.base_branch,
             "tx_branch": &prepared.tx_branch,
         },
-        "skills": [],
-        "memory": [],
+        "skills": skill_manifests,
+        "memory": memory,
+        "maps": maps,
         "policy": {
             "least_context": true,
             "scope_only": true,
@@ -274,14 +414,10 @@ fn write_context_pack(tx_dir: &Path, spec: &AgentSpec, prepared: &PreparedWorksp
         tx_dir.join("context_pack.json"),
         serde_json::to_string_pretty(&context)?,
     )?;
-    Ok(())
+    Ok(context)
 }
 
 fn new_tx_id() -> String {
     let suffix = Uuid::new_v4().to_string();
-    format!(
-        "tx-{}-{}",
-        Utc::now().format("%Y%m%d%H%M%S"),
-        &suffix[..8]
-    )
+    format!("tx-{}-{}", Utc::now().format("%Y%m%d%H%M%S"), &suffix[..8])
 }

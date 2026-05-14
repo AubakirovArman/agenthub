@@ -1,0 +1,26 @@
+skill:
+  id: verifier.web_runtime_smoke
+  version: 1.0.0
+  description: Verifies web routes through build and runtime smoke checks.
+
+requires:
+  workspace: code.git
+
+provides:
+  verifiers:
+    - build
+    - start_server
+    - route_http_check
+
+policies:
+  require_timeout: true
+  kill_process_tree: true
+
+common_errors:
+  - build_pass_runtime_fail
+  - port_not_ready
+  - protected_route_wrong_expectation
+
+prompt_fragments:
+  - Runtime success requires checking the changed route, not only compiling the application.
+

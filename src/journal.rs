@@ -81,4 +81,3 @@ pub fn read_latest_status(path: &Path) -> Result<Option<String>> {
     }
     Ok(latest)
 }
-

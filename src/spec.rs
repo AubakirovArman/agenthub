@@ -7,13 +7,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSpec {
     pub task: TaskSpec,
+    #[serde(default)]
+    pub agent: AgentConfig,
     pub workspace: WorkspaceSpec,
+    #[serde(default)]
+    pub skills: Vec<String>,
     #[serde(default)]
     pub execution: ExecutionSpec,
     #[serde(default)]
     pub scope: ScopeSpec,
     #[serde(default)]
+    pub rules: Vec<String>,
+    #[serde(default)]
     pub verify: VerifySpec,
+    #[serde(default)]
+    pub repair: RepairSpec,
     #[serde(default)]
     pub transaction: TransactionSpec,
 }
@@ -40,6 +48,16 @@ pub struct WorkspaceSpec {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AgentConfig {
+    #[serde(default)]
+    pub adapter: Option<String>,
+    #[serde(default)]
+    pub model: Option<String>,
+    #[serde(default)]
+    pub role: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExecutionSpec {
     #[serde(default)]
     pub commands: Vec<String>,
@@ -59,6 +77,31 @@ pub struct VerifySpec {
     pub profile: Option<String>,
     #[serde(default)]
     pub commands: Vec<String>,
+    #[serde(default)]
+    pub runtime: Option<RuntimeSmokeSpec>,
+    #[serde(default)]
+    pub routes: Vec<RouteCheckSpec>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RepairSpec {
+    #[serde(default)]
+    pub commands: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RuntimeSmokeSpec {
+    pub start_command: String,
+    #[serde(default = "default_base_url")]
+    pub base_url: String,
+    #[serde(default = "default_runtime_timeout_secs")]
+    pub timeout_secs: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RouteCheckSpec {
+    pub path: String,
+    pub expect: u16,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -109,7 +152,8 @@ impl Default for DiffLimitsSpec {
 
 impl AgentSpec {
     pub fn load(path: &Path) -> Result<Self> {
-        let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+        let content =
+            fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
         let spec: Self =
             serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))?;
         spec.validate()?;
@@ -125,7 +169,13 @@ impl AgentSpec {
                 "only workspace.type=code.git is implemented in Phase 1"
             ));
         }
-        if self.workspace.isolation.as_deref().unwrap_or("git_worktree") != "git_worktree" {
+        if self
+            .workspace
+            .isolation
+            .as_deref()
+            .unwrap_or("git_worktree")
+            != "git_worktree"
+        {
             return Err(anyhow!(
                 "only workspace.isolation=git_worktree is implemented in Phase 1"
             ));
@@ -138,6 +188,11 @@ impl AgentSpec {
         lines.push(format!("TX {}", self.task.kind));
         lines.push(format!("TASK {}", self.task.id));
         lines.push(format!(
+            "AGENT adapter={} role={}",
+            self.agent.adapter.as_deref().unwrap_or("command"),
+            self.agent.role.as_deref().unwrap_or("executor")
+        ));
+        lines.push(format!(
             "WS {} iso={}",
             self.workspace.kind,
             self.workspace
@@ -148,8 +203,14 @@ impl AgentSpec {
         if !self.scope.allow.is_empty() {
             lines.push(format!("ALLOW {}", self.scope.allow.join(" ")));
         }
+        if !self.skills.is_empty() {
+            lines.push(format!("SKILL {}", self.skills.join(" ")));
+        }
         if !self.scope.deny.is_empty() {
             lines.push(format!("DENY {}", self.scope.deny.join(" ")));
+        }
+        if !self.rules.is_empty() {
+            lines.push(format!("RULE {}", self.rules.join(" ")));
         }
         if !self.verify.commands.is_empty() {
             lines.push(format!("VERIFY {}", self.verify.commands.join(" && ")));
@@ -176,6 +237,14 @@ fn default_true() -> bool {
 
 fn default_max_repair_attempts() -> u32 {
     0
+}
+
+fn default_base_url() -> String {
+    "http://127.0.0.1:3000".to_string()
+}
+
+fn default_runtime_timeout_secs() -> u64 {
+    30
 }
 
 fn default_memory_promotion() -> String {
@@ -207,27 +276,34 @@ mod tests {
                 title: None,
                 target: None,
             },
+            agent: AgentConfig::default(),
             workspace: WorkspaceSpec {
                 kind: "code.git".to_string(),
                 isolation: Some("git_worktree".to_string()),
                 root: None,
             },
+            skills: vec!["code.test".to_string()],
             execution: ExecutionSpec::default(),
             scope: ScopeSpec {
                 allow: vec!["src/**".to_string()],
                 deny: vec!["secrets/**".to_string()],
             },
+            rules: vec!["R_SCOPE_ONLY".to_string()],
             verify: VerifySpec {
                 profile: Some("code_build".to_string()),
                 commands: vec!["cargo test".to_string()],
+                runtime: None,
+                routes: Vec::new(),
             },
+            repair: RepairSpec::default(),
             transaction: TransactionSpec::default(),
         };
 
         let ir = spec.to_agent_ir();
         assert!(ir.contains("TASK add_page"));
+        assert!(ir.contains("SKILL code.test"));
         assert!(ir.contains("ALLOW src/**"));
+        assert!(ir.contains("RULE R_SCOPE_ONLY"));
         assert!(ir.contains("VERIFY cargo test"));
     }
 }
-

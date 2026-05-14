@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -18,14 +18,23 @@ pub struct CommandResult {
     pub stderr: String,
 }
 
+#[derive(Debug)]
+pub struct SupervisedChild {
+    child: Child,
+}
+
 pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<CommandResult> {
     let started = Instant::now();
-    let mut child = Command::new("sh")
+    let mut process = Command::new("sh");
+    process
         .arg("-lc")
         .arg(command)
         .current_dir(cwd)
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::piped());
+    configure_process_group(&mut process);
+
+    let mut child = process
         .spawn()
         .with_context(|| format!("spawn command `{command}` in {}", cwd.display()))?;
 
@@ -36,7 +45,7 @@ pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<Command
         }
         if started.elapsed() >= timeout {
             timed_out = true;
-            let _ = child.kill();
+            terminate_process_tree(&mut child);
             break;
         }
         thread::sleep(Duration::from_millis(100));
@@ -60,3 +69,86 @@ pub fn run_shell(command: &str, cwd: &Path, timeout: Duration) -> Result<Command
     })
 }
 
+pub fn spawn_shell(command: &str, cwd: &Path) -> Result<SupervisedChild> {
+    let mut process = Command::new("sh");
+    process
+        .arg("-lc")
+        .arg(command)
+        .current_dir(cwd)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    configure_process_group(&mut process);
+
+    let child = process
+        .spawn()
+        .with_context(|| format!("spawn command `{command}` in {}", cwd.display()))?;
+    Ok(SupervisedChild { child })
+}
+
+impl SupervisedChild {
+    pub fn terminate(&mut self) {
+        terminate_process_tree(&mut self.child);
+    }
+}
+
+impl Drop for SupervisedChild {
+    fn drop(&mut self) {
+        self.terminate();
+    }
+}
+
+#[cfg(unix)]
+fn configure_process_group(command: &mut Command) {
+    use std::os::unix::process::CommandExt;
+
+    unsafe {
+        command.pre_exec(|| {
+            if libc::setpgid(0, 0) == 0 {
+                Ok(())
+            } else {
+                Err(std::io::Error::last_os_error())
+            }
+        });
+    }
+}
+
+#[cfg(not(unix))]
+fn configure_process_group(_command: &mut Command) {}
+
+#[cfg(unix)]
+fn terminate_process_tree(child: &mut Child) {
+    let pgid = -(child.id() as i32);
+    unsafe {
+        libc::kill(pgid, libc::SIGTERM);
+    }
+
+    let grace_started = Instant::now();
+    while grace_started.elapsed() < Duration::from_secs(1) {
+        if matches!(child.try_wait(), Ok(Some(_))) {
+            return;
+        }
+        thread::sleep(Duration::from_millis(50));
+    }
+
+    unsafe {
+        libc::kill(pgid, libc::SIGKILL);
+    }
+}
+
+#[cfg(not(unix))]
+fn terminate_process_tree(child: &mut Child) {
+    let _ = child.kill();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn marks_timed_out_command() -> Result<()> {
+        let result = run_shell("sleep 2", Path::new("."), Duration::from_millis(50))?;
+        assert!(result.timed_out);
+        assert!(!result.success);
+        Ok(())
+    }
+}

@@ -9,7 +9,6 @@ pub const AGENT_DIR: &str = ".agent";
 
 #[derive(Debug, Clone)]
 pub struct AgentPaths {
-    pub root: PathBuf,
     pub agent: PathBuf,
     pub tx: PathBuf,
     pub memory: PathBuf,
@@ -31,7 +30,6 @@ impl AgentPaths {
     pub fn new(root: &Path) -> Self {
         let agent = root.join(AGENT_DIR);
         Self {
-            root: root.to_path_buf(),
             tx: agent.join("tx"),
             memory: agent.join("memory"),
             maps: agent.join("maps"),
@@ -75,8 +73,16 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         force,
     )?;
     write_default(&paths.agent.join("agent.lock"), DEFAULT_AGENT_LOCK, force)?;
-    write_default(&paths.policies.join("core.yaml"), DEFAULT_CORE_POLICY, force)?;
-    write_default(&paths.policies.join("diff_limits.yaml"), DEFAULT_DIFF_LIMITS, force)?;
+    write_default(
+        &paths.policies.join("core.yaml"),
+        DEFAULT_CORE_POLICY,
+        force,
+    )?;
+    write_default(
+        &paths.policies.join("diff_limits.yaml"),
+        DEFAULT_DIFF_LIMITS,
+        force,
+    )?;
     write_default(&paths.skills.join("installed.json"), "[]\n", force)?;
     write_default(&paths.memory.join("committed.jsonl"), "", force)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", force)?;

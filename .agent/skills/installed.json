@@ -1,2 +1,17 @@
-[]
-
+[
+  {
+    "id": "code.nextjs.add_page",
+    "version": "1.0.0",
+    "source": "skills/code.nextjs.add_page/skill.yaml"
+  },
+  {
+    "id": "design.reuse_existing_style",
+    "version": "1.0.0",
+    "source": "skills/design.reuse_existing_style/skill.yaml"
+  },
+  {
+    "id": "verifier.web_runtime_smoke",
+    "version": "1.0.0",
+    "source": "skills/verifier.web_runtime_smoke/skill.yaml"
+  }
+]
