@@ -1,0 +1,90 @@
+{
+  "name": "agenthub-vscode",
+  "displayName": "AgentHub",
+  "description": "Inspect AgentHub transactions, memory, AgentSpecs, and DAGs from VS Code.",
+  "version": "0.1.0",
+  "publisher": "agenthub",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:agenthub.refresh",
+    "onCommand:agenthub.openLatestReport",
+    "onCommand:agenthub.openMemory",
+    "onCommand:agenthub.createSpecFromPrompt",
+    "onCommand:agenthub.openDag"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "AgentHub",
+      "properties": {
+        "agenthub.executable": {
+          "type": "string",
+          "default": "agenthub",
+          "description": "AgentHub CLI executable used by VS Code commands."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "agenthub.refresh",
+        "title": "AgentHub: Refresh"
+      },
+      {
+        "command": "agenthub.openLatestReport",
+        "title": "AgentHub: Open Latest Transaction Report"
+      },
+      {
+        "command": "agenthub.openMemory",
+        "title": "AgentHub: Open Memory"
+      },
+      {
+        "command": "agenthub.createSpecFromPrompt",
+        "title": "AgentHub: Create AgentSpec From Prompt"
+      },
+      {
+        "command": "agenthub.openDag",
+        "title": "AgentHub: Open Latest DAG"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agenthub",
+          "title": "AgentHub",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "agenthub": [
+        {
+          "id": "agenthub.transactions",
+          "name": "Transactions"
+        },
+        {
+          "id": "agenthub.memory",
+          "name": "Memory"
+        }
+      ]
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "/agenthub*.yaml",
+          "/agenthub*.yml",
+          "/task*.yaml",
+          "/task*.yml",
+          "/examples/*task.yaml"
+        ],
+        "url": "./schemas/agent-spec.schema.json"
+      }
+    ]
+  }
+}
+

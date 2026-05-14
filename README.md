@@ -40,6 +40,7 @@ This repository currently implements the foundation slices from the PRD:
 - reviewer gate with bounded repair before verifier;
 - context maps for routes/components/exports;
 - heuristic `ask` command for AgentSpec preview.
+- VS Code extension v0 for transaction/memory/DAG inspection.
 
 ## Reviewer Topology
 
@@ -68,3 +69,9 @@ cargo build
 cargo test
 cargo clippy -- -D warnings
 ```
+
+## IDE
+
+The Phase 12 v0 VS Code extension lives in `editors/vscode`.
+It provides AgentHub transaction and memory views, AgentSpec schema validation,
+prompt-to-spec preview, and a simple DAG webview.

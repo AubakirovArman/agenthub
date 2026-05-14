@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenthub.local/schemas/agent-spec.schema.json",
+  "title": "AgentHub AgentSpec",
+  "type": "object",
+  "required": ["task", "workspace"],
+  "additionalProperties": true,
+  "properties": {
+    "task": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "target": { "type": "string" }
+      }
+    },
+    "topology": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["single_executor", "executor_reviewer_repair"]
+        }
+      }
+    },
+    "agent": { "$ref": "#/$defs/agentConfig" },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "executor": { "$ref": "#/$defs/agentConfig" },
+        "reviewer": { "$ref": "#/$defs/agentConfig" },
+        "repair": { "$ref": "#/$defs/agentConfig" }
+      }
+    },
+    "workspace": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["code.git", "content.git", "data.git", "infra.git"]
+        },
+        "isolation": {
+          "type": "string",
+          "enum": ["git_worktree"]
+        },
+        "root": { "type": "string" }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "execution": { "$ref": "#/$defs/commandBlock" },
+    "review": { "$ref": "#/$defs/commandBlock" },
+    "repair": { "$ref": "#/$defs/commandBlock" },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "deny": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verify": {
+      "allOf": [
+        { "$ref": "#/$defs/commandBlock" },
+        {
+          "type": "object",
+          "properties": {
+            "profile": { "type": "string" },
+            "runtime": {
+              "type": "object",
+              "required": ["start_command"],
+              "properties": {
+                "start_command": { "type": "string" },
+                "base_url": { "type": "string" },
+                "timeout_secs": { "type": "integer", "minimum": 1 }
+              }
+            },
+            "routes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["path", "expect"],
+                "properties": {
+                  "path": { "type": "string" },
+                  "expect": { "type": "integer", "minimum": 100, "maximum": 599 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "transaction": {
+      "type": "object",
+      "properties": {
+        "max_repair_attempts": { "type": "integer", "minimum": 0 },
+        "rollback_on_failure": { "type": "boolean" },
+        "commit_on_success": { "type": "boolean" },
+        "memory_promotion": { "type": "string", "enum": ["on_success", "never"] },
+        "diff_limits": {
+          "type": "object",
+          "properties": {
+            "max_files_changed": { "type": "integer", "minimum": 0 },
+            "max_lines_added": { "type": "integer", "minimum": 0 },
+            "max_lines_deleted": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "agentConfig": {
+      "type": "object",
+      "properties": {
+        "adapter": { "type": "string", "enum": ["command", "codex", "kimi", "gemini"] },
+        "model": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    },
+    "commandBlock": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+
