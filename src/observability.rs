@@ -1,14 +1,16 @@
-use std::env;
-use std::fs::{self, OpenOptions};
-use std::io::Write;
+mod redaction;
+mod storage;
+
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::{DateTime, Utc};
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
+
+pub use redaction::redact_text;
+use storage::{append_jsonl, write_json};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ObservabilityArtifacts {
@@ -135,56 +137,13 @@ pub fn write_error_fingerprint(
     Ok(event)
 }
 
-pub fn redact_text(input: &str) -> Result<String> {
-    let replacements = [
-        (
-            r#"(?i)(api[_-]?key|token|password|secret|database_url|db_url)\s*[:=]\s*['"]?[^'"\s]+"#,
-            "$1=<redacted>",
-        ),
-        (r#"(?i)bearer\s+[A-Za-z0-9._\-]+"#, "Bearer <redacted>"),
-        (r#"sk-[A-Za-z0-9_\-]{10,}"#, "sk-<redacted>"),
-        (
-            r#"(?i)(postgres|postgresql|mysql|mongodb|redis)://[^'"\s]+"#,
-            "$1://<redacted>",
-        ),
-    ];
-
-    let mut output = input.to_string();
-    for (pattern, replacement) in replacements {
-        let regex = Regex::new(pattern)?;
-        output = regex.replace_all(&output, replacement).to_string();
-    }
-    Ok(output)
-}
-
 fn append_redacted_trace(tx_dir: &Path, event: &Value) -> Result<()> {
     append_jsonl(&tx_dir.join("redacted_api.jsonl"), event)?;
 
-    if env::var("AGENTHUB_RAW_TRACES").ok().as_deref() == Some("1") {
+    if std::env::var("AGENTHUB_RAW_TRACES").ok().as_deref() == Some("1") {
         append_jsonl(&tx_dir.join("raw_api.jsonl"), event)?;
     }
 
-    Ok(())
-}
-
-fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
-    }
-    fs::write(path, serde_json::to_string_pretty(value)?)
-        .with_context(|| format!("write {}", path.display()))
-}
-
-fn append_jsonl(path: &Path, value: &Value) -> Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
-    }
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(path)
-        .with_context(|| format!("open {}", path.display()))?;
-    writeln!(file, "{}", serde_json::to_string(value)?)?;
     Ok(())
 }
 
@@ -224,22 +183,4 @@ fn normalize_reason(reason: &str) -> String {
         normalized = normalized.replace("__", "_");
     }
     normalized.trim_matches('_').chars().take(40).collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn redacts_common_secret_shapes() -> Result<()> {
-        let text = "token=abcd1234 Bearer secret.jwt.value postgres://user:pass@localhost/db sk-1234567890abcdef";
-        let redacted = redact_text(text)?;
-
-        assert!(!redacted.contains("abcd1234"));
-        assert!(!redacted.contains("secret.jwt.value"));
-        assert!(!redacted.contains("user:pass"));
-        assert!(!redacted.contains("1234567890abcdef"));
-        assert!(redacted.contains("<redacted>"));
-        Ok(())
-    }
 }
