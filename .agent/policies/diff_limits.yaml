@@ -1,0 +1,7 @@
+diff_limits:
+  max_files_changed: 12
+  max_lines_added: 600
+  max_lines_deleted: 300
+  deletion_requires_approval: true
+  package_change_requires_skill: dependency_change
+

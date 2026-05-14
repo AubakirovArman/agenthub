@@ -1,0 +1,6 @@
+target/
+.agent/tx/
+.agent/workspaces/
+.agent/cache/
+.agent/memory/*.jsonl
+*.log

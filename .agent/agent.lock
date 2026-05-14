@@ -1,0 +1,26 @@
+project:
+  type: code
+  stack: rust-cli
+  language: rust
+  package_manager: cargo
+
+policies:
+  preferred:
+    cli_parser: clap
+    serialization: serde
+  forbidden: []
+
+rulesets:
+  - core.scope_only.v1
+  - code.no_secret_leak.v1
+  - code.reuse_first.v1
+
+skills: {}
+
+verifiers:
+  default: code_build
+
+commands:
+  build: cargo build
+  test: cargo test
+

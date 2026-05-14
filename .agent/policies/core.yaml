@@ -1,0 +1,18 @@
+commands:
+  safe:
+    - cargo build
+    - cargo test
+    - cargo fmt --check
+    - cargo clippy
+    - npm run build
+    - npm test
+    - pytest
+  needs_approval:
+    - npm install
+    - pip install
+    - docker compose up
+  restricted:
+    - rm -rf
+    - sudo
+    - terraform apply
+
