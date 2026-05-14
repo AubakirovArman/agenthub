@@ -53,6 +53,48 @@ pub struct WorkspaceSpec {
     pub root: Option<PathBuf>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum WorkspaceProfile {
+    Code,
+    Content,
+    Data,
+    Infra,
+}
+
+impl WorkspaceSpec {
+    pub fn profile(&self) -> Result<WorkspaceProfile> {
+        match self.kind.as_str() {
+            "code.git" => Ok(WorkspaceProfile::Code),
+            "content.git" => Ok(WorkspaceProfile::Content),
+            "data.git" => Ok(WorkspaceProfile::Data),
+            "infra.git" => Ok(WorkspaceProfile::Infra),
+            other => Err(anyhow!(
+                "unsupported workspace.type `{other}`; supported: code.git, content.git, data.git, infra.git"
+            )),
+        }
+    }
+}
+
+impl WorkspaceProfile {
+    pub fn domain(self) -> &'static str {
+        match self {
+            Self::Code => "code",
+            Self::Content => "content",
+            Self::Data => "data",
+            Self::Infra => "infra",
+        }
+    }
+
+    pub fn memory_change_kind(self) -> &'static str {
+        match self {
+            Self::Code => "code_change",
+            Self::Content => "content_change",
+            Self::Data => "data_change",
+            Self::Infra => "infra_change",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct AgentConfig {
     #[serde(default)]
@@ -211,11 +253,7 @@ impl AgentSpec {
                 "topology executor_reviewer_repair requires review.commands"
             ));
         }
-        if self.workspace.kind != "code.git" {
-            return Err(anyhow!(
-                "only workspace.type=code.git is implemented in Phase 1"
-            ));
-        }
+        self.workspace.profile()?;
         if self
             .workspace
             .isolation
@@ -224,7 +262,7 @@ impl AgentSpec {
             != "git_worktree"
         {
             return Err(anyhow!(
-                "only workspace.isolation=git_worktree is implemented in Phase 1"
+                "only workspace.isolation=git_worktree is implemented for git workspace profiles"
             ));
         }
         Ok(())
@@ -364,5 +402,17 @@ mod tests {
         assert!(ir.contains("ALLOW src/**"));
         assert!(ir.contains("RULE R_SCOPE_ONLY"));
         assert!(ir.contains("VERIFY cargo test"));
+    }
+
+    #[test]
+    fn supports_additional_git_workspace_profiles() {
+        for kind in ["code.git", "content.git", "data.git", "infra.git"] {
+            let workspace = WorkspaceSpec {
+                kind: kind.to_string(),
+                isolation: Some("git_worktree".to_string()),
+                root: None,
+            };
+            assert!(workspace.profile().is_ok(), "{kind}");
+        }
     }
 }

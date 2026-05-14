@@ -1,0 +1,11 @@
+memory_schema:
+  domain: infra
+  types:
+    - environment
+    - terraform_module
+    - cloud_resource
+    - cost_constraint
+    - rollback_procedure
+    - infra_change
+    - failed_attempt
+

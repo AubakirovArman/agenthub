@@ -38,6 +38,14 @@ pub fn prepare_code_worktree(
     paths: &AgentPaths,
     tx_id: &str,
 ) -> Result<PreparedWorkspace> {
+    prepare_git_worktree(root, paths, tx_id)
+}
+
+pub fn prepare_git_worktree(
+    root: &Path,
+    paths: &AgentPaths,
+    tx_id: &str,
+) -> Result<PreparedWorkspace> {
     if !git::is_repo(root) {
         return Err(anyhow!("project root is not a git repository"));
     }

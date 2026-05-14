@@ -14,6 +14,7 @@ pub struct AgentPaths {
     pub memory: PathBuf,
     pub maps: PathBuf,
     pub skills: PathBuf,
+    pub schemas: PathBuf,
     pub policies: PathBuf,
     pub workspaces: PathBuf,
     pub cache: PathBuf,
@@ -34,6 +35,7 @@ impl AgentPaths {
             memory: agent.join("memory"),
             maps: agent.join("maps"),
             skills: agent.join("skills"),
+            schemas: agent.join("schemas"),
             policies: agent.join("policies"),
             workspaces: agent.join("workspaces"),
             cache: agent.join("cache"),
@@ -56,6 +58,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         paths.memory.clone(),
         paths.maps.clone(),
         paths.skills.clone(),
+        paths.schemas.clone(),
         paths.policies.clone(),
         paths.workspaces.clone(),
         paths.cache.clone(),
@@ -79,11 +82,27 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         force,
     )?;
     write_default(
+        &paths.policies.join("verifiers.yaml"),
+        DEFAULT_VERIFIER_PROFILES,
+        force,
+    )?;
+    write_default(
         &paths.policies.join("diff_limits.yaml"),
         DEFAULT_DIFF_LIMITS,
         force,
     )?;
     write_default(&paths.skills.join("installed.json"), "[]\n", force)?;
+    write_default(
+        &paths.schemas.join("content.yaml"),
+        DEFAULT_CONTENT_SCHEMA,
+        force,
+    )?;
+    write_default(&paths.schemas.join("data.yaml"), DEFAULT_DATA_SCHEMA, force)?;
+    write_default(
+        &paths.schemas.join("infra.yaml"),
+        DEFAULT_INFRA_SCHEMA,
+        force,
+    )?;
     write_default(&paths.memory.join("committed.jsonl"), "", force)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", force)?;
 
@@ -194,4 +213,56 @@ const DEFAULT_DIFF_LIMITS: &str = r#"diff_limits:
   max_lines_deleted: 300
   deletion_requires_approval: true
   package_change_requires_skill: dependency_change
+"#;
+
+const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
+  content_quality:
+    checks:
+      - command
+      - length_check
+      - banned_phrase_check
+  data_quality:
+    checks:
+      - command
+      - schema_check
+      - metric_threshold
+  infra_plan:
+    checks:
+      - command
+      - plan_validation
+      - policy_check
+"#;
+
+const DEFAULT_CONTENT_SCHEMA: &str = r#"memory_schema:
+  domain: content
+  types:
+    - content_format
+    - tone_of_voice
+    - audience_profile
+    - brand_rule
+    - content_change
+    - failed_attempt
+"#;
+
+const DEFAULT_DATA_SCHEMA: &str = r#"memory_schema:
+  domain: data
+  types:
+    - dataset
+    - data_quality_rule
+    - metric
+    - artifact
+    - data_change
+    - failed_attempt
+"#;
+
+const DEFAULT_INFRA_SCHEMA: &str = r#"memory_schema:
+  domain: infra
+  types:
+    - environment
+    - terraform_module
+    - cloud_resource
+    - cost_constraint
+    - rollback_procedure
+    - infra_change
+    - failed_attempt
 "#;

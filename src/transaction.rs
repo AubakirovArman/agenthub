@@ -60,6 +60,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         .with_context(|| format!("copy {}", spec_path.display()))?;
     let skill_manifests = skill_registry::load_requested(project_root, &spec.skills)?;
     let agent_routes = agent_adapter::routes_for_spec(&spec)?;
+    let workspace_profile = spec.workspace.profile()?;
     let dag = compiler::compile(&spec)?;
     fs::write(tx_dir.join("agent_ir.txt"), spec.to_agent_ir())
         .with_context(|| format!("write {}", tx_dir.join("agent_ir.txt").display()))?;
@@ -93,6 +94,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         &journal,
         &skill_manifests,
         &agent_routes,
+        workspace_profile,
         no_commit,
         &mut prepared,
         &mut diff_guard_result,
@@ -174,6 +176,7 @@ fn run_inner(
     journal: &Journal,
     skill_manifests: &[SkillManifest],
     agent_routes: &AgentRoutes,
+    workspace_profile: crate::spec::WorkspaceProfile,
     no_commit: bool,
     prepared_slot: &mut Option<PreparedWorkspace>,
     diff_guard_slot: &mut Option<DiffGuardResult>,
@@ -185,11 +188,13 @@ fn run_inner(
     status_slot: &mut TransactionStatus,
 ) -> Result<()> {
     journal.append("BASELINE_CAPTURED", "capturing git baseline")?;
-    let prepared = workspace::prepare_code_worktree(project_root, paths, tx_id)?;
+    let prepared = workspace::prepare_git_worktree(project_root, paths, tx_id)?;
     journal.append_data(
         "WORKSPACE_READY",
         "isolated worktree ready",
         json!({
+            "workspace_type": &spec.workspace.kind,
+            "workspace_domain": workspace_profile.domain(),
             "worktree": prepared.worktree_path.display().to_string(),
             "base_head": &prepared.base_head,
             "tx_branch": &prepared.tx_branch,
@@ -275,10 +280,11 @@ fn run_inner(
     }
 
     *diff_guard_slot = Some(diff_guard);
-    memory::stage_code_change(
+    memory::stage_workspace_change(
         tx_dir,
         tx_id,
         &spec.task.id,
+        workspace_profile,
         &diff_guard_slot
             .as_ref()
             .map(|result| result.summary.changed_files.clone())
@@ -488,6 +494,10 @@ fn write_context_pack(
     let context = json!({
         "agent_spec": spec,
         "agent_routes": agent_routes,
+        "workspace_profile": {
+            "type": &spec.workspace.kind,
+            "domain": spec.workspace.profile()?.domain(),
+        },
         "workspace": {
             "base_head": &prepared.base_head,
             "base_branch": &prepared.base_branch,

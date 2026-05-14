@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
 use crate::observability::redact_text;
+use crate::spec::WorkspaceProfile;
 
 pub const STAGING_FILE: &str = "memory_staging.jsonl";
 
@@ -45,13 +46,30 @@ pub fn stage_code_change(
     task_id: &str,
     changed_files: &[String],
 ) -> Result<MemoryRecord> {
+    stage_workspace_change(
+        tx_dir,
+        tx_id,
+        task_id,
+        WorkspaceProfile::Code,
+        changed_files,
+    )
+}
+
+pub fn stage_workspace_change(
+    tx_dir: &Path,
+    tx_id: &str,
+    task_id: &str,
+    profile: WorkspaceProfile,
+    changed_files: &[String],
+) -> Result<MemoryRecord> {
     let record = MemoryRecord {
-        id: new_memory_id("code_change"),
-        kind: "code_change".to_string(),
+        id: new_memory_id(profile.memory_change_kind()),
+        kind: profile.memory_change_kind().to_string(),
         tx_id: tx_id.to_string(),
         task_id: Some(task_id.to_string()),
         created_at: Utc::now(),
         content: json!({
+            "domain": profile.domain(),
             "changed_files": changed_files,
             "verified": false,
         }),
@@ -104,16 +122,18 @@ pub fn retrieve_recent(root: &Path, limit: usize) -> Result<Vec<MemoryRecord>> {
 pub fn compact_project_state(root: &Path) -> Result<()> {
     let paths = ensure_runtime_dirs(root)?;
     let records = read_records(&paths.memory.join("committed.jsonl"))?;
-    let recent_code_changes = records
+    let recent_workspace_changes = records
         .iter()
-        .filter(|record| record.kind == "code_change")
+        .filter(|record| record.kind.ends_with("_change"))
         .rev()
         .take(20)
         .map(|record| {
             json!({
                 "id": record.id,
+                "type": record.kind,
                 "tx_id": record.tx_id,
                 "task_id": record.task_id,
+                "domain": record.content.get("domain").cloned().unwrap_or_else(|| json!("unknown")),
                 "changed_files": record.content.get("changed_files").cloned().unwrap_or_else(|| json!([])),
                 "created_at": record.created_at,
             })
@@ -123,7 +143,7 @@ pub fn compact_project_state(root: &Path) -> Result<()> {
     let compacted = json!({
         "updated_at": Utc::now(),
         "records": records.len(),
-        "recent_code_changes": recent_code_changes,
+        "recent_workspace_changes": recent_workspace_changes,
     });
     let path = paths.memory.join("compacted/project_state.json");
     if let Some(parent) = path.parent() {

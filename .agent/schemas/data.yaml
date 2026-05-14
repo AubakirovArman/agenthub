@@ -1,0 +1,10 @@
+memory_schema:
+  domain: data
+  types:
+    - dataset
+    - data_quality_rule
+    - metric
+    - artifact
+    - data_change
+    - failed_attempt
+

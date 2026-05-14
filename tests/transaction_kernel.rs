@@ -251,6 +251,53 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn content_workspace_uses_same_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "content.yaml",
+        r#"
+task:
+  id: draft_content_note
+  type: content.command
+workspace:
+  type: content.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p content/notes
+    - printf 'Content transaction\n' > content/notes/note.md
+scope:
+  allow:
+    - content/**
+verify:
+  profile: content_quality
+  commands:
+    - grep -q 'Content transaction' content/notes/note.md
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 3
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("content/notes/note.md").exists());
+
+    let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
+    assert!(committed_memory.contains("content_change"));
+    assert!(committed_memory.contains("draft_content_note"));
+    Ok(())
+}
+
 struct TestRepo {
     dir: TempDir,
     specs: TempDir,

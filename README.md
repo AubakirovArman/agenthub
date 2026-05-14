@@ -12,6 +12,7 @@ rollback, sync check, and transaction reports.
 agenthub init
 agenthub ask "Добавь страницу курсов в стиле dashboard"
 agenthub run examples/command-task.yaml
+agenthub run examples/content-task.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps
@@ -25,7 +26,7 @@ agenthub agents list
 This repository currently implements the foundation slices from the PRD:
 
 - transactional execution kernel;
-- worktree-isolated `CodeWorkspace`;
+- worktree-isolated `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, and `InfraWorkspace` profiles;
 - journal/report artifacts;
 - diff guard and sync check;
 - verifier commands and runtime smoke checks;

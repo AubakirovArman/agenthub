@@ -1,0 +1,17 @@
+profiles:
+  content_quality:
+    checks:
+      - command
+      - length_check
+      - banned_phrase_check
+  data_quality:
+    checks:
+      - command
+      - schema_check
+      - metric_threshold
+  infra_plan:
+    checks:
+      - command
+      - plan_validation
+      - policy_check
+

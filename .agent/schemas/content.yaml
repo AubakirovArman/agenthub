@@ -1,0 +1,10 @@
+memory_schema:
+  domain: content
+  types:
+    - content_format
+    - tone_of_voice
+    - audience_profile
+    - brand_rule
+    - content_change
+    - failed_attempt
+
