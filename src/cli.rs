@@ -24,6 +24,9 @@ pub enum Commands {
 
         #[arg(short, long)]
         output: Option<PathBuf>,
+
+        #[arg(long)]
+        approval_required: bool,
     },
     Run {
         spec: PathBuf,

@@ -30,8 +30,15 @@ fn run() -> Result<()> {
             agent_dir::init_project(&project_root, force)?;
             println!("initialized AgentHub project at {}", project_root.display());
         }
-        Commands::Ask { request, output } => {
-            let preview = intent::normalize_to_spec(&request);
+        Commands::Ask {
+            request,
+            output,
+            approval_required,
+        } => {
+            let preview = intent::normalize_to_spec_with_options(
+                &request,
+                intent::IntentOptions { approval_required },
+            );
             if let Some(output) = output {
                 let path = intent::write_preview(&preview, &output)?;
                 println!("{}", path.display());
@@ -40,6 +47,12 @@ fn run() -> Result<()> {
             }
             if !preview.unknowns.is_empty() {
                 eprintln!("unknowns: {}", preview.unknowns.join(", "));
+            }
+            if !preview.questions.is_empty() {
+                eprintln!("questions:");
+                for question in &preview.questions {
+                    eprintln!("- [{}] {}", question.id, question.question);
+                }
             }
         }
         Commands::Run { spec, no_commit } => {

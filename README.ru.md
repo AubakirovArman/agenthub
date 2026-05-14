@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [Natural language](docs/natural-language.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -21,7 +21,7 @@ AgentHub — транзакционная runtime-основа для работ
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
-- команда `ask` для предварительного AgentSpec;
+- команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
 - VS Code extension v0 для просмотра транзакций, памяти и DAG.
 - локальная enterprise policy, RBAC checks, audit log и compliance report generation.
 
@@ -93,6 +93,7 @@ cargo run -- run examples/command-task.yaml
 ```bash
 agenthub init
 agenthub ask "Add /courses page in the current dashboard style"
+agenthub ask --approval-required "Create a useful page"
 agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml

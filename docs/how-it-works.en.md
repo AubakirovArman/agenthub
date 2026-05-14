@@ -77,6 +77,10 @@ Important fields:
 - `transaction.diff_limits`: blast-radius limits.
 - `transaction.memory_promotion`: `on_success` promotes staged memory only after verification.
 
+## Natural Language Preview
+
+`agenthub ask "<request>"` generates an AgentSpec preview, resolves defaults, and prints required clarification questions when blocking fields cannot be inferred. Use `--approval-required` to mark the preview for manual approval. See [Natural language](natural-language.en.md).
+
 ## Workspaces
 
 AgentHub currently supports four git-backed domain profiles:

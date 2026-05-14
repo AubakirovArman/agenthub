@@ -77,6 +77,10 @@ transaction:
 - `transaction.diff_limits`: ограничения масштаба изменения.
 - `transaction.memory_promotion`: `on_success` продвигает память только после проверки.
 
+## Natural Language Preview
+
+`agenthub ask "<request>"` генерирует AgentSpec preview, подставляет defaults и печатает required clarification questions, если blocking fields нельзя вывести из запроса. `--approval-required` помечает preview как требующий manual approval. См. [Natural language](natural-language.ru.md).
+
 ## Workspaces
 
 Сейчас поддерживаются четыре git-backed профиля:

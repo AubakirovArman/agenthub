@@ -77,6 +77,10 @@ transaction:
 - `transaction.diff_limits`: 控制变更范围。
 - `transaction.memory_promotion`: `on_success` 表示只在验证成功后提升 memory。
 
+## Natural Language Preview
+
+`agenthub ask "<request>"` 会生成 AgentSpec preview、解析 defaults，并在无法推断 blocking fields 时打印 required clarification questions。`--approval-required` 可把 preview 标记为需要 manual approval。参见 [Natural language](natural-language.zh.md)。
+
 ## Workspaces
 
 目前支持四个 git-backed domain profiles：

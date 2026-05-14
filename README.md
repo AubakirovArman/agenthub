@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [Natural language](docs/natural-language.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -21,7 +21,7 @@ The current implementation covers the early PRD foundation:
 - agent adapter routing, CLI dry-run invocation, prompts, and transcripts;
 - LLM Gateway metadata, redacted traces, optional raw traces, and token/cost accounting;
 - context maps for routes, components, exports, stale-hash detection, and map-based context selection;
-- `ask` command for heuristic AgentSpec preview;
+- `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;
 - VS Code extension v0 for transaction, memory, and DAG inspection.
 - local enterprise policy, RBAC checks, audit log, and compliance report generation.
 
@@ -93,6 +93,7 @@ cargo run -- run examples/command-task.yaml
 ```bash
 agenthub init
 agenthub ask "Add /courses page in the current dashboard style"
+agenthub ask --approval-required "Create a useful page"
 agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml

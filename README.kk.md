@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [Natural language](docs/natural-language.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -21,7 +21,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - agent adapter routing, CLI dry-run invocation, prompts және transcripts;
 - LLM Gateway metadata, redacted traces, optional raw traces және token/cost accounting;
 - routes, components, exports үшін context maps, stale-hash detection және map-based context selection;
-- AgentSpec preview жасайтын `ask` командасы;
+- defaults, approval marking және clarification questions бар AgentSpec preview жасайтын `ask` командасы;
 - транзакция, memory және DAG көруге арналған VS Code extension v0.
 - local enterprise policy, RBAC checks, audit log және compliance report generation.
 
@@ -93,6 +93,7 @@ cargo run -- run examples/command-task.yaml
 ```bash
 agenthub init
 agenthub ask "Add /courses page in the current dashboard style"
+agenthub ask --approval-required "Create a useful page"
 agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml

@@ -135,6 +135,8 @@ pub struct RouteCheckSpec {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransactionSpec {
+    #[serde(default)]
+    pub approval_required: bool,
     #[serde(default = "default_max_repair_attempts")]
     pub max_repair_attempts: u32,
     #[serde(default = "default_true")]
@@ -160,6 +162,7 @@ pub struct DiffLimitsSpec {
 impl Default for TransactionSpec {
     fn default() -> Self {
         Self {
+            approval_required: false,
             max_repair_attempts: default_max_repair_attempts(),
             rollback_on_failure: true,
             commit_on_success: true,

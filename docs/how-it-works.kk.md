@@ -77,6 +77,10 @@ transaction:
 - `transaction.diff_limits`: өзгеріс көлемін шектейді.
 - `transaction.memory_promotion`: `on_success` memory тек verification өткен соң көтеріледі.
 
+## Natural Language Preview
+
+`agenthub ask "<request>"` AgentSpec preview жасайды, defaults толтырады және blocking fields анықталмаса required clarification questions шығарады. `--approval-required` preview manual approval қажет деп белгілейді. Қара: [Natural language](natural-language.kk.md).
+
 ## Workspaces
 
 Қазір төрт git-backed domain profile бар:
