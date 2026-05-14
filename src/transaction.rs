@@ -7,7 +7,7 @@ use chrono::Utc;
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::agent_adapter::{self, AgentRoute};
+use crate::agent_adapter::{self, AgentRoutes};
 use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
 use crate::code_maps;
 use crate::command_runner::{run_shell, CommandResult};
@@ -17,6 +17,7 @@ use crate::journal::Journal;
 use crate::memory;
 use crate::observability::{self, CostProfile};
 use crate::report::TransactionReport;
+use crate::reviewer::{self, ReviewResult};
 use crate::skill_registry::{self, SkillManifest};
 use crate::spec::AgentSpec;
 use crate::verifier::{self, VerifierResult};
@@ -58,7 +59,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     fs::copy(spec_path, tx_dir.join("plan.yaml"))
         .with_context(|| format!("copy {}", spec_path.display()))?;
     let skill_manifests = skill_registry::load_requested(project_root, &spec.skills)?;
-    let agent_route = agent_adapter::route(&spec.agent)?;
+    let agent_routes = agent_adapter::routes_for_spec(&spec)?;
     let dag = compiler::compile(&spec)?;
     fs::write(tx_dir.join("agent_ir.txt"), spec.to_agent_ir())
         .with_context(|| format!("write {}", tx_dir.join("agent_ir.txt").display()))?;
@@ -75,6 +76,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
 
     let mut prepared = None;
     let mut diff_guard_result = None;
+    let mut review_result = None;
     let mut verifier_result = None;
     let mut cost_profile = None;
     let mut error_fingerprint = None;
@@ -90,10 +92,11 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         &tx_dir,
         &journal,
         &skill_manifests,
-        &agent_route,
+        &agent_routes,
         no_commit,
         &mut prepared,
         &mut diff_guard_result,
+        &mut review_result,
         &mut verifier_result,
         &mut cost_profile,
         &mut failure_reason,
@@ -145,6 +148,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         committed,
         report_path: report_path.clone(),
         diff_guard: diff_guard_result,
+        review: review_result,
         verifier: verifier_result,
         cost_profile,
         error_fingerprint,
@@ -169,10 +173,11 @@ fn run_inner(
     tx_dir: &Path,
     journal: &Journal,
     skill_manifests: &[SkillManifest],
-    agent_route: &AgentRoute,
+    agent_routes: &AgentRoutes,
     no_commit: bool,
     prepared_slot: &mut Option<PreparedWorkspace>,
     diff_guard_slot: &mut Option<DiffGuardResult>,
+    review_slot: &mut Option<ReviewResult>,
     verifier_slot: &mut Option<VerifierResult>,
     cost_profile_slot: &mut Option<CostProfile>,
     failure_reason_slot: &mut Option<String>,
@@ -191,14 +196,14 @@ fn run_inner(
         }),
     )?;
     *prepared_slot = Some(prepared.clone());
-    agent_adapter::write_agent_trace(tx_dir, agent_route)?;
+    agent_adapter::write_agent_trace(tx_dir, agent_routes)?;
 
     let context_pack = write_context_pack(
         project_root,
         tx_dir,
         spec,
         skill_manifests,
-        agent_route,
+        agent_routes,
         &prepared,
     )?;
     let memory_ids = context_pack
@@ -227,7 +232,7 @@ fn run_inner(
         tx_dir.join("execution.json"),
         serde_json::to_string_pretty(&execution_results)?,
     )?;
-    agent_adapter::write_transcript(tx_dir, agent_route, &execution_results)?;
+    agent_adapter::write_transcript(tx_dir, &agent_routes.executor, &execution_results)?;
     if let Some(failed) = execution_results.iter().find(|result| !result.success) {
         return Err(anyhow!(
             "execution command failed: `{}` exit {:?}",
@@ -237,20 +242,38 @@ fn run_inner(
     }
 
     journal.append("DIFF_GUARD", "checking scope and diff limits")?;
-    let diff_guard = diff_guard::check(
-        &prepared.worktree_path,
-        &spec.scope,
-        &spec.transaction.diff_limits,
-    )?;
-    fs::write(
-        tx_dir.join("diff_guard.json"),
-        serde_json::to_string_pretty(&diff_guard)?,
-    )?;
+    let mut diff_guard = check_diff_guard(spec, &prepared.worktree_path, tx_dir)?;
     if !diff_guard.passed {
         let reason = format!("diff guard failed: {}", diff_guard.violations.join("; "));
         *diff_guard_slot = Some(diff_guard);
         return Err(anyhow!(reason));
     }
+
+    if spec.topology.kind == "executor_reviewer_repair" {
+        journal.append("REVIEWING", "running reviewer gate")?;
+        let (review, reviewed_diff_guard) = run_review_with_repair(
+            spec,
+            &prepared.worktree_path,
+            tx_dir,
+            journal,
+            agent_routes,
+            diff_guard,
+        )?;
+        diff_guard = reviewed_diff_guard;
+        fs::write(
+            tx_dir.join("review.json"),
+            serde_json::to_string_pretty(&review)?,
+        )?;
+        if !review.passed {
+            let reason = "reviewer failed".to_string();
+            *diff_guard_slot = Some(diff_guard);
+            *review_slot = Some(review);
+            *failure_reason_slot = Some(reason.clone());
+            return Err(anyhow!(reason));
+        }
+        *review_slot = Some(review);
+    }
+
     *diff_guard_slot = Some(diff_guard);
     memory::stage_code_change(
         tx_dir,
@@ -268,6 +291,7 @@ fn run_inner(
         &prepared.worktree_path,
         tx_dir,
         journal,
+        agent_routes,
         &tx_dir.join("verifier.log"),
     )?;
     fs::write(
@@ -320,11 +344,75 @@ fn run_inner(
     Ok(())
 }
 
+fn check_diff_guard(spec: &AgentSpec, worktree: &Path, tx_dir: &Path) -> Result<DiffGuardResult> {
+    let diff_guard = diff_guard::check(worktree, &spec.scope, &spec.transaction.diff_limits)?;
+    fs::write(
+        tx_dir.join("diff_guard.json"),
+        serde_json::to_string_pretty(&diff_guard)?,
+    )?;
+    Ok(diff_guard)
+}
+
+fn run_review_with_repair(
+    spec: &AgentSpec,
+    worktree: &Path,
+    tx_dir: &Path,
+    journal: &Journal,
+    agent_routes: &AgentRoutes,
+    mut diff_guard: DiffGuardResult,
+) -> Result<(ReviewResult, DiffGuardResult)> {
+    let mut review = reviewer::run(&spec.review, worktree, &tx_dir.join("reviewer.log"))?;
+    if let Some(route) = agent_routes.reviewer.as_ref() {
+        agent_adapter::write_transcript(tx_dir, route, &review.commands)?;
+    }
+
+    let mut repair_results = Vec::new();
+    for attempt in 1..=spec.transaction.max_repair_attempts {
+        if review.passed || spec.repair.commands.is_empty() {
+            break;
+        }
+
+        journal.append_data(
+            "REPAIRING",
+            "running reviewer repair commands",
+            json!({ "attempt": attempt, "phase": "review" }),
+        )?;
+        let results = run_repair_commands(spec, worktree)?;
+        if let Some(route) = agent_routes.repair.as_ref() {
+            agent_adapter::write_transcript(tx_dir, route, &results)?;
+        }
+        repair_results.push(json!({
+            "attempt": attempt,
+            "phase": "review",
+            "commands": results,
+        }));
+
+        diff_guard = check_diff_guard(spec, worktree, tx_dir)?;
+        if !diff_guard.passed {
+            break;
+        }
+        review = reviewer::run(&spec.review, worktree, &tx_dir.join("reviewer.log"))?;
+        if let Some(route) = agent_routes.reviewer.as_ref() {
+            agent_adapter::write_transcript(tx_dir, route, &review.commands)?;
+        }
+    }
+
+    if !repair_results.is_empty() {
+        fs::write(
+            tx_dir.join("review_repair.json"),
+            serde_json::to_string_pretty(&repair_results)?,
+        )?;
+    }
+
+    Ok((review, diff_guard))
+}
+
 fn run_verifier_with_repair(
     spec: &AgentSpec,
     worktree: &Path,
     tx_dir: &Path,
     journal: &Journal,
+    agent_routes: &AgentRoutes,
     log_path: &Path,
 ) -> Result<VerifierResult> {
     let mut verifier = verifier::run(&spec.verify, worktree, log_path)?;
@@ -341,6 +429,9 @@ fn run_verifier_with_repair(
             json!({ "attempt": attempt }),
         )?;
         let results = run_repair_commands(spec, worktree)?;
+        if let Some(route) = agent_routes.repair.as_ref() {
+            agent_adapter::write_transcript(tx_dir, route, &results)?;
+        }
         repair_results.push(json!({
             "attempt": attempt,
             "commands": results,
@@ -389,14 +480,14 @@ fn write_context_pack(
     tx_dir: &Path,
     spec: &AgentSpec,
     skill_manifests: &[SkillManifest],
-    agent_route: &AgentRoute,
+    agent_routes: &AgentRoutes,
     prepared: &PreparedWorkspace,
 ) -> Result<serde_json::Value> {
     let memory = memory::retrieve_recent(project_root, 10)?;
     let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
     let context = json!({
         "agent_spec": spec,
-        "agent_route": agent_route,
+        "agent_routes": agent_routes,
         "workspace": {
             "base_head": &prepared.base_head,
             "base_branch": &prepared.base_branch,

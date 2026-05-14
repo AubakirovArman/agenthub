@@ -9,6 +9,10 @@ pub struct AgentSpec {
     pub task: TaskSpec,
     #[serde(default)]
     pub agent: AgentConfig,
+    #[serde(default)]
+    pub agents: RoleAgents,
+    #[serde(default)]
+    pub topology: TopologySpec,
     pub workspace: WorkspaceSpec,
     #[serde(default)]
     pub skills: Vec<String>,
@@ -20,6 +24,8 @@ pub struct AgentSpec {
     pub rules: Vec<String>,
     #[serde(default)]
     pub verify: VerifySpec,
+    #[serde(default)]
+    pub review: ReviewSpec,
     #[serde(default)]
     pub repair: RepairSpec,
     #[serde(default)]
@@ -58,6 +64,30 @@ pub struct AgentConfig {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct RoleAgents {
+    #[serde(default)]
+    pub executor: Option<AgentConfig>,
+    #[serde(default)]
+    pub reviewer: Option<AgentConfig>,
+    #[serde(default)]
+    pub repair: Option<AgentConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TopologySpec {
+    #[serde(default = "default_topology_kind")]
+    pub kind: String,
+}
+
+impl Default for TopologySpec {
+    fn default() -> Self {
+        Self {
+            kind: default_topology_kind(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExecutionSpec {
     #[serde(default)]
     pub commands: Vec<String>,
@@ -81,6 +111,12 @@ pub struct VerifySpec {
     pub runtime: Option<RuntimeSmokeSpec>,
     #[serde(default)]
     pub routes: Vec<RouteCheckSpec>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ReviewSpec {
+    #[serde(default)]
+    pub commands: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -164,6 +200,17 @@ impl AgentSpec {
         if self.task.id.trim().is_empty() {
             return Err(anyhow!("task.id is required"));
         }
+        if !matches!(
+            self.topology.kind.as_str(),
+            "single_executor" | "executor_reviewer_repair"
+        ) {
+            return Err(anyhow!("unsupported topology.kind: {}", self.topology.kind));
+        }
+        if self.topology.kind == "executor_reviewer_repair" && self.review.commands.is_empty() {
+            return Err(anyhow!(
+                "topology executor_reviewer_repair requires review.commands"
+            ));
+        }
         if self.workspace.kind != "code.git" {
             return Err(anyhow!(
                 "only workspace.type=code.git is implemented in Phase 1"
@@ -187,6 +234,7 @@ impl AgentSpec {
         let mut lines = Vec::new();
         lines.push(format!("TX {}", self.task.kind));
         lines.push(format!("TASK {}", self.task.id));
+        lines.push(format!("TOPOLOGY {}", self.topology.kind));
         lines.push(format!(
             "AGENT adapter={} role={}",
             self.agent.adapter.as_deref().unwrap_or("command"),
@@ -215,6 +263,9 @@ impl AgentSpec {
         if !self.verify.commands.is_empty() {
             lines.push(format!("VERIFY {}", self.verify.commands.join(" && ")));
         }
+        if !self.review.commands.is_empty() {
+            lines.push(format!("REVIEW {}", self.review.commands.join(" && ")));
+        }
         lines.push(format!(
             "REPAIR max={}",
             self.transaction.max_repair_attempts
@@ -237,6 +288,10 @@ fn default_true() -> bool {
 
 fn default_max_repair_attempts() -> u32 {
     0
+}
+
+fn default_topology_kind() -> String {
+    "single_executor".to_string()
 }
 
 fn default_base_url() -> String {
@@ -277,6 +332,8 @@ mod tests {
                 target: None,
             },
             agent: AgentConfig::default(),
+            agents: RoleAgents::default(),
+            topology: TopologySpec::default(),
             workspace: WorkspaceSpec {
                 kind: "code.git".to_string(),
                 isolation: Some("git_worktree".to_string()),
@@ -295,12 +352,14 @@ mod tests {
                 runtime: None,
                 routes: Vec::new(),
             },
+            review: ReviewSpec::default(),
             repair: RepairSpec::default(),
             transaction: TransactionSpec::default(),
         };
 
         let ir = spec.to_agent_ir();
         assert!(ir.contains("TASK add_page"));
+        assert!(ir.contains("TOPOLOGY single_executor"));
         assert!(ir.contains("SKILL code.test"));
         assert!(ir.contains("ALLOW src/**"));
         assert!(ir.contains("RULE R_SCOPE_ONLY"));

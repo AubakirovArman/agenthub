@@ -35,8 +35,28 @@ This repository currently implements the foundation slices from the PRD:
 - AgentSpec YAML, AgentIR, and execution DAG;
 - skill manifests and dependency loading;
 - agent adapter routing/traces;
+- `single_executor` and `executor_reviewer_repair` topologies;
+- reviewer gate with bounded repair before verifier;
 - context maps for routes/components/exports;
 - heuristic `ask` command for AgentSpec preview.
+
+## Reviewer Topology
+
+```yaml
+topology:
+  kind: executor_reviewer_repair
+
+review:
+  commands:
+    - cargo test
+
+repair:
+  commands:
+    - cargo fmt
+
+transaction:
+  max_repair_attempts: 1
+```
 
 ## Local Build
 

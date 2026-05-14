@@ -10,6 +10,7 @@ pub mod journal;
 pub mod memory;
 pub mod observability;
 pub mod report;
+pub mod reviewer;
 pub mod skill_registry;
 pub mod spec;
 pub mod transaction;

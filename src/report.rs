@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::diff_guard::DiffGuardResult;
 use crate::observability::CostProfile;
+use crate::reviewer::ReviewResult;
 use crate::verifier::VerifierResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,6 +21,7 @@ pub struct TransactionReport {
     pub committed: bool,
     pub report_path: PathBuf,
     pub diff_guard: Option<DiffGuardResult>,
+    pub review: Option<ReviewResult>,
     pub verifier: Option<VerifierResult>,
     pub cost_profile: Option<CostProfile>,
     pub error_fingerprint: Option<String>,
@@ -73,6 +75,17 @@ impl TransactionReport {
                 for violation in &diff_guard.violations {
                     md.push_str(&format!("- {violation}\n"));
                 }
+            }
+        }
+
+        if let Some(review) = &self.review {
+            md.push_str("\n## Reviewer\n\n");
+            md.push_str(&format!("- Passed: `{}`\n", review.passed));
+            for command in &review.commands {
+                md.push_str(&format!(
+                    "- `{}` -> success `{}` exit `{:?}` timeout `{}`\n",
+                    command.command, command.success, command.exit_code, command.timed_out
+                ));
             }
         }
 

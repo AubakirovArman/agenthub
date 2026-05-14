@@ -26,13 +26,31 @@ pub struct DagEdge {
 pub fn compile(spec: &AgentSpec) -> Result<ExecutionDag> {
     validate_policy(spec)?;
 
-    let nodes = vec![
+    let mut nodes = vec![
         node("preflight", "policy", "Validate AgentSpec and policy"),
         node("baseline", "workspace", "Capture base revision"),
         node("workspace", "workspace", "Prepare isolated worktree"),
         node("context_pack", "context", "Build least-context pack"),
-        node("execute", "agent", "Run executor commands or adapter"),
+        node(
+            "execute",
+            "agent.executor",
+            "Run executor commands or adapter",
+        ),
         node("diff_guard", "policy", "Check scope and diff limits"),
+    ];
+
+    if spec.topology.kind == "executor_reviewer_repair" {
+        nodes.push(node("review", "agent.reviewer", "Run reviewer gate"));
+        if spec.transaction.max_repair_attempts > 0 && !spec.repair.commands.is_empty() {
+            nodes.push(node(
+                "repair_loop",
+                "agent.repair",
+                "Run bounded repair loop when review or verifier fails",
+            ));
+        }
+    }
+
+    nodes.extend([
         node("verify", "verifier", "Run verifier profile"),
         node(
             "sync_check",
@@ -41,7 +59,7 @@ pub fn compile(spec: &AgentSpec) -> Result<ExecutionDag> {
         ),
         node("commit", "transaction", "Commit or rollback"),
         node("report", "observability", "Write transaction report"),
-    ];
+    ]);
     let edges = nodes
         .windows(2)
         .map(|pair| DagEdge {
@@ -65,6 +83,11 @@ pub fn validate_policy(spec: &AgentSpec) -> Result<()> {
     if spec.scope.allow.is_empty() && !spec.execution.commands.is_empty() {
         return Err(anyhow!(
             "scope.allow is required when execution commands can mutate the workspace"
+        ));
+    }
+    if spec.topology.kind == "executor_reviewer_repair" && spec.review.commands.is_empty() {
+        return Err(anyhow!(
+            "topology executor_reviewer_repair requires review.commands"
         ));
     }
 
@@ -101,8 +124,8 @@ fn node(id: &str, kind: &str, label: &str) -> DagNode {
 mod tests {
     use super::*;
     use crate::spec::{
-        AgentConfig, AgentSpec, ExecutionSpec, RepairSpec, ScopeSpec, TaskSpec, TransactionSpec,
-        VerifySpec, WorkspaceSpec,
+        AgentConfig, AgentSpec, ExecutionSpec, RepairSpec, ReviewSpec, RoleAgents, ScopeSpec,
+        TaskSpec, TopologySpec, TransactionSpec, VerifySpec, WorkspaceSpec,
     };
 
     #[test]
@@ -125,6 +148,21 @@ mod tests {
         assert!(validate_policy(&spec).is_err());
     }
 
+    #[test]
+    fn compiles_reviewer_topology_nodes() -> Result<()> {
+        let mut spec = test_spec(vec!["src/**".to_string()]);
+        spec.topology.kind = "executor_reviewer_repair".to_string();
+        spec.review.commands = vec!["true".to_string()];
+        let dag = compile(&spec)?;
+
+        assert!(dag.nodes.iter().any(|node| node.id == "review"));
+        assert!(dag
+            .edges
+            .iter()
+            .any(|edge| edge.from == "review" && edge.to == "verify"));
+        Ok(())
+    }
+
     fn test_spec(allow: Vec<String>) -> AgentSpec {
         AgentSpec {
             task: TaskSpec {
@@ -134,6 +172,8 @@ mod tests {
                 target: None,
             },
             agent: AgentConfig::default(),
+            agents: RoleAgents::default(),
+            topology: TopologySpec::default(),
             workspace: WorkspaceSpec {
                 kind: "code.git".to_string(),
                 isolation: Some("git_worktree".to_string()),
@@ -149,6 +189,7 @@ mod tests {
             },
             rules: Vec::new(),
             verify: VerifySpec::default(),
+            review: ReviewSpec::default(),
             repair: RepairSpec::default(),
             transaction: TransactionSpec::default(),
         }

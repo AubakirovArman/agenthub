@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::command_runner::CommandResult;
-use crate::spec::AgentConfig;
+use crate::spec::{AgentConfig, AgentSpec};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentRoute {
@@ -20,15 +20,23 @@ pub struct AgentRoute {
     pub fallback_reason: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AgentRoutes {
+    pub executor: AgentRoute,
+    pub reviewer: Option<AgentRoute>,
+    pub repair: Option<AgentRoute>,
+}
+
 pub fn route(config: &AgentConfig) -> Result<AgentRoute> {
+    route_for_role(config, config.role.as_deref().unwrap_or("executor"))
+}
+
+pub fn route_for_role(config: &AgentConfig, role: &str) -> Result<AgentRoute> {
     let requested = config
         .adapter
         .clone()
         .unwrap_or_else(|| "command".to_string());
-    let role = config
-        .role
-        .clone()
-        .unwrap_or_else(|| "executor".to_string());
+    let role = config.role.clone().unwrap_or_else(|| role.to_string());
     let model = config.model.clone();
 
     match requested.as_str() {
@@ -64,15 +72,39 @@ pub fn route(config: &AgentConfig) -> Result<AgentRoute> {
     }
 }
 
+pub fn routes_for_spec(spec: &AgentSpec) -> Result<AgentRoutes> {
+    let executor_config = spec
+        .agents
+        .executor
+        .clone()
+        .unwrap_or_else(|| spec.agent.clone());
+    let reviewer_config = spec.agents.reviewer.clone().unwrap_or_else(command_config);
+    let repair_config = spec.agents.repair.clone().unwrap_or_else(command_config);
+
+    Ok(AgentRoutes {
+        executor: route_for_role(&executor_config, "executor")?,
+        reviewer: if spec.topology.kind == "executor_reviewer_repair" {
+            Some(route_for_role(&reviewer_config, "reviewer")?)
+        } else {
+            None
+        },
+        repair: if spec.transaction.max_repair_attempts > 0 && !spec.repair.commands.is_empty() {
+            Some(route_for_role(&repair_config, "repair")?)
+        } else {
+            None
+        },
+    })
+}
+
 pub fn supported_adapters() -> Vec<&'static str> {
     vec!["command", "codex", "kimi", "gemini"]
 }
 
-pub fn write_agent_trace(tx_dir: &Path, route: &AgentRoute) -> Result<()> {
+pub fn write_agent_trace(tx_dir: &Path, routes: &AgentRoutes) -> Result<()> {
     write_json(
         tx_dir.join("agent_trace.json").as_path(),
         &json!({
-            "route": route,
+            "routes": routes,
             "created_at": Utc::now(),
         }),
     )
@@ -107,6 +139,14 @@ fn executable_available(name: &str) -> bool {
         .into_iter()
         .flat_map(|paths| env::split_paths(&paths).collect::<Vec<_>>())
         .any(|dir| dir.join(name).is_file())
+}
+
+fn command_config() -> AgentConfig {
+    AgentConfig {
+        adapter: Some("command".to_string()),
+        model: None,
+        role: None,
+    }
 }
 
 fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {

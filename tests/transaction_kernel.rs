@@ -190,6 +190,67 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn reviewer_gate_can_repair_before_verify_and_commit() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "reviewer_repair.yaml",
+        r#"
+task:
+  id: reviewer_repair
+  type: code.command
+topology:
+  kind: executor_reviewer_repair
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'needs review\n' > generated/input.txt
+scope:
+  allow:
+    - generated/**
+review:
+  commands:
+    - test -f generated/reviewed.txt
+repair:
+  commands:
+    - printf 'reviewed\n' > generated/reviewed.txt
+verify:
+  profile: code_build
+  commands:
+    - test -f generated/reviewed.txt
+transaction:
+  max_repair_attempts: 1
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 3
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("generated/reviewed.txt").exists());
+    assert!(outcome.report_path.with_file_name("review.json").exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("review_repair.json")
+        .exists());
+
+    let agent_trace = fs::read_to_string(outcome.report_path.with_file_name("agent_trace.json"))?;
+    assert!(agent_trace.contains("reviewer"));
+    assert!(agent_trace.contains("repair"));
+    Ok(())
+}
+
 struct TestRepo {
     dir: TempDir,
     specs: TempDir,
