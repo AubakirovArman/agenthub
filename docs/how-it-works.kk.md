@@ -164,6 +164,8 @@ verify:
 
 Нәтиже `.agent/tx/<tx-id>/verifier.json` және `.agent/tx/<tx-id>/verifier.log` файлдарына жазылады.
 
+Verifier output missing environment variable көрсетсе, transaction status `BLOCKED_ON_HUMAN` болады және AgentHub оны normal failed attempt ретінде жазбайды. Толық мәлімет: [Runtime and repair](runtime-repair.kk.md).
+
 ## Memory және Artifacts
 
 Әр транзакция жазады:

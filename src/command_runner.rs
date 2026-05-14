@@ -151,4 +151,18 @@ mod tests {
         assert!(!result.success);
         Ok(())
     }
+
+    #[test]
+    fn timeout_terminates_background_child() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let marker = dir.path().join("late-marker");
+        let command = format!("(sleep 2; touch '{}') & wait", marker.display());
+
+        let result = run_shell(&command, dir.path(), Duration::from_millis(50))?;
+        thread::sleep(Duration::from_millis(300));
+
+        assert!(result.timed_out);
+        assert!(!marker.exists());
+        Ok(())
+    }
 }

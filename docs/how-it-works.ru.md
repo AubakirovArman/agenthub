@@ -164,6 +164,8 @@ verify:
 
 Результат сохраняется в `.agent/tx/<tx-id>/verifier.json` и `.agent/tx/<tx-id>/verifier.log`.
 
+Если verifier output указывает на missing environment variable, статус транзакции становится `BLOCKED_ON_HUMAN`, и AgentHub не записывает это как обычный failed attempt. Подробно: [Runtime and repair](runtime-repair.ru.md).
+
 ## Память и артефакты
 
 Каждая транзакция пишет:

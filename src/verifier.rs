@@ -1,4 +1,6 @@
 mod runtime;
+#[cfg(test)]
+mod runtime_tests;
 
 use std::fs::{self, OpenOptions};
 use std::io::Write;

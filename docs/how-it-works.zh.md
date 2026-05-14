@@ -164,6 +164,8 @@ verify:
 
 结果写入 `.agent/tx/<tx-id>/verifier.json` 和 `.agent/tx/<tx-id>/verifier.log`。
 
+如果 verifier output 表示缺少环境变量，事务状态会变成 `BLOCKED_ON_HUMAN`，AgentHub 不会把它记录为普通 failed attempt。详情见 [Runtime and repair](runtime-repair.zh.md)。
+
 ## Memory 和 Artifacts
 
 每个事务都会写入：

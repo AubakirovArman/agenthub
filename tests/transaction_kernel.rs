@@ -266,6 +266,104 @@ transaction:
 }
 
 #[test]
+fn repair_attempts_are_bounded_when_unresolved() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "bounded_repair.yaml",
+        r#"
+task:
+  id: bounded_repair
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'needs repair\n' > generated/input.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  profile: code_build
+  commands:
+    - test -f generated/never-created.txt
+repair:
+  commands:
+    - printf 'attempt\n' >> generated/attempts.txt
+transaction:
+  max_repair_attempts: 1
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 3
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::RolledBack));
+    assert!(!repo.path().join("generated/attempts.txt").exists());
+    let repair = fs::read_to_string(outcome.report_path.with_file_name("repair.json"))?;
+    assert!(repair.contains("\"attempt\": 1"));
+    assert!(!repair.contains("\"attempt\": 2"));
+    Ok(())
+}
+
+#[test]
+fn unresolved_missing_env_blocks_on_human() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "missing_env.yaml",
+        r#"
+task:
+  id: missing_env
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'pending env\n' > generated/env.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  profile: code_build
+  commands:
+    - sh -c "echo 'missing environment variable API_KEY' >&2; exit 1"
+transaction:
+  max_repair_attempts: 0
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
+    assert!(!repo.path().join("generated/env.txt").exists());
+    assert!(!outcome
+        .report_path
+        .with_file_name("error_fingerprint.json")
+        .exists());
+    Ok(())
+}
+
+#[test]
 fn reviewer_gate_can_repair_before_verify_and_commit() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;

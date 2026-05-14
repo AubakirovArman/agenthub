@@ -1,0 +1,42 @@
+task:
+  id: runtime_smoke_example
+  type: code.command
+  title: Verify a generated static page through runtime smoke
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p tmp/runtime-smoke
+    - printf '<!doctype html><title>AgentHub</title><h1>ok</h1>\n' > tmp/runtime-smoke/index.html
+
+scope:
+  allow:
+    - tmp/**
+  deny:
+    - prd.md
+    - .agent/**
+
+verify:
+  profile: web_runtime_smoke
+  commands:
+    - test -f tmp/runtime-smoke/index.html
+  runtime:
+    start_command: python3 -m http.server 48321 --bind 127.0.0.1 --directory tmp/runtime-smoke
+    base_url: http://127.0.0.1:48321
+    timeout_secs: 10
+  routes:
+    - path: /
+      expect: 200
+
+transaction:
+  max_repair_attempts: 0
+  rollback_on_failure: true
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 4
+    max_lines_added: 100
+    max_lines_deleted: 20

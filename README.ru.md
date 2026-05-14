@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -98,6 +98,7 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 agenthub run examples/adapter-dry-run-task.yaml
+agenthub run examples/runtime-smoke-task.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps
@@ -148,6 +149,8 @@ transaction:
 ```
 
 В этом режиме AgentHub запускает executor commands, проверяет diff, выполняет reviewer commands, при необходимости запускает repair commands, затем запускает verifier перед commit.
+
+Runtime smoke checks поднимают временный server, проверяют expected HTTP statuses и завершают process group. Missing environment failures ставят транзакцию на паузу как `BLOCKED_ON_HUMAN`. См. [Runtime and repair](docs/runtime-repair.ru.md).
 
 ## IDE
 
