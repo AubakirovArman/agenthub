@@ -24,7 +24,7 @@ git -C "$PROJECT" commit -q -m "Initialize AgentHub"
 
 output="$("$AGENTHUB_BIN" --project "$PROJECT" run "$ROOT/examples/adapter-dry-run-task.yaml")"
 printf '%s\n' "$output"
-tx_id="$(printf '%s\n' "$output" | awk '{print $1}')"
+tx_id="$(printf '%s\n' "$output" | awk 'NR==1 {print $1}')"
 test -f "$PROJECT/.agent/tx/$tx_id/adapter_invocation_executor.json"
 test -f "$PROJECT/.agent/tx/$tx_id/agent_transcript.jsonl"
 printf 'agenthub provider dry-run smoke test passed\n'
