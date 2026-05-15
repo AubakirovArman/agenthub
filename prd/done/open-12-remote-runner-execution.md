@@ -26,5 +26,5 @@ Real remote runner dispatch and result collection.
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `391492b`.
+- Checks: `cargo fmt -- --check`; `cargo test`; `cargo clippy -- -D warnings`; `scripts/check-module-size.sh 200`; `git diff --check`; `npm run check` in `editors/vscode`.
