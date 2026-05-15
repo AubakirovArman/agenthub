@@ -7,7 +7,7 @@ use serde_json::json;
 
 use agenthub::{
     agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, transaction,
-    tui, workspace,
+    tui, web_dashboard, workspace,
 };
 
 use crate::cli::{
@@ -92,6 +92,15 @@ fn run() -> Result<()> {
             enterprise::authorize(&project_root, "transaction.read")?;
             print!("{}", tui::dashboard_text(&project_root)?);
         }
+        Commands::Dashboard { output } => {
+            enterprise::authorize(&project_root, "transaction.read")?;
+            enterprise::authorize(&project_root, "memory.read")?;
+            enterprise::authorize(&project_root, "skills.read")?;
+            enterprise::authorize(&project_root, "enterprise.policy.read")?;
+            let output_dir = resolve_output(&project_root, &output);
+            let result = web_dashboard::write_dashboard(&project_root, &output_dir)?;
+            println!("{}", result.index_path.display());
+        }
         Commands::Tx { command } => match command {
             TxCommands::Status => {
                 enterprise::authorize(&project_root, "transaction.read")?;
@@ -154,4 +163,12 @@ fn run() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn resolve_output(project_root: &std::path::Path, output: &std::path::Path) -> std::path::PathBuf {
+    if output.is_absolute() {
+        output.to_path_buf()
+    } else {
+        project_root.join(output)
+    }
 }

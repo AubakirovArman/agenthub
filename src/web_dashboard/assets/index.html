@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgentHub Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>AgentHub Dashboard</h1>
+        <p id="project"></p>
+      </div>
+      <time id="generated"></time>
+    </header>
+    <main>
+      <section class="metrics" id="metrics"></section>
+      <section class="grid">
+        <article class="panel span-7">
+          <h2>Transactions</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>DAG</th>
+                <th>Cost</th>
+                <th>Report</th>
+              </tr>
+            </thead>
+            <tbody id="transactions"></tbody>
+          </table>
+        </article>
+        <article class="panel span-5">
+          <h2>Cost Analytics</h2>
+          <div id="cost"></div>
+        </article>
+      </section>
+      <section class="grid">
+        <article class="panel span-6">
+          <h2>Timeline</h2>
+          <ol class="timeline" id="timeline"></ol>
+        </article>
+        <article class="panel span-6">
+          <h2>Agent Trace</h2>
+          <div class="trace" id="trace"></div>
+        </article>
+      </section>
+      <section class="grid">
+        <article class="panel span-7">
+          <h2>Memory Graph</h2>
+          <svg id="memoryGraph" role="img" viewBox="0 0 720 320"></svg>
+        </article>
+        <article class="panel span-5">
+          <h2>Skills</h2>
+          <div class="list" id="skills"></div>
+        </article>
+      </section>
+      <section class="grid">
+        <article class="panel span-5">
+          <h2>Policies</h2>
+          <div class="list" id="policies"></div>
+        </article>
+        <article class="panel span-7">
+          <h2>Reports</h2>
+          <div class="list" id="reports"></div>
+        </article>
+      </section>
+    </main>
+    <script src="data.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

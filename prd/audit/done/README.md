@@ -8,6 +8,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - AgentSpec YAML, AgentIR, and execution DAG compiler.
 - CLI runtime commands and VS Code extension surface.
 - Terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals.
+- Static browser dashboard for transactions, timeline, agent trace, memory graph, skills, policies, costs, and reports.
 - Natural language `ask` preview with defaults, clarification questions, and approval marking.
 - Context maps and least-context context pack trace.
 - Agent adapters with command/dry-run integration, prompts, transcripts, and role routes.

@@ -2,6 +2,7 @@ target/
 .agent/tx/
 .agent/workspaces/
 .agent/cache/
+.agent/reports/
 .agent/memory/*.jsonl
 .agent/enterprise/audit.jsonl
 .agent/enterprise/compliance-*.md

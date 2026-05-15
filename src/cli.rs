@@ -35,6 +35,10 @@ pub enum Commands {
         no_commit: bool,
     },
     Tui,
+    Dashboard {
+        #[arg(short, long, default_value = ".agent/reports/dashboard")]
+        output: PathBuf,
+    },
     Tx {
         #[command(subcommand)]
         command: TxCommands,

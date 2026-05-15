@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: web dashboard, full AAL grammar, MediaWorkspace, full Research profile, Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: full AAL grammar, MediaWorkspace, full Research profile, Manager/Worker and Tournament topologies, specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -19,8 +19,8 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 4. Problem Statement | Done | State drift, context bloat, transactionality, memory pollution, verification, observability, and cross-agent continuity are addressed by phases 1-14. |
 | 5. Target Users | Partial | Developers, agent builders, content/data/infra, and enterprise flows exist; media/research users are not fully covered. |
 | 6. Core Principles / Laws | Mostly done | All core transaction laws are implemented; domain breadth is partial. |
-| 7. High-Level Architecture | Mostly done | Runtime architecture exists; future visual/web surfaces remain. |
-| 8. AgentHub Layers | Partial | CLI, TUI, VS Code, intent, AgentSpec, AgentIR exist; web dashboard and full AAL grammar are open. |
+| 7. High-Level Architecture | Mostly done | Runtime architecture and local visual surfaces exist; hosted/team surfaces remain future. |
+| 8. AgentHub Layers | Partial | CLI, TUI, Web Dashboard, VS Code, intent, AgentSpec, and AgentIR exist; full AAL grammar is open. |
 | 9. VCM-OS Memory Layer | Mostly done | Staging, committed, failed attempts, compaction, and schemas exist; media/research memory is partial. |
 | 10. Context Pack System | Done | Context pack, trace, least-context policy, maps, and selected map context are implemented. |
 | 11. Agent Lock | Mostly done | `.agent/agent.lock` exists with project, policies, skills, plugins, enterprise, verifiers, and commands; deeper lock governance remains future. |
@@ -64,7 +64,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 
 | Area | Done | Partial / Open |
 |---|---|---|
-| Interfaces | CLI, TUI, VS Code extension | web dashboard |
+| Interfaces | CLI, TUI, Web Dashboard, VS Code extension | hosted/remote dashboard polish |
 | Intent | natural language `ask`, defaults, clarification, approval marking | deeper intent semantics |
 | Language | AgentSpec YAML, AgentIR, DAG compiler | standalone AAL grammar/parser |
 | Memory | committed, staged, failed attempts, compaction | media/research schemas |
@@ -79,7 +79,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Enterprise | RBAC, policy source, audit, secrets check, runners inventory, compliance | real remote runner execution and network policy server |
 | Security | scope/diff guards, redaction, enterprise permissions | command allowlist enforcement and strong sandbox levels |
 | Domains | Code, Infra, Data, Content | Media open, Research partial |
-| Metrics | artifacts include cost/tokens/status | metric dashboards and aggregated KPIs |
+| Metrics | artifacts include cost/tokens/status and Web Dashboard project metrics | aggregated KPI dashboards |
 
 ## Roadmap Phase Matrix
 
