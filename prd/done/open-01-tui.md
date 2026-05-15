@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: TUI implementation commit.
+Closing evidence: `810504f Complete TUI dashboard task`
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
