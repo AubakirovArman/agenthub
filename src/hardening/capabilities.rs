@@ -77,10 +77,13 @@ fn network_policy(project_root: &Path) -> CapabilityStatus {
 }
 
 fn process_tree_kill() -> CapabilityStatus {
+    let supported = cfg!(unix) || cfg!(windows);
     status(
         "process.tree_kill",
-        cfg!(unix),
-        if cfg!(unix) {
+        supported,
+        if cfg!(windows) {
+            "Windows taskkill /T /F termination"
+        } else if cfg!(unix) {
             "Unix process group termination"
         } else {
             "child kill fallback; full tree control needs OS backend"

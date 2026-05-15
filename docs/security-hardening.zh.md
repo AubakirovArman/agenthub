@@ -19,6 +19,8 @@ Report 包含：
 - cgroups v2、container backends、Windows Job Objects、network policy 和 process tree kill support 的 capability detection。
 - unsupported 或 unconfigured features 的 warnings。
 
+在 Windows 上，local timeout cleanup 使用 `taskkill /T /F` 终止 shell process 及其 child process tree。
+
 ## Resource Limits
 
 Default policy file：

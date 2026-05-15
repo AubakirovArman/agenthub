@@ -19,6 +19,8 @@ The report includes:
 - Capability detection for cgroups v2, container backends, Windows Job Objects, network policy, and process tree kill support.
 - Warnings for unsupported or unconfigured features.
 
+On Windows, local timeout cleanup uses `taskkill /T /F` to terminate the shell process and its child process tree.
+
 ## Resource Limits
 
 Default policy file:

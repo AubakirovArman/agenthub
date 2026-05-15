@@ -41,7 +41,16 @@ pub(super) fn terminate_process_tree(child: &mut Child) {
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+pub(super) fn terminate_process_tree(child: &mut Child) {
+    let pid = child.id().to_string();
+    let _ = Command::new("taskkill")
+        .args(["/PID", &pid, "/T", "/F"])
+        .status();
+    let _ = child.kill();
+}
+
+#[cfg(all(not(unix), not(windows)))]
 pub(super) fn terminate_process_tree(child: &mut Child) {
     let _ = child.kill();
 }
@@ -50,7 +59,7 @@ pub fn process_control_label() -> &'static str {
     if cfg!(unix) {
         "unix_process_group_sigterm_sigkill"
     } else if cfg!(windows) {
-        "windows_child_kill_fallback"
+        "windows_taskkill_tree"
     } else {
         "child_kill_fallback"
     }
