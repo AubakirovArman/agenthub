@@ -31,5 +31,5 @@ Improve local and remote runner safety with resource-limit metadata, cancellatio
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `6dd256d`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test command_runner::tests`; `cargo test successful_transaction_commits_and_promotes_memory`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
