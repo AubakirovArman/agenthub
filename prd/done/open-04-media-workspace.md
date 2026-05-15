@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: MediaWorkspace implementation commit.
+Closing evidence: `d3f2071 Complete MediaWorkspace task`
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
