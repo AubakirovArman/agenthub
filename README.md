@@ -87,6 +87,7 @@ AgentHub is designed for AI work that can change a real project. Each transactio
 - diff guard and smart-sync decisions;
 - verifier output and failure fingerprints;
 - memory promotion only after committed success;
+- transaction history indexed in `.agent/cache/indexes/transactions.sqlite3` for fast local status/dashboard reads;
 - human-readable `report.md` and dashboard artifacts.
 
 If a task fails before commit, AgentHub rolls back the isolated worktree and keeps failed attempts as warning-only memory. If a transaction blocks on human input, `tx resolve`, `tx retry`, and supported `tx resume` flows keep the original artifacts inspectable.
@@ -131,6 +132,7 @@ Start here:
 - [How it works](docs/how-it-works.en.md)
 - [Testing Strategy](docs/testing-strategy.en.md)
 - [Dogfooding](docs/dogfooding.en.md)
+- [Analytics History](docs/analytics-history.en.md)
 - [Interactive Shell](docs/interactive-shell.en.md)
 - [Natural Language](docs/natural-language.en.md)
 - [AAL](docs/aal.en.md)

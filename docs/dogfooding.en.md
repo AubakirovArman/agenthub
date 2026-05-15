@@ -26,6 +26,12 @@ Run the full fixture suite when you want broader coverage:
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 ```
 
+Run repeated local transactions to test the SQLite transaction index and status/dashboard scalability:
+
+```bash
+AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
+```
+
 Use an installed binary instead of building from source:
 
 ```bash
@@ -39,6 +45,7 @@ A useful dogfood run should leave inspectable artifacts:
 - `.agent/tx/<tx-id>/report.md` explains the transaction result.
 - `.agent/tx/<tx-id>/effects.jsonl` shows planned, applied, verified, rollback, and non-rollbackable effects.
 - `.agent/tx/<tx-id>/journal.jsonl` shows state transitions and heartbeat events.
+- `.agent/cache/indexes/transactions.sqlite3` exists after repeated runs and backs fast `tx status` reads.
 - `.agent/reports/dashboard/index.html` opens a local dashboard.
 - committed memory changes appear only after committed transactions.
 

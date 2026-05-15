@@ -8,8 +8,6 @@ use anyhow::{Context, Result};
 
 use defaults::*;
 
-use crate::journal::read_latest_status;
-
 pub const AGENT_DIR: &str = ".agent";
 
 #[derive(Debug, Clone)]
@@ -156,30 +154,15 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
 }
 
 pub fn list_transactions(root: &Path) -> Result<Vec<TransactionRow>> {
-    let paths = AgentPaths::new(root);
-    let mut rows = Vec::new();
-    if !paths.tx.exists() {
-        return Ok(rows);
-    }
-
-    for entry in fs::read_dir(&paths.tx).with_context(|| format!("read {}", paths.tx.display()))? {
-        let entry = entry?;
-        if !entry.file_type()?.is_dir() {
-            continue;
-        }
-        let id = entry.file_name().to_string_lossy().to_string();
-        let tx_dir = entry.path();
-        let status = read_latest_status(&tx_dir.join("journal.jsonl"))?
-            .unwrap_or_else(|| "UNKNOWN".to_string());
-        rows.push(TransactionRow {
-            id,
-            status,
-            report_path: tx_dir.join("report.md"),
-        });
-    }
-
-    rows.sort_by(|a, b| a.id.cmp(&b.id));
-    Ok(rows)
+    crate::tx_index::list_rows(root).map(|rows| {
+        rows.into_iter()
+            .map(|row| TransactionRow {
+                id: row.id,
+                status: row.status,
+                report_path: row.report_path,
+            })
+            .collect()
+    })
 }
 
 pub fn read_report(root: &Path, tx_id: &str) -> Result<String> {

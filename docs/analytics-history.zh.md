@@ -9,6 +9,7 @@ Analytics History 将 transaction trends 持久化到 `.agent/metrics/`，让 re
 - `.agent/metrics/analytics_history.jsonl`: append-only transaction metric records。
 - `.agent/metrics/analytics_summary.json`: 当前 aggregate rates 和 grouped metrics。
 - `.agent/metrics/analytics_history.csv`: 用于 spreadsheets 或 BI tools 的 CSV export。
+- `.agent/cache/indexes/transactions.sqlite3`: best-effort local SQLite index，用于 transaction status、report paths 以及快速 dashboard/TUI/status reads。
 
 ## 记录字段
 
@@ -23,3 +24,5 @@ cat .agent/metrics/analytics_history.csv
 ```
 
 Browser dashboard 在 `metrics.history` 中包含 summary，并在 Metrics panel 中渲染 runs、rollback rate、repair rate 和 human-block rate。
+
+SQLite index 在缺失或 stale 时会从 `.agent/tx/<tx-id>/` directories 重建。它只是 acceleration cache，不是 source of truth；reports、journals、WAL、effects 和 analytics JSONL 仍然是 authoritative。

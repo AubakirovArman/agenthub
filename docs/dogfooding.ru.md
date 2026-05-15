@@ -26,6 +26,12 @@ dashboard smoke
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 ```
 
+Для repeated local transactions и проверки SQLite transaction index/status/dashboard scalability:
+
+```bash
+AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
+```
+
 Использовать установленный `agenthub` вместо сборки из исходников:
 
 ```bash
@@ -39,6 +45,7 @@ AGENTHUB_BIN="$(command -v agenthub)" scripts/dogfood.sh
 - `.agent/tx/<tx-id>/report.md` объясняет результат транзакции.
 - `.agent/tx/<tx-id>/effects.jsonl` показывает planned, applied, verified, rollback и non-rollbackable effects.
 - `.agent/tx/<tx-id>/journal.jsonl` показывает переходы состояний и heartbeat events.
+- `.agent/cache/indexes/transactions.sqlite3` exists после repeated runs и ускоряет `tx status`.
 - `.agent/reports/dashboard/index.html` открывает локальный dashboard.
 - committed memory меняется только после committed transactions.
 

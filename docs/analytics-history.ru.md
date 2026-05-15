@@ -9,6 +9,7 @@ Analytics History сохраняет тренды транзакций в `.agen
 - `.agent/metrics/analytics_history.jsonl`: append-only записи метрик транзакций.
 - `.agent/metrics/analytics_summary.json`: текущие агрегированные rates и grouped metrics.
 - `.agent/metrics/analytics_history.csv`: CSV export для spreadsheet или BI tools.
+- `.agent/cache/indexes/transactions.sqlite3`: best-effort local SQLite index для transaction status, report paths и быстрых dashboard/TUI/status reads.
 
 ## Что записывается
 
@@ -23,3 +24,5 @@ cat .agent/metrics/analytics_history.csv
 ```
 
 Browser dashboard включает summary в `metrics.history` и показывает runs, rollback rate, repair rate и human-block rate в Metrics panel.
+
+SQLite index пересобирается из `.agent/tx/<tx-id>/`, если отсутствует или устарел. Это acceleration cache, а не source of truth; authoritative остаются reports, journals, WAL, effects и analytics JSONL.

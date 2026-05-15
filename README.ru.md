@@ -87,6 +87,7 @@ AgentHub рассчитан на AI work, который меняет реаль
 - diff guard и smart-sync decisions;
 - verifier output и failure fingerprints;
 - memory promotion только после committed success;
+- transaction history индексируется в `.agent/cache/indexes/transactions.sqlite3` для быстрых local status/dashboard reads;
 - human-readable `report.md` и dashboard artifacts.
 
 Если задача падает до commit, AgentHub откатывает isolated worktree и сохраняет failed attempts как warning-only memory. Если transaction блокируется на human input, `tx resolve`, `tx retry` и supported `tx resume` сохраняют исходные artifacts inspectable.
@@ -131,6 +132,7 @@ AgentHub сейчас installable local developer preview, а не hosted team p
 - [How it works](docs/how-it-works.ru.md)
 - [Testing Strategy](docs/testing-strategy.ru.md)
 - [Dogfooding](docs/dogfooding.ru.md)
+- [Analytics History](docs/analytics-history.ru.md)
 - [Interactive Shell](docs/interactive-shell.ru.md)
 - [Natural Language](docs/natural-language.ru.md)
 - [AAL](docs/aal.ru.md)

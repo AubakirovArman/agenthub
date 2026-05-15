@@ -9,6 +9,7 @@ Analytics History persists transaction trends under `.agent/metrics/` so reports
 - `.agent/metrics/analytics_history.jsonl`: append-only transaction metric records.
 - `.agent/metrics/analytics_summary.json`: current aggregate rates and grouped metrics.
 - `.agent/metrics/analytics_history.csv`: CSV export for spreadsheets or BI tools.
+- `.agent/cache/indexes/transactions.sqlite3`: best-effort local SQLite index for transaction status, report paths, and fast dashboard/TUI/status reads.
 
 ## Recorded Fields
 
@@ -23,3 +24,5 @@ cat .agent/metrics/analytics_history.csv
 ```
 
 The browser dashboard includes the summary under `metrics.history` and renders runs, rollback rate, repair rate, and human-block rate in the Metrics panel.
+
+The SQLite index is rebuilt from `.agent/tx/<tx-id>/` directories when missing or stale. It is an acceleration cache, not the source of truth; reports, journals, WAL, effects, and analytics JSONL remain authoritative.

@@ -5,7 +5,9 @@ mod execution;
 mod failure;
 mod guards;
 mod id;
+mod index;
 mod orchestration;
+mod outcome;
 mod policy;
 mod prepare;
 mod review;
@@ -15,7 +17,7 @@ mod status;
 mod verify;
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::{Context, Result};
 use chrono::Utc;
@@ -38,14 +40,8 @@ use crate::smart_sync::SmartSyncDecision;
 use crate::spec::AgentSpec;
 use crate::verifier::VerifierResult;
 use crate::workspace::{PreparedWorkspace, WorkspaceRuntimeMetadata};
+pub use outcome::TransactionOutcome;
 pub use status::TransactionStatus;
-
-#[derive(Debug, Clone)]
-pub struct TransactionOutcome {
-    pub tx_id: String,
-    pub status: TransactionStatus,
-    pub report_path: PathBuf,
-}
 
 #[derive(Default)]
 pub(super) struct RunState {
@@ -191,6 +187,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     }
     .write_markdown(&report_path)?;
     journal.append("CLOSED", "transaction closed")?;
+    index::update(project_root, &tx_id, &tx_dir)?;
 
     Ok(TransactionOutcome {
         tx_id,

@@ -26,6 +26,12 @@ dashboard smoke
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 ```
 
+Repeated local transactions іске қосып, SQLite transaction index және status/dashboard scalability тексеру:
+
+```bash
+AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
+```
+
 Source build орнына орнатылған `agenthub` қолдану:
 
 ```bash
@@ -39,6 +45,7 @@ AGENTHUB_BIN="$(command -v agenthub)" scripts/dogfood.sh
 - `.agent/tx/<tx-id>/report.md` transaction result түсіндіреді.
 - `.agent/tx/<tx-id>/effects.jsonl` planned, applied, verified, rollback және non-rollbackable effects көрсетеді.
 - `.agent/tx/<tx-id>/journal.jsonl` state transitions және heartbeat events көрсетеді.
+- `.agent/cache/indexes/transactions.sqlite3` repeated runs кейін бар болады және fast `tx status` reads үшін қолданылады.
 - `.agent/reports/dashboard/index.html` local dashboard ашады.
 - committed memory тек committed transactions кейін өзгереді.
 
