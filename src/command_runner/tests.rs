@@ -104,6 +104,44 @@ fn logged_command_writes_files_and_keeps_bounded_tail() -> Result<()> {
 }
 
 #[test]
+fn logged_command_keeps_bounded_stderr_tail() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let result = run_shell_with_sandbox_logged(
+        "i=0; while [ $i -lt 70000 ]; do printf e >&2; i=$((i + 1)); done",
+        dir.path(),
+        Duration::from_secs(5),
+        CommandSandbox::default(),
+        &dir.path().join("logs"),
+        "large-stderr",
+    )?;
+
+    assert!(result.success);
+    assert!(result.stderr_truncated);
+    assert_eq!(result.stderr_bytes, 70000);
+    assert!(result.stderr.len() <= super::output::TAIL_LIMIT);
+    Ok(())
+}
+
+#[test]
+fn logged_infinite_output_times_out_with_bounded_tail() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let result = run_shell_with_sandbox_logged(
+        "while :; do printf x; done",
+        dir.path(),
+        Duration::from_millis(50),
+        CommandSandbox::default(),
+        &dir.path().join("logs"),
+        "infinite",
+    )?;
+
+    assert!(result.timed_out);
+    assert!(!result.success);
+    assert!(result.stdout_bytes > 0);
+    assert!(result.stdout.len() <= super::output::TAIL_LIMIT);
+    Ok(())
+}
+
+#[test]
 fn logged_command_writes_heartbeat() -> Result<()> {
     let dir = tempfile::tempdir()?;
     std::env::set_var("AGENTHUB_HEARTBEAT_INTERVAL_MS", "100");
