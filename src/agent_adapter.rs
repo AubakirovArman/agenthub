@@ -162,7 +162,7 @@ fn apply_routing_policy(spec: &AgentSpec, route: &mut AgentRoute) {
 
 fn default_template(adapter: &str) -> Option<String> {
     match adapter {
-        "codex" => Some("codex exec - < {prompt}".to_string()),
+        "codex" => Some("codex exec --sandbox workspace-write - < {prompt}".to_string()),
         "kimi" => Some("kimi --prompt-file {prompt}".to_string()),
         "gemini" => Some("gemini --prompt-file {prompt}".to_string()),
         _ => None,

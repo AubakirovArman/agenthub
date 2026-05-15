@@ -31,7 +31,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             id: "codex",
             binary: Some("codex"),
             endpoint_env: None,
-            template: Some("codex exec - < {prompt}"),
+            template: Some("codex exec --sandbox workspace-write - < {prompt}"),
             note: "install the Codex CLI and make `codex` available on PATH",
         },
         ProviderInfo {

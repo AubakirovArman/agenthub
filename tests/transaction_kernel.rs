@@ -156,7 +156,7 @@ agent:
   adapter: codex
   model: test-model
   dry_run: true
-  command_template: "codex exec - < {prompt}"
+  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 workspace:
   type: code.git
   isolation: git_worktree

@@ -114,7 +114,7 @@ agent:
   adapter: codex
   model: test-model
   dry_run: true
-  command_template: "codex exec - < {prompt}"
+  command_template: "codex exec --sandbox workspace-write - < {prompt}"
 ```
 
 运行 dry-run 示例：
