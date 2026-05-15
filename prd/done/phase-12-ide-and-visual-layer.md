@@ -4,7 +4,7 @@ Status: Done
 
 Existing evidence: `58a68b8 Add VS Code IDE surface`
 
-Closing evidence: Phase 12 implementation commit.
+Closing evidence: `d3517eb`.
 
 ## Deliverables
 
