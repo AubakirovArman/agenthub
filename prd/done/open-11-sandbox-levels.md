@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: sandbox levels implementation commit pending.
+Closing evidence: implementation commit `e09941b`; verified with `cargo fmt -- --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test sandbox`, `scripts/check-module-size.sh 200`, `git diff --check`, and `npm run check` in `editors/vscode/`.
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
