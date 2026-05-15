@@ -102,3 +102,51 @@ fn logged_command_writes_files_and_keeps_bounded_tail() -> Result<()> {
     assert!(result.stdout.len() <= super::output::TAIL_LIMIT);
     Ok(())
 }
+
+#[test]
+fn logged_command_writes_heartbeat() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    std::env::set_var("AGENTHUB_HEARTBEAT_INTERVAL_MS", "100");
+    let result = run_shell_with_sandbox_logged(
+        "sleep 0.35",
+        dir.path(),
+        Duration::from_secs(2),
+        CommandSandbox::default(),
+        &dir.path().join("logs"),
+        "heartbeat",
+    )?;
+    std::env::remove_var("AGENTHUB_HEARTBEAT_INTERVAL_MS");
+
+    assert!(result.success);
+    let heartbeat = std::fs::read_to_string(dir.path().join("heartbeat.jsonl"))?;
+    assert!(heartbeat.contains("\"event\":\"HEARTBEAT\""));
+    assert!(heartbeat.contains("\"node\":\"heartbeat\""));
+    Ok(())
+}
+
+#[test]
+fn cancel_request_stops_running_logged_command() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let tx_dir = dir.path().to_path_buf();
+    let cancel_dir = tx_dir.clone();
+    let canceller = thread::spawn(move || {
+        thread::sleep(Duration::from_millis(150));
+        write_cancel_request(&cancel_dir, "test", "stop running command").unwrap();
+    });
+
+    let error = run_shell_with_sandbox_logged(
+        "sleep 5",
+        &tx_dir,
+        Duration::from_secs(10),
+        CommandSandbox::default(),
+        &tx_dir.join("logs"),
+        "cancel",
+    )
+    .expect_err("command should be cancelled");
+    canceller.join().expect("canceller thread");
+
+    assert!(error.to_string().contains("transaction cancelled"));
+    let status = std::fs::read_to_string(tx_dir.join("cancel_status.json"))?;
+    assert!(status.contains("stop running command"));
+    Ok(())
+}

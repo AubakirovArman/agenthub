@@ -21,4 +21,4 @@ agenthub tx watch tx-20260515123000-abcd1234 --once
 [done] COMMITTED transaction committed
 ```
 
-Journal `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN` немесе `CLOSED` күйіне жеткенде `watch` өзі аяқталады.
+Journal `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN`, `CANCELED` немесе `CLOSED` күйіне жеткенде `watch` өзі аяқталады. Ұзақ commands heartbeat records-ты `.agent/tx/<tx-id>/heartbeat.jsonl` ішіне де жазады.

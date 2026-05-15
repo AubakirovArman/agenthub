@@ -77,7 +77,7 @@ fn format_event(event: &JournalEvent, latest: bool, latest_is_final: bool) -> St
 fn is_final(state: &str) -> bool {
     matches!(
         state,
-        "COMMITTED" | "ROLLED_BACK" | "BLOCKED_ON_HUMAN" | "CLOSED"
+        "COMMITTED" | "ROLLED_BACK" | "BLOCKED_ON_HUMAN" | "CANCELED" | "CLOSED"
     )
 }
 

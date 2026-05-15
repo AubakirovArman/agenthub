@@ -1,12 +1,12 @@
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, Context, Result};
 
 use super::metadata::{metadata_for, usage};
+use super::monitor;
 use super::process::{configure_process_group, terminate_process_tree};
 use super::{output, remote, sandbox, CommandResult, CommandSandbox};
 
@@ -57,6 +57,9 @@ fn run_shell_inner(
         return remote::run(command, cwd, timeout, sandbox.level, runner);
     }
     let started = Instant::now();
+    let tx_dir = log_dir
+        .and_then(|path| path.parent())
+        .map(Path::to_path_buf);
     let mut process = Command::new("sh");
     process
         .arg("-lc")
@@ -64,6 +67,10 @@ fn run_shell_inner(
         .current_dir(cwd)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    if let Some(tx_dir) = &tx_dir {
+        process.env("AGENTHUB_TX_DIR", tx_dir);
+        process.env("AGENTHUB_COMMAND_NODE", prefix);
+    }
     let log_paths = configure_log_files(&mut process, log_dir, prefix)?;
     sandbox::configure(&mut process, cwd, &sandbox)?;
     configure_process_group(&mut process);
@@ -72,18 +79,14 @@ fn run_shell_inner(
         .spawn()
         .with_context(|| format!("spawn command `{command}` in {}", cwd.display()))?;
 
-    let mut timed_out = false;
-    loop {
-        if child.try_wait()?.is_some() {
-            break;
-        }
-        if started.elapsed() >= timeout {
-            timed_out = true;
-            terminate_process_tree(&mut child);
-            break;
-        }
-        thread::sleep(Duration::from_millis(100));
-    }
+    let wait = monitor::wait(
+        &mut child,
+        started,
+        timeout,
+        tx_dir.as_deref(),
+        prefix,
+        log_paths.as_ref(),
+    )?;
 
     let (exit_code, success_status, output) = if log_paths.is_some() {
         let status = child
@@ -97,20 +100,23 @@ fn run_shell_inner(
         (output.status.code(), output.status.success(), Some(output))
     };
     let duration_ms = started.elapsed().as_millis();
-    let success = success_status && !timed_out;
+    let success = success_status && !wait.timed_out;
     let runner_metadata = metadata_for(sandbox.level, None, timeout);
     let output = match (log_paths, output) {
         (Some((stdout, stderr)), _) => output::from_files(&stdout, &stderr)?,
         (None, Some(output)) => output::from_bytes(&output.stdout, &output.stderr),
         (None, None) => output::from_bytes(&[], &[]),
     };
+    if let Some(reason) = wait.cancelled_reason {
+        return Err(anyhow!("transaction cancelled: {reason}"));
+    }
 
     Ok(CommandResult {
         command: command.to_string(),
         cwd: cwd.display().to_string(),
         exit_code,
         success,
-        timed_out,
+        timed_out: wait.timed_out,
         duration_ms,
         stdout: output.stdout,
         stderr: output.stderr,
@@ -125,7 +131,7 @@ fn run_shell_inner(
         sandbox_level: sandbox.level,
         remote: false,
         runner: None,
-        resource_usage: usage(duration_ms, exit_code, timed_out),
+        resource_usage: usage(duration_ms, exit_code, wait.timed_out),
         runner_metadata,
     })
 }

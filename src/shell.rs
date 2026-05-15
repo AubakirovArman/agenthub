@@ -42,6 +42,7 @@ fn handle(root: &Path, command: ShellCommand, current_tx: &mut Option<String>) -
             *current_tx = Some(tx_id);
         }
         ShellCommand::Watch(tx_id) => watch_tx(root, &require_tx(tx_id, current_tx)?)?,
+        ShellCommand::Cancel(tx_id) => cancel_tx(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Report(tx_id) => print_report(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Effects(tx_id) => print_effects(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Ask(request) => {
@@ -73,6 +74,7 @@ fn print_help() {
     println!("sessions                     list transactions");
     println!("open <tx-id>                 open transaction report");
     println!("watch [tx-id]                follow live transaction journal");
+    println!("cancel [tx-id]               request transaction cancellation");
     println!("report [tx-id]               print report");
     println!("effects [tx-id]              print effect ledger");
     println!("ask <request>                write a draft spec");
@@ -114,6 +116,14 @@ fn watch_tx(root: &Path, tx_id: &str) -> Result<()> {
             once: false,
         },
     )
+}
+
+fn cancel_tx(root: &Path, tx_id: &str) -> Result<()> {
+    enterprise::authorize(root, "transaction.run")?;
+    let actor = std::env::var("AGENTHUB_ACTOR").unwrap_or_else(|_| "local".to_string());
+    let report = crate::tx_control::cancel(root, tx_id, &actor, "requested from shell")?;
+    println!("cancel_requested {} {}", report.tx_id, report.reason);
+    Ok(())
 }
 
 fn run_request(

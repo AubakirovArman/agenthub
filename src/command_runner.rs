@@ -1,6 +1,7 @@
 mod cancel;
 mod local;
 mod metadata;
+mod monitor;
 mod output;
 mod process;
 mod remote;

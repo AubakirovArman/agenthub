@@ -21,4 +21,4 @@ Output is intentionally compact:
 [done] COMMITTED transaction committed
 ```
 
-`watch` exits automatically when the journal reaches `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN`, or `CLOSED`.
+`watch` exits automatically when the journal reaches `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN`, `CANCELED`, or `CLOSED`. Long-running commands also write heartbeat records to `.agent/tx/<tx-id>/heartbeat.jsonl`.

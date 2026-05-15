@@ -41,6 +41,15 @@ pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
                 tx_watch::WatchOptions { interval_ms, once },
             )?;
         }
+        TxCommands::Cancel { tx_id, reason } => {
+            enterprise::authorize(project_root, "transaction.run")?;
+            let actor = std::env::var("AGENTHUB_ACTOR").unwrap_or_else(|_| "local".to_string());
+            let report = tx_control::cancel(project_root, &tx_id, &actor, &reason)?;
+            println!(
+                "cancel_requested\t{}\t{}\t{}",
+                report.tx_id, report.requested_by, report.reason
+            );
+        }
         TxCommands::Resolve { tx_id, note } => {
             enterprise::authorize(project_root, "transaction.run")?;
             let record = tx_control::resolve(project_root, &tx_id, &note)?;

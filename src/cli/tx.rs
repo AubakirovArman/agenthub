@@ -18,6 +18,12 @@ pub enum TxCommands {
         #[arg(long)]
         once: bool,
     },
+    Cancel {
+        tx_id: String,
+
+        #[arg(long, default_value = "requested by user")]
+        reason: String,
+    },
     Resolve {
         tx_id: String,
         #[arg(long)]

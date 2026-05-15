@@ -11,6 +11,7 @@ Hardened Runner AgentHub командаларды local немесе remote runn
 ```text
 .agent/tx/<tx-id>/runner.json
 .agent/tx/<tx-id>/cancel_status.json
+.agent/tx/<tx-id>/heartbeat.jsonl
 ```
 
 `execution.json`, `review.json`, `repair.json` және `verifier.json` ішіндегі commands `runner_metadata` және `resource_usage` сақтайды.
@@ -21,7 +22,13 @@ Hardened Runner AgentHub командаларды local немесе remote runn
 
 ## Cancellation
 
-Келесі command басталмай тұрып cancellation сұрау үшін осы файлды жаса:
+Cancellation сұрау үшін CLI қолдан:
+
+```bash
+agenthub tx cancel tx-20260515123000-abcd1234 --reason "stop before deploy step"
+```
+
+Local runner command орындалып жатқанда cancel marker тексереді, process tree тоқтатады, worktree rollback жасайды, `CANCELED` жазады және memory promote жасамайды. Бұл файлды тікелей де жасауға болады:
 
 ```text
 .agent/tx/<tx-id>/cancel_request.json
@@ -37,3 +44,13 @@ Hardened Runner AgentHub командаларды local немесе remote runn
 ```
 
 AgentHub нәтижені `cancel_status.json` ішіне жазады.
+
+## Heartbeat
+
+Ұзақ running logged commands heartbeat records қосып жазады:
+
+```json
+{"event":"HEARTBEAT","node":"verifier-0","elapsed_sec":30,"last_output_sec":5}
+```
+
+Әдепкі интервал 30 секунд. Тесттерде оны `AGENTHUB_HEARTBEAT_INTERVAL_MS` арқылы азайтуға болады.

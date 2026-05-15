@@ -18,6 +18,7 @@ init                         初始化 .agent
 sessions                     列出最近事务
 open <tx-id>                 打开事务报告并设为当前事务
 watch [tx-id]                跟随实时 transaction journal
+cancel [tx-id]               请求取消 transaction
 report [tx-id]               打印报告，默认使用当前事务
 effects [tx-id]              打印 effect ledger
 ask <request>                写入 draft AgentSpec

@@ -18,6 +18,7 @@ init                         .agent инициализациялау
 sessions                     соңғы transaction тізімі
 open <tx-id>                 report ашу және tx-ті ағымдағы ету
 watch [tx-id]                transaction journal-ды live бақылау
+cancel [tx-id]               transaction cancellation сұрау
 report [tx-id]               report шығару, әдепкісі ағымдағы tx
 effects [tx-id]              effect ledger шығару
 ask <request>                draft AgentSpec жазу

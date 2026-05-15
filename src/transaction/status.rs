@@ -4,6 +4,7 @@ pub enum TransactionStatus {
     RolledBack,
     BlockedOnHuman,
     Noop,
+    Canceled,
 }
 
 impl TransactionStatus {
@@ -13,6 +14,7 @@ impl TransactionStatus {
             Self::RolledBack => "ROLLED_BACK",
             Self::BlockedOnHuman => "BLOCKED_ON_HUMAN",
             Self::Noop => "NOOP",
+            Self::Canceled => "CANCELED",
         }
     }
 }

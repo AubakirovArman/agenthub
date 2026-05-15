@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::agent_dir::AgentPaths;
+use crate::command_runner;
 use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::spec::AgentSpec;
@@ -37,6 +38,32 @@ pub struct ResumeReport {
     pub resumed_tx_id: String,
     pub status: String,
     pub report_path: PathBuf,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CancelReport {
+    pub tx_id: String,
+    pub requested_at: DateTime<Utc>,
+    pub requested_by: String,
+    pub reason: String,
+}
+
+pub fn cancel(root: &Path, tx_id: &str, requested_by: &str, reason: &str) -> Result<CancelReport> {
+    let tx_dir = existing_tx_dir(root, tx_id)?;
+    command_runner::write_cancel_request(&tx_dir, requested_by, reason)?;
+    let report = CancelReport {
+        tx_id: tx_id.to_string(),
+        requested_at: Utc::now(),
+        requested_by: requested_by.to_string(),
+        reason: reason.to_string(),
+    };
+    fs::write(
+        tx_dir.join("cancel.json"),
+        serde_json::to_string_pretty(&report)?,
+    )?;
+    journal(tx_id, &tx_dir).append_data("CANCEL_REQUESTED", "cancel requested", json!(report))?;
+    EffectLedger::for_tx_dir(&tx_dir).record_control("cancel", "requested", json!(report))?;
+    Ok(report)
 }
 
 pub fn resolve(root: &Path, tx_id: &str, note: &str) -> Result<ResolutionRecord> {

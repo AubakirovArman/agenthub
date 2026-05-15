@@ -21,4 +21,4 @@ agenthub tx watch tx-20260515123000-abcd1234 --once
 [done] COMMITTED transaction committed
 ```
 
-`watch` сам завершается, когда journal доходит до `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN` или `CLOSED`.
+`watch` сам завершается, когда journal доходит до `COMMITTED`, `ROLLED_BACK`, `BLOCKED_ON_HUMAN`, `CANCELED` или `CLOSED`. Долгие commands также пишут heartbeat records в `.agent/tx/<tx-id>/heartbeat.jsonl`.

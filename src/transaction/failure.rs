@@ -35,6 +35,9 @@ pub(super) fn handle_failure(
         )?;
         return Ok(());
     }
+    if is_cancelled(&error_text) {
+        return handle_cancelled(tx_id, tx_dir, journal, &error_text, state);
+    }
 
     journal.append_data(
         "ROLLING_BACK",
@@ -56,6 +59,39 @@ pub(super) fn handle_failure(
     state.error_fingerprint = Some(fingerprint.fingerprint);
     state.status = Some(TransactionStatus::RolledBack);
     journal.append("ROLLED_BACK", "transaction rolled back")
+}
+
+fn handle_cancelled(
+    tx_id: &str,
+    tx_dir: &Path,
+    journal: &Journal,
+    error_text: &str,
+    state: &mut RunState,
+) -> Result<()> {
+    journal.append_data(
+        "ROLLING_BACK",
+        "transaction cancelled; rollback requested",
+        json!({ "error": error_text }),
+    )?;
+    let ledger = EffectLedger::for_tx_dir(tx_dir);
+    let changed = changed_files(state);
+    ledger.record_rollback_pending_files("cancel", &changed)?;
+    if let Some(prepared) = &state.prepared {
+        let runtime = workspace::runtime_for_prepared(prepared);
+        let _ = runtime.rollback(prepared);
+    }
+    rollback::write_report(tx_dir, tx_id, &changed, "cancelled")?;
+    ledger.record_rolled_back_files("cancel", &changed)?;
+    state.status = Some(TransactionStatus::Canceled);
+    journal.append_data(
+        "CANCELED",
+        "transaction cancelled",
+        json!({ "error": error_text }),
+    )
+}
+
+fn is_cancelled(error_text: &str) -> bool {
+    error_text.starts_with("transaction cancelled:")
 }
 
 fn changed_files(state: &RunState) -> Vec<String> {

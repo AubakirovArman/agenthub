@@ -2,7 +2,7 @@ use std::fs;
 
 use anyhow::Result;
 
-use super::{resolve, retry};
+use super::{cancel, resolve, retry};
 
 #[test]
 fn resolve_writes_note_journal_wal_and_effect() -> Result<()> {
@@ -42,6 +42,27 @@ fn retry_creates_controlled_plan() -> Result<()> {
     assert!(
         fs::read_to_string(dir.path().join(".agent/tx/tx-test/effects.jsonl"))?
             .contains("control:retry")
+    );
+    Ok(())
+}
+
+#[test]
+fn cancel_writes_request_journal_and_effect() -> Result<()> {
+    let dir = fixture_tx()?;
+    let report = cancel(dir.path(), "tx-test", "tester", "stop now")?;
+
+    assert_eq!(report.reason, "stop now");
+    assert!(dir
+        .path()
+        .join(".agent/tx/tx-test/cancel_request.json")
+        .exists());
+    assert!(
+        fs::read_to_string(dir.path().join(".agent/tx/tx-test/journal.jsonl"))?
+            .contains("CANCEL_REQUESTED")
+    );
+    assert!(
+        fs::read_to_string(dir.path().join(".agent/tx/tx-test/effects.jsonl"))?
+            .contains("control:cancel")
     );
     Ok(())
 }

@@ -18,6 +18,7 @@ init                         инициализировать .agent
 sessions                     список последних транзакций
 open <tx-id>                 открыть report и сделать tx текущей
 watch [tx-id]                следить за live journal транзакции
+cancel [tx-id]               запросить cancellation транзакции
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
 ask <request>                записать draft AgentSpec

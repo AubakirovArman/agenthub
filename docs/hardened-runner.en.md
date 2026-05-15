@@ -11,6 +11,7 @@ Every transaction writes:
 ```text
 .agent/tx/<tx-id>/runner.json
 .agent/tx/<tx-id>/cancel_status.json
+.agent/tx/<tx-id>/heartbeat.jsonl
 ```
 
 Commands in `execution.json`, `review.json`, `repair.json`, and `verifier.json` also include `runner_metadata` and `resource_usage`.
@@ -21,7 +22,13 @@ Commands in `execution.json`, `review.json`, `repair.json`, and `verifier.json` 
 
 ## Cancellation
 
-Create this file to request cancellation before the next command starts:
+Use the CLI to request cancellation:
+
+```bash
+agenthub tx cancel tx-20260515123000-abcd1234 --reason "stop before deploy step"
+```
+
+The local runner checks the cancel marker while a command is running, terminates the process tree, rolls back the worktree, writes `CANCELED`, and does not promote memory. You can also create this file directly:
 
 ```text
 .agent/tx/<tx-id>/cancel_request.json
@@ -37,3 +44,13 @@ Example:
 ```
 
 AgentHub writes the result to `cancel_status.json`.
+
+## Heartbeat
+
+Long-running logged commands append heartbeat records:
+
+```json
+{"event":"HEARTBEAT","node":"verifier-0","elapsed_sec":30,"last_output_sec":5}
+```
+
+The heartbeat interval defaults to 30 seconds and can be lowered in tests with `AGENTHUB_HEARTBEAT_INTERVAL_MS`.
