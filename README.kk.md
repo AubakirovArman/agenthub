@@ -10,6 +10,8 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.kk.md)
 
 Verifier docs: [Verifier Integrations](docs/verifier-integrations.kk.md)
 
+Governance docs: [Governance v2](docs/governance-v2.kk.md)
+
 ## Қазіргі күйі
 
 Қазір PRD-дегі негізгі қабаттар іске асырылды:
@@ -37,6 +39,7 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.kk.md)
 - transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs және reports көрсететін static browser dashboard;
 - transaction, memory, AgentSpec, approval және DAG көруге арналған VS Code extension;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log және compliance reports.
+- governance v2 lock layers, drift detection, policy bundles, approval history және compliance summaries.
 - PRD tracker `prd/done` және `prd/todo` болып бөлінді.
 
 ## Орнату және жинау

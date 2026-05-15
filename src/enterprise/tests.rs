@@ -4,7 +4,8 @@ use anyhow::Result;
 use serde_json::json;
 
 use super::{
-    authorize, check_secret, list_audit, load_policy_with_source, record_event, route_model,
+    approval_summary, authorize, check_secret, evaluate_governance, generate_compliance_report,
+    list_audit, load_policy_with_source, record_approval, record_event, route_model,
     runner_inventory, PolicyServer, PolicyServerConfig,
 };
 use crate::agent_dir::init_project;
@@ -105,6 +106,56 @@ fn http_policy_server_can_supply_central_policy() -> Result<()> {
     assert_eq!(source.path, url);
     assert_eq!(policy.enterprise.default_role, "auditor");
     assert_eq!(served.requests, 1);
+    Ok(())
+}
+
+#[test]
+fn governance_lock_precedence_detects_local_override_drift() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    init_project(dir.path(), false)?;
+    fs::create_dir_all(dir.path().join(".agent/governance"))?;
+    fs::write(
+        dir.path().join(".agent/governance/organization.lock"),
+        "lock:\n  allow_local_override: false\npolicy_bundles:\n  - id: enterprise.secure-code.v1\n    rules:\n      - no_raw_traces\n",
+    )?;
+    fs::write(
+        dir.path().join(".agent/governance/local.override.lock"),
+        "policy_bundles:\n  - id: local.debug.v1\n",
+    )?;
+
+    let report = evaluate_governance(dir.path())?;
+
+    assert!(report
+        .effective_bundles
+        .iter()
+        .any(|bundle| bundle.id == "enterprise.secure-code.v1"));
+    assert!(!report
+        .effective_bundles
+        .iter()
+        .any(|bundle| bundle.id == "local.debug.v1"));
+    assert_eq!(report.drift.len(), 1);
+    Ok(())
+}
+
+#[test]
+fn approvals_are_auditable_and_in_compliance_report() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    init_project(dir.path(), false)?;
+
+    record_approval(
+        dir.path(),
+        "alice",
+        "package_install",
+        "left-pad",
+        "needs dependency",
+    )?;
+    let summary = approval_summary(dir.path())?;
+    let compliance = generate_compliance_report(dir.path(), None)?;
+    let text = fs::read_to_string(compliance.path)?;
+
+    assert_eq!(summary.total, 1);
+    assert!(text.contains("## Governance"));
+    assert!(text.contains("- approvals: 1"));
     Ok(())
 }
 

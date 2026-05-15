@@ -10,6 +10,8 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.en.md)
 
 Verifier docs: [Verifier Integrations](docs/verifier-integrations.en.md)
 
+Governance docs: [Governance v2](docs/governance-v2.en.md)
+
 ## Current Status
 
 The current implementation covers the early PRD foundation:
@@ -37,6 +39,7 @@ The current implementation covers the early PRD foundation:
 - static browser dashboard for transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs, and reports;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log, and compliance reports.
+- governance v2 lock layers, drift detection, policy bundles, approval history, and compliance summaries.
 - PRD tracker split into `prd/done` and `prd/todo`.
 
 ## Install And Build

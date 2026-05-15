@@ -10,6 +10,8 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.zh.md)
 
 Verifier docs: [Verifier Integrations](docs/verifier-integrations.zh.md)
 
+Governance docs: [Governance v2](docs/governance-v2.zh.md)
+
 ## 当前状态
 
 当前实现覆盖 PRD 的基础层：
@@ -37,6 +39,7 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.zh.md)
 - static browser dashboard，用于查看 transactions、metrics、timeline、agent trace、memory graph、skills、policies、costs 和 reports；
 - VS Code extension，用于查看 transaction、memory、AgentSpec、approval 和 DAG；
 - enterprise policy sources including HTTP policy server、RBAC checks、secret checks、runner/model routing、audit log 和 compliance reports。
+- governance v2 lock layers、drift detection、policy bundles、approval history 和 compliance summaries。
 - PRD tracker 已拆分为 `prd/done` 和 `prd/todo`。
 
 ## 安装与构建

@@ -10,6 +10,8 @@ Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.ru.md)
 
 Verifier docs: [Verifier Integrations](docs/verifier-integrations.ru.md)
 
+Governance docs: [Governance v2](docs/governance-v2.ru.md)
+
 ## Текущий статус
 
 Сейчас реализована фундаментальная часть PRD:
@@ -37,6 +39,7 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.ru.md)
 - static browser dashboard для transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs и reports;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
+- governance v2 lock layers, drift detection, policy bundles, approval history и compliance summaries.
 - PRD tracker разбит на `prd/done` и `prd/todo`.
 
 ## Установка и сборка
