@@ -28,5 +28,5 @@ Move workspace execution behind a real `WorkspaceRuntime` abstraction so transac
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `f704db8`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test successful_transaction_commits_and_promotes_memory`; `cargo test failed_transaction_rolls_back_and_records_failed_attempt`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
