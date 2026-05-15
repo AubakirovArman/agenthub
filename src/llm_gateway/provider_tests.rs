@@ -85,12 +85,11 @@ fn stub_server() -> StubServer {
     let addr = listener.local_addr().expect("stub addr");
     thread::spawn(move || {
         let (mut stream, _) = listener.accept().expect("accept stub");
-        let mut buffer = [0_u8; 4096];
-        let _ = stream.read(&mut buffer);
+        read_http_request(&mut stream).expect("read request");
         let body =
             r#"{"choices":[{"message":{"content":"stub ok"}}],"usage":{"completion_tokens":2}}"#;
         let response = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
             body.len(),
             body
         );
@@ -99,6 +98,40 @@ fn stub_server() -> StubServer {
     StubServer {
         endpoint: format!("http://{addr}"),
     }
+}
+
+fn read_http_request(stream: &mut impl Read) -> std::io::Result<()> {
+    let mut buffer = Vec::new();
+    let mut chunk = [0_u8; 512];
+    loop {
+        let read = stream.read(&mut chunk)?;
+        if read == 0 {
+            return Ok(());
+        }
+        buffer.extend_from_slice(&chunk[..read]);
+        if let Some(header_end) = find_header_end(&buffer) {
+            let headers = String::from_utf8_lossy(&buffer[..header_end]);
+            let content_length = headers
+                .lines()
+                .find_map(|line| line.split_once(':'))
+                .filter(|(key, _)| key.eq_ignore_ascii_case("content-length"))
+                .and_then(|(_, value)| value.trim().parse::<usize>().ok())
+                .unwrap_or(0);
+            let body_start = header_end + 4;
+            while buffer.len().saturating_sub(body_start) < content_length {
+                let read = stream.read(&mut chunk)?;
+                if read == 0 {
+                    break;
+                }
+                buffer.extend_from_slice(&chunk[..read]);
+            }
+            return Ok(());
+        }
+    }
+}
+
+fn find_header_end(buffer: &[u8]) -> Option<usize> {
+    buffer.windows(4).position(|window| window == b"\r\n\r\n")
 }
 
 #[derive(Default)]
