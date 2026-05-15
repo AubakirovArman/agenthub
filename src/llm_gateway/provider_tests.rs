@@ -27,8 +27,8 @@ fn cli_provider_invokes_real_command_and_writes_transcript() -> Result<()> {
 
 #[test]
 fn http_provider_calls_openai_compatible_stub() -> Result<()> {
-    let server = stub_server();
-    let provider = HttpProvider::new(server.endpoint, Some("test-key".to_string()), None);
+    let endpoint = stub_server();
+    let provider = HttpProvider::new(endpoint, Some("test-key".to_string()), None);
 
     let response = provider.complete(request("http", "hello http"))?;
 
@@ -77,11 +77,7 @@ fn request(id: &str, prompt: &str) -> LlmRequest {
     }
 }
 
-struct StubServer {
-    endpoint: String,
-}
-
-fn stub_server() -> StubServer {
+fn stub_server() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub");
     let addr = listener.local_addr().expect("stub addr");
     thread::spawn(move || {
@@ -100,18 +96,16 @@ fn stub_server() -> StubServer {
         stream.write_all(response.as_bytes()).expect("write stub");
         stream.flush().expect("flush stub");
         let _ = stream.shutdown(Shutdown::Write);
-        let _ = drain_client_close(&mut stream);
+        drain_client_close(&mut stream);
     });
-    StubServer {
-        endpoint: format!("http://{addr}"),
-    }
+    format!("http://{addr}")
 }
 
-fn drain_client_close(stream: &mut impl Read) -> std::io::Result<()> {
+fn drain_client_close(stream: &mut impl Read) {
     let mut chunk = [0_u8; 128];
     loop {
         match stream.read(&mut chunk) {
-            Ok(0) => return Ok(()),
+            Ok(0) => return,
             Ok(_) => {}
             Err(error)
                 if matches!(
@@ -119,9 +113,9 @@ fn drain_client_close(stream: &mut impl Read) -> std::io::Result<()> {
                     std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
                 ) =>
             {
-                return Ok(());
+                return;
             }
-            Err(error) => return Err(error),
+            Err(_) => return,
         }
     }
 }
