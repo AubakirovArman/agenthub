@@ -1,6 +1,6 @@
 # PRD v2 Task 07 — VCM-OS Typed Memory
 
-Status: Todo
+Status: Done
 
 ## Goal
 
@@ -17,3 +17,19 @@ Move VCM memory from mostly raw JSONL records toward typed project intelligence 
 - Tests cover typed memory write, retrieval filtering, compaction views, and failed-attempt separation.
 - README and docs are updated in English, Russian, Chinese, and Kazakh for user-facing behavior.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
+
+## Completed
+
+- Added core/code/content/data/infra `.memory.yaml` schemas under `.agent/schemas/`.
+- Added typed memory metadata fields: schema, status, supersedes, stale, confidence, and last verified commit.
+- Added `write_typed_fact` and schema-filtered `retrieve_relevant` with recent-memory fallback.
+- Switched context pack memory retrieval to domain-aware typed retrieval.
+- Added `.agent/memory/views/` current-truth views and `.agent/memory/audit.json`.
+- Kept failed attempts in `failed_attempts.jsonl` and `known_failures.json` as warning-only memory.
+- Added tests for typed memory write/retrieval/views and failed-attempt separation.
+- Updated README and VCM-OS memory docs in English, Russian, Chinese, and Kazakh.
+
+## Evidence
+
+- Implementation commit: pending.
+- Checks: pending.

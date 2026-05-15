@@ -76,6 +76,7 @@ pub fn init_project(root: &Path, force: bool) -> Result<AgentPaths> {
         paths.cache.join("embeddings"),
         paths.cache.join("indexes"),
         paths.memory.join("compacted"),
+        paths.memory.join("views"),
     ];
     for dir in dirs {
         fs::create_dir_all(&dir).with_context(|| format!("create {}", dir.display()))?;
@@ -122,6 +123,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
     let dirs = vec![
         paths.tx.clone(),
         paths.memory.clone(),
+        paths.schemas.clone(),
         paths.workspaces.clone(),
         paths.cache.clone(),
         paths.plugins.clone(),
@@ -129,6 +131,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
         paths.cache.join("embeddings"),
         paths.cache.join("indexes"),
         paths.memory.join("compacted"),
+        paths.memory.join("views"),
     ];
     for dir in dirs {
         fs::create_dir_all(&dir).with_context(|| format!("create {}", dir.display()))?;
@@ -136,6 +139,7 @@ pub fn ensure_runtime_dirs(root: &Path) -> Result<AgentPaths> {
 
     write_default(&paths.memory.join("committed.jsonl"), "", false)?;
     write_default(&paths.memory.join("failed_attempts.jsonl"), "", false)?;
+    schemas::write_defaults(&paths, false)?;
     write_default(&paths.plugins.join("installed.json"), "[]\n", false)?;
     write_default(
         &paths.enterprise.join("policy.yaml"),

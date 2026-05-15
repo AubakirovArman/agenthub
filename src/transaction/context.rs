@@ -65,7 +65,8 @@ pub(super) fn write_context_pack(
     agent_routes: &AgentRoutes,
     prepared: &PreparedWorkspace,
 ) -> Result<serde_json::Value> {
-    let memory = memory::retrieve_recent(project_root, 10)?;
+    let workspace_profile = spec.workspace.profile()?;
+    let memory = memory::retrieve_relevant(project_root, workspace_profile.domain(), 10)?;
     let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
     let enterprise = enterprise_context(project_root);
     let map_context = code_maps::select_context(project_root, spec)
@@ -89,7 +90,7 @@ pub(super) fn write_context_pack(
         "agent_routes": agent_routes,
         "workspace_profile": {
             "type": &spec.workspace.kind,
-            "domain": spec.workspace.profile()?.domain(),
+            "domain": workspace_profile.domain(),
         },
         "workspace": {
             "base_head": &prepared.base_head,

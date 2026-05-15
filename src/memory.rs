@@ -1,20 +1,25 @@
 mod storage;
+#[cfg(test)]
+mod tests;
+mod typed;
+mod views;
 
 use std::cmp::Reverse;
-use std::fs;
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
+use crate::git;
 use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
 use storage::{append_jsonl, count_lines, read_records};
+pub use typed::{write_typed_fact, TypedMemoryInput};
 
 pub const STAGING_FILE: &str = "memory_staging.jsonl";
 
@@ -23,6 +28,18 @@ pub struct MemoryRecord {
     pub id: String,
     #[serde(rename = "type")]
     pub kind: String,
+    #[serde(default)]
+    pub schema: Option<String>,
+    #[serde(default)]
+    pub status: Option<String>,
+    #[serde(default)]
+    pub supersedes: Option<String>,
+    #[serde(default)]
+    pub stale: bool,
+    #[serde(default)]
+    pub confidence: Option<f32>,
+    #[serde(default)]
+    pub last_verified_commit: Option<String>,
     pub tx_id: String,
     pub task_id: Option<String>,
     pub created_at: DateTime<Utc>,
@@ -68,6 +85,12 @@ pub fn stage_workspace_change(
     let record = MemoryRecord {
         id: new_memory_id(profile.memory_change_kind()),
         kind: profile.memory_change_kind().to_string(),
+        schema: Some(format!("{}.memory.v1", profile.domain())),
+        status: Some("staged".to_string()),
+        supersedes: None,
+        stale: false,
+        confidence: Some(0.7),
+        last_verified_commit: None,
         tx_id: tx_id.to_string(),
         task_id: Some(task_id.to_string()),
         created_at: Utc::now(),
@@ -85,8 +108,11 @@ pub fn promote_staging(root: &Path, tx_dir: &Path) -> Result<Vec<MemoryRecord>> 
     let paths = ensure_runtime_dirs(root)?;
     let staging_path = tx_dir.join(STAGING_FILE);
     let mut promoted = Vec::new();
+    let verified_head = git::head(root).ok().flatten();
 
     for mut record in read_records(&staging_path)? {
+        record.status = Some("active".to_string());
+        record.last_verified_commit = verified_head.clone();
         if let Some(content) = record.content.as_object_mut() {
             content.insert("verified".to_string(), json!(true));
             content.insert("verified_at".to_string(), json!(Utc::now()));
@@ -104,6 +130,12 @@ pub fn record_failed_attempt(root: &Path, tx_id: &str, task_id: &str, reason: &s
     let record = MemoryRecord {
         id: new_memory_id("failed_attempt"),
         kind: "failed_attempt".to_string(),
+        schema: Some("core.memory.v1".to_string()),
+        status: Some("warning".to_string()),
+        supersedes: None,
+        stale: false,
+        confidence: Some(0.4),
+        last_verified_commit: None,
         tx_id: tx_id.to_string(),
         task_id: Some(task_id.to_string()),
         created_at: Utc::now(),
@@ -111,7 +143,9 @@ pub fn record_failed_attempt(root: &Path, tx_id: &str, task_id: &str, reason: &s
             "reason": redact_text(reason).unwrap_or_else(|_| reason.to_string()),
         }),
     };
-    append_jsonl(&paths.memory.join("failed_attempts.jsonl"), &record)
+    append_jsonl(&paths.memory.join("failed_attempts.jsonl"), &record)?;
+    let committed = read_records(&paths.memory.join("committed.jsonl"))?;
+    views::write_views(root, &committed)
 }
 
 pub fn retrieve_recent(root: &Path, limit: usize) -> Result<Vec<MemoryRecord>> {
@@ -122,40 +156,18 @@ pub fn retrieve_recent(root: &Path, limit: usize) -> Result<Vec<MemoryRecord>> {
     Ok(records)
 }
 
-pub fn compact_project_state(root: &Path) -> Result<()> {
-    let paths = ensure_runtime_dirs(root)?;
-    let records = read_records(&paths.memory.join("committed.jsonl"))?;
-    let recent_workspace_changes = records
-        .iter()
-        .filter(|record| record.kind.ends_with("_change"))
-        .rev()
-        .take(20)
-        .map(|record| {
-            json!({
-                "id": record.id,
-                "type": record.kind,
-                "tx_id": record.tx_id,
-                "task_id": record.task_id,
-                "domain": record.content.get("domain").cloned().unwrap_or_else(|| json!("unknown")),
-                "changed_files": record.content.get("changed_files").cloned().unwrap_or_else(|| json!([])),
-                "created_at": record.created_at,
-            })
-        })
-        .collect::<Vec<_>>();
-
-    let compacted = json!({
-        "updated_at": Utc::now(),
-        "records": records.len(),
-        "recent_workspace_changes": recent_workspace_changes,
-    });
-    let path = paths.memory.join("compacted/project_state.json");
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+pub fn retrieve_relevant(root: &Path, domain: &str, limit: usize) -> Result<Vec<MemoryRecord>> {
+    let records = typed::retrieve_by_schema(root, domain, limit)?;
+    if records.is_empty() {
+        return retrieve_recent(root, limit);
     }
-    fs::write(path, serde_json::to_string_pretty(&compacted)?)?;
-    Ok(())
+    Ok(records)
 }
 
-fn new_memory_id(kind: &str) -> String {
+pub fn compact_project_state(root: &Path) -> Result<()> {
+    views::compact_project_state(root)
+}
+
+pub(super) fn new_memory_id(kind: &str) -> String {
     format!("mem-{}-{}", kind, &Uuid::new_v4().to_string()[..8])
 }

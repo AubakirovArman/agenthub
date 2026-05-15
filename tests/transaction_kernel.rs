@@ -105,9 +105,15 @@ transaction:
         .path()
         .join(".agent/memory/compacted/project_state.json")
         .exists());
+    assert!(repo
+        .path()
+        .join(".agent/memory/views/project_state.json")
+        .exists());
+    assert!(repo.path().join(".agent/memory/audit.json").exists());
 
     let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
     assert!(committed_memory.contains("create_generated_file"));
+    assert!(committed_memory.contains("\"schema\":\"code.memory.v1\""));
     Ok(())
 }
 
