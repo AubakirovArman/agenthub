@@ -45,6 +45,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("tx-20260101000000-web"));
     assert!(data.contains("\"total_cost_usd\": 0.25"));
     assert!(data.contains("\"metrics\""));
+    assert!(data.contains("\"history\""));
     assert!(data.contains("\"gate_pass_rate\": 1.0"));
     assert!(data.contains("example.skill"));
     assert!(output.join("dashboard.js").exists());

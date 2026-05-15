@@ -118,6 +118,17 @@ transaction:
         .join(".agent/memory/views/project_state.json")
         .exists());
     assert!(repo.path().join(".agent/memory/audit.json").exists());
+    assert!(repo
+        .path()
+        .join(".agent/metrics/analytics_history.jsonl")
+        .exists());
+    assert!(repo
+        .path()
+        .join(".agent/metrics/analytics_history.csv")
+        .exists());
+    let analytics = fs::read_to_string(repo.path().join(".agent/metrics/analytics_summary.json"))?;
+    assert!(analytics.contains("\"success_rate\": 1.0"));
+    assert!(analytics.contains("code.command"));
 
     let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
     assert!(committed_memory.contains("create_generated_file"));

@@ -119,6 +119,7 @@ pub struct MetricsPanel {
     pub quality: QualityMetrics,
     pub trust: TrustMetrics,
     pub cost: CostMetrics,
+    pub history: crate::analytics::AnalyticsSummary,
 }
 
 #[derive(Debug, Clone, Serialize, Default)]

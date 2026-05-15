@@ -63,6 +63,7 @@ pub fn collect_metrics(
             average_usd: average_float(total_cost, cost_count),
             estimated_tokens: tokens,
         },
+        history: crate::analytics::load_summary(project_root)?,
     })
 }
 

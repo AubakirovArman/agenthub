@@ -2,6 +2,7 @@ pub mod aal;
 pub mod adaptive;
 pub mod agent_adapter;
 pub mod agent_dir;
+pub mod analytics;
 pub mod baseline;
 pub mod code_maps;
 pub mod command_policy;

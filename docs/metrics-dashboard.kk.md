@@ -11,6 +11,7 @@
 - Quality: verifier pass count, review pass count және combined gate pass rate.
 - Trust: installed plugins, signed plugins, verified signatures және trusted plugins.
 - Cost: total USD, average USD per costed transaction және estimated tokens.
+- History: `.agent/metrics/analytics_summary.json` ішіндегі persisted analytics runs, rollback rate, repair rate және human-block rate.
 
 ## Қолдану
 

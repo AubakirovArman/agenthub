@@ -11,6 +11,7 @@
 - Quality: verifier pass count、review pass count 和 combined gate pass rate。
 - Trust: installed plugins、signed plugins、verified signatures 和 trusted plugins。
 - Cost: total USD、average USD per costed transaction 和 estimated tokens。
+- History: `.agent/metrics/analytics_summary.json` 中的 persisted analytics runs、rollback rate、repair rate 和 human-block rate。
 
 ## 使用
 

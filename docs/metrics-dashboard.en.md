@@ -11,6 +11,7 @@ Languages: [English](metrics-dashboard.en.md), [Русский](metrics-dashboar
 - Quality: verifier pass count, review pass count, and combined gate pass rate.
 - Trust: installed plugins, signed plugins, verified signatures, and trusted plugins.
 - Cost: total USD, average USD per costed transaction, and estimated tokens.
+- History: persisted analytics runs, rollback rate, repair rate, and human-block rate from `.agent/metrics/analytics_summary.json`.
 
 ## Use
 

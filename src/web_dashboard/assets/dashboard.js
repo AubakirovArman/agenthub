@@ -81,6 +81,7 @@ function renderMetricsDashboard() {
     ["Quality", [["Verifier", `${m.quality.verifier_passed}/${m.quality.verifier_total}`], ["Review", `${m.quality.review_passed}/${m.quality.review_total}`], ["Gate pass", pct(m.quality.gate_pass_rate)]]],
     ["Trust", [["Plugins", m.trust.installed_plugins], ["Signed", m.trust.signed_plugins], ["Verified", m.trust.verified_signatures], ["Trusted", m.trust.trusted_plugins]]],
     ["Cost", [["Total", money(m.cost.total_usd)], ["Average", money(m.cost.average_usd)], ["Tokens", m.cost.estimated_tokens]]],
+    ["History", [["Runs", m.history.totals.runs], ["Rollback", pct(m.history.rollback_rate)], ["Repair", pct(m.history.repair_rate)], ["Human block", pct(m.history.human_block_rate)]]],
   ];
   $("#metricsDashboard").replaceChildren(...groups.map(([title, items]) =>
     el("div", { class: "metric-group" }, [

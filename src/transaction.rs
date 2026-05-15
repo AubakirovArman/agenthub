@@ -1,3 +1,4 @@
+mod analytics;
 mod commit;
 mod context;
 mod execution;
@@ -10,6 +11,7 @@ mod prepare;
 mod review;
 mod runner;
 mod sandbox;
+mod status;
 mod verify;
 
 use std::fs;
@@ -35,31 +37,13 @@ use crate::smart_sync::SmartSyncDecision;
 use crate::spec::AgentSpec;
 use crate::verifier::VerifierResult;
 use crate::workspace::{PreparedWorkspace, WorkspaceRuntimeMetadata};
+pub use status::TransactionStatus;
 
 #[derive(Debug, Clone)]
 pub struct TransactionOutcome {
     pub tx_id: String,
     pub status: TransactionStatus,
     pub report_path: PathBuf,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum TransactionStatus {
-    Committed,
-    RolledBack,
-    BlockedOnHuman,
-    Noop,
-}
-
-impl TransactionStatus {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Committed => "COMMITTED",
-            Self::RolledBack => "ROLLED_BACK",
-            Self::BlockedOnHuman => "BLOCKED_ON_HUMAN",
-            Self::Noop => "NOOP",
-        }
-    }
 }
 
 #[derive(Default)]
@@ -153,6 +137,17 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     let report_path = tx_dir.join("report.md");
     let status = state.status.unwrap_or(TransactionStatus::RolledBack);
     let finished_at = Utc::now();
+    analytics::record_history(analytics::HistoryInput {
+        project_root,
+        spec: &spec,
+        tx_id: &tx_id,
+        tx_dir: &tx_dir,
+        state: &state,
+        status,
+        started_at,
+        finished_at,
+        skills: &skills,
+    })?;
     orchestration::record_scoreboard(
         project_root,
         &tx_dir,
