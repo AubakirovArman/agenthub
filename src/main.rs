@@ -1,5 +1,6 @@
 mod cli;
 mod handlers;
+mod project_path;
 
 use std::fs;
 
@@ -25,7 +26,7 @@ fn main() {
 
 fn run() -> Result<()> {
     let cli = Cli::parse();
-    let project_root = cli.project.canonicalize().unwrap_or(cli.project);
+    let project_root = project_path::resolve_cli_project(cli.project);
 
     match cli.command {
         Commands::Init { force } => {
