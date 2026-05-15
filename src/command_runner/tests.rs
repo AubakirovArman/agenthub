@@ -34,5 +34,35 @@ fn level_one_sandbox_sets_metadata_and_tmpdir() -> Result<()> {
 
     assert!(result.success);
     assert_eq!(result.sandbox_level, 1);
+    assert_eq!(result.runner_metadata.trust_level, "local-sandbox");
+    assert!(result
+        .runner_metadata
+        .capabilities
+        .contains(&"sanitized_env".to_string()));
+    assert_eq!(
+        result.runner_metadata.resource_limits.filesystem,
+        "sanitized_workspace"
+    );
+    Ok(())
+}
+
+#[test]
+fn cancel_request_artifact_round_trips() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+
+    write_cancel_request(dir.path(), "test", "stop after current command")?;
+    let request = read_cancel_request(dir.path())?.expect("cancel request exists");
+    write_cancel_status(
+        dir.path(),
+        &CancelStatus {
+            cancelled: true,
+            reason: Some(request.reason.clone()),
+        },
+    )?;
+
+    assert_eq!(request.requested_by, "test");
+    assert!(dir.path().join("cancel_request.json").exists());
+    let status = std::fs::read_to_string(dir.path().join("cancel_status.json"))?;
+    assert!(status.contains("stop after current command"));
     Ok(())
 }

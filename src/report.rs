@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::command_runner::RunnerMetadata;
 use crate::diff_guard::DiffGuardResult;
 use crate::observability::CostProfile;
 use crate::reviewer::ReviewResult;
@@ -27,6 +28,7 @@ pub struct TransactionReport {
     pub verifier: Option<VerifierResult>,
     pub sync: Option<SmartSyncDecision>,
     pub workspace_runtime: Option<WorkspaceRuntimeMetadata>,
+    pub runner: Option<RunnerMetadata>,
     pub cost_profile: Option<CostProfile>,
     pub error_fingerprint: Option<String>,
     pub failure_reason: Option<String>,
@@ -149,6 +151,16 @@ impl TransactionReport {
             md.push_str(&format!(
                 "- Capabilities: `{}`\n",
                 runtime.capabilities.join(", ")
+            ));
+        }
+
+        if let Some(runner) = &self.runner {
+            md.push_str("\n## Runner\n\n");
+            md.push_str(&format!("- Kind: `{}`\n", runner.kind));
+            md.push_str(&format!("- Trust: `{}`\n", runner.trust_level));
+            md.push_str(&format!(
+                "- Process control: `{}`\n",
+                runner.process_control
             ));
         }
 

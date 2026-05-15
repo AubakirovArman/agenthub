@@ -1,3 +1,6 @@
+mod cancel;
+mod metadata;
+mod process;
 mod remote;
 mod sandbox;
 #[cfg(test)]
@@ -11,6 +14,10 @@ use std::time::{Duration, Instant};
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+pub use cancel::{read_cancel_request, write_cancel_request, write_cancel_status, CancelStatus};
+use metadata::usage;
+pub use metadata::{metadata_for, ResourceLimitPolicy, ResourceUsage, RunnerMetadata};
+use process::{configure_process_group, terminate_process_tree};
 pub use remote::RemoteRunner;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,6 +33,8 @@ pub struct CommandResult {
     pub sandbox_level: u8,
     pub remote: bool,
     pub runner: Option<String>,
+    pub resource_usage: ResourceUsage,
+    pub runner_metadata: RunnerMetadata,
 }
 
 #[derive(Debug)]
@@ -99,7 +108,9 @@ pub fn run_shell_with_sandbox(
         .wait_with_output()
         .with_context(|| format!("wait for command `{command}`"))?;
     let exit_code = output.status.code();
+    let duration_ms = started.elapsed().as_millis();
     let success = output.status.success() && !timed_out;
+    let runner_metadata = metadata_for(sandbox.level, None, timeout);
 
     Ok(CommandResult {
         command: command.to_string(),
@@ -107,12 +118,14 @@ pub fn run_shell_with_sandbox(
         exit_code,
         success,
         timed_out,
-        duration_ms: started.elapsed().as_millis(),
+        duration_ms,
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
         stderr: String::from_utf8_lossy(&output.stderr).to_string(),
         sandbox_level: sandbox.level,
         remote: false,
         runner: None,
+        resource_usage: usage(duration_ms, exit_code, timed_out),
+        runner_metadata,
     })
 }
 
@@ -142,47 +155,4 @@ impl Drop for SupervisedChild {
     fn drop(&mut self) {
         self.terminate();
     }
-}
-
-#[cfg(unix)]
-fn configure_process_group(command: &mut Command) {
-    use std::os::unix::process::CommandExt;
-
-    unsafe {
-        command.pre_exec(|| {
-            if libc::setpgid(0, 0) == 0 {
-                Ok(())
-            } else {
-                Err(std::io::Error::last_os_error())
-            }
-        });
-    }
-}
-
-#[cfg(not(unix))]
-fn configure_process_group(_command: &mut Command) {}
-
-#[cfg(unix)]
-fn terminate_process_tree(child: &mut Child) {
-    let pgid = -(child.id() as i32);
-    unsafe {
-        libc::kill(pgid, libc::SIGTERM);
-    }
-
-    let grace_started = Instant::now();
-    while grace_started.elapsed() < Duration::from_secs(1) {
-        if matches!(child.try_wait(), Ok(Some(_))) {
-            return;
-        }
-        thread::sleep(Duration::from_millis(50));
-    }
-
-    unsafe {
-        libc::kill(pgid, libc::SIGKILL);
-    }
-}
-
-#[cfg(not(unix))]
-fn terminate_process_tree(child: &mut Child) {
-    let _ = child.kill();
 }

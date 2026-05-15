@@ -5,6 +5,7 @@ mod failure;
 mod guards;
 mod id;
 mod policy;
+mod prepare;
 mod review;
 mod runner;
 mod sandbox;
@@ -20,6 +21,7 @@ use serde_json::json;
 use crate::agent_adapter;
 use crate::agent_dir::ensure_runtime_dirs;
 use crate::command_runner::RemoteRunner;
+use crate::command_runner::RunnerMetadata;
 use crate::compiler;
 use crate::diff_guard::DiffGuardResult;
 use crate::journal::Journal;
@@ -66,6 +68,7 @@ pub(super) struct RunState {
     verifier: Option<VerifierResult>,
     sync: Option<SmartSyncDecision>,
     workspace_runtime: Option<WorkspaceRuntimeMetadata>,
+    runner: Option<RunnerMetadata>,
     cost_profile: Option<CostProfile>,
     error_fingerprint: Option<String>,
     failure_reason: Option<String>,
@@ -151,6 +154,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         verifier: state.verifier,
         sync: state.sync,
         workspace_runtime: state.workspace_runtime,
+        runner: state.runner,
         cost_profile: state.cost_profile,
         error_fingerprint: state.error_fingerprint,
         failure_reason: state.failure_reason,

@@ -38,7 +38,7 @@ pub(super) fn run_review_with_repair(
         if let Some(route) = agent_routes.repair.as_ref() {
             agent_adapter::invoke_adapter(spec, tx_dir, worktree, route, remote_runner)?;
         }
-        let results = run_repair_commands(spec, worktree, remote_runner)?;
+        let results = run_repair_commands(spec, tx_dir, worktree, remote_runner)?;
         if let Some(route) = agent_routes.repair.as_ref() {
             agent_adapter::write_transcript(tx_dir, route, &results)?;
         }

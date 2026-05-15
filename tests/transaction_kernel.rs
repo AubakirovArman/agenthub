@@ -74,11 +74,19 @@ transaction:
         .with_file_name("llm_gateway_summary.json")
         .exists());
     assert!(outcome.report_path.with_file_name("cost.json").exists());
+    let runner = fs::read_to_string(outcome.report_path.with_file_name("runner.json"))?;
+    assert!(runner.contains("\"trust_level\""));
+    assert!(runner.contains("process_control"));
+    assert!(outcome
+        .report_path
+        .with_file_name("cancel_status.json")
+        .exists());
     let runtime = fs::read_to_string(outcome.report_path.with_file_name("workspace_runtime.json"))?;
     assert!(runtime.contains("CodeGitWorkspace"));
     assert!(runtime.contains("commit"));
     let report = fs::read_to_string(&outcome.report_path)?;
     assert!(report.contains("## Workspace Runtime"));
+    assert!(report.contains("## Runner"));
     assert!(outcome
         .report_path
         .with_file_name("skill_trace.json")

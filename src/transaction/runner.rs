@@ -1,23 +1,23 @@
 use std::fs;
 use std::path::Path;
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
-use serde_json::json;
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::agent_dir::AgentPaths;
-use crate::baseline;
+use crate::command_runner::{self, CancelStatus};
 use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::memory;
 use crate::skill_registry::SkillManifest;
 use crate::spec::{AgentSpec, WorkspaceProfile};
-use crate::workspace;
 
 use super::commit::{sync_and_commit, CommitContext};
 use super::context::{build_context, ContextBuild};
 use super::execution::execute;
 use super::guards::check_diff_guard;
+use super::prepare::prepare_workspace;
 use super::review::run_review_with_repair;
 use super::verify::verify_transaction;
 use super::RunState;
@@ -36,7 +36,7 @@ pub(super) fn run_inner(
     no_commit: bool,
     state: &mut RunState,
 ) -> Result<()> {
-    let (prepared, runtime_metadata) = prepare(
+    let (prepared, runtime_metadata) = prepare_workspace(
         project_root,
         paths,
         spec,
@@ -47,6 +47,28 @@ pub(super) fn run_inner(
     )?;
     state.prepared = Some(prepared.clone());
     state.workspace_runtime = Some(runtime_metadata);
+    let runner_metadata = command_runner::metadata_for(
+        spec.execution.sandbox.level,
+        state.remote_runner.as_ref(),
+        Duration::from_secs(300),
+    );
+    fs::write(
+        tx_dir.join("runner.json"),
+        serde_json::to_string_pretty(&runner_metadata)?,
+    )?;
+    command_runner::write_cancel_status(
+        tx_dir,
+        &CancelStatus {
+            cancelled: false,
+            reason: None,
+        },
+    )?;
+    journal.append_data(
+        "RUNNER_READY",
+        "runner metadata and resource policy recorded",
+        serde_json::json!(&runner_metadata),
+    )?;
+    state.runner = Some(runner_metadata);
     agent_adapter::write_agent_trace(tx_dir, agent_routes)?;
     build_context(
         ContextBuild {
@@ -102,55 +124,6 @@ pub(super) fn run_inner(
         },
         state,
     )
-}
-
-fn prepare(
-    project_root: &Path,
-    paths: &AgentPaths,
-    spec: &AgentSpec,
-    tx_id: &str,
-    tx_dir: &Path,
-    journal: &Journal,
-    profile: WorkspaceProfile,
-) -> Result<(
-    crate::workspace::PreparedWorkspace,
-    crate::workspace::WorkspaceRuntimeMetadata,
-)> {
-    let mut runtime = workspace::runtime_for_profile(project_root, paths, tx_id, profile);
-    let prepared = runtime.prepare()?;
-    let runtime_metadata = runtime.metadata(Some(&prepared));
-    fs::write(
-        tx_dir.join("workspace_runtime.json"),
-        serde_json::to_string_pretty(&runtime_metadata)?,
-    )?;
-    let baseline = baseline::capture(project_root, spec, &prepared.base_head)?;
-    baseline::write(tx_dir, &baseline)?;
-    journal.append_data(
-        "BASELINE_CAPTURED",
-        "captured git and file-hash baseline",
-        json!({
-            "base_head": &baseline.base_head,
-            "scoped_files": baseline.scoped_files.len(),
-            "relevant_files": baseline.relevant_files.len(),
-        }),
-    )?;
-    journal.append_data(
-        "WORKSPACE_RUNTIME",
-        "workspace runtime selected",
-        json!(&runtime_metadata),
-    )?;
-    journal.append_data(
-        "WORKSPACE_READY",
-        "isolated worktree ready",
-        json!({
-            "workspace_type": &spec.workspace.kind,
-            "workspace_domain": profile.domain(),
-            "worktree": prepared.worktree_path.display().to_string(),
-            "base_head": &prepared.base_head,
-            "tx_branch": &prepared.tx_branch,
-        }),
-    )?;
-    Ok((prepared, runtime_metadata))
 }
 
 fn guard_and_review(

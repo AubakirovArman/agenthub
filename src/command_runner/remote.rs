@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+use super::metadata::{metadata_for, usage};
 use super::CommandResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -39,18 +40,23 @@ pub fn run(
         thread::sleep(Duration::from_millis(100));
     }
     let output = child.wait_with_output()?;
+    let exit_code = output.status.code();
+    let duration_ms = started.elapsed().as_millis();
+    let metadata = metadata_for(sandbox_level, Some(runner), timeout);
     Ok(CommandResult {
         command: command.to_string(),
         cwd: cwd.display().to_string(),
-        exit_code: output.status.code(),
+        exit_code,
         success: output.status.success() && !timed_out,
         timed_out,
-        duration_ms: started.elapsed().as_millis(),
+        duration_ms,
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
         stderr: String::from_utf8_lossy(&output.stderr).to_string(),
         sandbox_level,
         remote: true,
         runner: Some(runner.id.clone()),
+        resource_usage: usage(duration_ms, exit_code, timed_out),
+        runner_metadata: metadata,
     })
 }
 
