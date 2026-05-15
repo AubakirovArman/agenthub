@@ -14,6 +14,7 @@ Topologies 描述哪些 agent roles 参与 transaction DAG。Phase 10 添加 mul
 - `generator_critic`: generator、critic、executor。
 - `swarm_research`: `researcher_1..N`、aggregator、executor。
 - `manager_worker`: manager 分发到 `worker_1..N`，然后 executor 应用 managed result。
+- `tournament`: `contestant_1..N` candidates 输入 `judge`，然后 executor 应用 winning result。
 
 Runtime mutation 仍由 transaction kernel 控制。Executor commands 修改 workspace；reviewer 和 repair gates 在支持的拓扑中运行。其他 roles 会被规划、路由、记录 trace，并进入 DAG/gateway metadata。
 
@@ -72,6 +73,20 @@ topology:
 ```
 
 这会生成 fan-out DAG：`manager -> worker_1`、`manager -> worker_2`，每个 worker 都连接到 `executor`。`swarm_size` 控制 worker 数量。
+
+## Tournament 示例
+
+```bash
+agenthub run examples/topology-tournament-task.yaml
+```
+
+```yaml
+topology:
+  kind: tournament
+  swarm_size: 3
+```
+
+这会生成 fan-in DAG：`contestant_1`、`contestant_2` 和 `contestant_3` 输入 `judge`；`judge` 连接到 `executor`。`swarm_size` 控制 contestant 数量，并被限制在 2..8。
 
 ## Different Repair Agent
 

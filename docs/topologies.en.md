@@ -14,6 +14,7 @@ Topologies describe which agent roles participate in a transaction DAG. Phase 10
 - `generator_critic`: generator, critic, executor.
 - `swarm_research`: `researcher_1..N`, aggregator, executor.
 - `manager_worker`: manager fans out to `worker_1..N`, then executor applies the managed result.
+- `tournament`: `contestant_1..N` candidates feed `judge`, then executor applies the winning result.
 
 Runtime mutation remains controlled by the existing transaction kernel. Executor commands mutate the workspace; reviewer and repair gates run where supported. Other roles are planned, routed, traced, and included in the DAG/gateway metadata.
 
@@ -72,6 +73,20 @@ topology:
 ```
 
 This produces a fan-out DAG: `manager -> worker_1`, `manager -> worker_2`, and each worker feeds `executor`. `swarm_size` controls the worker count.
+
+## Tournament Example
+
+```bash
+agenthub run examples/topology-tournament-task.yaml
+```
+
+```yaml
+topology:
+  kind: tournament
+  swarm_size: 3
+```
+
+This produces a fan-in DAG: `contestant_1`, `contestant_2`, and `contestant_3` feed `judge`; `judge` feeds `executor`. `swarm_size` controls the contestant count and is clamped to 2..8.
 
 ## Different Repair Agent
 

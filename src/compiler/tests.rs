@@ -82,6 +82,26 @@ fn compiles_manager_worker_fanout() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn compiles_tournament_fanin() -> Result<()> {
+    let mut spec = test_spec(vec!["src/**".to_string()]);
+    spec.topology.kind = "tournament".to_string();
+    spec.topology.swarm_size = 3;
+    let dag = compile(&spec)?;
+
+    assert!(dag.nodes.iter().any(|node| node.id == "contestant_3"));
+    assert!(dag.nodes.iter().any(|node| node.id == "judge"));
+    assert!(dag
+        .edges
+        .iter()
+        .any(|edge| edge.from == "contestant_2" && edge.to == "judge"));
+    assert!(dag
+        .edges
+        .iter()
+        .any(|edge| edge.from == "judge" && edge.to == "executor"));
+    Ok(())
+}
+
 fn test_spec(allow: Vec<String>) -> AgentSpec {
     AgentSpec {
         task: TaskSpec {

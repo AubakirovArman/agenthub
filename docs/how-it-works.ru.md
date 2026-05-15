@@ -130,7 +130,7 @@ AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 
 ## Topologies
 
-AgentSpec поддерживает `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research` и `manager_worker`. Multi-role topologies попадают в `dag.json`, `agent_trace.json` и `model_call_metadata.json`. См. [Topologies](topologies.ru.md).
+AgentSpec поддерживает `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, `manager_worker` и `tournament`. Multi-role topologies попадают в `dag.json`, `agent_trace.json` и `model_call_metadata.json`. См. [Topologies](topologies.ru.md).
 
 ## Review и Repair
 

@@ -677,6 +677,55 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn tournament_topology_writes_agent_trace() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "tournament.yaml",
+        r#"
+task:
+  id: tournament_demo
+  type: code.command
+topology:
+  kind: tournament
+  swarm_size: 3
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'winner\n' > generated/winner.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/winner.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    let trace = fs::read_to_string(outcome.report_path.with_file_name("agent_trace.json"))?;
+    let dag = fs::read_to_string(outcome.report_path.with_file_name("dag.json"))?;
+    assert!(trace.contains("contestant_3"));
+    assert!(trace.contains("judge"));
+    assert!(dag.contains("contestant_1"));
+    assert!(dag.contains("judge"));
+    Ok(())
+}
+
 fn research_spec() -> &'static str {
     r#"
 task:

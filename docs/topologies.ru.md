@@ -14,6 +14,7 @@ Topologies описывают, какие agent roles участвуют в tran
 - `generator_critic`: generator, critic, executor.
 - `swarm_research`: `researcher_1..N`, aggregator, executor.
 - `manager_worker`: manager распределяет работу на `worker_1..N`, затем executor применяет managed result.
+- `tournament`: candidates `contestant_1..N` идут в `judge`, затем executor применяет winning result.
 
 Runtime mutation остаётся под контролем transaction kernel. Executor commands меняют workspace; reviewer и repair gates выполняются там, где они поддержаны. Остальные roles планируются, маршрутизируются, трассируются и попадают в DAG/gateway metadata.
 
@@ -72,6 +73,20 @@ topology:
 ```
 
 Это создаёт fan-out DAG: `manager -> worker_1`, `manager -> worker_2`, а каждый worker ведёт к `executor`. `swarm_size` задаёт количество workers.
+
+## Tournament Example
+
+```bash
+agenthub run examples/topology-tournament-task.yaml
+```
+
+```yaml
+topology:
+  kind: tournament
+  swarm_size: 3
+```
+
+Это создаёт fan-in DAG: `contestant_1`, `contestant_2` и `contestant_3` идут в `judge`; `judge` ведёт к `executor`. `swarm_size` задаёт количество contestants и ограничивается диапазоном 2..8.
 
 ## Different Repair Agent
 

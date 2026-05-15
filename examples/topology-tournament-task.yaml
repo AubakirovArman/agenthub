@@ -1,0 +1,35 @@
+task:
+  id: tournament_demo
+  type: code.command
+  title: Run a tournament topology
+
+topology:
+  kind: tournament
+  swarm_size: 3
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'winner\n' > generated/winner.txt
+
+scope:
+  allow:
+    - generated/**
+  deny:
+    - .agent/**
+
+verify:
+  commands:
+    - test -f generated/winner.txt
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0

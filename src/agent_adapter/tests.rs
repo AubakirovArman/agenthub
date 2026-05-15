@@ -82,6 +82,23 @@ fn manager_worker_routes_include_workers() -> Result<()> {
 }
 
 #[test]
+fn tournament_routes_include_contestants_and_judge() -> Result<()> {
+    let mut spec = fixture_spec();
+    spec.topology.kind = "tournament".to_string();
+    spec.topology.swarm_size = 3;
+
+    let routes = routes_for_spec(&spec)?;
+
+    assert!(routes
+        .roles
+        .iter()
+        .any(|route| route.role == "contestant_3"));
+    assert!(routes.roles.iter().any(|route| route.role == "judge"));
+    assert!(routes.roles.iter().any(|route| route.role == "executor"));
+    Ok(())
+}
+
+#[test]
 fn repair_agent_can_differ_from_executor() -> Result<()> {
     let mut spec = fixture_spec();
     spec.topology.kind = "executor_reviewer_repair".to_string();

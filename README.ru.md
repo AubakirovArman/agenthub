@@ -20,7 +20,7 @@ AgentHub — транзакционная runtime-основа для работ
 - skill manifests и загрузка зависимостей;
 - plugin package scaffold, manifest validation, trust model и lock files;
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
-- multi-role topologies для planner/executor, generator/critic, reviewer/repair, swarm research и manager/worker DAGs;
+- multi-role topologies для planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker и tournament DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;

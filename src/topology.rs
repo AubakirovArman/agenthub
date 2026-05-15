@@ -40,12 +40,13 @@ pub fn compile(spec: &AgentSpec) -> Result<TopologyPlan> {
         ],
         "swarm_research" => swarm_roles(spec.topology.swarm_size),
         "manager_worker" => manager_worker_roles(spec.topology.swarm_size),
+        "tournament" => tournament_roles(spec.topology.swarm_size),
         other => return Err(anyhow!("unsupported topology.kind: {other}")),
     };
-    let edges = if kind == "manager_worker" {
-        manager_worker_edges(spec.topology.swarm_size)
-    } else {
-        linear_edges(&roles)
+    let edges = match kind {
+        "manager_worker" => manager_worker_edges(spec.topology.swarm_size),
+        "tournament" => tournament_edges(spec.topology.swarm_size),
+        _ => linear_edges(&roles),
     };
     Ok(TopologyPlan {
         kind: kind.to_string(),
@@ -64,6 +65,7 @@ pub fn is_supported(kind: &str) -> bool {
             | "generator_critic"
             | "swarm_research"
             | "manager_worker"
+            | "tournament"
     )
 }
 
@@ -115,6 +117,32 @@ fn manager_worker_edges(size: usize) -> Vec<TopologyEdge> {
         edges.push(edge("manager", &format!("worker_{index}")));
         edges.push(edge(&format!("worker_{index}"), "executor"));
     }
+    edges
+}
+
+fn tournament_roles(size: usize) -> Vec<TopologyRole> {
+    let size = size.clamp(2, 8);
+    let mut roles = (1..=size)
+        .map(|index| {
+            role(
+                &format!("contestant_{index}"),
+                "generator",
+                &format!("Generate candidate {index}"),
+            )
+        })
+        .collect::<Vec<_>>();
+    roles.push(role("judge", "critic", "Select winning candidate"));
+    roles.push(role("executor", "executor", "Apply winning result"));
+    roles
+}
+
+fn tournament_edges(size: usize) -> Vec<TopologyEdge> {
+    let size = size.clamp(2, 8);
+    let mut edges = Vec::new();
+    for index in 1..=size {
+        edges.push(edge(&format!("contestant_{index}"), "judge"));
+    }
+    edges.push(edge("judge", "executor"));
     edges
 }
 

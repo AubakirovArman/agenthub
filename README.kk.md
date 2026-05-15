@@ -20,7 +20,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - skill manifests және dependency loading;
 - plugin package scaffold, manifest validation, trust model және lock files;
 - agent adapter routing, CLI dry-run invocation, prompts және transcripts;
-- planner/executor, generator/critic, reviewer/repair, swarm research және manager/worker DAGs үшін multi-role topologies;
+- planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker және tournament DAGs үшін multi-role topologies;
 - LLM Gateway metadata, redacted traces, optional raw traces және token/cost accounting;
 - routes, components, exports үшін context maps, stale-hash detection және map-based context selection;
 - defaults, approval marking және clarification questions бар AgentSpec preview жасайтын `ask` командасы;

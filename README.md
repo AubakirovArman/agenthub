@@ -20,7 +20,7 @@ The current implementation covers the early PRD foundation:
 - skill manifests and dependency loading;
 - plugin package scaffold, manifest validation, trust model, and lock files;
 - agent adapter routing, CLI dry-run invocation, prompts, and transcripts;
-- multi-role topologies for planner/executor, generator/critic, reviewer/repair, swarm research, and manager/worker DAGs;
+- multi-role topologies for planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker, and tournament DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces, and token/cost accounting;
 - context maps for routes, components, exports, stale-hash detection, and map-based context selection;
 - `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;

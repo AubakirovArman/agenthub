@@ -2,7 +2,6 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Tournament topology.
 - Specialized `backend_tdd` verifier profile.
 - Specialized `db_migration` verifier profile.
 - Command policy enforcement for `safe`, `needs_approval`, and `restricted` command lists.

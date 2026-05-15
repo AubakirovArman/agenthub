@@ -23,4 +23,4 @@ sed -n '1,120p' prd/status.md
 
 - `prd/source/`: top-level split файла `prd.md`.
 - `prd/audit/`: done, partial и open PRD areas.
-- `prd/todo/open-*.md`: long-term PRD tasks; current task — `open-07-tournament-topology.md`.
+- `prd/todo/open-*.md`: long-term PRD tasks; current task — `open-08-backend-tdd-verifier.md`.
