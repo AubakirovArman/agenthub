@@ -10,7 +10,7 @@ PRD v3 local install, provider readiness және simple configuration текс�
 agenthub doctor
 ```
 
-`doctor` OS/architecture, Git бар-жоғын, Git repository status, `.agent` initialization, policy files және supported provider binaries тексереді. Codex/Gemini/Kimi CLI жоқ болса, ол blocking error емес, warning болып көрсетіледі.
+`doctor` — орнатудан кейінгі бірінші readiness screen. Ол AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness және supported provider binaries/endpoints тексереді. Optional Codex/Gemini/Kimi CLI жоқ болса warning; Git немесе `sh` жоқ болса blocking error.
 
 ## Version
 
@@ -39,7 +39,20 @@ Supported providers:
 - `kimi`: external Kimi CLI wrapper.
 - `openai-http`: local OpenAI-compatible HTTP endpoint.
 
-`setup` provider қолжетімді болса ғана config жазады. Binary жоқ болса, AgentHub actionable install/PATH message шығарады.
+`setup` provider қолжетімді болса ғана config жазады. Сәтті болса `default_provider` жазады, CLI providers үшін command template сақтайды, binary немесе endpoint көрсетеді, dry-run mode шығарады және келесі `agenthub ask` command ұсынады.
+
+Мысал:
+
+```text
+configured	command
+default_provider	command
+runner	built-in
+version	agenthub 0.1.0
+dry_run	built-in deterministic runner ready
+next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
+```
+
+`providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP completion request орындайды.
 
 ## Config
 

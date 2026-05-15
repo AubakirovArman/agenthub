@@ -80,13 +80,15 @@ release artifact installers 见 [Install And Packaging](docs/install-packaging.z
 ## 快速开始
 
 ```bash
-cargo run -- init
-cargo run -- doctor
-cargo run -- providers status
-cargo run -- ask "Добавь страницу курсов в стиле dashboard"
-cargo run -- run examples/command-task.yaml
-cargo run -- tx status
-cargo run -- tx report tx-...
+agenthub init
+agenthub doctor
+agenthub providers status
+agenthub providers setup command
+agenthub providers test command
+agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
+agenthub run examples/command-task.yaml
+agenthub tx status
+agenthub tx report tx-...
 ```
 
 事务成功后，AgentHub 会把隔离 worktree 的变更应用回项目，写入 `.agent/tx/<tx-id>/report.md`，并把已验证记忆提升到 `.agent/memory/committed.jsonl`。

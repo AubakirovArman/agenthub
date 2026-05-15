@@ -18,11 +18,16 @@ fn providers_list_and_command_test_are_user_facing() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
     let list = providers::render_list();
+    let setup = providers::setup_provider(dir.path(), "command")?;
     let test = providers::test_provider(dir.path(), "command")?;
 
     assert!(list.contains("codex"));
     assert!(list.contains("gemini"));
+    assert!(setup.contains("default_provider\tcommand"));
+    assert!(setup.contains("dry_run\tbuilt-in deterministic runner ready"));
+    assert!(setup.contains("next\tagenthub ask"));
     assert!(test.contains("ok\tcommand"));
+    assert!(test.contains("version\tagenthub"));
     Ok(())
 }
 
@@ -34,6 +39,9 @@ fn doctor_reports_missing_project_as_warning() -> Result<()> {
     let rendered = report.render();
 
     assert!(rendered.contains("AgentHub Doctor"));
+    assert!(rendered.contains("[ok] agenthub.version"));
+    assert!(rendered.contains("[ok] shell.sh"));
+    assert!(rendered.contains("[ok] provider.default"));
     assert!(rendered.contains("[warn] project"));
     Ok(())
 }

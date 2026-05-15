@@ -80,13 +80,15 @@ Release artifact installers are documented in [Install And Packaging](docs/insta
 ## Quick Start
 
 ```bash
-cargo run -- init
-cargo run -- doctor
-cargo run -- providers status
-cargo run -- ask "Добавь страницу курсов в стиле dashboard"
-cargo run -- run examples/command-task.yaml
-cargo run -- tx status
-cargo run -- tx report tx-...
+agenthub init
+agenthub doctor
+agenthub providers status
+agenthub providers setup command
+agenthub providers test command
+agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
+agenthub run examples/command-task.yaml
+agenthub tx status
+agenthub tx report tx-...
 ```
 
 After a successful transaction AgentHub commits the isolated worktree back into the project, writes a report under `.agent/tx/<tx-id>/report.md`, and promotes verified memory to `.agent/memory/committed.jsonl`.

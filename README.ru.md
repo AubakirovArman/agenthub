@@ -80,13 +80,15 @@ Installers для release artifacts описаны в [Install And Packaging](do
 ## Быстрый старт
 
 ```bash
-cargo run -- init
-cargo run -- doctor
-cargo run -- providers status
-cargo run -- ask "Добавь страницу курсов в стиле dashboard"
-cargo run -- run examples/command-task.yaml
-cargo run -- tx status
-cargo run -- tx report tx-...
+agenthub init
+agenthub doctor
+agenthub providers status
+agenthub providers setup command
+agenthub providers test command
+agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
+agenthub run examples/command-task.yaml
+agenthub tx status
+agenthub tx report tx-...
 ```
 
 После успешной транзакции AgentHub применяет изолированный worktree обратно в проект, пишет отчёт в `.agent/tx/<tx-id>/report.md` и продвигает проверенную память в `.agent/memory/committed.jsonl`.

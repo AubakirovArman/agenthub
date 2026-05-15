@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
@@ -7,62 +7,13 @@ use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPol
 use super::config;
 use super::env::find_executable;
 
-#[derive(Debug, Clone)]
-pub struct ProviderInfo {
-    pub id: &'static str,
-    pub binary: Option<&'static str>,
-    pub endpoint_env: Option<&'static str>,
-    pub template: Option<&'static str>,
-    pub note: &'static str,
-}
+mod catalog;
+mod diagnostics;
 
-#[derive(Debug, Clone)]
-pub struct ProviderStatus {
-    pub info: ProviderInfo,
-    pub available: bool,
-    pub path: Option<PathBuf>,
-    pub endpoint: Option<String>,
-    pub is_default: bool,
-}
+pub use catalog::{ProviderInfo, ProviderStatus};
 
 pub fn supported() -> Vec<ProviderInfo> {
-    vec![
-        ProviderInfo {
-            id: "command",
-            binary: None,
-            endpoint_env: None,
-            template: None,
-            note: "built-in deterministic command runner",
-        },
-        ProviderInfo {
-            id: "codex",
-            binary: Some("codex"),
-            endpoint_env: None,
-            template: Some("codex exec --prompt-file {prompt}"),
-            note: "install the Codex CLI and make `codex` available on PATH",
-        },
-        ProviderInfo {
-            id: "gemini",
-            binary: Some("gemini"),
-            endpoint_env: None,
-            template: Some("gemini --prompt-file {prompt}"),
-            note: "install the Gemini CLI and make `gemini` available on PATH",
-        },
-        ProviderInfo {
-            id: "kimi",
-            binary: Some("kimi"),
-            endpoint_env: None,
-            template: Some("kimi --prompt-file {prompt}"),
-            note: "install the Kimi CLI and make `kimi` available on PATH",
-        },
-        ProviderInfo {
-            id: "openai-http",
-            binary: None,
-            endpoint_env: Some("AGENTHUB_OPENAI_COMPAT_BASE_URL"),
-            template: None,
-            note: "set AGENTHUB_OPENAI_COMPAT_BASE_URL for an OpenAI-compatible HTTP endpoint",
-        },
-    ]
+    catalog::supported()
 }
 
 pub fn render_list() -> String {
@@ -104,17 +55,19 @@ pub fn render_status(project_root: &Path) -> Result<String> {
     for status in statuses(project_root)? {
         let state = if status.available { "ok" } else { "missing" };
         let marker = if status.is_default { "default" } else { "-" };
-        let path = status
-            .path
-            .map(|path| path.display().to_string())
-            .or(status.endpoint)
-            .unwrap_or_else(|| status.info.note.to_string());
         out.push_str(&format!(
             "{}\t{}\t{}\t{}\n",
-            status.info.id, state, marker, path
+            status.info.id,
+            state,
+            marker,
+            status_detail(&status)
         ));
     }
     Ok(out)
+}
+
+pub fn status_detail(status: &ProviderStatus) -> String {
+    diagnostics::status_detail(status)
 }
 
 pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
@@ -133,7 +86,7 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
             template,
         )?;
     }
-    Ok(format!("configured\t{}\n", status.info.id))
+    Ok(diagnostics::setup_success(&status))
 }
 
 pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
@@ -142,11 +95,7 @@ pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
         return test_http_provider(status);
     }
     if status.available {
-        let detail = status
-            .path
-            .map(|path| path.display().to_string())
-            .unwrap_or_else(|| "built-in".to_string());
-        return Ok(format!("ok\t{}\t{}\n", status.info.id, detail));
+        return Ok(diagnostics::test_success(&status));
     }
     Ok(format!(
         "missing\t{}\t{}\n",

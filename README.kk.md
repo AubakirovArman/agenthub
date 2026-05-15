@@ -80,13 +80,15 @@ Release artifact installers [Install And Packaging](docs/install-packaging.kk.md
 ## Жылдам бастау
 
 ```bash
-cargo run -- init
-cargo run -- doctor
-cargo run -- providers status
-cargo run -- ask "Добавь страницу курсов в стиле dashboard"
-cargo run -- run examples/command-task.yaml
-cargo run -- tx status
-cargo run -- tx report tx-...
+agenthub init
+agenthub doctor
+agenthub providers status
+agenthub providers setup command
+agenthub providers test command
+agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
+agenthub run examples/command-task.yaml
+agenthub tx status
+agenthub tx report tx-...
 ```
 
 Транзакция сәтті аяқталса, AgentHub оқшауланған worktree өзгерістерін негізгі жобаға қолданады, `.agent/tx/<tx-id>/report.md` файлына есеп жазады және тексерілген memory жазбасын `.agent/memory/committed.jsonl` ішіне көтереді.

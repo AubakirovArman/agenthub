@@ -10,7 +10,7 @@ AgentHub PRD v3 adds product-facing commands for local installation checks, prov
 agenthub doctor
 ```
 
-`doctor` checks OS/architecture, Git availability, Git repository status, `.agent` initialization, policy files, and supported provider binaries. Missing Codex/Gemini/Kimi CLIs are warnings, not blocking errors.
+`doctor` is the first readiness screen after install. It checks the AgentHub version, binary path, dev/release channel, OS/architecture, `sh` shell availability, Git version, Git repository status, `.agent` initialization, policy files, default provider readiness, and supported provider binaries/endpoints. Missing optional Codex/Gemini/Kimi CLIs are warnings; missing Git or `sh` is blocking.
 
 ## Version
 
@@ -39,7 +39,20 @@ Supported providers:
 - `kimi`: external Kimi CLI wrapper.
 - `openai-http`: OpenAI-compatible local HTTP endpoint.
 
-`setup` configures a provider only when it is available. If the binary is missing, AgentHub prints an actionable install/PATH message.
+`setup` configures a provider only when it is available. On success it records `default_provider`, stores the command template for CLI providers, prints the binary or endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
+
+Example:
+
+```text
+configured	command
+default_provider	command
+runner	built-in
+version	agenthub 0.1.0
+dry_run	built-in deterministic runner ready
+next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
+```
+
+`providers test command` validates the built-in runner. CLI providers validate binary discovery, version output when available, and template readiness; live authentication remains managed by the provider CLI. `providers test openai-http` performs a real OpenAI-compatible HTTP completion request.
 
 ## Config
 
