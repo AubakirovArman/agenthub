@@ -27,6 +27,7 @@ watch [tx-id|latest]         follow the live transaction journal
 cancel [tx-id|latest]        request transaction cancellation
 report [tx-id]               print a report, defaulting to current tx
 effects [tx-id]              print the effect ledger
+explain [tx-id]              explain result, failure cause, and next steps
 ask <request>                write a draft AgentSpec
 do <request>                 write a draft and run it
 run <spec|request> [--no-commit]
@@ -72,6 +73,7 @@ Browse prior sessions:
 agenthub:plan> sessions
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 ```
 

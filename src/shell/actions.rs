@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use crate::{agent_dir, enterprise, tx_control, tx_watch};
+use crate::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
 
 pub(super) fn list_sessions(root: &Path) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
@@ -37,6 +37,12 @@ pub(super) fn print_report(root: &Path, tx_id: &str) -> Result<()> {
 pub(super) fn print_effects(root: &Path, tx_id: &str) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
     print!("{}", agent_dir::read_effects(root, tx_id)?);
+    Ok(())
+}
+
+pub(super) fn print_explain(root: &Path, tx_id: &str) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    print!("{}", tx_explain::explain(root, tx_id)?.render_text());
     Ok(())
 }
 

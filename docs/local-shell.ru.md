@@ -27,6 +27,7 @@ watch [tx-id|latest]         следить за live journal транзакци
 cancel [tx-id|latest]        запросить cancellation транзакции
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
+explain [tx-id]              объяснить результат, причину failure и next steps
 ask <request>                записать draft AgentSpec
 do <request>                 записать draft и сразу выполнить
 run <spec|request> [--no-commit]
@@ -72,6 +73,7 @@ agenthub:plan> do добавь generated health-check файл
 agenthub:plan> sessions
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
+agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 ```
 

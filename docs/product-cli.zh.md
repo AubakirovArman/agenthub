@@ -28,7 +28,15 @@ agenthub run "Add /courses page in the current dashboard style"
 agenthub run examples/command-task.yaml
 ```
 
-如果没有提供 `--output`，`plan` 会把 draft AgentSpec 写入 `.agent/drafts/`。`run` 接受已有 AgentSpec path，也接受 natural request。Natural request 会先转换成 draft spec，然后通过正常 transaction engine 执行。第一行输出保留脚本友好的 `tx-id STATUS (report)` 格式；后续行显示包含 report 和 watch command 的 human-readable summary。
+如果没有提供 `--output`，`plan` 会把 draft AgentSpec 写入 `.agent/drafts/`。`run` 接受已有 AgentSpec path，也接受 natural request。Natural request 会先转换成 draft spec，然后通过正常 transaction engine 执行。
+
+第一行输出保留脚本友好的 `tx-id STATUS (report)` 格式。后续行显示 task、provider、topology、verifier、memory promotion、changed files 数量、report、`tx explain`、`tx watch` 和 dashboard path。
+
+```bash
+agenthub tx explain tx-20260515123000-abcd1234
+```
+
+`tx explain` 会概括 transaction 为什么失败或成功、发生了什么、下一步做什么，以及应该查看哪些 artifacts。
 
 ## Providers
 

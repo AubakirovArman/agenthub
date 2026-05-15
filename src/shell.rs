@@ -77,6 +77,10 @@ fn handle(
             let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
             actions::print_effects(root, &tx)?;
         }
+        ShellCommand::Explain(tx_id) => {
+            let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
+            actions::print_explain(root, &tx)?;
+        }
         ShellCommand::Ask(request) => {
             let path = run::write_draft(root, &request)?;
             println!("draft {}", path.display());
@@ -117,12 +121,13 @@ fn print_help(mode: ShellMode) {
     println!("cancel [tx-id|latest]        request transaction cancellation");
     println!("report [tx-id|latest]        print report");
     println!("effects [tx-id|latest]       print effect ledger");
+    println!("explain [tx-id|latest]       explain failure/result and next steps");
     println!("ask <request>                write a draft spec");
     println!("do <request>                 write a draft and run it");
     println!("run <spec|request> [--no-commit]");
     println!("quit                         exit");
     println!("plain text                   plan mode: draft; run mode: execute");
-    println!("slash commands               /sessions /open latest /report /effects");
+    println!("slash commands               /sessions /open latest /report /explain");
 }
 
 fn handle_message(

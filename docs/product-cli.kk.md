@@ -28,7 +28,15 @@ agenthub run "Add /courses page in the current dashboard style"
 agenthub run examples/command-task.yaml
 ```
 
-`plan` `--output` берілмесе draft AgentSpec-ті `.agent/drafts/` ішіне жазады. `run` бар AgentSpec path немесе natural request қабылдайды. Natural request алдымен draft spec-ке айналады, кейін кәдімгі transaction engine арқылы орындалады. Бірінші output line scripts үшін compact `tx-id STATUS (report)` форматында қалады; кейінгі жолдар report және watch command бар human-readable summary көрсетеді.
+`plan` `--output` берілмесе draft AgentSpec-ті `.agent/drafts/` ішіне жазады. `run` бар AgentSpec path немесе natural request қабылдайды. Natural request алдымен draft spec-ке айналады, кейін кәдімгі transaction engine арқылы орындалады.
+
+Бірінші output line scripts үшін compact `tx-id STATUS (report)` форматында қалады. Кейінгі жолдар task, provider, topology, verifier, memory promotion, changed files саны, report, `tx explain`, `tx watch` және dashboard path көрсетеді.
+
+```bash
+agenthub tx explain tx-20260515123000-abcd1234
+```
+
+`tx explain` transaction неге failed немесе succeeded болғанын, не болғанын, келесі қадамды және қандай artifacts қарау керегін қысқаша түсіндіреді.
 
 ## Providers
 

@@ -3,13 +3,14 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
-use agenthub::{agent_dir, enterprise, tx_control, tx_watch};
+use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
 
 use crate::cli::{EnterpriseCommands, TxCommands};
 
 mod plugin_commands;
 mod product_commands;
 mod run_commands;
+mod run_summary;
 
 pub use plugin_commands::handle_plugins;
 pub use product_commands::{handle_config, handle_doctor, handle_providers, handle_version};
@@ -30,6 +31,13 @@ pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
         TxCommands::Effects { tx_id } => {
             enterprise::authorize(project_root, "transaction.read")?;
             print!("{}", agent_dir::read_effects(project_root, &tx_id)?);
+        }
+        TxCommands::Explain { tx_id } => {
+            enterprise::authorize(project_root, "transaction.read")?;
+            print!(
+                "{}",
+                tx_explain::explain(project_root, &tx_id)?.render_text()
+            );
         }
         TxCommands::Watch {
             tx_id,

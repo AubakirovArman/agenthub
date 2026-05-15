@@ -9,6 +9,9 @@ pub enum TxCommands {
     Effects {
         tx_id: String,
     },
+    Explain {
+        tx_id: String,
+    },
     Watch {
         tx_id: String,
 

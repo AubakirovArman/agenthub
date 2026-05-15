@@ -1,11 +1,12 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use agenthub::diff_guard::DiffGuardResult;
 use agenthub::{enterprise, intent, transaction};
+
+use super::run_summary;
 
 pub fn handle_ask(request: &str, output: Option<&Path>, approval_required: bool) -> Result<()> {
     let preview = intent::normalize_to_spec_with_options(
@@ -66,7 +67,7 @@ pub fn handle_run(root: &Path, target: &str, no_commit: bool) -> Result<()> {
         Some(spec.display().to_string()),
         json!({ "tx_id": outcome.tx_id }),
     )?;
-    print_run_summary(&spec, &outcome)
+    run_summary::print(root, &spec, &outcome)
 }
 
 fn resolve_run_spec(root: &Path, target: &str) -> Result<PathBuf> {
@@ -87,35 +88,6 @@ fn resolve_run_spec(root: &Path, target: &str) -> Result<PathBuf> {
     intent::write_preview(&preview, &output)?;
     print_questions(&preview);
     Ok(output)
-}
-
-fn print_run_summary(spec: &Path, outcome: &transaction::TransactionOutcome) -> Result<()> {
-    println!(
-        "{} {} ({})",
-        outcome.tx_id,
-        outcome.status.as_str(),
-        outcome.report_path.display()
-    );
-    println!();
-    println!("AgentHub transaction {}", outcome.status.as_str());
-    println!("Spec: {}", spec.display());
-    println!("Report: {}", outcome.report_path.display());
-    println!("Watch: agenthub tx watch {}", outcome.tx_id);
-    if let Some(files) = changed_files(&outcome.report_path)? {
-        println!("Files changed: {files}");
-    }
-    Ok(())
-}
-
-fn changed_files(report_path: &Path) -> Result<Option<usize>> {
-    let path = report_path.with_file_name("diff_guard.json");
-    if !path.exists() {
-        return Ok(None);
-    }
-    let content =
-        std::fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
-    let diff: DiffGuardResult = serde_json::from_str(&content)?;
-    Ok(Some(diff.summary.files_changed))
 }
 
 fn print_questions(preview: &intent::IntentPreview) {
