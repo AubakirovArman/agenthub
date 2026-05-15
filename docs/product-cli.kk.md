@@ -56,6 +56,8 @@ agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
 agenthub providers diagnose codex
+agenthub providers set executor codex
+agenthub providers fallback reviewer gemini kimi openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
@@ -82,6 +84,8 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
 `providers diagnose <id>` binary немесе endpoint location, version available болса, rendered command template, auth hint, install hint және provider-specific details шығарады. `openai-http` diagnose scheme, model, API-key presence көрсетіп, live request үшін `providers test` ұсынады.
+
+`providers set <role> <provider>` `.agent/config.yaml` ішіне `provider.role.<role>` сақтайды. `providers fallback <role> ...` comma-separated fallback chain мәнін `provider.fallback.<role>` ішіне жазады. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager және worker.
 
 `providers test command` built-in runner тексереді. CLI providers binary discovery, version output available болса, және template readiness тексереді; live authentication provider CLI жағында қалады. `providers test openai-http` real OpenAI-compatible HTTP/HTTPS completion request орындайды.
 

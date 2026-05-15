@@ -4,9 +4,23 @@ use clap::Subcommand;
 pub enum ProviderCommands {
     List,
     Status,
-    Setup { provider: String },
-    Test { provider: String },
-    Diagnose { provider: String },
+    Setup {
+        provider: String,
+    },
+    Test {
+        provider: String,
+    },
+    Diagnose {
+        provider: String,
+    },
+    Set {
+        role: String,
+        provider: String,
+    },
+    Fallback {
+        role: String,
+        providers: Vec<String>,
+    },
 }
 
 #[derive(Debug, Subcommand)]

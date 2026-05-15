@@ -9,8 +9,10 @@ use super::env::find_executable;
 
 mod catalog;
 mod diagnostics;
+mod roles;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
+pub use roles::{set_role_fallback, set_role_provider};
 
 pub fn supported() -> Vec<ProviderInfo> {
     catalog::supported()
@@ -142,7 +144,7 @@ fn test_http_provider(status: ProviderStatus) -> Result<String> {
     ))
 }
 
-fn status_for(project_root: &Path, provider: &str) -> Result<ProviderStatus> {
+pub(super) fn status_for(project_root: &Path, provider: &str) -> Result<ProviderStatus> {
     statuses(project_root)?
         .into_iter()
         .find(|status| status.info.id == provider)

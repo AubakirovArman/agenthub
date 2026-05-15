@@ -56,6 +56,8 @@ agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
 agenthub providers diagnose codex
+agenthub providers set executor codex
+agenthub providers fallback reviewer gemini kimi openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
@@ -82,6 +84,8 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
 `providers diagnose <id>` prints binary or endpoint location, version when available, rendered command template, auth hint, install hint, and provider-specific details. `openai-http` diagnosis reports scheme, model, API-key presence, and points to `providers test` for the live request.
+
+`providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
 
 `providers test command` validates the built-in runner. CLI providers validate binary discovery, version output when available, and template readiness; live authentication remains managed by the provider CLI. `providers test openai-http` performs a real OpenAI-compatible HTTP/HTTPS completion request.
 

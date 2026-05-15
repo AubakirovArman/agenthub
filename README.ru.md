@@ -90,6 +90,7 @@ agenthub providers status
 agenthub providers setup command
 agenthub providers test command
 agenthub providers diagnose codex
+agenthub providers set executor command
 agenthub
 agenthub plan "Добавь страницу курсов в стиле dashboard"
 agenthub run "Добавь generated health-check файл" --no-commit

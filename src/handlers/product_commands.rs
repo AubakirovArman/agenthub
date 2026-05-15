@@ -33,6 +33,21 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Diagnose { provider } => {
             print!("{}", providers::diagnose_provider(project_root, &provider)?);
         }
+        ProviderCommands::Set { role, provider } => {
+            print!(
+                "{}",
+                providers::set_role_provider(project_root, &role, &provider)?
+            );
+        }
+        ProviderCommands::Fallback {
+            role,
+            providers: items,
+        } => {
+            print!(
+                "{}",
+                providers::set_role_fallback(project_root, &role, &items)?
+            );
+        }
     }
     Ok(())
 }

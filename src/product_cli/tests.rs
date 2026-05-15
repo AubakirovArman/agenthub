@@ -54,6 +54,25 @@ fn provider_diagnose_reports_openai_http_endpoint_details() -> Result<()> {
 }
 
 #[test]
+fn providers_set_role_and_fallback_config() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+
+    let role = providers::set_role_provider(dir.path(), "executor", "command")?;
+    let fallback = providers::set_role_fallback(
+        dir.path(),
+        "reviewer",
+        &["command".to_string(), "openai-http".to_string()],
+    )?;
+    let config = config::render_show(dir.path())?;
+
+    assert!(role.contains("role\texecutor\tcommand"));
+    assert!(fallback.contains("fallback\treviewer\tcommand,openai-http"));
+    assert!(config.contains("provider.role.executor\tcommand"));
+    assert!(config.contains("provider.fallback.reviewer\tcommand,openai-http"));
+    Ok(())
+}
+
+#[test]
 fn doctor_reports_missing_project_as_warning() -> Result<()> {
     let dir = tempfile::tempdir()?;
 

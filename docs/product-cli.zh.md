@@ -56,6 +56,8 @@ agenthub providers setup command
 agenthub providers setup codex
 agenthub providers test codex
 agenthub providers diagnose codex
+agenthub providers set executor codex
+agenthub providers fallback reviewer gemini kimi openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test openai-http
 AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
@@ -82,6 +84,8 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
 `providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、install hint 和 provider-specific details。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
+
+`providers set <role> <provider>` 会把 `provider.role.<role>` 保存到 `.agent/config.yaml`。`providers fallback <role> ...` 会把逗号分隔的 fallback chain 保存到 `provider.fallback.<role>`。Valid roles: planner、executor、reviewer、repair、generator、critic、researcher、aggregator、manager、worker。
 
 `providers test command` 验证内置 runner。CLI providers 会验证 binary discovery、可用时的 version output、以及 template readiness；live authentication 仍由 provider CLI 管理。`providers test openai-http` 会执行真实的 OpenAI-compatible HTTP/HTTPS completion request。
 
