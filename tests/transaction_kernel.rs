@@ -171,6 +171,10 @@ transaction:
     assert!(agent_trace.contains("codex"));
     assert!(transcript.contains("\"kind\":\"adapter\""));
     assert!(transcript.contains("\"dry_run\":true"));
+    let provider_plan =
+        fs::read_to_string(outcome.report_path.with_file_name("llm_provider_plan.json"))?;
+    assert!(provider_plan.contains("codex"));
+    assert!(provider_plan.contains("cli_wrapper"));
     Ok(())
 }
 

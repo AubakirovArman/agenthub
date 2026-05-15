@@ -4,7 +4,7 @@
 
 ## 目的
 
-LLM Gateway 是 model work 的 observability boundary。它记录 planned 和 observed model-call metadata、prompt/context hashes、redacted traces、optional raw traces、token estimates 和 cost estimates。
+LLM Gateway 是 model work 的 provider control 与 observability boundary。它记录 planned provider calls、prompt/context hashes、retry/failover metadata、budget decisions、redacted traces、optional raw traces、token estimates 和 cost estimates。
 
 ## 事务 Artifacts
 
@@ -14,12 +14,40 @@ LLM Gateway 是 model work 的 observability boundary。它记录 planned 和 ob
 .agent/tx/<tx-id>/context_pack.json
 .agent/tx/<tx-id>/context_pack_trace.json
 .agent/tx/<tx-id>/model_call_metadata.json
+.agent/tx/<tx-id>/llm_provider_plan.json
+.agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
 .agent/tx/<tx-id>/cost.json
 ```
 
 `context_pack.json` 和 `redacted_api.jsonl` 默认会被 redacted。
+
+## Provider Plan
+
+`llm_provider_plan.json` 把 CLI wrappers 和未来的 API providers 统一为一个 request model。每个 planned call 包含 provider metadata、token counts、retry backoff，以及 requested adapter 被 routed 到其他 provider 时的 explicit failover records。
+
+示例:
+
+```json
+{
+  "provider": { "id": "codex", "kind": "cli_wrapper", "supports_streaming": true },
+  "retry_policy": { "max_attempts": 3, "backoff_ms": [250, 1000, 3000] },
+  "failover": []
+}
+```
+
+## Budget Policy
+
+可通过 `topology.routing.max_estimated_cost_usd` 设置 transaction budget:
+
+```yaml
+topology:
+  routing:
+    max_estimated_cost_usd: 0.25
+```
+
+如果 planned model cost 超过限制，AgentHub 会写入 `llm_budget.json` 并在 execution 之前 block。
 
 ## Raw Debug Mode
 

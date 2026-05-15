@@ -4,7 +4,7 @@ Languages: [English](llm-gateway.en.md), [Русский](llm-gateway.ru.md), [�
 
 ## Purpose
 
-The LLM Gateway is the observability boundary for model work. It records planned and observed model-call metadata, prompt/context hashes, redacted traces, optional raw traces, token estimates, and cost estimates.
+The LLM Gateway is the provider control and observability boundary for model work. It records planned provider calls, prompt/context hashes, retry/failover metadata, budget decisions, redacted traces, optional raw traces, token estimates, and cost estimates.
 
 ## Transaction Artifacts
 
@@ -14,12 +14,40 @@ Every transaction now writes:
 .agent/tx/<tx-id>/context_pack.json
 .agent/tx/<tx-id>/context_pack_trace.json
 .agent/tx/<tx-id>/model_call_metadata.json
+.agent/tx/<tx-id>/llm_provider_plan.json
+.agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
 .agent/tx/<tx-id>/cost.json
 ```
 
 `context_pack.json` and `redacted_api.jsonl` are redacted by default.
+
+## Provider Plan
+
+`llm_provider_plan.json` normalizes CLI wrappers and future API providers into one request model. Each planned call includes provider metadata, token counts, retry backoff, and explicit failover records when a requested adapter is routed to another provider.
+
+Example:
+
+```json
+{
+  "provider": { "id": "codex", "kind": "cli_wrapper", "supports_streaming": true },
+  "retry_policy": { "max_attempts": 3, "backoff_ms": [250, 1000, 3000] },
+  "failover": []
+}
+```
+
+## Budget Policy
+
+Set a transaction budget through `topology.routing.max_estimated_cost_usd`:
+
+```yaml
+topology:
+  routing:
+    max_estimated_cost_usd: 0.25
+```
+
+If planned model cost exceeds the limit, AgentHub writes `llm_budget.json` and blocks before execution.
 
 ## Raw Debug Mode
 

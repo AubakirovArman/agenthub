@@ -1,6 +1,6 @@
 # PRD v2 Task 06 — LLM Provider Gateway
 
-Status: Todo
+Status: Done
 
 ## Goal
 
@@ -17,3 +17,18 @@ Turn the current LLM Gateway trace layer into a provider control plane that can 
 - Tests cover provider metadata, budget blocking, and compatibility with existing CLI adapter routes.
 - README and docs are updated in English, Russian, Chinese, and Kazakh for user-facing behavior.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
+
+## Completed
+
+- Added `LlmProvider`, `CliProvider`, shared `LlmRequest`, `LlmResponse`, `TokenCount`, and provider metadata types.
+- Added `llm_provider_plan.json` with provider metadata, unified request records, retry backoff, token counts, and failover records.
+- Added `llm_budget.json` and budget decisions from `topology.routing.max_estimated_cost_usd` or environment policy.
+- Added preflight budget rejection before execution when planned model cost exceeds the transaction limit.
+- Kept existing `model_call_metadata.json`, gateway summary, redacted traces, and CLI adapter artifacts compatible.
+- Added tests for provider metadata, budget blocking, and CLI adapter route compatibility.
+- Updated README and LLM Gateway docs in English, Russian, Chinese, and Kazakh.
+
+## Evidence
+
+- Implementation commit: pending.
+- Checks: pending.

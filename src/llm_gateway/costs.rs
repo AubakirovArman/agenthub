@@ -28,6 +28,10 @@ fn env_rate(name: &str) -> Option<f64> {
 fn default_input(adapter: &str) -> f64 {
     match adapter {
         "command" => 0.0,
+        "gemini" => 0.001,
+        "kimi" => 0.001,
+        "codex" | "openai" => 0.005,
+        "anthropic" => 0.008,
         _ => 0.0,
     }
 }
@@ -35,6 +39,10 @@ fn default_input(adapter: &str) -> f64 {
 fn default_output(adapter: &str) -> f64 {
     match adapter {
         "command" => 0.0,
+        "gemini" => 0.002,
+        "kimi" => 0.002,
+        "codex" | "openai" => 0.015,
+        "anthropic" => 0.024,
         _ => 0.0,
     }
 }
