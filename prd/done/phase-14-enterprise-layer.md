@@ -4,7 +4,7 @@ Status: Done
 
 Existing evidence: `20cf11b Add enterprise governance foundation`
 
-Closing evidence: Phase 14 implementation commit.
+Closing evidence: `bfafb07`.
 
 ## Deliverables
 
