@@ -25,6 +25,7 @@ pub mod report;
 pub mod reviewer;
 pub mod rollback;
 pub mod sandbox;
+pub mod shell;
 pub mod skill_registry;
 pub mod smart_sync;
 pub mod spec;

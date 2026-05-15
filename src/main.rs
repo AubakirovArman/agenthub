@@ -9,8 +9,8 @@ use clap::Parser;
 use serde_json::json;
 
 use agenthub::{
-    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, team,
-    transaction, tui, web_dashboard, workspace,
+    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, shell, skill_registry,
+    team, transaction, tui, web_dashboard, workspace,
 };
 
 use crate::cli::{
@@ -28,13 +28,14 @@ fn run() -> Result<()> {
     let cli = Cli::parse();
     let project_root = project_path::resolve_cli_project(cli.project);
 
-    match cli.command {
+    match cli.command.unwrap_or(Commands::Shell) {
         Commands::Init { force } => {
             agent_dir::init_project(&project_root, force)?;
             println!("initialized AgentHub project at {}", project_root.display());
         }
         Commands::Doctor => handlers::handle_doctor(&project_root)?,
         Commands::Version => handlers::handle_version()?,
+        Commands::Shell => shell::run(&project_root)?,
         Commands::Ask {
             request,
             output,

@@ -16,7 +16,7 @@ pub struct Cli {
     pub project: PathBuf,
 
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 #[derive(Debug, Subcommand)]
@@ -27,6 +27,7 @@ pub enum Commands {
     },
     Doctor,
     Version,
+    Shell,
     Ask {
         request: String,
 
