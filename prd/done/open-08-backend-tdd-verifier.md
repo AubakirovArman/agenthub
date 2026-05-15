@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: Backend TDD verifier implementation commit pending.
+Closing evidence: implementation commit `52668be`; verified with `cargo fmt -- --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test backend_tdd`, `scripts/check-module-size.sh 200`, `git diff --check`, and `npm run check` in `editors/vscode/`.
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
