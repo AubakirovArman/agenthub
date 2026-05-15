@@ -39,6 +39,7 @@ enterprise:
     mode: local
     url: null
     policy_path: null
+    token_env: AGENTHUB_POLICY_TOKEN
   secrets:
     provider: env
     allowed_prefixes:
@@ -60,13 +61,25 @@ enterprise:
 
 ## Policy Source
 
-默认情况下，AgentHub 读取项目中的 `.agent/enterprise/policy.yaml`。要在多个项目中强制使用同一 central policy：
+默认情况下，AgentHub 读取项目中的 `.agent/enterprise/policy.yaml`。要在多个项目中强制使用同一 central policy，可使用 file-backed source 或 HTTP policy server：
 
 ```bash
 AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml agenthub enterprise policy
+AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
 ```
 
-这是 Phase 14 的 file-backed policy-server mode。Policy source 也会写入 compliance reports。
+Project bootstrap policy 也可以指向 server：
+
+```yaml
+enterprise:
+  policy_server:
+    mode: http
+    url: http://127.0.0.1:8787/policy
+    token_env: AGENTHUB_POLICY_TOKEN
+```
+
+见 [Network Policy Server](network-policy-server.zh.md)。Policy source 也会写入 compliance reports。
 
 ## RBAC
 

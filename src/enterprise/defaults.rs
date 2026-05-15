@@ -1,8 +1,9 @@
 use std::collections::BTreeMap;
 
 use crate::enterprise::types::{
-    default_policy_server_mode, default_role, default_runner, default_secret_provider,
-    EnterpriseConfig, PolicyServerPolicy, RolePolicy, RunnerPolicy, SecretsPolicy,
+    default_policy_server_mode, default_policy_token_env, default_role, default_runner,
+    default_secret_provider, EnterpriseConfig, PolicyServerPolicy, RolePolicy, RunnerPolicy,
+    SecretsPolicy,
 };
 
 impl Default for EnterpriseConfig {
@@ -25,6 +26,7 @@ impl Default for PolicyServerPolicy {
             mode: default_policy_server_mode(),
             url: None,
             policy_path: None,
+            token_env: default_policy_token_env(),
         }
     }
 }

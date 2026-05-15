@@ -41,6 +41,8 @@ pub struct PolicyServerPolicy {
     pub url: Option<String>,
     #[serde(default)]
     pub policy_path: Option<String>,
+    #[serde(default = "default_policy_token_env")]
+    pub token_env: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -117,6 +119,10 @@ pub(super) fn default_secret_provider() -> String {
 
 pub(super) fn default_policy_server_mode() -> String {
     "local".to_string()
+}
+
+pub(super) fn default_policy_token_env() -> String {
+    "AGENTHUB_POLICY_TOKEN".to_string()
 }
 
 pub(super) fn default_runner() -> String {

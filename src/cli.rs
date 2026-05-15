@@ -148,6 +148,19 @@ pub enum PluginCommands {
 #[derive(Debug, Subcommand)]
 pub enum EnterpriseCommands {
     Policy,
+    PolicyServer {
+        #[arg(long, default_value = "127.0.0.1:8787")]
+        bind: String,
+
+        #[arg(long)]
+        policy: Option<PathBuf>,
+
+        #[arg(long, default_value = "AGENTHUB_POLICY_TOKEN")]
+        token_env: String,
+
+        #[arg(long)]
+        once: bool,
+    },
     Secrets {
         name: Option<String>,
     },

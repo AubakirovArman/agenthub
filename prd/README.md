@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-13-network-policy-server.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-14-plugin-signature-verification.md`.
 
 ## Status Index
 

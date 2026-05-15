@@ -39,6 +39,7 @@ enterprise:
     mode: local
     url: null
     policy_path: null
+    token_env: AGENTHUB_POLICY_TOKEN
   secrets:
     provider: env
     allowed_prefixes:
@@ -60,13 +61,25 @@ enterprise:
 
 ## Policy Source
 
-By default AgentHub reads `.agent/enterprise/policy.yaml` from the project. To enforce one central policy across projects, set:
+By default AgentHub reads `.agent/enterprise/policy.yaml` from the project. To enforce one central policy across projects, use a file-backed source or HTTP policy server:
 
 ```bash
 AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml agenthub enterprise policy
+AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
 ```
 
-This is the file-backed policy-server mode for Phase 14. The policy source is also included in compliance reports.
+Project bootstrap policy can also point to the server:
+
+```yaml
+enterprise:
+  policy_server:
+    mode: http
+    url: http://127.0.0.1:8787/policy
+    token_env: AGENTHUB_POLICY_TOKEN
+```
+
+See [Network Policy Server](network-policy-server.en.md). The policy source is also included in compliance reports.
 
 ## RBAC
 

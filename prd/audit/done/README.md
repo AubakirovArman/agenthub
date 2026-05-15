@@ -25,6 +25,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Specialized `db_migration` verifier profile with migration, dry-run, rollback, and seed artifact checks.
 - Plugin ecosystem with package manifest, scaffold, trust model, optional signature metadata, and locks.
 - Enterprise RBAC, policy source, audit log, secret checks, runner inventory, private model route metadata, and compliance reports.
+- Networked enterprise policy server with HTTP policy loading, built-in YAML server, and token env support.
 - Command policy enforcement for `safe`, `needs_approval`, and restricted command lists at transaction preflight.
 - Sandbox Level 0/1 execution controls plus Level 2/3 remote runner dispatch and result collection.
 - Remote runner execution for sandbox Level 2/3 with `local://` and `ssh://` endpoints.

@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-主要 open areas：networked central policy server、cryptographic plugin signing、metrics dashboards、formal WAL。
+主要 open areas：cryptographic plugin signing、metrics dashboards、formal WAL。

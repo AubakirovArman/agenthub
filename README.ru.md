@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -28,7 +28,7 @@ AgentHub — транзакционная runtime-основа для работ
 - terminal TUI dashboard для transactions, DAG, verifier, cost, memory и approvals;
 - static browser dashboard для transactions, timeline, agent trace, memory graph, skills, policies, costs и reports;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
-- enterprise policy source, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
+- enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
 - PRD tracker разбит на `prd/done` и `prd/todo`.
 
 ## Установка и сборка
@@ -212,10 +212,12 @@ agenthub plugins list
 
 ## Enterprise
 
-Phase 14 даёт enterprise governance. Policy находится в `.agent/enterprise/policy.yaml` или central `AGENTHUB_POLICY_PATH`; secret checks не печатают значения; runner и private model routing управляются policy; audit events и compliance reports находятся в `.agent/enterprise/`.
+Phase 14 даёт enterprise governance. Policy находится в `.agent/enterprise/policy.yaml`, central `AGENTHUB_POLICY_PATH` или HTTP policy server; secret checks не печатают значения; runner и private model routing управляются policy; audit events и compliance reports находятся в `.agent/enterprise/`.
 
 ```bash
 AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
 AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
 AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance

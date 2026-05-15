@@ -104,6 +104,37 @@ pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Re
             println!("default_role\t{}", policy.enterprise.default_role);
             println!("roles\t{}", policy.enterprise.roles.len());
         }
+        EnterpriseCommands::PolicyServer {
+            bind,
+            policy,
+            token_env,
+            once,
+        } => {
+            let actor = enterprise::authorize(project_root, "enterprise.policy.serve")?;
+            let policy_path =
+                policy.unwrap_or_else(|| project_root.join(".agent/enterprise/policy.yaml"));
+            let token = std::env::var(&token_env)
+                .ok()
+                .filter(|value| !value.is_empty());
+            enterprise::record_event(
+                project_root,
+                &actor,
+                "agenthub.enterprise.policy_server",
+                "enterprise.policy.serve",
+                "started",
+                Some(policy_path.display().to_string()),
+                json!({ "bind": bind.clone(), "token_env": token_env.clone() }),
+            )?;
+            let server = enterprise::PolicyServer::bind(enterprise::PolicyServerConfig {
+                bind,
+                policy_path,
+                token,
+                once,
+            })?;
+            println!("policy_server\t{}", server.local_addr()?);
+            let result = server.serve()?;
+            println!("requests\t{}", result.requests);
+        }
         EnterpriseCommands::Secrets { name } => {
             enterprise::authorize(project_root, "enterprise.secrets.check")?;
             let checks = if let Some(name) = name {

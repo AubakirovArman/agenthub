@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Главные open areas: networked central policy server, cryptographic plugin signing, metrics dashboards и formal WAL.
+Главные open areas: cryptographic plugin signing, metrics dashboards и formal WAL.

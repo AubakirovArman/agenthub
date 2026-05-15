@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [AAL](docs/aal.kk.md), [Workspaces](docs/workspaces.kk.md), [MediaWorkspace](docs/media-workspace.kk.md), [Research](docs/research-profile.kk.md), [Backend TDD](docs/backend-tdd-verifier.kk.md), [DB Migration](docs/db-migration-verifier.kk.md), [Command Policy](docs/command-policy.kk.md), [Sandbox Levels](docs/sandbox-levels.kk.md), [Remote Runner](docs/remote-runner.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Web Dashboard](docs/web-dashboard.kk.md), [AAL](docs/aal.kk.md), [Workspaces](docs/workspaces.kk.md), [MediaWorkspace](docs/media-workspace.kk.md), [Research](docs/research-profile.kk.md), [Backend TDD](docs/backend-tdd-verifier.kk.md), [DB Migration](docs/db-migration-verifier.kk.md), [Command Policy](docs/command-policy.kk.md), [Sandbox Levels](docs/sandbox-levels.kk.md), [Remote Runner](docs/remote-runner.kk.md), [Network Policy](docs/network-policy-server.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -28,7 +28,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - transactions, DAG, verifier, cost, memory және approvals көрсететін terminal TUI dashboard;
 - transactions, timeline, agent trace, memory graph, skills, policies, costs және reports көрсететін static browser dashboard;
 - transaction, memory, AgentSpec, approval және DAG көруге арналған VS Code extension;
-- enterprise policy source, RBAC checks, secret checks, runner/model routing, audit log және compliance reports.
+- enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log және compliance reports.
 - PRD tracker `prd/done` және `prd/todo` болып бөлінді.
 
 ## Орнату және жинау
@@ -212,10 +212,12 @@ agenthub plugins list
 
 ## Enterprise
 
-Phase 14 enterprise governance береді. Policy `.agent/enterprise/policy.yaml` ішінде немесе central `AGENTHUB_POLICY_PATH` арқылы беріледі; secret checks мәндерді шығармайды; runner және private model routing policy арқылы басқарылады; audit events және compliance reports `.agent/enterprise/` ішінде.
+Phase 14 enterprise governance береді. Policy `.agent/enterprise/policy.yaml` ішінде, central `AGENTHUB_POLICY_PATH` арқылы немесе HTTP policy server арқылы беріледі; secret checks мәндерді шығармайды; runner және private model routing policy арқылы басқарылады; audit events және compliance reports `.agent/enterprise/` ішінде.
 
 ```bash
 AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
 AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
 AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance

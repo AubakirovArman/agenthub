@@ -63,6 +63,7 @@ pub(super) const DEFAULT_ENTERPRISE_POLICY: &str = r#"enterprise:
     mode: local
     url: null
     policy_path: null
+    token_env: AGENTHUB_POLICY_TOKEN
   secrets:
     provider: env
     allowed_prefixes:

@@ -39,6 +39,7 @@ enterprise:
     mode: local
     url: null
     policy_path: null
+    token_env: AGENTHUB_POLICY_TOKEN
   secrets:
     provider: env
     allowed_prefixes:
@@ -60,13 +61,25 @@ enterprise:
 
 ## Policy Source
 
-Әдетте AgentHub project ішіндегі `.agent/enterprise/policy.yaml` оқиды. Бір central policy бірнеше project үшін қолдану:
+Әдетте AgentHub project ішіндегі `.agent/enterprise/policy.yaml` оқиды. Бір central policy бірнеше project үшін қолдану үшін file-backed source немесе HTTP policy server қолданыңыз:
 
 ```bash
 AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml agenthub enterprise policy
+AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
 ```
 
-Phase 14 ішінде бұл file-backed policy-server mode. Policy source compliance reports ішіне де жазылады.
+Project bootstrap policy server-ге де көрсете алады:
+
+```yaml
+enterprise:
+  policy_server:
+    mode: http
+    url: http://127.0.0.1:8787/policy
+    token_env: AGENTHUB_POLICY_TOKEN
+```
+
+Қара: [Network Policy Server](network-policy-server.kk.md). Policy source compliance reports ішіне де жазылады.
 
 ## RBAC
 
