@@ -25,5 +25,5 @@ End-to-end reference web app fixture for Add Page to Existing Web App.
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `55605bf`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `node --check scripts/build.mjs && node --check scripts/server.mjs && npm run build` in `examples/reference-web-app`; `cargo test --test reference_web_fixture`; `cargo test`; `cargo clippy -- -D warnings`; `npm run check` in `editors/vscode`.
