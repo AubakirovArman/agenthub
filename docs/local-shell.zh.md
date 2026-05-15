@@ -17,6 +17,7 @@ help                         显示命令
 init                         初始化 .agent
 sessions                     列出最近事务
 open <tx-id>                 打开事务报告并设为当前事务
+watch [tx-id]                跟随实时 transaction journal
 report [tx-id]               打印报告，默认使用当前事务
 effects [tx-id]              打印 effect ledger
 ask <request>                写入 draft AgentSpec
@@ -53,6 +54,7 @@ agenthub> do add a generated health-check file
 ```text
 agenthub> sessions
 agenthub> open tx-20260515123000-abcd1234
+agenthub[tx-20260515123000-abcd1234]> watch
 agenthub[tx-20260515123000-abcd1234]> effects
 ```
 

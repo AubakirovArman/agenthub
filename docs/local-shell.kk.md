@@ -17,6 +17,7 @@ help                         командаларды көрсету
 init                         .agent инициализациялау
 sessions                     соңғы transaction тізімі
 open <tx-id>                 report ашу және tx-ті ағымдағы ету
+watch [tx-id]                transaction journal-ды live бақылау
 report [tx-id]               report шығару, әдепкісі ағымдағы tx
 effects [tx-id]              effect ledger шығару
 ask <request>                draft AgentSpec жазу
@@ -53,6 +54,7 @@ agenthub> do generated health-check file қос
 ```text
 agenthub> sessions
 agenthub> open tx-20260515123000-abcd1234
+agenthub[tx-20260515123000-abcd1234]> watch
 agenthub[tx-20260515123000-abcd1234]> effects
 ```
 

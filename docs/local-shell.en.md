@@ -17,6 +17,7 @@ help                         show commands
 init                         initialize .agent
 sessions                     list recent transactions
 open <tx-id>                 open a transaction report and set it current
+watch [tx-id]                follow the live transaction journal
 report [tx-id]               print a report, defaulting to current tx
 effects [tx-id]              print the effect ledger
 ask <request>                write a draft AgentSpec
@@ -53,6 +54,7 @@ Browse prior sessions:
 ```text
 agenthub> sessions
 agenthub> open tx-20260515123000-abcd1234
+agenthub[tx-20260515123000-abcd1234]> watch
 agenthub[tx-20260515123000-abcd1234]> effects
 ```
 

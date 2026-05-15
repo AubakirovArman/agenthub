@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 
-use crate::{agent_dir, enterprise, intent, transaction};
+use crate::{agent_dir, enterprise, intent, transaction, tx_watch};
 use commands::{parse_line, ShellCommand};
 
 pub fn run(project_root: &Path) -> Result<()> {
@@ -41,6 +41,7 @@ fn handle(root: &Path, command: ShellCommand, current_tx: &mut Option<String>) -
             print_report(root, &tx_id)?;
             *current_tx = Some(tx_id);
         }
+        ShellCommand::Watch(tx_id) => watch_tx(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Report(tx_id) => print_report(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Effects(tx_id) => print_effects(root, &require_tx(tx_id, current_tx)?)?,
         ShellCommand::Ask(request) => {
@@ -71,6 +72,7 @@ fn print_help() {
     println!("init                         initialize .agent");
     println!("sessions                     list transactions");
     println!("open <tx-id>                 open transaction report");
+    println!("watch [tx-id]                follow live transaction journal");
     println!("report [tx-id]               print report");
     println!("effects [tx-id]              print effect ledger");
     println!("ask <request>                write a draft spec");
@@ -100,6 +102,18 @@ fn print_effects(root: &Path, tx_id: &str) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
     print!("{}", agent_dir::read_effects(root, tx_id)?);
     Ok(())
+}
+
+fn watch_tx(root: &Path, tx_id: &str) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    tx_watch::watch(
+        root,
+        tx_id,
+        tx_watch::WatchOptions {
+            interval_ms: 1000,
+            once: false,
+        },
+    )
 }
 
 fn run_request(

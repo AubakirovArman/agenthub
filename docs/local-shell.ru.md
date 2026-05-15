@@ -17,6 +17,7 @@ help                         показать команды
 init                         инициализировать .agent
 sessions                     список последних транзакций
 open <tx-id>                 открыть report и сделать tx текущей
+watch [tx-id]                следить за live journal транзакции
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
 ask <request>                записать draft AgentSpec
@@ -53,6 +54,7 @@ agenthub> do добавь generated health-check файл
 ```text
 agenthub> sessions
 agenthub> open tx-20260515123000-abcd1234
+agenthub[tx-20260515123000-abcd1234]> watch
 agenthub[tx-20260515123000-abcd1234]> effects
 ```
 

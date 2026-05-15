@@ -9,6 +9,15 @@ pub enum TxCommands {
     Effects {
         tx_id: String,
     },
+    Watch {
+        tx_id: String,
+
+        #[arg(long, default_value_t = 1000)]
+        interval_ms: u64,
+
+        #[arg(long)]
+        once: bool,
+    },
     Resolve {
         tx_id: String,
         #[arg(long)]

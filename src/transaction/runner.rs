@@ -82,6 +82,7 @@ pub(super) fn run_inner(
         },
         state,
     )?;
+    journal.append("EXECUTING", "running execution commands")?;
     execute(
         spec,
         tx_dir,
