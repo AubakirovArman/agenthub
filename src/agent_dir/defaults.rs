@@ -123,6 +123,13 @@ pub(super) const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
       - unit_tests
       - integration_tests
       - api_response_expectations
+  db_migration:
+    checks:
+      - command
+      - schema_diff
+      - migration_dry_run
+      - rollback_plan
+      - seed_check
   media_render:
     checks:
       - command

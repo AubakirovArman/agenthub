@@ -1,5 +1,6 @@
 mod backend;
 mod common;
+mod db;
 mod profiles;
 mod research;
 
@@ -32,6 +33,7 @@ pub fn run(profile: Option<&str>, worktree: &Path) -> Result<Option<DomainVerifi
         "infra_plan" => profiles::infra_checks(worktree)?,
         "media_render" => profiles::media_checks(worktree)?,
         "backend_tdd" => backend::backend_checks(worktree)?,
+        "db_migration" => db::migration_checks(worktree)?,
         "research_report" => research::research_checks(worktree)?,
         _ => return Ok(None),
     };

@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -14,7 +14,7 @@ AgentHub — транзакционная runtime-основа для работ
 - изолированные через worktree профили `CodeWorkspace`, `ContentWorkspace`, `DataWorkspace`, `InfraWorkspace`, `MediaWorkspace`, `ResearchWorkspace`;
 - journal, report, DAG, AgentIR, context pack и verifier logs;
 - diff guard, sync check, rollback и commit-on-success;
-- команды verifier, runtime smoke checks и domain verifiers для content/data/infra/media/research/backend TDD;
+- команды verifier, runtime smoke checks и domain verifiers для content/data/infra/media/research/backend TDD/DB migration;
 - ограниченный repair loop и reviewer gate;
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;

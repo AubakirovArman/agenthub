@@ -92,7 +92,7 @@ transaction:
 - `media.git`: prompts、scripts、voice tracks、renders 和 media assets。
 - `research.git`: sources、claims、citations、graphs、critic notes 和 reports。
 
-Domain verifier profiles 会在 configured commands 之后添加 structural checks：`content_quality` 检查 content artifacts，`data_quality` 验证 JSON，`infra_plan` 验证 plans，`media_render` 验证 media manifests/assets，`research_report` 验证 cited claims，`backend_tdd` 验证 test 和 API response artifacts。详情见 [Workspaces](workspaces.zh.md)、[Research](research-profile.zh.md) 和 [Backend TDD](backend-tdd-verifier.zh.md)。
+Domain verifier profiles 会在 configured commands 之后添加 structural checks：`content_quality` 检查 content artifacts，`data_quality` 验证 JSON，`infra_plan` 验证 plans，`media_render` 验证 media manifests/assets，`research_report` 验证 cited claims，`backend_tdd` 验证 test 和 API response artifacts，`db_migration` 验证 migration artifacts。详情见 [Workspaces](workspaces.zh.md)、[Research](research-profile.zh.md)、[Backend TDD](backend-tdd-verifier.zh.md) 和 [DB Migration](db-migration-verifier.zh.md)。
 
 示例：
 
@@ -102,6 +102,7 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 agenthub run examples/backend-tdd-task.yaml
+agenthub run examples/db-migration-task.yaml
 ```
 
 ## Agent Adapters

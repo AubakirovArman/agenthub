@@ -23,4 +23,4 @@ sed -n '1,120p' prd/status.md
 
 - `prd/source/`: `prd.md` файлының top-level split.
 - `prd/audit/`: done, partial және open PRD areas.
-- `prd/todo/open-*.md`: long-term PRD tasks; қазіргі task — `open-09-db-migration-verifier.md`.
+- `prd/todo/open-*.md`: long-term PRD tasks; қазіргі task — `open-10-command-policy-enforcement.md`.

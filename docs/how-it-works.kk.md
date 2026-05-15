@@ -92,7 +92,7 @@ transaction:
 - `media.git`: prompts, scripts, voice tracks, renders және media assets.
 - `research.git`: sources, claims, citations, graphs, critic notes және reports.
 
-Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` content artifacts тексереді, `data_quality` JSON валидтейді, `infra_plan` plans валидтейді, `media_render` media manifests/assets валидтейді, `research_report` cited claims валидтейді, ал `backend_tdd` test және API response artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md), [Research](research-profile.kk.md), [Backend TDD](backend-tdd-verifier.kk.md).
+Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` content artifacts тексереді, `data_quality` JSON валидтейді, `infra_plan` plans валидтейді, `media_render` media manifests/assets валидтейді, `research_report` cited claims валидтейді, `backend_tdd` test және API response artifacts валидтейді, ал `db_migration` migration artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md), [Research](research-profile.kk.md), [Backend TDD](backend-tdd-verifier.kk.md), [DB Migration](db-migration-verifier.kk.md).
 
 Мысалдар:
 
@@ -102,6 +102,7 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 agenthub run examples/backend-tdd-task.yaml
+agenthub run examples/db-migration-task.yaml
 ```
 
 ## Agent Adapters

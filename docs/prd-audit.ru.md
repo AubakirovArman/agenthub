@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Главные open areas: specialized database migration verifier, command policy enforcement, strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards и formal WAL.
+Главные open areas: command policy enforcement, strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards и formal WAL.

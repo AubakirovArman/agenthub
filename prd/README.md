@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-09-db-migration-verifier.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-10-command-policy-enforcement.md`.
 
 ## Status Index
 

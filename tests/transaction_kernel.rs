@@ -773,6 +773,56 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn db_migration_verifier_profile_uses_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "db_migration.yaml",
+        r#"
+task:
+  id: db_migration_demo
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p db/migrations db/seeds
+    - printf 'create table users;\n' > db/migrations/001_create_users.sql
+    - printf '+ users\n' > db/schema.diff
+    - printf 'dry run ok\n' > db/dry-run.log
+    - printf 'drop table users;\n' > db/rollback.sql
+    - printf 'insert into users values (1);\n' > db/seeds/users.sql
+    - "printf '{\"migrations\":[\"db/migrations/001_create_users.sql\"],\"schema_diff\":\"db/schema.diff\",\"dry_run\":\"db/dry-run.log\",\"rollback_supported\":true,\"rollback_plan\":\"db/rollback.sql\",\"seed_files\":[\"db/seeds/users.sql\"]}\n' > db/migration.json"
+scope:
+  allow:
+    - db/**
+verify:
+  profile: db_migration
+  commands:
+    - test -f db/dry-run.log
+    - test -f db/rollback.sql
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 6
+    max_lines_added: 12
+    max_lines_deleted: 0
+"#,
+    )?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("db_migration"));
+    assert!(verifier.contains("db_dry_run_present"));
+    Ok(())
+}
+
 fn research_spec() -> &'static str {
     r#"
 task:

@@ -92,7 +92,7 @@ AgentHub currently supports six git-backed domain profiles:
 - `media.git`: prompts, scripts, voice tracks, renders, and media assets.
 - `research.git`: sources, claims, citations, graphs, critic notes, and reports.
 
-Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, and `backend_tdd` validates test and API response artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), and [Backend TDD](backend-tdd-verifier.en.md).
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, `backend_tdd` validates test and API response artifacts, and `db_migration` validates migration artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), [Backend TDD](backend-tdd-verifier.en.md), and [DB Migration](db-migration-verifier.en.md).
 
 Examples:
 
@@ -102,6 +102,7 @@ agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
 agenthub run examples/backend-tdd-task.yaml
+agenthub run examples/db-migration-task.yaml
 ```
 
 ## Agent Adapters

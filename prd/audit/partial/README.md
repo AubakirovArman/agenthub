@@ -7,7 +7,7 @@ These PRD areas have an implemented foundation but are not complete compared wit
 - AAL: grammar, parser, diagnostics, and language reference exist; deeper language-server semantics remain future work.
 - Agent Lock: `.agent/agent.lock` exists, but deeper central lock governance is future work.
 - Transaction Manager effect tracking: local git/file rollback exists, but not all external effects have rollback handlers.
-- Verifier layer: command/runtime/content/data/infra/media/research/backend_tdd checks exist; specialized db_migration profile is not complete.
+- Verifier layer: command/runtime/content/data/infra/media/research/backend_tdd/db_migration checks exist; deeper verifier integrations remain future work.
 - Agent orchestration: single, planner/executor, generator/critic, reviewer/repair, swarm, manager/worker, and tournament topology kinds exist; deeper adaptive orchestration remains future work.
 - LLM Gateway: traces, metadata, redaction, and cost estimates exist; not a full provider network gateway.
 - Security policy: RBAC and diff/scope controls exist; command allowlist enforcement and strong sandbox levels are not complete.
