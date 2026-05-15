@@ -71,6 +71,28 @@ function renderCost() {
   );
 }
 
+function renderMetricsDashboard() {
+  const m = data.metrics;
+  const pct = (value) => `${(value * 100).toFixed(1)}%`;
+  const money = (value) => `$${value.toFixed(6)}`;
+  const groups = [
+    ["Reliability", [["Committed", m.reliability.committed], ["Failed", m.reliability.failed], ["Blocked", m.reliability.blocked], ["Success", pct(m.reliability.success_rate)]]],
+    ["Context", [["Memory", m.context.memory_records], ["Failed attempts", m.context.failed_attempts], ["Tokens", m.context.estimated_tokens], ["Avg DAG", m.context.average_dag_nodes.toFixed(1)]]],
+    ["Quality", [["Verifier", `${m.quality.verifier_passed}/${m.quality.verifier_total}`], ["Review", `${m.quality.review_passed}/${m.quality.review_total}`], ["Gate pass", pct(m.quality.gate_pass_rate)]]],
+    ["Trust", [["Plugins", m.trust.installed_plugins], ["Signed", m.trust.signed_plugins], ["Verified", m.trust.verified_signatures], ["Trusted", m.trust.trusted_plugins]]],
+    ["Cost", [["Total", money(m.cost.total_usd)], ["Average", money(m.cost.average_usd)], ["Tokens", m.cost.estimated_tokens]]],
+  ];
+  $("#metricsDashboard").replaceChildren(...groups.map(([title, items]) =>
+    el("div", { class: "metric-group" }, [
+      el("strong", { text: title }),
+      ...items.map(([label, value]) => el("div", { class: "metric-row" }, [
+        el("span", { text: label }),
+        el("b", { text: String(value) }),
+      ])),
+    ])
+  ));
+}
+
 function renderTimeline() {
   const items = data.timeline.map((event) => el("li", {}, [
     el("time", { text: new Date(event.ts).toLocaleString() }),
@@ -156,6 +178,7 @@ renderHeader();
 renderMetrics();
 renderTransactions();
 renderCost();
+renderMetricsDashboard();
 renderTimeline();
 renderTrace();
 renderGraph();

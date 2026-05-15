@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-主要 open areas：metrics dashboards、formal WAL。
+主要 open areas：formal WAL、reference web fixture。

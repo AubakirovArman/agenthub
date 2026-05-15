@@ -1,6 +1,7 @@
 mod assets;
 mod collect;
 mod memory_graph;
+mod metrics;
 mod read;
 mod reports;
 #[cfg(test)]
@@ -26,6 +27,7 @@ pub struct WebDashboard {
     pub skills: Vec<WebSkill>,
     pub policies: PolicyPanel,
     pub cost: CostPanel,
+    pub metrics: MetricsPanel,
     pub reports: Vec<ReportLink>,
 }
 
@@ -107,6 +109,56 @@ pub struct RoleSummary {
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CostPanel {
     pub total_usd: f64,
+    pub estimated_tokens: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct MetricsPanel {
+    pub reliability: ReliabilityMetrics,
+    pub context: ContextMetrics,
+    pub quality: QualityMetrics,
+    pub trust: TrustMetrics,
+    pub cost: CostMetrics,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct ReliabilityMetrics {
+    pub committed: usize,
+    pub failed: usize,
+    pub blocked: usize,
+    pub open: usize,
+    pub success_rate: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct ContextMetrics {
+    pub memory_records: usize,
+    pub failed_attempts: usize,
+    pub estimated_tokens: usize,
+    pub average_dag_nodes: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct QualityMetrics {
+    pub verifier_total: usize,
+    pub verifier_passed: usize,
+    pub review_total: usize,
+    pub review_passed: usize,
+    pub gate_pass_rate: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct TrustMetrics {
+    pub installed_plugins: usize,
+    pub signed_plugins: usize,
+    pub verified_signatures: usize,
+    pub trusted_plugins: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Default)]
+pub struct CostMetrics {
+    pub total_usd: f64,
+    pub average_usd: f64,
     pub estimated_tokens: usize,
 }
 

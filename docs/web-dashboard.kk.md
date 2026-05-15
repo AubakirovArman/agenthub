@@ -32,6 +32,7 @@ agenthub dashboard --output tmp/agenthub-dashboard
 
 - project path және generation timestamp;
 - transaction саны, open/failed саны, memory саны, skill саны және total cost;
+- reliability, context, quality, trust және cost үшін aggregated KPI metrics;
 - recent transactions: status, DAG size, cost және report links;
 - `journal.jsonl` ішінен transaction timeline;
 - DAG node roles ішінен latest agent trace;
@@ -39,6 +40,8 @@ agenthub dashboard --output tmp/agenthub-dashboard
 - `skills/**/skill.yaml` ішінен available skills;
 - enterprise policy source, default role, runner және role permission counts;
 - transaction report және compliance report links.
+
+KPI payload үшін [Metrics Dashboard](metrics-dashboard.kk.md) қараңыз.
 
 ## Permissions
 

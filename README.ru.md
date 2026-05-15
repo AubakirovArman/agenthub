@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [Metrics Dashboard](docs/metrics-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -26,7 +26,7 @@ AgentHub — транзакционная runtime-основа для работ
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
 - standalone AAL parser с diagnostics и AgentSpec YAML output;
 - terminal TUI dashboard для transactions, DAG, verifier, cost, memory и approvals;
-- static browser dashboard для transactions, timeline, agent trace, memory graph, skills, policies, costs и reports;
+- static browser dashboard для transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs и reports;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
 - PRD tracker разбит на `prd/done` и `prd/todo`.
@@ -195,7 +195,7 @@ agenthub dashboard
 agenthub dashboard --output tmp/agenthub-dashboard
 ```
 
-Dashboard пишет `index.html`, `data.json`, `data.js`, `dashboard.css` и `dashboard.js`. Он показывает последние transactions, journal timeline, DAG roles, memory graph, skills, enterprise policy summary, cost analytics и report links. См. [Web Dashboard](docs/web-dashboard.ru.md).
+Dashboard пишет `index.html`, `data.json`, `data.js`, `dashboard.css` и `dashboard.js`. Он показывает последние transactions, aggregated metrics, journal timeline, DAG roles, memory graph, skills, enterprise policy summary, cost analytics и report links. См. [Web Dashboard](docs/web-dashboard.ru.md) и [Metrics Dashboard](docs/metrics-dashboard.ru.md).
 
 ## Plugin Ecosystem
 

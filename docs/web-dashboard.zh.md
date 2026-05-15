@@ -32,6 +32,7 @@ agenthub dashboard --output tmp/agenthub-dashboard
 
 - project 路径和生成时间；
 - transaction 数量、open/failed 数量、memory 数量、skill 数量和总 cost；
+- reliability、context、quality、trust 和 cost 的 aggregated KPI metrics；
 - recent transactions，包括 status、DAG 大小、cost 和 report links；
 - 来自 `journal.jsonl` 的 transaction timeline；
 - 来自 DAG node roles 的 latest agent trace；
@@ -39,6 +40,8 @@ agenthub dashboard --output tmp/agenthub-dashboard
 - 来自 `skills/**/skill.yaml` 的 available skills；
 - enterprise policy source、default role、runner 和每个 role 的 permission 数量；
 - transaction reports 和 compliance reports 链接。
+
+KPI payload 见 [Metrics Dashboard](metrics-dashboard.zh.md)。
 
 ## Permissions
 

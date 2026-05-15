@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [Sandbox Levels](docs/sandbox-levels.en.md), [Remote Runner](docs/remote-runner.en.md), [Network Policy](docs/network-policy-server.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Plugin signatures](docs/plugin-signatures.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [Metrics Dashboard](docs/metrics-dashboard.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [Sandbox Levels](docs/sandbox-levels.en.md), [Remote Runner](docs/remote-runner.en.md), [Network Policy](docs/network-policy-server.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Plugin signatures](docs/plugin-signatures.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Current Status
 
@@ -26,7 +26,7 @@ The current implementation covers the early PRD foundation:
 - `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;
 - standalone AAL parser with diagnostics and AgentSpec YAML output;
 - terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals;
-- static browser dashboard for transactions, timeline, agent trace, memory graph, skills, policies, costs, and reports;
+- static browser dashboard for transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs, and reports;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
 - enterprise policy sources including HTTP policy server, RBAC checks, secret checks, runner/model routing, audit log, and compliance reports.
 - PRD tracker split into `prd/done` and `prd/todo`.
@@ -195,7 +195,7 @@ agenthub dashboard
 agenthub dashboard --output tmp/agenthub-dashboard
 ```
 
-The dashboard writes `index.html`, `data.json`, `data.js`, `dashboard.css`, and `dashboard.js`. It shows recent transactions, journal timeline, DAG roles, memory graph, skills, enterprise policy summary, cost analytics, and report links. See [Web Dashboard](docs/web-dashboard.en.md).
+The dashboard writes `index.html`, `data.json`, `data.js`, `dashboard.css`, and `dashboard.js`. It shows recent transactions, aggregated metrics, journal timeline, DAG roles, memory graph, skills, enterprise policy summary, cost analytics, and report links. See [Web Dashboard](docs/web-dashboard.en.md) and [Metrics Dashboard](docs/metrics-dashboard.en.md).
 
 ## Plugin Ecosystem
 

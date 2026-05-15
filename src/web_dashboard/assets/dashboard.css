@@ -114,6 +114,10 @@ th,
   grid-column: span 7;
 }
 
+.span-12 {
+  grid-column: span 12;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
@@ -172,6 +176,26 @@ a {
 #cost {
   display: grid;
   gap: 10px;
+}
+
+.metric-dashboard {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.metric-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.metric-row {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
 }
 
 .chip {

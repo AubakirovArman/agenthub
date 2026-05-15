@@ -9,6 +9,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - CLI runtime commands and VS Code extension surface.
 - Terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals.
 - Static browser dashboard for transactions, timeline, agent trace, memory graph, skills, policies, costs, and reports.
+- Aggregated metrics dashboard for reliability, context, quality, trust, and cost KPIs.
 - Standalone AAL parser, diagnostics, AgentSpec YAML output, and language reference.
 - Natural language `ask` preview with defaults, clarification questions, and approval marking.
 - Context maps and least-context context pack trace.

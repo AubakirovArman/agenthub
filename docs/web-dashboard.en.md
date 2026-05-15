@@ -32,6 +32,7 @@ Then open the printed `index.html` path in a browser.
 
 - project path and generated timestamp;
 - transaction counts, open/failed counts, memory count, skill count, and total cost;
+- aggregated KPI metrics for reliability, context, quality, trust, and cost;
 - recent transactions with status, DAG size, cost, and report links;
 - transaction timeline from `journal.jsonl`;
 - latest agent trace from DAG node roles;
@@ -39,6 +40,8 @@ Then open the printed `index.html` path in a browser.
 - available skills from `skills/**/skill.yaml`;
 - enterprise policy source, default role, runner, and role permission counts;
 - transaction and compliance report links.
+
+See [Metrics Dashboard](metrics-dashboard.en.md) for the KPI payload.
 
 ## Permissions
 

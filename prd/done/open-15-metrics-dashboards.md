@@ -1,6 +1,6 @@
 # Open Task 15 — Metrics Dashboards
 
-Status: Todo
+Status: Done
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
@@ -15,3 +15,15 @@ Aggregated reliability, context, quality, trust, and cost metrics dashboards.
 - Tests or smoke checks cover the new behavior.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
 - Move this task to `prd/done/` with closing evidence when complete.
+
+## Completed
+
+- Added aggregated `metrics` payload to Web Dashboard `data.json` and `data.js`.
+- Added Metrics Dashboard UI panel for reliability, context, quality, trust, and cost KPI groups.
+- Aggregates transaction status rates, verifier/reviewer pass rates, memory/context data, plugin trust/signature data, and cost/token totals.
+- README and feature docs were updated in English, Russian, Chinese, and Kazakh.
+
+## Evidence
+
+- Implementation commit: pending.
+- Checks: pending.

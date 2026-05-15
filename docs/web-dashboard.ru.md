@@ -32,6 +32,7 @@ agenthub dashboard --output tmp/agenthub-dashboard
 
 - путь проекта и время генерации;
 - количество transactions, open/failed, memory records, skills и общий cost;
+- aggregated KPI metrics для reliability, context, quality, trust и cost;
 - последние transactions со status, размером DAG, cost и ссылками на reports;
 - timeline транзакций из `journal.jsonl`;
 - latest agent trace из DAG node roles;
@@ -39,6 +40,8 @@ agenthub dashboard --output tmp/agenthub-dashboard
 - доступные skills из `skills/**/skill.yaml`;
 - enterprise policy source, default role, runner и количество permissions по ролям;
 - ссылки на transaction reports и compliance reports.
+
+См. [Metrics Dashboard](metrics-dashboard.ru.md) для KPI payload.
 
 ## Permissions
 

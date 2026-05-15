@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: metrics dashboards and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: a formal WAL layer and reference web fixture.
 
 ## Top-Level Section Matrix
 
@@ -35,7 +35,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 20. Domain Profiles | Mostly done | Code, Infra, Data, Content, Media, and Research exist. |
 | 21. Development Roadmap | Done | Phases 1-14 are done with commit evidence in `prd/status.md`. |
 | 22. Technical Stack | Mostly done | Rust core and VS Code extension exist; research/ML plugins are future. |
-| 23. Success Metrics | Partial | Artifacts expose reliability/context/cost data, but metric aggregation and dashboards are open. |
+| 23. Success Metrics | Mostly done | Artifacts expose reliability/context/cost data and the Web Dashboard aggregates KPI metrics. |
 | 24. Major Risks | Mostly mitigated | Transaction, verifier, memory, security, cost, and skill risks have mitigations, but remain ongoing product risks. |
 | 25. Open Questions | Partial | Several decisions are answered; some long-term questions remain open. |
 | 26. Reference Scenario | Partial | Transaction examples exist; a full real web-app add-page scenario is not shipped as an end-to-end fixture. |
@@ -79,7 +79,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Enterprise | RBAC, local/file/HTTP policy source, built-in policy server, audit, secrets check, runners inventory, remote runner execution, compliance | hosted/team policy administration |
 | Security | command policy, sandbox level gates, scope/diff guards, redaction, enterprise permissions, remote dispatch | hardened runner backends |
 | Domains | Code, Infra, Data, Content, Media, Research | deeper specialized profile tooling |
-| Metrics | artifacts include cost/tokens/status and Web Dashboard project metrics | aggregated KPI dashboards |
+| Metrics | artifacts include cost/tokens/status and Web Dashboard aggregated KPI dashboards | deeper trend history and external analytics exports |
 
 ## Roadmap Phase Matrix
 
