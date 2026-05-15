@@ -26,6 +26,7 @@ pub mod sandbox;
 pub mod skill_registry;
 pub mod smart_sync;
 pub mod spec;
+pub mod team;
 pub mod topology;
 pub mod transaction;
 pub mod tui;

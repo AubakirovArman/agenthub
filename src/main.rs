@@ -8,7 +8,7 @@ use clap::Parser;
 use serde_json::json;
 
 use agenthub::{
-    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry,
+    aal, agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, team,
     transaction, tui, web_dashboard, workspace,
 };
 
@@ -101,6 +101,10 @@ fn run() -> Result<()> {
             enterprise::authorize(&project_root, "enterprise.policy.read")?;
             let output_dir = resolve_output(&project_root, &output);
             let result = web_dashboard::write_dashboard(&project_root, &output_dir)?;
+            team::write_export(
+                std::slice::from_ref(&project_root),
+                &project_root.join(".agent/reports/team"),
+            )?;
             println!("{}", result.index_path.display());
         }
         Commands::Aal { command } => match command {
