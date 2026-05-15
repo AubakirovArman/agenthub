@@ -13,7 +13,7 @@ static RUNTIME_SMOKE_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn runtime_smoke_checks_http_route() -> Result<()> {
-    if !command_exists("python3") {
+    if !command_exists("node") {
         return Ok(());
     }
 
@@ -45,7 +45,7 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
 
 #[test]
 fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
-    if !command_exists("python3") {
+    if !command_exists("node") {
         return Ok(());
     }
 
@@ -80,7 +80,7 @@ fn runtime_verify(_root: &std::path::Path, port: u16, path: &str, expect: u16) -
         profile: Some("web_runtime_smoke".to_string()),
         commands: Vec::new(),
         runtime: Some(RuntimeSmokeSpec {
-            start_command: format!("python3 -m http.server {port} --bind 127.0.0.1"),
+            start_command: node_static_server_command(port),
             base_url: format!("http://127.0.0.1:{port}"),
             timeout_secs: 10,
         }),
@@ -89,6 +89,24 @@ fn runtime_verify(_root: &std::path::Path, port: u16, path: &str, expect: u16) -
             expect,
         }],
     }
+}
+
+fn node_static_server_command(port: u16) -> String {
+    let script = [
+        "const http=require(\"http\");",
+        "const fs=require(\"fs\");",
+        "http.createServer((req,res)=>{",
+        "if(req.url===\"/\"||req.url===\"/index.html\"){",
+        "res.writeHead(200);",
+        "res.end(fs.readFileSync(\"index.html\"));",
+        "}else{",
+        "res.writeHead(404);",
+        "res.end(\"missing\");",
+        "}",
+        &format!("}}).listen({port},\"127.0.0.1\");"),
+    ]
+    .join("");
+    format!("node -e '{script}'")
 }
 
 fn command_exists(command: &str) -> bool {
