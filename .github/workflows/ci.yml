@@ -68,3 +68,8 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: AGENTHUB_PACKAGE_DIST=target/agenthub-package scripts/package.sh
+
+      - name: Fixture smoke
+        if: runner.os == 'Linux'
+        shell: bash
+        run: scripts/test-fixtures.sh

@@ -1,0 +1,33 @@
+task:
+  id: content_basic_fixture
+  type: content.command
+  title: Draft a content article
+
+workspace:
+  type: content.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p content/articles
+    - printf '# AgentHub Fixture\n\nContent smoke test.\n' > content/articles/fixture.md
+
+scope:
+  allow:
+    - content/**
+  deny:
+    - .agent/**
+
+verify:
+  profile: content_quality
+  commands:
+    - test -s content/articles/fixture.md
+    - grep -q 'AgentHub Fixture' content/articles/fixture.md
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0

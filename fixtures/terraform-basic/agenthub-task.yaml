@@ -1,0 +1,33 @@
+task:
+  id: terraform_basic_fixture
+  type: infra.command
+  title: Generate a Terraform plan note
+
+workspace:
+  type: infra.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p infra/plans
+    - "printf 'plan: fixture\\nrisk: none\\n' > infra/plans/plan.yaml"
+
+scope:
+  allow:
+    - infra/**
+  deny:
+    - .agent/**
+
+verify:
+  profile: infra_plan
+  commands:
+    - test -s infra/plans/plan.yaml
+    - grep -q 'plan:' infra/plans/plan.yaml
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0

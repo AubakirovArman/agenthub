@@ -1,0 +1,33 @@
+task:
+  id: rust_basic_fixture
+  type: code.command
+  title: Add a generated Rust module
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - printf 'pub fn generated() -> String { "ok".to_string() }\n' > src/generated.rs
+    - printf '\npub mod generated;\n' >> src/lib.rs
+
+scope:
+  allow:
+    - src/lib.rs
+    - src/generated.rs
+  deny:
+    - .agent/**
+
+verify:
+  profile: code_build
+  commands:
+    - cargo check --quiet
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 4
+    max_lines_deleted: 0

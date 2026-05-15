@@ -1,0 +1,33 @@
+task:
+  id: python_data_fixture
+  type: data.command
+  title: Generate a data quality artifact
+
+workspace:
+  type: data.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p data/reports
+    - "printf '{\"rows\":1,\"status\":\"ok\"}\\n' > data/reports/quality.json"
+
+scope:
+  allow:
+    - data/**
+  deny:
+    - .agent/**
+
+verify:
+  profile: data_quality
+  commands:
+    - test -s data/reports/quality.json
+    - grep -q '"status":"ok"' data/reports/quality.json
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
