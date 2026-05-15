@@ -12,7 +12,7 @@
 | Phase 8 — Context Maps | Done | `done/phase-08-context-maps.md` | `c55de1f` |
 | Phase 9 — Natural Language to AgentSpec | Done | `done/phase-09-natural-language-agentspec.md` | `55d4dd3` |
 | Phase 10 — Advanced Agent Topologies | Done | `done/phase-10-advanced-agent-topologies.md` | `ae9d1cb` |
-| Phase 11 — Additional Workspaces | Done | `done/phase-11-additional-workspaces.md` | Phase 11 implementation commit |
+| Phase 11 — Additional Workspaces | Done | `done/phase-11-additional-workspaces.md` | `fbbe0bd` |
 | Phase 12 — IDE and Visual Layer | Partial / verify fully | `todo/phase-12-ide-and-visual-layer.md` | existing v0 in `58a68b8`; needs PRD audit |
 | Phase 13 — Marketplace / Plugin Ecosystem | Partial / verify fully | `todo/phase-13-marketplace-plugin-ecosystem.md` | existing foundation in `ddd84ca`; needs PRD audit |
 | Phase 14 — Enterprise Layer | Partial / verify fully | `todo/phase-14-enterprise-layer.md` | existing foundation in `20cf11b`; needs PRD audit |

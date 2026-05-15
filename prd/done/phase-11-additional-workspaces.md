@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: Phase 11 implementation commit.
+Closing evidence: `fbbe0bd`.
 
 ## Deliverables
 
