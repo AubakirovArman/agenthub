@@ -1,6 +1,7 @@
 use std::fs;
 use std::net::TcpListener;
 use std::process::Command;
+use std::sync::Mutex;
 
 use anyhow::Result;
 
@@ -8,15 +9,21 @@ use crate::spec::SandboxSpec;
 use crate::spec::{RouteCheckSpec, RuntimeSmokeSpec, VerifySpec};
 use crate::verifier::run;
 
+static RUNTIME_SMOKE_TEST_LOCK: Mutex<()> = Mutex::new(());
+
 #[test]
 fn runtime_smoke_checks_http_route() -> Result<()> {
     if !command_exists("python3") {
         return Ok(());
     }
 
+    let _guard = RUNTIME_SMOKE_TEST_LOCK
+        .lock()
+        .expect("runtime smoke test lock");
     let dir = tempfile::tempdir()?;
     fs::write(dir.path().join("index.html"), "ok")?;
     let port = free_port()?;
+    let log_path = dir.path().join("verifier.log");
     let verify = runtime_verify(dir.path(), port, "/", 200);
 
     let result = run(
@@ -24,10 +31,11 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
         &SandboxSpec::default(),
         None,
         dir.path(),
-        &dir.path().join("verifier.log"),
+        &log_path,
     )?;
 
-    assert!(result.passed);
+    let log = fs::read_to_string(&log_path).unwrap_or_default();
+    assert!(result.passed, "runtime smoke failed: {result:#?}\n{log}");
     assert!(result
         .runtime_smoke
         .as_ref()
@@ -41,6 +49,9 @@ fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
         return Ok(());
     }
 
+    let _guard = RUNTIME_SMOKE_TEST_LOCK
+        .lock()
+        .expect("runtime smoke test lock");
     let dir = tempfile::tempdir()?;
     fs::write(dir.path().join("index.html"), "ok")?;
     let port = free_port()?;
