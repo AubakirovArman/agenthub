@@ -25,5 +25,5 @@ Aggregated reliability, context, quality, trust, and cost metrics dashboards.
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `17d6e2b`.
+- Checks: `cargo fmt -- --check`; `cargo test`; `cargo clippy -- -D warnings`; `scripts/check-module-size.sh 200`; `git diff --check`; `npm run check` in `editors/vscode`; targeted `cargo test web_dashboard`; `node --check src/web_dashboard/assets/dashboard.js`.
