@@ -2,7 +2,7 @@
 
 Languages: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub can be installed from source today and from GitHub Release artifacts after the first tagged release is published.
+AgentHub can be installed from source today. The first release artifact target is `v0.2.0-local-preview`.
 
 ## From Source
 
@@ -12,7 +12,7 @@ Install the current checkout:
 cargo install --path .
 ```
 
-Future GitHub install flow:
+GitHub source install flow:
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub.git
@@ -20,10 +20,17 @@ cargo install --git https://github.com/AubakirovArman/agenthub.git
 
 ## POSIX Installer
 
-After release assets exist:
+After the `v0.2.0-local-preview` assets exist:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
+```
+
+Pin the preview release:
+
+```bash
+AGENTHUB_VERSION=v0.2.0-local-preview \
+  curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
 ```
 
 Use a local artifact for testing:
@@ -40,10 +47,16 @@ Optional environment:
 
 ## Windows Installer
 
-After release assets exist:
+After the `v0.2.0-local-preview` assets exist:
 
 ```powershell
 irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
+```
+
+Pin the preview release:
+
+```powershell
+$env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
 ```
 
 Use a local artifact for testing:

@@ -2,7 +2,7 @@
 
 语言: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub 现在可以从 source checkout 安装。发布第一个 tagged release 后，也可以从 GitHub Release artifacts 安装。
+AgentHub 现在可以从 source checkout 安装。第一个 release artifact 目标是 `v0.2.0-local-preview`。
 
 ## 从 source 安装
 
@@ -12,7 +12,7 @@ AgentHub 现在可以从 source checkout 安装。发布第一个 tagged release
 cargo install --path .
 ```
 
-未来 GitHub install flow：
+GitHub source install flow：
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub.git
@@ -20,10 +20,17 @@ cargo install --git https://github.com/AubakirovArman/agenthub.git
 
 ## POSIX installer
 
-release assets 发布后：
+`v0.2.0-local-preview` assets 发布后：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
+```
+
+固定安装 preview release：
+
+```bash
+AGENTHUB_VERSION=v0.2.0-local-preview \
+  curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
 ```
 
 使用 local artifact 测试：
@@ -40,10 +47,16 @@ AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz scripts/install.
 
 ## Windows installer
 
-release assets 发布后：
+`v0.2.0-local-preview` assets 发布后：
 
 ```powershell
 irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
+```
+
+固定安装 preview release：
+
+```powershell
+$env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
 ```
 
 使用 local artifact 测试：

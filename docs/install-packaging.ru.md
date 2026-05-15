@@ -2,7 +2,7 @@
 
 Языки: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub уже можно ставить из source checkout. Установка из GitHub Release artifacts будет работать после публикации первого tag release.
+AgentHub уже можно ставить из source checkout. Первый целевой release artifact — `v0.2.0-local-preview`.
 
 ## Из source
 
@@ -12,7 +12,7 @@ AgentHub уже можно ставить из source checkout. Установк
 cargo install --path .
 ```
 
-Будущий GitHub install flow:
+GitHub source install flow:
 
 ```bash
 cargo install --git https://github.com/AubakirovArman/agenthub.git
@@ -20,10 +20,17 @@ cargo install --git https://github.com/AubakirovArman/agenthub.git
 
 ## POSIX installer
 
-После появления release assets:
+После появления assets для `v0.2.0-local-preview`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
+```
+
+Установка конкретного preview release:
+
+```bash
+AGENTHUB_VERSION=v0.2.0-local-preview \
+  curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
 ```
 
 Проверка на local artifact:
@@ -40,10 +47,16 @@ AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz scripts/install.
 
 ## Windows installer
 
-После появления release assets:
+После появления assets для `v0.2.0-local-preview`:
 
 ```powershell
 irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
+```
+
+Установка конкретного preview release:
+
+```powershell
+$env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
 ```
 
 Проверка на local artifact:

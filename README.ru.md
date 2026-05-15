@@ -12,6 +12,10 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.ru.md)
 
 Governance docs: [Governance v2](docs/governance-v2.ru.md)
 
+Ограничения preview: [Known Limitations](docs/known-limitations.ru.md)
+
+Документация release preview: [PRD v4](docs/prd-v4.ru.md)
+
 ## Текущий статус
 
 Сейчас реализована фундаментальная часть PRD:

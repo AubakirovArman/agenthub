@@ -12,6 +12,10 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.zh.md)
 
 Governance docs: [Governance v2](docs/governance-v2.zh.md)
 
+Preview 限制: [Known Limitations](docs/known-limitations.zh.md)
+
+Release preview 文档: [PRD v4](docs/prd-v4.zh.md)
+
 ## 当前状态
 
 当前实现覆盖 PRD 的基础层：

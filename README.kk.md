@@ -12,6 +12,10 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.kk.md)
 
 Governance docs: [Governance v2](docs/governance-v2.kk.md)
 
+Preview шектеулері: [Known Limitations](docs/known-limitations.kk.md)
+
+Release preview құжаттамасы: [PRD v4](docs/prd-v4.kk.md)
+
 ## Қазіргі күйі
 
 Қазір PRD-дегі негізгі қабаттар іске асырылды:

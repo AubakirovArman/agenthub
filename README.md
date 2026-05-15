@@ -12,6 +12,10 @@ Verifier docs: [Verifier Integrations](docs/verifier-integrations.en.md)
 
 Governance docs: [Governance v2](docs/governance-v2.en.md)
 
+Known limitations: [Known Limitations](docs/known-limitations.en.md)
+
+Release preview docs: [PRD v4](docs/prd-v4.en.md)
+
 ## Current Status
 
 The current implementation covers the early PRD foundation:
