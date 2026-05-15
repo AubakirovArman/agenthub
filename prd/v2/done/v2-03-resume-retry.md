@@ -29,5 +29,5 @@ Make blocked and failed transactions actionable instead of read-only historical 
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `624264d`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test tx_control`; `cargo test resolve_and_resume_blocked_transaction`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
