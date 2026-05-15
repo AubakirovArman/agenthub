@@ -45,7 +45,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             id: "kimi",
             binary: Some("kimi"),
             endpoint_env: None,
-            template: Some("kimi --prompt-file {prompt}"),
+            template: Some("kimi --print --afk --input-format text < {prompt}"),
             note: "install the Kimi CLI and make `kimi` available on PATH",
         },
         ProviderInfo {
