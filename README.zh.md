@@ -1,64 +1,23 @@
 # AgentHub
 
-AgentHub 是面向 AI Agent 工作流的事务型运行时基础。它把人工请求或 `AgentSpec` 文件转换成隔离、可验证、可审计的事务。
+AgentHub 是面向 AI coding agents 的本地事务型 runtime。它不替代 Codex、Gemini、Kimi 或 OpenAI-compatible tools，而是用 isolated worktrees、command policy、verifier checks、rollback、memory、reports 和 dashboards 包住这些工具。
 
 语言: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-详细文档: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.zh.md), [PRD audit](docs/prd-audit.zh.md), [PRD v2](docs/prd-v2.zh.md), [PRD v3](docs/prd-v3.zh.md), [Repository Rename](docs/repository-rename.zh.md), [Release Engineering](docs/release-engineering.zh.md), [Install And Packaging](docs/install-packaging.zh.md), [Product CLI](docs/product-cli.zh.md), [Local Shell](docs/local-shell.zh.md), [Skill Standard Library](docs/skill-standard-library.zh.md), [Product Fixtures](docs/product-fixtures.zh.md), [Testing Strategy](docs/testing-strategy.zh.md), [Security Hardening](docs/security-hardening.zh.md), [TUI](docs/tui.zh.md), [Web Dashboard](docs/web-dashboard.zh.md), [Metrics Dashboard](docs/metrics-dashboard.zh.md), [Analytics History](docs/analytics-history.zh.md), [Hosted/Team Surfaces](docs/hosted-team-surfaces.zh.md), [AAL](docs/aal.zh.md), [Workspaces](docs/workspaces.zh.md), [Workspace Runtime](docs/workspace-runtime.zh.md), [Domain Runtimes](docs/domain-runtimes.zh.md), [MediaWorkspace](docs/media-workspace.zh.md), [Research](docs/research-profile.zh.md), [Backend TDD](docs/backend-tdd-verifier.zh.md), [DB Migration](docs/db-migration-verifier.zh.md), [Command Policy](docs/command-policy.zh.md), [Sandbox Levels](docs/sandbox-levels.zh.md), [Remote Runner](docs/remote-runner.zh.md), [Hardened Runner](docs/hardened-runner.zh.md), [Network Policy](docs/network-policy-server.zh.md), [WAL](docs/wal.zh.md), [Effect Ledger](docs/effect-ledger.zh.md), [Rollback Handlers](docs/rollback-handlers.zh.md), [Resume/Retry](docs/resume-retry.zh.md), [Transaction Watch](docs/tx-watch.zh.md), [Transaction Explain](docs/tx-explain.zh.md), [Transaction Undo](docs/tx-undo.zh.md), [Smart Sync](docs/smart-sync.zh.md), [VCM-OS Memory](docs/vcm-os-memory.zh.md), [Reference Web Fixture](docs/reference-web-fixture.zh.md), [IDE](docs/ide.zh.md), [Natural language](docs/natural-language.zh.md), [Topologies](docs/topologies.zh.md), [Agent adapters](docs/agent-adapters.zh.md), [Runtime and repair](docs/runtime-repair.zh.md), [Context maps](docs/context-maps.zh.md), [LLM Gateway](docs/llm-gateway.zh.md), [Plugin ecosystem](docs/plugin-ecosystem.zh.md), [Plugin signatures](docs/plugin-signatures.zh.md), [Plugin Governance](docs/plugin-governance.zh.md), [Enterprise](docs/enterprise.zh.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+## 什么是 AgentHub?
 
-1.0 readiness 文档: [Dogfooding](docs/dogfooding.zh.md), [Competitive Positioning](docs/competitive-positioning.zh.md), [Interactive Shell](docs/interactive-shell.zh.md)
+AgentHub 将 natural request 或 `AgentSpec` 文件转换为可审计 transaction：
 
-Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.zh.md)
+1. 准备 isolated workspace；
+2. 构建 context、memory warnings、DAG 和 AgentIR；
+3. 运行 configured provider 或 command adapter；
+4. 检查 scope、verifier commands、runtime smoke 和 smart sync；
+5. commit verified changes，或者安全 rollback；
+6. 写入 report、logs、effects、WAL、memory、analytics 和 dashboard data。
 
-Verifier docs: [Verifier Integrations](docs/verifier-integrations.zh.md)
+第一个产品目标是 local-first 使用：安装 CLI，连接 provider，运行任务，查看结果，然后不用手动清理即可继续工作。
 
-Governance docs: [Governance v2](docs/governance-v2.zh.md)
-
-Preview 限制: [Known Limitations](docs/known-limitations.zh.md)
-
-Release preview 文档: [PRD v4](docs/prd-v4.zh.md)
-
-## 当前状态
-
-当前实现覆盖 PRD 的基础层：
-
-- 事务型执行内核；
-- 通过 `CodeGitWorkspace` runtime abstraction 实现 git worktree 隔离的 `CodeWorkspace`、`ContentWorkspace`、`DataWorkspace`、`InfraWorkspace`、`MediaWorkspace`、`ResearchWorkspace`；
-- 面向 Rust、Terraform、Python data、media render 和 research citation work 的 domain runtime packs；
-- journal、带 replay validation 的 formal WAL、effect ledger、report、DAG、AgentIR、context pack 和 verifier logs；
-- command policy enforcement、sandbox level evaluation、hardened runner metadata、remote runner dispatch、diff guard、smart sync、rollback handlers 和成功后 commit；
-- verifier commands、runtime smoke checks，以及 content/data/infra/media/research/backend TDD/DB migration 的 domain verifiers；
-- structured verifier integrations，包含 unified check records、fingerprints、trend data 和 plugin metadata compatibility；
-- end-to-end reference web fixture，用于在 existing app 中添加 `/courses`，并验证 build、runtime smoke、scope rollback、memory、report、cost 和 WAL evidence；
-- 有边界的 repair loop 和 reviewer gate；
-- transaction resolve、retry planning，以及 human-blocked transactions 的 supported resume；
-- VCM memory staging、promotion、typed schemas、schema-filtered retrieval、failed-attempt warnings、views 和 audit；
-- skill manifests 和依赖加载；
-- plugin package scaffold、manifest validation、SHA-256 signature verification、trust model 和 lock files；
-- plugin governance permissions、publisher/review metadata、compatibility checks、advisories 和 scorecards；
-- agent adapter routing、CLI dry-run invocation、prompts 和 transcripts；
-- planner/executor、generator/critic、reviewer/repair、swarm research、manager/worker 和 tournament DAGs 的 multi-role topologies；
-- opt-in adaptive orchestration，包含 task classification、topology selection、report artifacts 和 project scoreboard；
-- LLM Gateway metadata、provider plans、budget decisions、redacted traces、optional raw traces 和 token/cost accounting；
-- routes、components、exports 的 context maps、stale-hash detection 和 map-based context selection；
-- `ask` 命令，用于生成带 defaults、approval marking 和 clarification questions 的 AgentSpec preview；
-- AAL v0.2 preamble/imports、semantic diagnostics、normalized rendering 和 AgentSpec YAML output；
-- terminal TUI dashboard，用于查看 transactions、DAG、verifier、cost、memory 和 approvals；
-- static browser dashboard，用于查看 transactions、metrics、timeline、agent trace、memory graph、skills、policies、costs 和 reports；
-- analytics history，包含 JSONL records、summary snapshots、CSV export 和 dashboard trend metrics；
-- hosted/team export payloads，用于 project、approval、policy、runner、audit、report 和 analytics summaries；
-- product CLI commands，用于 `doctor`、`version`、providers 和 config inspection；
-- real LLM Gateway provider execution，用于 CLI templates 和带 retry/backoff 的 OpenAI-compatible HTTP endpoints；
-- product fixture projects 和 smoke scripts，用于 installable CLI quality gates；
-- sandbox hardening report，包含 OS capability detection 和 resource limit policy；
-- VS Code extension，用于查看 transaction、memory、AgentSpec、approval 和 DAG；
-- enterprise policy sources including HTTP policy server、RBAC checks、secret checks、runner/model routing、audit log 和 compliance reports。
-- governance v2 lock layers、drift detection、policy bundles、approval history 和 compliance summaries。
-- PRD tracker 已拆分为 `prd/done` 和 `prd/todo`。
-
-## 安装与构建
-
-需要 Rust。工具链版本由 `rust-toolchain.toml` 固定。
+## 安装
 
 安装当前 checkout：
 
@@ -69,9 +28,9 @@ cargo install --path .
 从 source 构建并验证：
 
 ```bash
-cargo build
-cargo test
-cargo clippy -- -D warnings
+cargo build --locked
+cargo test --locked
+cargo clippy --locked -- -D warnings
 scripts/check-module-size.sh 200
 ```
 
@@ -81,213 +40,111 @@ scripts/check-module-size.sh 200
 scripts/package.sh
 ```
 
-release artifact installers 见 [Install And Packaging](docs/install-packaging.zh.md)。
+Release installers 和 package details 见 [Install And Packaging](docs/install-packaging.zh.md)。
 
-## 快速开始
+## 60 秒快速开始
 
 ```bash
 agenthub init
 agenthub doctor
 agenthub providers status
 agenthub providers setup command
-agenthub providers test command
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub tx status
+agenthub tx report latest
+agenthub open dashboard
+```
+
+不带 subcommand 运行 `agenthub` 会打开 local shell。Shell 内可以使用 `sessions`、`session latest`、`doctor`、`providers status`、`provider codex`、`config show`、`dashboard` 和普通文本请求。普通文本默认是 `plan` 模式；使用 `mode run` 后，之后的请求会立即执行。
+
+## 与 Codex、Gemini、Kimi 一起使用
+
+AgentHub 是 provider-neutral。配置 provider 后，通过同一个 transaction engine 运行任务：
+
+```bash
+agenthub providers setup codex
 agenthub providers diagnose codex
-agenthub providers set executor command
-agenthub
-agenthub plan "Добавь страницу курсов в стиле dashboard"
-agenthub run "Добавь generated health-check файл" --no-commit
-agenthub ask "Добавь страницу курсов в стиле dashboard" --output .agent/drafts/courses.yaml
+agenthub providers set executor codex
+agenthub run "add a small health-check page" --no-commit
+```
+
+`gemini`、`kimi`、`command` 和 `openai-http` 也有等价命令。OpenAI-compatible endpoints 使用 `AGENTHUB_OPENAI_COMPAT_BASE_URL` 和 optional bearer-token configuration。
+
+Provider 文档：
+
+- [Product CLI](docs/product-cli.zh.md)
+- [Agent adapters](docs/agent-adapters.zh.md)
+- [LLM Gateway](docs/llm-gateway.zh.md)
+- [Competitive Positioning](docs/competitive-positioning.zh.md)
+
+## 为什么需要 Transaction Safety
+
+AgentHub 面向会修改真实项目的 AI work。每个 transaction 都会记录：
+
+- `journal.jsonl` 和 WAL replay state；
+- bounded stdout/stderr log files 和 tails；
+- `effects.jsonl`，包含 planned、applied、verified、rollback 和 non-rollbackable effects；
+- diff guard 和 smart-sync decisions；
+- verifier output 和 failure fingerprints；
+- 只有 committed success 才会 memory promotion；
+- human-readable `report.md` 和 dashboard artifacts。
+
+如果任务在 commit 前失败，AgentHub 会 rollback isolated worktree，并把 failed attempts 保留为 warning-only memory。如果 transaction 需要 human input，`tx resolve`、`tx retry` 和 supported `tx resume` 会让原始 artifacts 继续可 inspect。
+
+## Demo
+
+试用内置 examples：
+
+```bash
 agenthub run examples/command-task.yaml
-agenthub tx status
-agenthub tx report tx-...
-```
-
-事务成功后，AgentHub 会把隔离 worktree 的变更应用回项目，写入 `.agent/tx/<tx-id>/report.md`，并把已验证记忆提升到 `.agent/memory/committed.jsonl`。
-
-## AgentSpec 示例
-
-```yaml
-task:
-  id: example_touch_file
-  type: code.command
-  title: Create an example generated file
-
-workspace:
-  type: code.git
-  isolation: git_worktree
-
-execution:
-  commands:
-    - mkdir -p tmp
-    - printf 'generated by AgentHub\n' > tmp/agenthub-example.txt
-
-scope:
-  allow:
-    - tmp/**
-  deny:
-    - prd.md
-    - .agent/**
-
-verify:
-  profile: code_build
-  commands:
-    - test -f tmp/agenthub-example.txt
-
-transaction:
-  commit_on_success: true
-  memory_promotion: on_success
-```
-
-运行：
-
-```bash
-cargo run -- run examples/command-task.yaml
-```
-
-## AAL Example
-
-```bash
-agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
-agenthub run tmp/add-courses.yaml
-```
-
-AAL 支持 `aal "0.2"`、`import skill`、`import rules`、semantic diagnostics、`workspace`、`goal`、`use skill`、`allow`、`deny`、`rules`、`execute`、`verify`、runtime smoke routes 和 transaction policy，然后输出 AgentSpec YAML。参见 [AAL](docs/aal.zh.md)。
-
-## 主要命令
-
-```bash
-agenthub init
-agenthub plan "Add /courses page in the current dashboard style"
-agenthub ask "Add /courses page in the current dashboard style"
-agenthub ask --approval-required "Create a useful page"
-agenthub run "Add a generated health-check file" --no-commit
-agenthub run examples/command-task.yaml
-agenthub run examples/content-task.yaml
-agenthub run examples/data-task.yaml
-agenthub run examples/infra-task.yaml
-agenthub run examples/media-task.yaml
-agenthub run examples/research-task.yaml
-agenthub run examples/adapter-dry-run-task.yaml
 agenthub run examples/runtime-smoke-task.yaml
-agenthub run examples/topology-planner-task.yaml
-agenthub run examples/topology-swarm-task.yaml
-agenthub run examples/topology-manager-worker-task.yaml
-agenthub tui
-agenthub dashboard
-agenthub dashboard --output tmp/agenthub-dashboard
-agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
-agenthub tx status
-agenthub tx report tx-...
-agenthub tx effects tx-...
-agenthub tx resolve tx-... --note "Approved"
-agenthub tx retry tx-... --from VERIFYING
-agenthub tx resume tx-...
-agenthub workspace scan --write-maps
-agenthub memory inspect
-agenthub memory summary
-agenthub memory audit
-agenthub skills list
-agenthub skills scorecard
-agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
-agenthub plugins inspect marketplace/skill-packs/content-basic
-agenthub plugins install marketplace/skill-packs/content-basic --trust local
-agenthub plugins list
-AGENTHUB_ROLE=admin agenthub enterprise policy
-AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
-AGENTHUB_ROLE=admin agenthub enterprise runners
-AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
-AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
-AGENTHUB_ROLE=admin agenthub enterprise compliance
-agenthub agents list
+agenthub run examples/adapter-dry-run-task.yaml
+agenthub aal check examples/add-courses.aal
+agenthub tui --live
 ```
 
-## Agent Adapters
-
-Executor 可以路由到 `command`、`codex`、`kimi` 或 `gemini`。External CLI adapters 会写入 prompt 和 invocation artifacts，然后继续运行正常的 transaction checks。
-
-```yaml
-agent:
-  adapter: codex
-  model: test-model
-  dry_run: true
-  command_template: "codex exec --sandbox workspace-write - < {prompt}"
-```
+运行 product checks：
 
 ```bash
-AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/adapter-dry-run-task.yaml
+scripts/dogfood.sh
+AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
+scripts/release-readiness.sh
 ```
 
-参见 [Agent adapters](docs/agent-adapters.zh.md)。
+Representative fixtures 位于 `fixtures/`；reference web fixture 会测试添加 `/courses`，并覆盖 build、runtime smoke、scope rollback、report、memory 和 WAL evidence。
 
-## Reviewer 与 Repair 拓扑
+## 已知限制
 
-```yaml
-topology:
-  kind: executor_reviewer_repair
+AgentHub 目前是 installable local developer preview，还不是 hosted team product。
 
-review:
-  commands:
-    - cargo test
+- Local sandboxing 是 process supervision 加 policy checks，不是面向 untrusted code 的完整 security boundary。
+- Hosted/team surfaces 目前生成 local export payloads；还没有 shared server、browser login 或 team accounts。
+- CLI providers 的 authentication 仍由 provider CLI 管理。
+- OpenAI-compatible HTTP/HTTPS calls 已支持，但 streaming 和 provider-specific auth flows 计划在后续版本中实现。
 
-repair:
-  commands:
-    - cargo fmt
+见 [Known Limitations](docs/known-limitations.zh.md) 和 [Security Hardening](docs/security-hardening.zh.md)。
 
-transaction:
-  max_repair_attempts: 1
-```
+## Architecture Docs
 
-在该模式下，AgentHub 会运行 executor commands、检查 diff、运行 reviewer commands、必要时运行 repair commands，然后在 commit 前运行 verifier。
+从这里开始：
 
-Runtime smoke checks 会启动临时 server、检查 expected HTTP statuses，并终止 process group。Missing environment failures 会让事务暂停为 `BLOCKED_ON_HUMAN`。参见 [Runtime and repair](docs/runtime-repair.zh.md)。
-
-## IDE
-
-VS Code extension 位于 `editors/vscode`。它是 zero-build JavaScript，提供 transaction tree、memory tree、AgentSpec view、approval view、latest report、prompt-to-spec 和 DAG view。参见 [IDE and visual layer](docs/ide.zh.md)。
-
-## Web Dashboard
-
-无需 frontend build 即可生成 browser dashboard：
-
-```bash
-agenthub dashboard
-agenthub dashboard --output tmp/agenthub-dashboard
-```
-
-Dashboard 会写入 `index.html`、`data.json`、`data.js`、`dashboard.css` 和 `dashboard.js`。它展示 recent transactions、aggregated metrics、journal timeline、DAG roles、memory graph、skills、enterprise policy summary、cost analytics 和 report links。参见 [Web Dashboard](docs/web-dashboard.zh.md) 和 [Metrics Dashboard](docs/metrics-dashboard.zh.md)。
-
-## Plugin Ecosystem
-
-Phase 13 从本地 marketplace packages 开始。包使用 `agenthub-plugin.yaml` manifest，可以包含 skills、workspace plugin metadata、verifier plugin metadata、SHA-256 signature metadata，并安装到项目 lock files。
-
-```bash
-agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
-agenthub plugins inspect marketplace/skill-packs/content-basic
-agenthub plugins digest marketplace/skill-packs/content-basic
-agenthub plugins install marketplace/skill-packs/content-basic --trust local
-agenthub plugins list
-```
-
-`inspect` 会验证 semver package versions、safe relative paths、referenced skill manifests、workspace schemas，以及存在时的 SHA-256 signatures。已安装 plugin lock 存在 `.agent/plugins/installed.json`；已安装 skill 版本锁定在 `.agent/skills/installed.json`。
-
-## Enterprise
-
-Phase 14 提供 enterprise governance。Policy 位于 `.agent/enterprise/policy.yaml`，也可以来自 central `AGENTHUB_POLICY_PATH` 或 HTTP policy server；secret checks 不打印值；runner 与 private model routing 由 policy 控制；audit events 和 compliance reports 位于 `.agent/enterprise/`。
-
-```bash
-AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml AGENTHUB_ROLE=admin agenthub enterprise policy
-AGENTHUB_POLICY_URL=http://127.0.0.1:8787/policy AGENTHUB_ROLE=admin agenthub enterprise policy
-AGENTHUB_ROLE=admin agenthub enterprise policy-server --bind 127.0.0.1:8787 --policy /etc/agenthub/policy.yaml
-AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
-AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
-AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
-AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
-```
-
-## 开发规则
-
-代码必须保持模块化。目标是单文件不超过 200 行；当模块难以快速阅读时，应按职责拆分。检查命令：`scripts/check-module-size.sh 200`。
-
-## 许可证
-
-AgentHub 是 Apache License 2.0 下的 open-source 项目。商业使用、修改、再分发和衍生作品都按许可证条款允许。再分发时请保留 `LICENSE` 和 `NOTICE`。
+- [How it works](docs/how-it-works.zh.md)
+- [Testing Strategy](docs/testing-strategy.zh.md)
+- [Dogfooding](docs/dogfooding.zh.md)
+- [Interactive Shell](docs/interactive-shell.zh.md)
+- [Natural Language](docs/natural-language.zh.md)
+- [AAL](docs/aal.zh.md)
+- [Transaction Watch](docs/tx-watch.zh.md)
+- [Transaction Explain](docs/tx-explain.zh.md)
+- [Transaction Undo](docs/tx-undo.zh.md)
+- [Effect Ledger](docs/effect-ledger.zh.md)
+- [Rollback Handlers](docs/rollback-handlers.zh.md)
+- [Smart Sync](docs/smart-sync.zh.md)
+- [VCM-OS Memory](docs/vcm-os-memory.zh.md)
+- [Workspace Runtime](docs/workspace-runtime.zh.md)
+- [Domain Runtimes](docs/domain-runtimes.zh.md)
+- [Verifier Integrations](docs/verifier-integrations.zh.md)
+- [Hardened Runner](docs/hardened-runner.zh.md)
+- [Plugin Governance](docs/plugin-governance.zh.md)
+- [Governance v2](docs/governance-v2.zh.md)
+- [PRD v4](docs/prd-v4.zh.md)
