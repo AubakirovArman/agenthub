@@ -32,6 +32,8 @@ fn run() -> Result<()> {
             agent_dir::init_project(&project_root, force)?;
             println!("initialized AgentHub project at {}", project_root.display());
         }
+        Commands::Doctor => handlers::handle_doctor(&project_root)?,
+        Commands::Version => handlers::handle_version()?,
         Commands::Ask {
             request,
             output,
@@ -177,6 +179,8 @@ fn run() -> Result<()> {
                 }
             }
         },
+        Commands::Providers { command } => handlers::handle_providers(&project_root, command)?,
+        Commands::Config { command } => handlers::handle_config(&project_root, command)?,
     }
 
     Ok(())

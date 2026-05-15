@@ -30,6 +30,9 @@ git -C "$PROJECT" commit -q -m "Initial smoke fixture"
 run_agenthub init
 git -C "$PROJECT" add .agent
 git -C "$PROJECT" commit -q -m "Initialize AgentHub"
+run_agenthub doctor > "$TMP/doctor.txt"
+run_agenthub providers status > "$TMP/providers-status.txt"
+run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'
 task:

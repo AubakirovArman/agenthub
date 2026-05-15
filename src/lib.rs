@@ -19,6 +19,7 @@ pub mod llm_gateway;
 pub mod memory;
 pub mod observability;
 pub mod plugin_registry;
+pub mod product_cli;
 pub mod report;
 pub mod reviewer;
 pub mod rollback;

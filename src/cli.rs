@@ -2,8 +2,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+mod product;
 mod tx;
 
+pub use product::{ConfigCommands, ProviderCommands};
 pub use tx::TxCommands;
 
 #[derive(Debug, Parser)]
@@ -23,6 +25,8 @@ pub enum Commands {
         #[arg(long)]
         force: bool,
     },
+    Doctor,
+    Version,
     Ask {
         request: String,
 
@@ -74,6 +78,14 @@ pub enum Commands {
     Agents {
         #[command(subcommand)]
         command: AgentCommands,
+    },
+    Providers {
+        #[command(subcommand)]
+        command: ProviderCommands,
+    },
+    Config {
+        #[command(subcommand)]
+        command: ConfigCommands,
     },
 }
 
