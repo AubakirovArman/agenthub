@@ -38,6 +38,10 @@ pub fn write_transcript(
                 "exit_code": result.exit_code,
                 "success": result.success,
                 "timed_out": result.timed_out,
+                "stdout_path": result.stdout_path,
+                "stderr_path": result.stderr_path,
+                "stdout_truncated": result.stdout_truncated,
+                "stderr_truncated": result.stderr_truncated,
                 "duration_ms": result.duration_ms,
             }),
         )?;
@@ -62,6 +66,10 @@ pub fn write_adapter_run(tx_dir: &Path, route: &AgentRoute, run: &AdapterRun) ->
             "dry_run": run.dry_run,
             "stdout": run.stdout,
             "stderr": run.stderr,
+            "stdout_path": run.stdout_path,
+            "stderr_path": run.stderr_path,
+            "stdout_truncated": run.stdout_truncated,
+            "stderr_truncated": run.stderr_truncated,
         }),
     )
 }

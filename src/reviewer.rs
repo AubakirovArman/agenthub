@@ -6,7 +6,9 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox, RemoteRunner};
+use crate::command_runner::{
+    run_shell_with_sandbox_logged, CommandResult, CommandSandbox, RemoteRunner,
+};
 use crate::spec::{ReviewSpec, SandboxSpec};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,12 +29,18 @@ pub fn run(
     }
 
     let mut results = Vec::new();
-    for command in &review.commands {
-        let result = run_shell_with_sandbox(
+    let log_dir = log_path
+        .parent()
+        .map(|parent| parent.join("logs"))
+        .unwrap_or_else(|| Path::new("logs").to_path_buf());
+    for (index, command) in review.commands.iter().enumerate() {
+        let result = run_shell_with_sandbox_logged(
             command,
             worktree,
             Duration::from_secs(300),
             sandbox_for(sandbox.level, remote_runner),
+            &log_dir,
+            &format!("reviewer-{index}"),
         )?;
         append_log(log_path, &result)?;
         let success = result.success;

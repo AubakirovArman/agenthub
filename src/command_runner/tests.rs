@@ -1,5 +1,10 @@
 use super::*;
 
+use anyhow::Result;
+use std::path::Path;
+use std::thread;
+use std::time::Duration;
+
 #[test]
 fn marks_timed_out_command() -> Result<()> {
     let result = run_shell("sleep 2", Path::new("."), Duration::from_millis(50))?;
@@ -73,5 +78,27 @@ fn cancel_request_artifact_round_trips() -> Result<()> {
     assert!(dir.path().join("cancel_request.json").exists());
     let status = std::fs::read_to_string(dir.path().join("cancel_status.json"))?;
     assert!(status.contains("stop after current command"));
+    Ok(())
+}
+
+#[test]
+fn logged_command_writes_files_and_keeps_bounded_tail() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let logs = dir.path().join("logs");
+    let result = run_shell_with_sandbox_logged(
+        "i=0; while [ $i -lt 70000 ]; do printf x; i=$((i + 1)); done",
+        dir.path(),
+        Duration::from_secs(5),
+        CommandSandbox::default(),
+        &logs,
+        "large",
+    )?;
+
+    let stdout_path = result.stdout_path.as_ref().expect("stdout path");
+    assert!(result.success);
+    assert!(Path::new(stdout_path).exists());
+    assert!(result.stdout_truncated);
+    assert_eq!(result.stdout_bytes, 70000);
+    assert!(result.stdout.len() <= super::output::TAIL_LIMIT);
     Ok(())
 }

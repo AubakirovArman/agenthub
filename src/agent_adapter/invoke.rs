@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
-use crate::command_runner::{run_shell_with_sandbox, CommandSandbox, RemoteRunner};
+use crate::command_runner::{run_shell_with_sandbox_logged, CommandSandbox, RemoteRunner};
 use crate::observability::redact_text;
 use crate::spec::AgentSpec;
 
@@ -22,6 +22,10 @@ pub struct AdapterRun {
     pub exit_code: Option<i32>,
     pub stdout: String,
     pub stderr: String,
+    pub stdout_path: Option<String>,
+    pub stderr_path: Option<String>,
+    pub stdout_truncated: bool,
+    pub stderr_truncated: bool,
     pub duration_ms: u128,
     pub dry_run: bool,
     pub remote: bool,
@@ -51,17 +55,23 @@ pub fn invoke_adapter(
             exit_code: Some(0),
             stdout: "adapter dry-run enabled; external CLI was not executed".to_string(),
             stderr: String::new(),
+            stdout_path: None,
+            stderr_path: None,
+            stdout_truncated: false,
+            stderr_truncated: false,
             duration_ms: 0,
             dry_run: true,
             remote: false,
             runner: None,
         }
     } else {
-        let result = run_shell_with_sandbox(
+        let result = run_shell_with_sandbox_logged(
             &command,
             worktree,
             Duration::from_secs(900),
             adapter_sandbox(spec.execution.sandbox.level, remote_runner),
+            &tx_dir.join("logs"),
+            &format!("adapter-{}", route.role),
         )?;
         AdapterRun {
             adapter: route.selected_adapter.clone(),
@@ -72,6 +82,10 @@ pub fn invoke_adapter(
             exit_code: result.exit_code,
             stdout: redact_text(&result.stdout)?,
             stderr: redact_text(&result.stderr)?,
+            stdout_path: result.stdout_path.clone(),
+            stderr_path: result.stderr_path.clone(),
+            stdout_truncated: result.stdout_truncated,
+            stderr_truncated: result.stderr_truncated,
             duration_ms: result.duration_ms,
             dry_run: false,
             remote: result.remote,

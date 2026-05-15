@@ -1,6 +1,9 @@
+mod common;
 mod verifier_section;
 
 use crate::report::TransactionReport;
+
+use common::{command_line, list};
 
 pub(super) fn render(report: &TransactionReport) -> String {
     let mut md = String::new();
@@ -175,22 +178,5 @@ fn failure(md: &mut String, report: &TransactionReport) {
         md.push_str("\n## Failure\n\n");
         md.push_str(reason);
         md.push('\n');
-    }
-}
-
-pub(super) fn command_line(md: &mut String, command: &crate::command_runner::CommandResult) {
-    md.push_str(&format!(
-        "- `{}` -> success `{}` exit `{:?}` timeout `{}`\n",
-        command.command, command.success, command.exit_code, command.timed_out
-    ));
-}
-
-fn list(md: &mut String, title: &str, values: &[String]) {
-    if values.is_empty() {
-        return;
-    }
-    md.push_str(&format!("\n{title}:\n\n"));
-    for value in values {
-        md.push_str(&format!("- `{value}`\n"));
     }
 }

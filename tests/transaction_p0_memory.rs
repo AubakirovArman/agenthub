@@ -48,6 +48,9 @@ transaction:
     assert!(matches!(outcome.status, TransactionStatus::Noop));
     assert!(!repo.path().join("generated/preview.txt").exists());
     assert!(outcome.report_path.exists());
+    assert!(tx_log(&outcome.report_path, "execution-0.stdout.log").exists());
+    let execution = fs::read_to_string(outcome.report_path.with_file_name("execution.json"))?;
+    assert!(execution.contains("\"stdout_path\""));
     let report = fs::read_to_string(&outcome.report_path)?;
     assert!(report.contains("Status: `NOOP`"));
     let memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
@@ -95,6 +98,9 @@ transaction:
 
     assert!(matches!(outcome.status, TransactionStatus::RolledBack));
     assert!(!repo.path().join("generated/bad.txt").exists());
+    assert!(tx_log(&outcome.report_path, "verifier-0.stderr.log").exists());
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("\"stderr_path\""));
     let report = fs::read_to_string(&outcome.report_path)?;
     assert!(report.contains("verifier failed"));
     let effects = fs::read_to_string(outcome.report_path.with_file_name("effects.jsonl"))?;
@@ -106,6 +112,14 @@ transaction:
         fs::read_to_string(repo.path().join(".agent/memory/failed_attempts.jsonl"))?;
     assert!(failed_memory.contains("verifier_failure_no_promotion"));
     Ok(())
+}
+
+fn tx_log(report_path: &Path, name: &str) -> PathBuf {
+    report_path
+        .parent()
+        .expect("transaction report has parent")
+        .join("logs")
+        .join(name)
 }
 
 struct TestRepo {

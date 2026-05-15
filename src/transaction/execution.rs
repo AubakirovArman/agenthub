@@ -6,8 +6,8 @@ use anyhow::{anyhow, Result};
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::command_runner::{
-    read_cancel_request, run_shell_with_sandbox, write_cancel_status, CancelStatus, CommandResult,
-    CommandSandbox, RemoteRunner,
+    read_cancel_request, run_shell_with_sandbox_logged, write_cancel_status, CancelStatus,
+    CommandResult, CommandSandbox, RemoteRunner,
 };
 use crate::effects::EffectLedger;
 use crate::spec::AgentSpec;
@@ -67,6 +67,7 @@ pub(super) fn run_execution_commands(
     remote_runner: Option<&RemoteRunner>,
 ) -> Result<Vec<CommandResult>> {
     run_commands(
+        "execution",
         &spec.execution.commands,
         tx_dir,
         worktree,
@@ -82,6 +83,7 @@ pub(super) fn run_repair_commands(
     remote_runner: Option<&RemoteRunner>,
 ) -> Result<Vec<CommandResult>> {
     run_commands(
+        "repair",
         &spec.repair.commands,
         tx_dir,
         worktree,
@@ -91,6 +93,7 @@ pub(super) fn run_repair_commands(
 }
 
 fn run_commands(
+    stage: &str,
     commands: &[String],
     tx_dir: &Path,
     worktree: &Path,
@@ -98,7 +101,7 @@ fn run_commands(
     remote_runner: Option<&RemoteRunner>,
 ) -> Result<Vec<CommandResult>> {
     let mut results = Vec::new();
-    for command in commands {
+    for (index, command) in commands.iter().enumerate() {
         if let Some(cancel) = read_cancel_request(tx_dir)? {
             write_cancel_status(
                 tx_dir,
@@ -109,11 +112,13 @@ fn run_commands(
             )?;
             return Err(anyhow!("transaction cancelled: {}", cancel.reason));
         }
-        let result = run_shell_with_sandbox(
+        let result = run_shell_with_sandbox_logged(
             command,
             worktree,
             Duration::from_secs(300),
             sandbox_for(sandbox_level, remote_runner),
+            &tx_dir.join("logs"),
+            &format!("{stage}-{index}"),
         )?;
         let success = result.success;
         results.push(result);

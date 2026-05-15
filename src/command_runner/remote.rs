@@ -7,6 +7,7 @@ use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
 use super::metadata::{metadata_for, usage};
+use super::output;
 use super::CommandResult;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +44,7 @@ pub fn run(
     let exit_code = output.status.code();
     let duration_ms = started.elapsed().as_millis();
     let metadata = metadata_for(sandbox_level, Some(runner), timeout);
+    let captured = output::from_bytes(&output.stdout, &output.stderr);
     Ok(CommandResult {
         command: command.to_string(),
         cwd: cwd.display().to_string(),
@@ -50,8 +52,16 @@ pub fn run(
         success: output.status.success() && !timed_out,
         timed_out,
         duration_ms,
-        stdout: String::from_utf8_lossy(&output.stdout).to_string(),
-        stderr: String::from_utf8_lossy(&output.stderr).to_string(),
+        stdout: captured.stdout,
+        stderr: captured.stderr,
+        stdout_path: captured.stdout_path,
+        stderr_path: captured.stderr_path,
+        stdout_tail: captured.stdout_tail,
+        stderr_tail: captured.stderr_tail,
+        stdout_truncated: captured.stdout_truncated,
+        stderr_truncated: captured.stderr_truncated,
+        stdout_bytes: captured.stdout_bytes,
+        stderr_bytes: captured.stderr_bytes,
         sandbox_level,
         remote: true,
         runner: Some(runner.id.clone()),
