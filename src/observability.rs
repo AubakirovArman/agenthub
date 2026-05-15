@@ -1,5 +1,6 @@
 mod hash;
 mod redaction;
+mod reports;
 mod storage;
 mod tokens;
 
@@ -14,7 +15,11 @@ use crate::llm_gateway::{self, GatewaySummary};
 
 use hash::normalize_reason;
 pub use hash::{sha256_json, sha256_short};
-pub use redaction::{redact_text, redact_value};
+pub use redaction::{
+    merge_findings, redact_file_in_place, redact_text, redact_text_with_findings, redact_value,
+    redact_value_with_findings, RedactionFinding,
+};
+pub use reports::write_secret_scan_record;
 pub use storage::{append_jsonl as write_jsonl, write_json as write_pretty_json};
 use tokens::estimate_tokens;
 
@@ -60,9 +65,18 @@ pub struct ErrorFingerprint {
 }
 
 pub fn write_context_pack_artifacts(tx_dir: &Path, context: &Value) -> Result<Value> {
-    let redacted = redact_value(context)?;
+    let (redacted, findings) = redact_value_with_findings(context)?;
+    let raw_requested = raw_traces_requested();
+    let raw_allowed = raw_requested && (findings.is_empty() || raw_secret_traces_allowed());
+    reports::write_redaction_report(
+        tx_dir,
+        "context_pack",
+        &findings,
+        raw_requested,
+        raw_allowed,
+    )?;
     write_pretty_json(&tx_dir.join("context_pack.json"), &redacted)?;
-    if raw_traces_enabled() {
+    if raw_allowed {
         write_pretty_json(&tx_dir.join("raw_context_pack.json"), context)?;
     }
     Ok(redacted)
@@ -151,6 +165,13 @@ fn build_cost_profile(context_tokens: usize, gateway: &GatewaySummary) -> CostPr
     }
 }
 
-fn raw_traces_enabled() -> bool {
+fn raw_traces_requested() -> bool {
     std::env::var("AGENTHUB_RAW_TRACES").ok().as_deref() == Some("1")
+}
+
+fn raw_secret_traces_allowed() -> bool {
+    std::env::var("AGENTHUB_ALLOW_RAW_SECRET_TRACES")
+        .ok()
+        .as_deref()
+        == Some("1")
 }

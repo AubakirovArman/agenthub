@@ -18,10 +18,11 @@ LLM Gateway — model work үшін provider control және observability boun
 .agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
+.agent/tx/<tx-id>/redaction_report.json
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` және `redacted_api.jsonl` default бойынша redacted болады.
+`context_pack.json` және `redacted_api.jsonl` default бойынша redacted болады. `redaction_report.json` secret-like finding түрлері мен санын жазады, бірақ secret мәндерін сақтамайды.
 
 ## Provider Plan
 
@@ -78,6 +79,14 @@ Raw context және raw API traces тек нақты қосылғанда жа�
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
+
+Егер context scan secret-like values тапса, `AGENTHUB_RAW_TRACES=1` берілсе де raw context жазылмайды. Бақыланатын local debug үшін мұны нақты override жасауға болады:
+
+```bash
+AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
+```
+
+Бұл override-ты shared projects немесе CI ішінде қолданба.
 
 Ол мыналарды жасайды:
 

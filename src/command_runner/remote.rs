@@ -6,6 +6,8 @@ use std::time::{Duration, Instant};
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::observability::redact_text;
+
 use super::docker;
 use super::metadata::{metadata_for, usage};
 use super::output;
@@ -45,9 +47,9 @@ pub fn run(
     let exit_code = output.status.code();
     let duration_ms = started.elapsed().as_millis();
     let metadata = metadata_for(sandbox_level, Some(runner), timeout);
-    let captured = output::from_bytes(&output.stdout, &output.stderr);
+    let captured = output::redact_summary(output::from_bytes(&output.stdout, &output.stderr))?;
     Ok(CommandResult {
-        command: command.to_string(),
+        command: redact_text(command)?,
         cwd: cwd.display().to_string(),
         exit_code,
         success: output.status.success() && !timed_out,

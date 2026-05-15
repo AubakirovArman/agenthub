@@ -83,6 +83,7 @@ AgentHub is designed for AI work that can change a real project. Each transactio
 
 - `journal.jsonl` and WAL replay state;
 - bounded stdout/stderr log files and tails;
+- secret-redacted context/log artifacts plus `redaction_report.json` and optional `secret_scan.jsonl`;
 - `effects.jsonl` for planned, applied, verified, rollback, and non-rollbackable effects;
 - diff guard and smart-sync decisions;
 - verifier output and failure fingerprints;

@@ -5,6 +5,8 @@ use std::path::Path;
 use std::thread;
 use std::time::Duration;
 
+mod redaction;
+
 #[test]
 fn marks_timed_out_command() -> Result<()> {
     let result = run_shell("sleep 2", Path::new("."), Duration::from_millis(50))?;

@@ -168,6 +168,8 @@ fn observability(md: &mut String, report: &TransactionReport) {
     md.push_str("- `model_call_metadata.json`\n");
     md.push_str("- `llm_gateway_summary.json`\n");
     md.push_str("- `redacted_api.jsonl`\n");
+    md.push_str("- `redaction_report.json`\n");
+    md.push_str("- `secret_scan.jsonl` when command logs needed redaction\n");
     if let Some(fingerprint) = &report.error_fingerprint {
         md.push_str(&format!("- Error fingerprint: `{fingerprint}`\n"));
     }

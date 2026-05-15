@@ -18,10 +18,11 @@ Every transaction now writes:
 .agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
+.agent/tx/<tx-id>/redaction_report.json
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` and `redacted_api.jsonl` are redacted by default.
+`context_pack.json` and `redacted_api.jsonl` are redacted by default. `redaction_report.json` records secret-like finding categories and counts without storing secret values.
 
 ## Provider Plan
 
@@ -78,6 +79,14 @@ Raw context and raw API traces are written only when explicitly enabled:
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
+
+If the context scan finds secret-like values, raw context output is blocked even when `AGENTHUB_RAW_TRACES=1`. For a controlled local debug session you can override this with:
+
+```bash
+AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
+```
+
+Do not use that override in shared projects or CI.
 
 That creates:
 

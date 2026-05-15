@@ -83,6 +83,7 @@ AgentHub real project өзгертетін AI work үшін жасалған. Ә
 
 - `journal.jsonl` және WAL replay state;
 - bounded stdout/stderr log files және tails;
+- context/log artifacts secret redaction жасайды, `redaction_report.json` және optional `secret_scan.jsonl` жазады;
 - planned, applied, verified, rollback және non-rollbackable effects үшін `effects.jsonl`;
 - diff guard және smart-sync decisions;
 - verifier output және failure fingerprints;

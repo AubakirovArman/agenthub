@@ -21,6 +21,18 @@ Report құрамында:
 
 Windows жүйесінде local timeout cleanup shell process және оның child process tree тоқтату үшін `taskkill /T /F` қолданады.
 
+## Secret Redaction
+
+Transaction context сақталмас бұрын AgentHub secret-like text және `api_key`, `token`, `password`, `secret`, `database_url`, `private_key` сияқты secret-like JSON keys мәндерін redacts етеді. Transaction `.agent/tx/<tx-id>/redaction_report.json` жазады; онда finding түрлері мен саны ғана болады, secret values сақталмайды.
+
+Command stdout/stderr log files command аяқталғаннан кейін default бойынша redacted болады. Егер redaction болса, AgentHub `.agent/tx/<tx-id>/secret_scan.jsonl` ішіне record қосады. Raw logs тек бақыланатын local debug үшін сақталуы керек:
+
+```bash
+AGENTHUB_RAW_LOGS=1 agenthub run examples/command-task.yaml
+```
+
+Raw logs немесе raw secret traces параметрлерін shared projects немесе CI ішінде қоспа.
+
 ## Resource Limits
 
 Default policy file:

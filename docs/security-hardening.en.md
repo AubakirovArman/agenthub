@@ -21,6 +21,18 @@ The report includes:
 
 On Windows, local timeout cleanup uses `taskkill /T /F` to terminate the shell process and its child process tree.
 
+## Secret Redaction
+
+Before transaction context is stored, AgentHub redacts secret-like text and secret-like JSON keys such as `api_key`, `token`, `password`, `secret`, `database_url`, and `private_key`. The transaction writes `.agent/tx/<tx-id>/redaction_report.json` with finding categories and counts, not secret values.
+
+Command stdout/stderr log files are also redacted by default after command completion. If a log redaction occurs, AgentHub appends `.agent/tx/<tx-id>/secret_scan.jsonl`. Raw logs can be kept only for controlled local debugging:
+
+```bash
+AGENTHUB_RAW_LOGS=1 agenthub run examples/command-task.yaml
+```
+
+Do not enable raw logs or raw secret traces in shared projects or CI.
+
 ## Resource Limits
 
 Default policy file:

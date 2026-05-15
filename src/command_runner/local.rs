@@ -5,6 +5,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, Context, Result};
 
+use crate::observability;
+
 use super::metadata::{metadata_for, usage};
 use super::monitor;
 use super::process::{configure_process_group, terminate_process_tree};
@@ -103,16 +105,29 @@ fn run_shell_inner(
     let success = success_status && !wait.timed_out;
     let runner_metadata = metadata_for(sandbox.level, None, timeout);
     let output = match (log_paths, output) {
-        (Some((stdout, stderr)), _) => output::from_files(&stdout, &stderr)?,
+        (Some((stdout, stderr)), _) => {
+            output::sanitize_log_files(tx_dir.as_deref(), &stdout, &stderr, prefix)?;
+            output::from_files(&stdout, &stderr)?
+        }
         (None, Some(output)) => output::from_bytes(&output.stdout, &output.stderr),
         (None, None) => output::from_bytes(&[], &[]),
     };
+    let output = output::redact_summary(output)?;
     if let Some(reason) = wait.cancelled_reason {
         return Err(anyhow!("transaction cancelled: {reason}"));
     }
 
+    let (safe_command, command_findings) = observability::redact_text_with_findings(command)?;
+    if let Some(tx_dir) = tx_dir.as_deref() {
+        observability::write_secret_scan_record(
+            tx_dir,
+            &format!("command/{prefix}"),
+            &command_findings,
+        )?;
+    }
+
     Ok(CommandResult {
-        command: command.to_string(),
+        command: safe_command,
         cwd: cwd.display().to_string(),
         exit_code,
         success,

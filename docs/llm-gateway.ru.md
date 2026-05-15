@@ -18,10 +18,11 @@ LLM Gateway — provider control и observability boundary для model work. О
 .agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
+.agent/tx/<tx-id>/redaction_report.json
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` и `redacted_api.jsonl` по умолчанию проходят redaction.
+`context_pack.json` и `redacted_api.jsonl` по умолчанию проходят redaction. `redaction_report.json` пишет категории и количество secret-like findings без самих значений.
 
 ## Provider Plan
 
@@ -78,6 +79,14 @@ Raw context и raw API traces пишутся только при явном вк
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
+
+Если scan контекста находит secret-like values, raw context не пишется даже при `AGENTHUB_RAW_TRACES=1`. Для контролируемой локальной отладки можно явно разрешить это:
+
+```bash
+AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
+```
+
+Не используй этот override в shared projects или CI.
 
 Это создаёт:
 

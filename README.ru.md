@@ -83,6 +83,7 @@ AgentHub рассчитан на AI work, который меняет реаль
 
 - `journal.jsonl` и WAL replay state;
 - bounded stdout/stderr log files и tails;
+- context/log artifacts проходят secret redaction, рядом пишутся `redaction_report.json` и optional `secret_scan.jsonl`;
 - `effects.jsonl` для planned, applied, verified, rollback и non-rollbackable effects;
 - diff guard и smart-sync decisions;
 - verifier output и failure fingerprints;

@@ -21,6 +21,18 @@ Report 包含：
 
 在 Windows 上，local timeout cleanup 使用 `taskkill /T /F` 终止 shell process 及其 child process tree。
 
+## Secret Redaction
+
+在保存 transaction context 前，AgentHub 会 redact secret-like text 和 secret-like JSON keys，例如 `api_key`、`token`、`password`、`secret`、`database_url`、`private_key`。事务会写入 `.agent/tx/<tx-id>/redaction_report.json`，其中只有 finding 类别和数量，不包含 secret values。
+
+Command stdout/stderr log files 默认也会在 command 完成后被 redacted。如果发生 redaction，AgentHub 会追加 `.agent/tx/<tx-id>/secret_scan.jsonl`。只有受控的本地调试才应保留 raw logs：
+
+```bash
+AGENTHUB_RAW_LOGS=1 agenthub run examples/command-task.yaml
+```
+
+不要在 shared projects 或 CI 中启用 raw logs 或 raw secret traces。
+
 ## Resource Limits
 
 Default policy file：

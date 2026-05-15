@@ -96,6 +96,10 @@ transaction:
         .report_path
         .with_file_name("redacted_api.jsonl")
         .exists());
+    assert!(outcome
+        .report_path
+        .with_file_name("redaction_report.json")
+        .exists());
     assert!(!outcome
         .report_path
         .with_file_name("raw_context_pack.json")

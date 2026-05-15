@@ -5,6 +5,10 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::observability::{
+    merge_findings, redact_file_in_place, redact_text, write_secret_scan_record,
+};
+
 pub const TAIL_LIMIT: usize = 64 * 1024;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,6 +66,34 @@ pub fn from_bytes(stdout: &[u8], stderr: &[u8]) -> OutputSummary {
     }
 }
 
+pub fn redact_summary(summary: OutputSummary) -> Result<OutputSummary> {
+    Ok(OutputSummary {
+        stdout: redact_text(&summary.stdout)?,
+        stderr: redact_text(&summary.stderr)?,
+        stdout_tail: redact_text(&summary.stdout_tail)?,
+        stderr_tail: redact_text(&summary.stderr_tail)?,
+        ..summary
+    })
+}
+
+pub fn sanitize_log_files(
+    tx_dir: Option<&Path>,
+    stdout_path: &Path,
+    stderr_path: &Path,
+    prefix: &str,
+) -> Result<()> {
+    if raw_logs_enabled() {
+        return Ok(());
+    }
+    let mut findings = redact_file_in_place(stdout_path)?;
+    findings.extend(redact_file_in_place(stderr_path)?);
+    let findings = merge_findings(findings);
+    if let Some(tx_dir) = tx_dir {
+        write_secret_scan_record(tx_dir, &format!("logs/{prefix}"), &findings)?;
+    }
+    Ok(())
+}
+
 fn tail_file(path: &Path) -> Result<Tail> {
     let metadata = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
     let bytes = metadata.len();
@@ -80,6 +112,10 @@ fn tail_file(path: &Path) -> Result<Tail> {
 fn tail_bytes(value: &[u8]) -> String {
     let start = value.len().saturating_sub(TAIL_LIMIT);
     String::from_utf8_lossy(&value[start..]).to_string()
+}
+
+fn raw_logs_enabled() -> bool {
+    std::env::var("AGENTHUB_RAW_LOGS").ok().as_deref() == Some("1")
 }
 
 struct Tail {

@@ -18,10 +18,11 @@ LLM Gateway 是 model work 的 provider control 与 observability boundary。它
 .agent/tx/<tx-id>/llm_budget.json
 .agent/tx/<tx-id>/llm_gateway_summary.json
 .agent/tx/<tx-id>/redacted_api.jsonl
+.agent/tx/<tx-id>/redaction_report.json
 .agent/tx/<tx-id>/cost.json
 ```
 
-`context_pack.json` 和 `redacted_api.jsonl` 默认会被 redacted。
+`context_pack.json` 和 `redacted_api.jsonl` 默认会被 redacted。`redaction_report.json` 只记录 secret-like finding 的类别和数量，不保存 secret 值。
 
 ## Provider Plan
 
@@ -78,6 +79,14 @@ topology:
 ```bash
 AGENTHUB_RAW_TRACES=1 agenthub run examples/command-task.yaml
 ```
+
+如果 context scan 发现 secret-like values，即使设置了 `AGENTHUB_RAW_TRACES=1`，raw context 也不会写入。受控的本地调试可以显式覆盖：
+
+```bash
+AGENTHUB_RAW_TRACES=1 AGENTHUB_ALLOW_RAW_SECRET_TRACES=1 agenthub run examples/command-task.yaml
+```
+
+不要在 shared projects 或 CI 中使用该 override。
 
 它会创建：
 
