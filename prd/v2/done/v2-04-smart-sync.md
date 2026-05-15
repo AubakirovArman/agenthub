@@ -31,5 +31,5 @@ Replace the current coarse HEAD-only sync block with file-level overlap detectio
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `d2b27f9`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test smart_sync_rebases_independent_main_changes`; `cargo test smart_sync_blocks_overlapping_main_changes`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
