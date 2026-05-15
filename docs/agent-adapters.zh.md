@@ -15,7 +15,7 @@ agent:
   adapter: codex
   model: gpt-5.2
   dry_run: true
-  command_template: "codex exec --prompt-file {prompt}"
+  command_template: "codex exec - < {prompt}"
 ```
 
 - `adapter`: `command`、`codex`、`kimi` 或 `gemini`。
@@ -64,7 +64,7 @@ AGENTHUB_EXECUTOR_ADAPTER=kimi AGENTHUB_ADAPTER_DRY_RUN=1 agenthub run examples/
 AGENTHUB_EXECUTOR_ADAPTER=gemini
 AGENTHUB_AGENT_ADAPTER=codex
 AGENTHUB_ADAPTER_DRY_RUN=1
-AGENTHUB_ADAPTER_CODEX_TEMPLATE='codex exec --prompt-file {prompt}'
+AGENTHUB_ADAPTER_CODEX_TEMPLATE='codex exec - < {prompt}'
 AGENTHUB_ADAPTER_KIMI_TEMPLATE='kimi --prompt-file {prompt}'
 AGENTHUB_ADAPTER_GEMINI_TEMPLATE='gemini --prompt-file {prompt}'
 AGENTHUB_ADAPTER_CODEX_MODEL='gpt-5.2'

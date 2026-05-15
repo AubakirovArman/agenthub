@@ -107,18 +107,35 @@ fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<P
 
 fn render_prompt(spec: &AgentSpec, route: &AgentRoute) -> String {
     format!(
-        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nWorkspace: {}\n\nExecution commands:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
+        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
         route.role,
         route.selected_adapter,
         route.model.as_deref().unwrap_or("<default>"),
         spec.task.id,
         spec.task.kind,
+        spec.task.title.as_deref().unwrap_or("<none>"),
+        spec.task.target.as_deref().unwrap_or("<none>"),
         spec.workspace.kind,
+        list_values(&spec.skills),
+        list_values(&spec.rules),
+        list_values(&spec.scope.allow),
+        list_values(&spec.scope.deny),
         list_commands(&spec.execution.commands),
         list_commands(&spec.review.commands),
         list_commands(&spec.repair.commands),
         list_commands(&spec.verify.commands)
     )
+}
+
+fn list_values(values: &[String]) -> String {
+    if values.is_empty() {
+        return "- <none>".to_string();
+    }
+    values
+        .iter()
+        .map(|value| format!("- {value}"))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn list_commands(commands: &[String]) -> String {

@@ -114,7 +114,7 @@ agent:
   adapter: codex
   model: test-model
   dry_run: true
-  command_template: "codex exec --prompt-file {prompt}"
+  command_template: "codex exec - < {prompt}"
 ```
 
 Run the dry-run example:
