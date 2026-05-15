@@ -3,11 +3,14 @@ use anyhow::{anyhow, Result};
 use crate::aal::builder::build_spec;
 use crate::aal::diagnostics::AalDiagnostic;
 use crate::aal::draft::Draft;
+use crate::aal::formatter;
 use crate::aal::lexer::tokenize;
+use crate::aal::preamble;
 use crate::aal::section::{parse_section, Section};
-use crate::aal::values::{join, parse_bool, parse_u16, parse_u32, parse_u64};
+use crate::aal::semantics;
+use crate::aal::statements;
+use crate::aal::values::join;
 use crate::aal::AalParseOutput;
-use crate::spec::RouteCheckSpec;
 
 pub fn parse_aal(source: &str) -> Result<AalParseOutput> {
     let mut parser = AalParser::default();
@@ -15,6 +18,10 @@ pub fn parse_aal(source: &str) -> Result<AalParseOutput> {
         parser.line(index + 1, raw)?;
     }
     parser.finish()
+}
+
+pub fn format_aal(source: &str) -> Result<String> {
+    Ok(parse_aal(source)?.normalized)
 }
 
 #[derive(Default)]
@@ -54,6 +61,9 @@ impl AalParser {
 
     fn header(&mut self, line_number: usize, line: &str) -> Result<()> {
         let tokens = tokenize(line, line_number)?;
+        if preamble::handle(&mut self.draft, line_number, &tokens)? {
+            return Ok(());
+        }
         if tokens.len() == 3 && matches!(tokens[0].as_str(), "change" | "task") && tokens[2] == "{"
         {
             self.draft.name = Some(tokens[1].clone());
@@ -68,7 +78,10 @@ impl AalParser {
 
     fn statement(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
         if self.section == Section::Transaction {
-            return self.transaction(line_number, tokens);
+            if !statements::transaction(&mut self.draft, line_number, tokens)? {
+                return self.unknown(line_number, tokens.first().map_or("", String::as_str));
+            }
+            return Ok(());
         }
         match tokens.first().map(String::as_str) {
             Some("workspace") if tokens.len() == 2 => {
@@ -93,78 +106,21 @@ impl AalParser {
             Section::Deny => self.draft.deny.push(join(tokens)),
             Section::Rules => self.draft.rules.push(join(tokens)),
             Section::Execute => self.draft.execution_commands.push(join(tokens)),
-            Section::Verify => self.verify(line_number, tokens)?,
-            Section::Transaction => self.transaction(line_number, tokens)?,
+            Section::Verify => {
+                if !statements::verify(&mut self.draft, line_number, tokens)? {
+                    return self.unknown(line_number, tokens.first().map_or("", String::as_str));
+                }
+            }
+            Section::Transaction => {
+                if !statements::transaction(&mut self.draft, line_number, tokens)? {
+                    return self.unknown(line_number, tokens.first().map_or("", String::as_str));
+                }
+            }
             Section::Body => {
                 return self.unknown(line_number, tokens.first().map_or("-", String::as_str))
             }
         }
         Ok(())
-    }
-
-    fn verify(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
-        match tokens.first().map(String::as_str) {
-            Some("profile") if tokens.len() == 2 => {
-                self.draft.verify_profile = Some(tokens[1].clone())
-            }
-            Some("command") if tokens.len() >= 2 => {
-                self.draft.verify_commands.push(join(&tokens[1..]))
-            }
-            Some("runtime_start") if tokens.len() >= 2 => {
-                self.draft.runtime.start_command = Some(join(&tokens[1..]))
-            }
-            Some("runtime_base_url") if tokens.len() == 2 => {
-                self.draft.runtime.base_url = Some(tokens[1].clone())
-            }
-            Some("runtime_timeout_secs") if tokens.len() == 2 => {
-                self.draft.runtime.timeout_secs = Some(parse_u64(line_number, &tokens[1])?)
-            }
-            Some("runtime_smoke") => self.runtime_route(line_number, tokens)?,
-            Some(_) => self.draft.verify_commands.push(join(tokens)),
-            None => {}
-        }
-        Ok(())
-    }
-
-    fn runtime_route(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
-        if tokens.len() == 5 && tokens[1] == "route" && tokens[3] == "expect" {
-            self.draft.routes.push(RouteCheckSpec {
-                path: tokens[2].clone(),
-                expect: parse_u16(line_number, &tokens[4])?,
-            });
-            return Ok(());
-        }
-        self.unknown(line_number, "runtime_smoke")
-    }
-
-    fn transaction(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
-        match tokens.first().map(String::as_str) {
-            Some("isolation") if tokens.len() == 2 => {}
-            Some("max_repair_attempts") if tokens.len() == 2 => {
-                self.draft.transaction.max_repair_attempts = parse_u32(line_number, &tokens[1])?
-            }
-            Some("approval_required") if tokens.len() == 2 => {
-                self.draft.transaction.approval_required = parse_bool(line_number, &tokens[1])?
-            }
-            Some("on_failure") if tokens.len() == 2 => {
-                self.draft.transaction.rollback_on_failure = tokens[1] == "rollback"
-            }
-            Some("on_success") => self.on_success(&tokens[1..]),
-            Some(other) => return self.unknown(line_number, other),
-            None => {}
-        }
-        Ok(())
-    }
-
-    fn on_success(&mut self, tokens: &[String]) {
-        self.draft.transaction.commit_on_success =
-            tokens.iter().any(|token| token == "commit_code");
-        self.draft.transaction.memory_promotion =
-            if tokens.iter().any(|token| token == "promote_memory") {
-                "on_success".to_string()
-            } else {
-                "never".to_string()
-            };
     }
 
     fn finish(mut self) -> Result<AalParseOutput> {
@@ -174,17 +130,14 @@ impl AalParser {
                 AalDiagnostic::error(0, "missing closing `}`").render()
             ));
         }
-        if !self.draft.routes.is_empty() && self.draft.runtime.start_command.is_none() {
-            self.diagnostics.push(AalDiagnostic::warning(
-                0,
-                "runtime_smoke routes are recorded but not executed until runtime_start is set",
-            ));
-        }
+        self.diagnostics.extend(semantics::validate(&self.draft));
+        let normalized = formatter::format(&self.draft);
         let spec = build_spec(&self.draft);
         spec.validate()?;
         Ok(AalParseOutput {
             spec,
             diagnostics: self.diagnostics,
+            normalized,
         })
     }
 

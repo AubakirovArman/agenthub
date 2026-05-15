@@ -16,6 +16,10 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 ## Grammar
 
 ```text
+aal "0.2"
+import skill <skill.id>@<version>
+import rules <ruleset.id>@<version>
+
 change <Name> {
   workspace <workspace.type>
   goal "<human title>"
@@ -45,11 +49,15 @@ change <Name> {
 }
 ```
 
-`workspace`、`goal`、`topology`、`use skill`、`allow`、`deny`、`rules`、`execute`、`verify` 和 `transaction` 会直接映射到 `AgentSpec` 字段。Quoted strings 可以包含空格。以 `#` 或 `//` 开头的行是 comments。
+`aal "0.2"` 启用 v0.2 preamble。不写它时，旧的 v0.1-style 文件仍然可用。`import skill` 和 `import rules` 声明给 semantic tooling 使用的 versioned dependencies；真正写入 `AgentSpec` 的 skills 仍由 `use skill` 决定。`workspace`、`goal`、`topology`、`use skill`、`allow`、`deny`、`rules`、`execute`、`verify` 和 `transaction` 会直接映射到 `AgentSpec` 字段。Quoted strings 可以包含空格。以 `#` 或 `//` 开头的行是 comments。
 
 ## 示例
 
 ```aal
+aal "0.2"
+import skill code.nextjs.add_page@1
+import rules core.safe_diff@1
+
 change AddCoursesPage {
   workspace code.git
   goal "Add /courses page"
@@ -77,4 +85,23 @@ Parser errors 会包含行号：
 error line 2: unsupported AAL statement `mystery`
 ```
 
-如果存在 `runtime_smoke route` 但没有 `runtime_start`，parser 会给出 warning：route 会写入 AgentSpec，但在定义 runtime startup 之前不会执行。
+Semantic diagnostics 现在是结构化数据，包含稳定的 `code`、`severity`、`line` 和 `message` 字段。Parser 会报告：
+
+- unsupported AAL versions；
+- unknown skill namespaces；
+- unknown verifier profiles；
+- workspace/skill mismatches；
+- 完全相同的 `allow`/`deny` policy overlaps；
+- 没有 `runtime_start` 的 `runtime_smoke route`。
+
+`agenthub aal parse` 会把 diagnostics 打到 stderr；如果存在 semantic errors，它会在输出 YAML 之前停止。Warnings，例如没有 `runtime_start` 的 route smoke check，不会阻止 YAML output。
+
+作为 library 使用：
+
+```rust
+let parsed = agenthub::aal::parse_aal(source)?;
+let diagnostics_json = serde_json::to_string_pretty(&parsed.diagnostics)?;
+let normalized_aal = parsed.normalized;
+```
+
+`normalized` 会输出 canonical AAL form。它用于 editor/LSP integration、review，以及未来的 formatter command。

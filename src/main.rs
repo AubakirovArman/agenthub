@@ -109,6 +109,9 @@ fn run() -> Result<()> {
                 for diagnostic in &parsed.diagnostics {
                     eprintln!("{}", diagnostic.render());
                 }
+                if parsed.has_errors() {
+                    anyhow::bail!("AAL semantic validation failed");
+                }
                 let yaml = serde_yaml::to_string(&parsed.spec)?;
                 if let Some(output) = output {
                     if let Some(parent) =

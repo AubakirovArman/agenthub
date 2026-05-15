@@ -26,7 +26,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - LLM Gateway metadata, provider plans, budget decisions, redacted traces, optional raw traces және token/cost accounting;
 - routes, components, exports үшін context maps, stale-hash detection және map-based context selection;
 - defaults, approval marking және clarification questions бар AgentSpec preview жасайтын `ask` командасы;
-- diagnostics және AgentSpec YAML output беретін standalone AAL parser;
+- AAL v0.2 preamble/imports, semantic diagnostics, normalized rendering және AgentSpec YAML output;
 - transactions, DAG, verifier, cost, memory және approvals көрсететін terminal TUI dashboard;
 - transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs және reports көрсететін static browser dashboard;
 - transaction, memory, AgentSpec, approval және DAG көруге арналған VS Code extension;
@@ -103,7 +103,7 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub run tmp/add-courses.yaml
 ```
 
-AAL `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes және transaction policy қолдайды, содан кейін AgentSpec YAML шығарады. Қара: [AAL](docs/aal.kk.md).
+AAL `aal "0.2"`, `import skill`, `import rules`, semantic diagnostics, `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes және transaction policy қолдайды, содан кейін AgentSpec YAML шығарады. Қара: [AAL](docs/aal.kk.md).
 
 ## Негізгі командалар
 

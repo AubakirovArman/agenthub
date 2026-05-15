@@ -16,6 +16,10 @@ The command prints diagnostics to stderr and writes AgentSpec YAML to stdout or 
 ## Grammar
 
 ```text
+aal "0.2"
+import skill <skill.id>@<version>
+import rules <ruleset.id>@<version>
+
 change <Name> {
   workspace <workspace.type>
   goal "<human title>"
@@ -45,11 +49,15 @@ change <Name> {
 }
 ```
 
-`workspace`, `goal`, `topology`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, and `transaction` map directly to `AgentSpec` fields. Quoted strings may contain spaces. Lines starting with `#` or `//` are comments.
+`aal "0.2"` enables the v0.2 preamble. Omit it for legacy v0.1-style files. `import skill` and `import rules` declare versioned dependencies for semantic tooling; `use skill` still controls which skills are emitted into `AgentSpec`. `workspace`, `goal`, `topology`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, and `transaction` map directly to `AgentSpec` fields. Quoted strings may contain spaces. Lines starting with `#` or `//` are comments.
 
 ## Example
 
 ```aal
+aal "0.2"
+import skill code.nextjs.add_page@1
+import rules core.safe_diff@1
+
 change AddCoursesPage {
   workspace code.git
   goal "Add /courses page"
@@ -77,4 +85,23 @@ Parser errors include a line number:
 error line 2: unsupported AAL statement `mystery`
 ```
 
-If a `runtime_smoke route` exists without `runtime_start`, the parser emits a warning because the route is recorded but cannot run until runtime startup is defined.
+Semantic diagnostics are structured and carry stable `code`, `severity`, `line`, and `message` fields. The parser now reports:
+
+- unsupported AAL versions;
+- unknown skill namespaces;
+- unknown verifier profiles;
+- workspace/skill mismatches;
+- exact `allow`/`deny` policy overlaps;
+- `runtime_smoke route` without `runtime_start`.
+
+`agenthub aal parse` prints diagnostics to stderr and stops before YAML output when semantic errors are present. Warnings, such as a route smoke check without `runtime_start`, still allow YAML output.
+
+Library usage:
+
+```rust
+let parsed = agenthub::aal::parse_aal(source)?;
+let diagnostics_json = serde_json::to_string_pretty(&parsed.diagnostics)?;
+let normalized_aal = parsed.normalized;
+```
+
+`normalized` renders a canonical AAL form. It is intended for editor/LSP integration, reviews, and future formatter commands.

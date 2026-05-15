@@ -26,7 +26,7 @@ The current implementation covers the early PRD foundation:
 - LLM Gateway metadata, provider plans, budget decisions, redacted traces, optional raw traces, and token/cost accounting;
 - context maps for routes, components, exports, stale-hash detection, and map-based context selection;
 - `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;
-- standalone AAL parser with diagnostics and AgentSpec YAML output;
+- AAL v0.2 preamble/imports, semantic diagnostics, normalized rendering, and AgentSpec YAML output;
 - terminal TUI dashboard for transactions, DAG, verifier, cost, memory, and approvals;
 - static browser dashboard for transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs, and reports;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
@@ -103,7 +103,7 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub run tmp/add-courses.yaml
 ```
 
-AAL supports `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes, and transaction policy, then emits AgentSpec YAML. See [AAL](docs/aal.en.md).
+AAL supports `aal "0.2"`, `import skill`, `import rules`, semantic diagnostics, `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes, and transaction policy, then emits AgentSpec YAML. See [AAL](docs/aal.en.md).
 
 ## Main Commands
 

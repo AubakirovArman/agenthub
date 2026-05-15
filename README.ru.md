@@ -26,7 +26,7 @@ AgentHub — транзакционная runtime-основа для работ
 - LLM Gateway metadata, provider plans, budget decisions, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
-- standalone AAL parser с diagnostics и AgentSpec YAML output;
+- AAL v0.2 preamble/imports, semantic diagnostics, normalized rendering и AgentSpec YAML output;
 - terminal TUI dashboard для transactions, DAG, verifier, cost, memory и approvals;
 - static browser dashboard для transactions, metrics, timeline, agent trace, memory graph, skills, policies, costs и reports;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
@@ -103,7 +103,7 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub run tmp/add-courses.yaml
 ```
 
-AAL поддерживает `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes и transaction policy, затем выдаёт AgentSpec YAML. См. [AAL](docs/aal.ru.md).
+AAL поддерживает `aal "0.2"`, `import skill`, `import rules`, semantic diagnostics, `workspace`, `goal`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify`, runtime smoke routes и transaction policy, затем выдаёт AgentSpec YAML. См. [AAL](docs/aal.ru.md).
 
 ## Основные команды
 

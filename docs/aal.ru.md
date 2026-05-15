@@ -16,6 +16,10 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 ## Grammar
 
 ```text
+aal "0.2"
+import skill <skill.id>@<version>
+import rules <ruleset.id>@<version>
+
 change <Name> {
   workspace <workspace.type>
   goal "<human title>"
@@ -45,11 +49,15 @@ change <Name> {
 }
 ```
 
-`workspace`, `goal`, `topology`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify` и `transaction` напрямую переходят в поля `AgentSpec`. Quoted strings могут содержать пробелы. Строки, начинающиеся с `#` или `//`, считаются comments.
+`aal "0.2"` включает preamble версии v0.2. Если его не указывать, старые v0.1-style файлы продолжают работать. `import skill` и `import rules` объявляют versioned dependencies для semantic tooling; `use skill` по-прежнему определяет, какие skills попадут в `AgentSpec`. `workspace`, `goal`, `topology`, `use skill`, `allow`, `deny`, `rules`, `execute`, `verify` и `transaction` напрямую переходят в поля `AgentSpec`. Quoted strings могут содержать пробелы. Строки, начинающиеся с `#` или `//`, считаются comments.
 
 ## Пример
 
 ```aal
+aal "0.2"
+import skill code.nextjs.add_page@1
+import rules core.safe_diff@1
+
 change AddCoursesPage {
   workspace code.git
   goal "Add /courses page"
@@ -77,4 +85,23 @@ Parser errors содержат номер строки:
 error line 2: unsupported AAL statement `mystery`
 ```
 
-Если есть `runtime_smoke route`, но нет `runtime_start`, parser выдаёт warning: route будет записан в AgentSpec, но не будет выполняться, пока не задан runtime startup.
+Semantic diagnostics теперь структурированы и имеют стабильные поля `code`, `severity`, `line` и `message`. Parser сообщает:
+
+- unsupported AAL versions;
+- unknown skill namespaces;
+- unknown verifier profiles;
+- workspace/skill mismatches;
+- точные `allow`/`deny` policy overlaps;
+- `runtime_smoke route` без `runtime_start`.
+
+`agenthub aal parse` печатает diagnostics в stderr и останавливается до YAML output, если есть semantic errors. Warnings, например route smoke check без `runtime_start`, не блокируют YAML output.
+
+Использование как library:
+
+```rust
+let parsed = agenthub::aal::parse_aal(source)?;
+let diagnostics_json = serde_json::to_string_pretty(&parsed.diagnostics)?;
+let normalized_aal = parsed.normalized;
+```
+
+`normalized` выводит canonical AAL form. Это задел для editor/LSP integration, code review и будущей formatter command.
