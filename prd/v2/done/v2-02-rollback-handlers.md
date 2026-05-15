@@ -26,5 +26,5 @@ Add concrete rollback handler records and handler execution beyond the current g
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `f57647f`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test rollback`; `cargo test failed_transaction_rolls_back_and_records_failed_attempt`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
