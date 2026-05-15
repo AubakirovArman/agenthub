@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: Web dashboard implementation commit.
+Closing evidence: `21242d8 Complete web dashboard task`
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
