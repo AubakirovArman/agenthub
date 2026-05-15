@@ -1,11 +1,39 @@
 memory_schema:
   domain: infra
+  description: InfraWorkspace memory tracks environments, plans, policy decisions, costs, and rollback information.
   types:
-    - environment
-    - terraform_module
-    - cloud_resource
-    - cost_constraint
-    - rollback_procedure
-    - infra_change
-    - failed_attempt
-
+    environment:
+      fields:
+        - name
+        - provider
+        - account
+    terraform_module:
+      fields:
+        - path
+        - version
+        - owner
+    cloud_resource:
+      fields:
+        - provider
+        - resource_type
+        - identifier
+    cost_constraint:
+      fields:
+        - limit
+        - currency
+        - period
+    rollback_procedure:
+      fields:
+        - plan_path
+        - owner
+        - steps
+    infra_change:
+      fields:
+        - task_id
+        - changed_files
+        - summary
+    failed_attempt:
+      fields:
+        - task_id
+        - reason
+        - fingerprint

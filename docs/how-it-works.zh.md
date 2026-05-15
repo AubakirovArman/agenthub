@@ -90,6 +90,8 @@ transaction:
 - `data.git`: reports、data artifacts、metric checks。
 - `infra.git`: plans、config、infrastructure review artifacts。
 
+Domain verifier profiles 会在 configured commands 之后添加 structural checks：`content_quality` 检查非空 content artifacts，`data_quality` 验证 JSON artifacts，`infra_plan` 验证 infra plan artifacts。详情见 [Workspaces](workspaces.zh.md)。
+
 示例：
 
 ```bash

@@ -109,34 +109,37 @@ pub(super) const DEFAULT_VERIFIER_PROFILES: &str = r#"profiles:
 
 pub(super) const DEFAULT_CONTENT_SCHEMA: &str = r#"memory_schema:
   domain: content
+  description: ContentWorkspace memory tracks text decisions, tone, audience, and quality constraints.
   types:
-    - content_format
-    - tone_of_voice
-    - audience_profile
-    - brand_rule
-    - content_change
-    - failed_attempt
+    content_format: { fields: [path, format, channel] }
+    tone_of_voice: { fields: [name, allowed_phrases, banned_phrases] }
+    audience_profile: { fields: [audience, reading_level, locale] }
+    brand_rule: { fields: [rule, severity, source] }
+    content_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
 "#;
 
 pub(super) const DEFAULT_DATA_SCHEMA: &str = r#"memory_schema:
   domain: data
+  description: DataWorkspace memory tracks datasets, metrics, artifacts, and quality rules.
   types:
-    - dataset
-    - data_quality_rule
-    - metric
-    - artifact
-    - data_change
-    - failed_attempt
+    dataset: { fields: [name, source, snapshot] }
+    data_quality_rule: { fields: [rule, threshold, severity] }
+    metric: { fields: [name, value, unit] }
+    artifact: { fields: [path, media_type, checksum] }
+    data_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
 "#;
 
 pub(super) const DEFAULT_INFRA_SCHEMA: &str = r#"memory_schema:
   domain: infra
+  description: InfraWorkspace memory tracks environments, plans, policy decisions, costs, and rollback information.
   types:
-    - environment
-    - terraform_module
-    - cloud_resource
-    - cost_constraint
-    - rollback_procedure
-    - infra_change
-    - failed_attempt
+    environment: { fields: [name, provider, account] }
+    terraform_module: { fields: [path, version, owner] }
+    cloud_resource: { fields: [provider, resource_type, identifier] }
+    cost_constraint: { fields: [limit, currency, period] }
+    rollback_procedure: { fields: [plan_path, owner, steps] }
+    infra_change: { fields: [task_id, changed_files, summary] }
+    failed_attempt: { fields: [task_id, reason, fingerprint] }
 "#;

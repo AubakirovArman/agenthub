@@ -102,6 +102,15 @@ impl TransactionReport {
                     command.command, command.success, command.exit_code, command.timed_out
                 ));
             }
+            if let Some(domain) = &verifier.domain {
+                md.push_str(&format!("- Domain checks: `{}`\n", domain.passed));
+                for check in &domain.checks {
+                    md.push_str(&format!(
+                        "- `{}` -> success `{}` detail `{}`\n",
+                        check.name, check.success, check.detail
+                    ));
+                }
+            }
             if let Some(runtime) = &verifier.runtime_smoke {
                 md.push_str(&format!("- Runtime smoke: `{}`\n", runtime.passed));
                 for check in &runtime.checks {

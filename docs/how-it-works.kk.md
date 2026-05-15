@@ -90,6 +90,8 @@ transaction:
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
 
+Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` бос емес content artifacts тексереді, `data_quality` JSON artifacts валидтейді, `infra_plan` infra plan artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md).
+
 Мысалдар:
 
 ```bash

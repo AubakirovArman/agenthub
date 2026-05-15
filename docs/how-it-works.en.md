@@ -90,6 +90,8 @@ AgentHub currently supports four git-backed domain profiles:
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
 
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks non-empty content artifacts, `data_quality` validates JSON artifacts, and `infra_plan` validates infra plan artifacts. Details: [Workspaces](workspaces.en.md).
+
 Examples:
 
 ```bash

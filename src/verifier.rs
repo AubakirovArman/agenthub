@@ -1,3 +1,6 @@
+mod domain;
+#[cfg(test)]
+mod domain_tests;
 mod runtime;
 #[cfg(test)]
 mod runtime_tests;
@@ -13,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use crate::command_runner::{run_shell, CommandResult};
 use crate::spec::VerifySpec;
 
+pub use domain::{DomainCheckResult, DomainVerificationResult};
 use runtime::run_runtime_smoke;
 pub use runtime::{RouteCheckResult, RuntimeSmokeResult};
 
@@ -21,6 +25,7 @@ pub struct VerifierResult {
     pub passed: bool,
     pub profile: Option<String>,
     pub commands: Vec<CommandResult>,
+    pub domain: Option<DomainVerificationResult>,
     pub runtime_smoke: Option<RuntimeSmokeResult>,
 }
 
@@ -40,6 +45,21 @@ pub fn run(verify: &VerifySpec, worktree: &Path, log_path: &Path) -> Result<Veri
                 passed: false,
                 profile: verify.profile.clone(),
                 commands: results,
+                domain: None,
+                runtime_smoke: None,
+            });
+        }
+    }
+
+    let domain = domain::run(verify.profile.as_deref(), worktree)?;
+    if let Some(domain) = &domain {
+        append_domain_log(log_path, domain)?;
+        if !domain.passed {
+            return Ok(VerifierResult {
+                passed: false,
+                profile: verify.profile.clone(),
+                commands: results,
+                domain: Some(domain.clone()),
                 runtime_smoke: None,
             });
         }
@@ -52,6 +72,7 @@ pub fn run(verify: &VerifySpec, worktree: &Path, log_path: &Path) -> Result<Veri
                 passed: false,
                 profile: verify.profile.clone(),
                 commands: results,
+                domain,
                 runtime_smoke: Some(result),
             });
         }
@@ -64,6 +85,7 @@ pub fn run(verify: &VerifySpec, worktree: &Path, log_path: &Path) -> Result<Veri
         passed: true,
         profile: verify.profile.clone(),
         commands: results,
+        domain,
         runtime_smoke,
     })
 }
@@ -92,6 +114,25 @@ fn append_log(path: &Path, result: &CommandResult) -> Result<()> {
     }
     if !result.stderr.trim().is_empty() {
         writeln!(file, "STDERR:\n{}", result.stderr)?;
+    }
+    writeln!(file, "---")?;
+    Ok(())
+}
+
+fn append_domain_log(path: &Path, domain: &DomainVerificationResult) -> Result<()> {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .with_context(|| format!("open {}", path.display()))?;
+    writeln!(file, "DOMAIN_PROFILE: {}", domain.profile)?;
+    writeln!(file, "DOMAIN_PASSED: {}", domain.passed)?;
+    for check in &domain.checks {
+        writeln!(
+            file,
+            "DOMAIN_CHECK: {} success {} detail {}",
+            check.name, check.success, check.detail
+        )?;
     }
     writeln!(file, "---")?;
     Ok(())

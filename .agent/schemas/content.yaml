@@ -1,10 +1,34 @@
 memory_schema:
   domain: content
+  description: ContentWorkspace memory tracks published/drafted text decisions, tone, audience, and quality constraints.
   types:
-    - content_format
-    - tone_of_voice
-    - audience_profile
-    - brand_rule
-    - content_change
-    - failed_attempt
-
+    content_format:
+      fields:
+        - path
+        - format
+        - channel
+    tone_of_voice:
+      fields:
+        - name
+        - allowed_phrases
+        - banned_phrases
+    audience_profile:
+      fields:
+        - audience
+        - reading_level
+        - locale
+    brand_rule:
+      fields:
+        - rule
+        - severity
+        - source
+    content_change:
+      fields:
+        - task_id
+        - changed_files
+        - summary
+    failed_attempt:
+      fields:
+        - task_id
+        - reason
+        - fingerprint

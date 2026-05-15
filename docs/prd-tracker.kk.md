@@ -17,4 +17,4 @@ sed -n '1,120p' prd/status.md
 - Code, tests, acceptance және 4-language docs толық біткенде ғана phase `prd/done/` ішіне көшеді.
 - Closing commit hash phase file және `prd/status.md` ішіне жазылады.
 
-Қазіргі келесі phase: Phase 11, additional workspaces.
+Қазіргі келесі phase: Phase 12, IDE and visual layer.

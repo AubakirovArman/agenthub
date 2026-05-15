@@ -17,4 +17,4 @@ Rules:
 - Move a phase to `prd/done/` only after code, tests, acceptance, and 4-language docs are complete.
 - Add the closing commit hash to the phase file and `prd/status.md`.
 
-Current next phase: Phase 11, additional workspaces.
+Current next phase: Phase 12, IDE and visual layer.

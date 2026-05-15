@@ -471,6 +471,100 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn data_workspace_uses_same_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "data.yaml",
+        r#"
+task:
+  id: data_quality_report
+  type: data.command
+workspace:
+  type: data.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p data/reports
+    - "printf '{\"rows\": 12, \"status\": \"ok\"}\\n' > data/reports/quality.json"
+scope:
+  allow:
+    - data/**
+verify:
+  profile: data_quality
+  commands:
+    - test -f data/reports/quality.json
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 3
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("data/reports/quality.json").exists());
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("data_json_valid"));
+    let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
+    assert!(committed_memory.contains("data_change"));
+    Ok(())
+}
+
+#[test]
+fn infra_workspace_uses_same_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "infra.yaml",
+        r#"
+task:
+  id: infra_plan_report
+  type: infra.command
+workspace:
+  type: infra.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p infra/plans
+    - "printf 'plan: ok\\nrisk: low\\n' > infra/plans/plan.yaml"
+scope:
+  allow:
+    - infra/**
+verify:
+  profile: infra_plan
+  commands:
+    - test -f infra/plans/plan.yaml
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 3
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    assert!(repo.path().join("infra/plans/plan.yaml").exists());
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("infra_artifacts_valid"));
+    let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
+    assert!(committed_memory.contains("infra_change"));
+    Ok(())
+}
+
 struct TestRepo {
     dir: TempDir,
     specs: TempDir,

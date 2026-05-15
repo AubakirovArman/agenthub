@@ -22,8 +22,7 @@ git diff --check
 
 ## Current Queue
 
-- Current: `todo/phase-11-additional-workspaces.md`
-- Then: `todo/phase-12-ide-and-visual-layer.md`
+- Current: `todo/phase-12-ide-and-visual-layer.md`
 - Then: `todo/phase-13-marketplace-plugin-ecosystem.md`
 - Then: `todo/phase-14-enterprise-layer.md`
 
