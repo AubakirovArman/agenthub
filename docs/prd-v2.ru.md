@@ -4,4 +4,4 @@
 
 AgentHub v2 переводит проект из feature-complete foundation в hardened platform. Первые приоритеты: effect-aware transactions, smart sync, настоящий LLM Gateway control, typed VCM-OS memory, hardened runners, затем AAL v2 и team/hosted surfaces.
 
-Рабочий backlog находится в `prd/v2/`. Effect ledger, rollback handlers, resume/retry/resolve, Smart Sync, Workspace Runtime trait, LLM Provider Gateway, VCM-OS typed memory, Hardened Runner, AAL v2 semantics, Adaptive Orchestration, Verifier Integrations v2, Governance v2, Analytics History, Specialized Domain Runtimes и Plugin Marketplace Governance сделаны. Следующая task — Hosted / Team Surfaces.
+Рабочий backlog находится в `prd/v2/`. Effect ledger, rollback handlers, resume/retry/resolve, Smart Sync, Workspace Runtime trait, LLM Provider Gateway, VCM-OS typed memory, Hardened Runner, AAL v2 semantics, Adaptive Orchestration, Verifier Integrations v2, Governance v2, Analytics History, Specialized Domain Runtimes, Plugin Marketplace Governance и Hosted / Team Surfaces сделаны. В текущем tracker не осталось v2 tasks.

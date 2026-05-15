@@ -4,4 +4,4 @@ Languages: [English](prd-v2.en.md), [Русский](prd-v2.ru.md), [中文](prd
 
 AgentHub v2 moves the project from feature-complete foundation to hardened platform. The first priorities are effect-aware transactions, smart sync, real LLM gateway control, typed VCM-OS memory, hardened runners, then AAL v2 and team/hosted surfaces.
 
-The working backlog is in `prd/v2/`. Effect ledger, rollback handlers, resume/retry/resolve, Smart Sync, Workspace Runtime trait, LLM Provider Gateway, VCM-OS typed memory, Hardened Runner, AAL v2 semantics, Adaptive Orchestration, Verifier Integrations v2, Governance v2, Analytics History, Specialized Domain Runtimes, and Plugin Marketplace Governance are done. The next task is Hosted / Team Surfaces.
+The working backlog is in `prd/v2/`. Effect ledger, rollback handlers, resume/retry/resolve, Smart Sync, Workspace Runtime trait, LLM Provider Gateway, VCM-OS typed memory, Hardened Runner, AAL v2 semantics, Adaptive Orchestration, Verifier Integrations v2, Governance v2, Analytics History, Specialized Domain Runtimes, Plugin Marketplace Governance, and Hosted / Team Surfaces are done. There is no remaining v2 task in the current tracker.

@@ -2,7 +2,7 @@
 
 ## Current Queue
 
-- Current: `v2-16-hosted-team-surfaces.md`
+- Current: none
 - Done: `../done/v2-00-brand-audit.md`
 - Done: `../done/v2-01-effect-ledger-foundation.md`
 - Done: `../done/v2-02-rollback-handlers.md`
@@ -19,7 +19,8 @@
 - Done: `../done/v2-13-analytics-history.md`
 - Done: `../done/v2-14-domain-runtimes.md`
 - Done: `../done/v2-15-plugin-governance.md`
+- Done: `../done/v2-16-hosted-team-surfaces.md`
 
 ## Remaining Tasks
 
-1. `v2-16-hosted-team-surfaces.md` — hosted/team product surfaces after hardening.
+- None.
