@@ -114,6 +114,54 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn blocked_transaction_does_not_promote_or_record_failed_memory() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "blocked_missing_env.yaml",
+        r#"
+task:
+  id: blocked_missing_env_no_memory
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'pending\n' > generated/blocked.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - sh -c "echo 'missing environment variable API_KEY' >&2; exit 1"
+transaction:
+  max_repair_attempts: 0
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 1
+    max_lines_added: 1
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
+    assert!(!repo.path().join("generated/blocked.txt").exists());
+    let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
+    let failed_memory =
+        fs::read_to_string(repo.path().join(".agent/memory/failed_attempts.jsonl"))?;
+    assert!(!committed_memory.contains("blocked_missing_env_no_memory"));
+    assert!(!failed_memory.contains("blocked_missing_env_no_memory"));
+    Ok(())
+}
+
 fn tx_log(report_path: &Path, name: &str) -> PathBuf {
     report_path
         .parent()
