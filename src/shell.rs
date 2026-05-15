@@ -1,5 +1,6 @@
 mod actions;
 mod commands;
+mod product;
 mod run;
 
 use std::io::{self, BufRead, Write};
@@ -53,6 +54,10 @@ fn handle(
         }
         ShellCommand::Mode(next) => update_mode(next, mode),
         ShellCommand::Sessions => actions::list_sessions(root)?,
+        ShellCommand::Doctor => product::print_doctor(root)?,
+        ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
+        ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
+        ShellCommand::Dashboard => product::open_dashboard(root)?,
         ShellCommand::Open(tx_id) => {
             let requested = (!tx_id.trim().is_empty()).then_some(tx_id.as_str());
             let opened = requested
@@ -121,6 +126,11 @@ fn print_help(mode: ShellMode) {
     println!("current                      show selected transaction");
     println!("close                        clear selected transaction");
     println!("sessions or history          list transactions");
+    println!("doctor                       check local readiness");
+    println!("providers [status|setup|test|diagnose]");
+    println!("provider <id>                setup default provider");
+    println!("config [show|set key value]  inspect or update config");
+    println!("dashboard                    write local web dashboard");
     println!("open <tx-id|latest>          open report and select tx");
     println!("latest                       open latest transaction");
     println!("watch [tx-id|latest]         follow live transaction journal");

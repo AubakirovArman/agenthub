@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады.
+Бұл shell local-first жұмысқа арналған. Оның ішінде бұрынғы transaction сессияларын көруге, report ашуға, табиғи тілден draft AgentSpec жасауға, request-ті prompt ішінен іске қосуға және ағымдағы transaction таңдаулы күйде ұстауға болады. Бұл сессиялар AgentHub transaction sessions, еркін chat rooms емес: әр орындалған хабар tracked transaction болады және report, journal, effects, verifier output, memory behavior сақтайды.
 
 Shell әдепкіде `plan` режимінде ашылады. Бұл режимде жай мәтін тек draft жасайды. Жай мәтін бірден орындалсын десең, `mode run` қос.
 
@@ -21,6 +21,12 @@ mode plan|run                жай мәтін әрекетін таңдау
 current                      таңдалған transaction көрсету
 close                        таңдалған transaction тазалау
 sessions or history          соңғы transaction тізімі
+session [tx-id|latest]       сессия тізімі немесе біреуін ашу
+doctor                       жергілікті readiness тексеру
+providers [status|...]       providers list/setup/test/diagnose
+provider <id>                default provider орнату
+config [show|set key value]  config көру немесе жаңарту
+dashboard                    жергілікті web dashboard жазу
 open <tx-id|latest>          report ашу және tx-ті ағымдағы ету
 latest                       соңғы transaction ашу
 watch [tx-id|latest]         transaction journal-ды live бақылау
@@ -74,6 +80,7 @@ agenthub:plan> do generated health-check file қос
 
 ```text
 agenthub:plan> sessions
+agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
@@ -81,6 +88,17 @@ agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
 agenthub:plan[tx-20260515123000-abcd1234]> undo
+```
+
+Shell ішінен шықпай environment тексеру:
+
+```text
+agenthub:plan> doctor
+agenthub:plan> providers status
+agenthub:plan> provider codex
+agenthub:plan> providers diagnose codex
+agenthub:plan> config show
+agenthub:plan> dashboard
 ```
 
 ## Қауіпсіздік

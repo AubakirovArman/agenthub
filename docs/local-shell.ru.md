@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию.
+Оболочка нужна для local-first работы. Внутри можно смотреть прошлые транзакции, открывать отчёты, создавать draft AgentSpec из обычного сообщения, запускать запросы без выхода из prompt и держать выбранную текущую транзакцию. Эти сессии — AgentHub transaction sessions, а не свободные chat rooms: каждое выполненное сообщение становится отслеживаемой транзакцией с report, journal, effects, verifier output и memory behavior.
 
 Shell стартует в режиме `plan`. В этом режиме обычный текст только создаёт draft. Если хочешь, чтобы обычный текст сразу выполнялся, включи `mode run`.
 
@@ -21,6 +21,12 @@ mode plan|run                выбрать поведение обычного 
 current                      показать выбранную транзакцию
 close                        сбросить выбранную транзакцию
 sessions or history          список последних транзакций
+session [tx-id|latest]       список сессий или открыть одну
+doctor                       проверить локальную готовность
+providers [status|...]       список, setup, test или diagnose providers
+provider <id>                настроить default provider
+config [show|set key value]  посмотреть или обновить config
+dashboard                    записать локальный web dashboard
 open <tx-id|latest>          открыть report и сделать tx текущей
 latest                       открыть последнюю транзакцию
 watch [tx-id|latest]         следить за live journal транзакции
@@ -74,6 +80,7 @@ agenthub:plan> do добавь generated health-check файл
 
 ```text
 agenthub:plan> sessions
+agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
@@ -81,6 +88,17 @@ agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
 agenthub:plan[tx-20260515123000-abcd1234]> undo
+```
+
+Проверить окружение без выхода из shell:
+
+```text
+agenthub:plan> doctor
+agenthub:plan> providers status
+agenthub:plan> provider codex
+agenthub:plan> providers diagnose codex
+agenthub:plan> config show
+agenthub:plan> dashboard
 ```
 
 ## Безопасность

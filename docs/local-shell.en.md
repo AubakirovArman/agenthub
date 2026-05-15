@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-The shell is for local-first work. It lets you inspect transaction sessions, open reports, create draft specs from natural language, run requests without leaving the prompt, and keep a current transaction selected.
+The shell is for local-first work. It lets you inspect transaction sessions, open reports, create draft specs from natural language, run requests without leaving the prompt, and keep a current transaction selected. These sessions are AgentHub transaction sessions, not free-form chat rooms: every executed message becomes a tracked transaction with report, journal, effects, verifier output, and memory behavior.
 
 Shell starts in `plan` mode. In this mode, plain text creates a draft only. Use `mode run` when you want plain text to execute immediately.
 
@@ -21,6 +21,12 @@ mode plan|run                set plain-text behavior
 current                      show selected transaction
 close                        clear selected transaction
 sessions or history          list recent transactions
+session [tx-id|latest]       list sessions or open one
+doctor                       check local readiness
+providers [status|...]       list, setup, test, or diagnose providers
+provider <id>                setup default provider
+config [show|set key value]  inspect or update config
+dashboard                    write the local web dashboard
 open <tx-id|latest>          open a transaction report and set it current
 latest                       open latest transaction
 watch [tx-id|latest]         follow the live transaction journal
@@ -74,6 +80,7 @@ Browse prior sessions:
 
 ```text
 agenthub:plan> sessions
+agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
@@ -81,6 +88,17 @@ agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
 agenthub:plan[tx-20260515123000-abcd1234]> undo
+```
+
+Check the environment without leaving the shell:
+
+```text
+agenthub:plan> doctor
+agenthub:plan> providers status
+agenthub:plan> provider codex
+agenthub:plan> providers diagnose codex
+agenthub:plan> config show
+agenthub:plan> dashboard
 ```
 
 ## Safety

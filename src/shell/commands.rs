@@ -8,6 +8,10 @@ pub(super) enum ShellCommand {
     Close,
     Mode(Option<ShellMode>),
     Sessions,
+    Doctor,
+    Providers(Option<String>),
+    Config(Option<String>),
+    Dashboard,
     Open(String),
     Watch(Option<String>),
     Cancel(Option<String>),
@@ -53,6 +57,12 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "close" | "clear" => ShellCommand::Close,
         "mode" => ShellCommand::Mode(parse_mode(rest)),
         "sessions" | "history" | "tx" | "list" => ShellCommand::Sessions,
+        "session" => parse_session(rest),
+        "doctor" => ShellCommand::Doctor,
+        "providers" => ShellCommand::Providers(optional(rest)),
+        "provider" => ShellCommand::Providers(Some(format!("setup {}", rest.trim()))),
+        "config" => ShellCommand::Config(optional(rest)),
+        "dashboard" => ShellCommand::Dashboard,
         "latest" => ShellCommand::Open("latest".to_string()),
         "open" => ShellCommand::Open(rest.trim().to_string()),
         "watch" => ShellCommand::Watch(optional(rest)),
@@ -86,6 +96,13 @@ fn parse_mode(value: &str) -> Option<ShellMode> {
     }
 }
 
+fn parse_session(rest: &str) -> ShellCommand {
+    match optional(rest) {
+        Some(tx_id) => ShellCommand::Open(tx_id),
+        None => ShellCommand::Sessions,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{parse_line, ShellCommand, ShellMode};
@@ -93,7 +110,26 @@ mod tests {
     #[test]
     fn parses_shell_commands_and_plain_text() {
         assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
+        assert_eq!(parse_line("session"), ShellCommand::Sessions);
+        assert_eq!(
+            parse_line("session latest"),
+            ShellCommand::Open("latest".into())
+        );
         assert_eq!(parse_line("/sessions"), ShellCommand::Sessions);
+        assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
+        assert_eq!(parse_line("dashboard"), ShellCommand::Dashboard);
+        assert_eq!(
+            parse_line("providers diagnose codex"),
+            ShellCommand::Providers(Some("diagnose codex".into()))
+        );
+        assert_eq!(
+            parse_line("provider codex"),
+            ShellCommand::Providers(Some("setup codex".into()))
+        );
+        assert_eq!(
+            parse_line("config set default_provider command"),
+            ShellCommand::Config(Some("set default_provider command".into()))
+        );
         assert_eq!(
             parse_line("mode run"),
             ShellCommand::Mode(Some(ShellMode::Run))

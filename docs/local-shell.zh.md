@@ -8,7 +8,7 @@ agenthub
 agenthub shell
 ```
 
-这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec、在同一个 prompt 中运行请求，并保持一个当前选中的 transaction。
+这个 shell 面向 local-first 使用。你可以查看历史事务会话、打开报告、用自然语言生成 draft AgentSpec、在同一个 prompt 中运行请求，并保持一个当前选中的 transaction。这些会话是 AgentHub transaction sessions，不是自由聊天房间：每条被执行的消息都会成为可追踪的 transaction，并带有 report、journal、effects、verifier output 和 memory behavior。
 
 Shell 默认以 `plan` 模式启动。在该模式下，普通文本只会创建 draft。使用 `mode run` 后，普通文本会立即执行。
 
@@ -21,6 +21,12 @@ mode plan|run                设置普通文本行为
 current                      显示当前选中的 transaction
 close                        清除当前选中的 transaction
 sessions or history          列出最近事务
+session [tx-id|latest]       列出会话或打开一个会话
+doctor                       检查本地 readiness
+providers [status|...]       列出、setup、test 或 diagnose providers
+provider <id>                设置 default provider
+config [show|set key value]  查看或更新 config
+dashboard                    写入本地 web dashboard
 open <tx-id|latest>          打开事务报告并设为当前事务
 latest                       打开最新 transaction
 watch [tx-id|latest]         跟随实时 transaction journal
@@ -74,6 +80,7 @@ agenthub:plan> do add a generated health-check file
 
 ```text
 agenthub:plan> sessions
+agenthub:plan> session latest
 agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
@@ -81,6 +88,17 @@ agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
 agenthub:plan[tx-20260515123000-abcd1234]> undo
+```
+
+不离开 shell 检查环境：
+
+```text
+agenthub:plan> doctor
+agenthub:plan> providers status
+agenthub:plan> provider codex
+agenthub:plan> providers diagnose codex
+agenthub:plan> config show
+agenthub:plan> dashboard
 ```
 
 ## 安全性

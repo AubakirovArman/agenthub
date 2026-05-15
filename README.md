@@ -100,6 +100,8 @@ agenthub tx status
 agenthub tx report tx-...
 ```
 
+Running `agenthub` without a subcommand opens the local shell. Inside it you can use `sessions`, `session latest`, `doctor`, `providers status`, `provider codex`, `config show`, `dashboard`, and plain text requests. Shell sessions are transaction sessions: executed messages produce tracked transactions with reports, effects, verifier logs, and memory behavior.
+
 After a successful transaction AgentHub commits the isolated worktree back into the project, writes a report under `.agent/tx/<tx-id>/report.md`, and promotes verified memory to `.agent/memory/committed.jsonl`.
 
 ## AgentSpec Example
