@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use agenthub::{enterprise, intent, transaction};
+use agenthub::{enterprise, intent, memory, spec::AgentSpec, transaction};
 
 use super::run_summary;
 
@@ -42,6 +42,7 @@ pub fn handle_plan(
 
 pub fn handle_run(root: &Path, target: &str, no_commit: bool) -> Result<()> {
     let spec = resolve_run_spec(root, target)?;
+    print_failed_attempt_warnings(root, &spec)?;
     let actor = enterprise::authorize(root, "transaction.run")?;
     let outcome = match transaction::run(root, &spec, no_commit) {
         Ok(outcome) => outcome,
@@ -68,6 +69,25 @@ pub fn handle_run(root: &Path, target: &str, no_commit: bool) -> Result<()> {
         json!({ "tx_id": outcome.tx_id }),
     )?;
     run_summary::print(root, &spec, &outcome)
+}
+
+fn print_failed_attempt_warnings(root: &Path, spec_path: &Path) -> Result<()> {
+    let spec = AgentSpec::load(spec_path)?;
+    let query = [
+        Some(spec.task.id.as_str()),
+        Some(spec.task.kind.as_str()),
+        spec.task.title.as_deref(),
+        spec.task.target.as_deref(),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ");
+    for warning in memory::failed_attempt_warnings(root, &query, 3)? {
+        eprintln!("warning: similar failed attempt: {}", warning.reason);
+        eprintln!("mitigation: {}", warning.mitigation);
+    }
+    Ok(())
 }
 
 fn resolve_run_spec(root: &Path, target: &str) -> Result<PathBuf> {

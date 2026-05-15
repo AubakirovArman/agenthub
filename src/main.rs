@@ -8,13 +8,11 @@ use anyhow::Result;
 use clap::Parser;
 
 use agenthub::{
-    aal, agent_adapter, agent_dir, code_maps, enterprise, memory, shell, skill_registry, team, tui,
+    aal, agent_adapter, agent_dir, code_maps, enterprise, shell, skill_registry, team, tui,
     tx_undo, web_dashboard, workspace,
 };
 
-use crate::cli::{
-    AalCommands, AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, WorkspaceCommands,
-};
+use crate::cli::{AalCommands, AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands};
 
 fn main() {
     if let Err(error) = run() {
@@ -120,14 +118,7 @@ fn run() -> Result<()> {
                 }
             }
         },
-        Commands::Memory { command } => match command {
-            MemoryCommands::Inspect => {
-                enterprise::authorize(&project_root, "memory.read")?;
-                let stats = memory::inspect(&project_root)?;
-                println!("committed: {}", stats.committed);
-                println!("failed_attempts: {}", stats.failed_attempts);
-            }
-        },
+        Commands::Memory { command } => handlers::handle_memory(&project_root, command)?,
         Commands::Skills { command } => match command {
             SkillCommands::List => {
                 enterprise::authorize(&project_root, "skills.read")?;

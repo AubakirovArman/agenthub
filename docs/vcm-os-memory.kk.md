@@ -22,6 +22,20 @@ infra.memory.yaml
 
 Context packs алдымен schema-filtered retrieval қолданады. Code transaction үшін AgentHub active `code.memory.v1` және `core.memory.v1` facts таңдайды; typed facts болмаса, recent committed memory fallback болады.
 
+Енді `context_pack.json` ішіндегі records `score` және `reasons` сақтайды, мысалы `same_domain`, `active_decision`, `verified_commit` және `high_confidence`. Осылайша context selection жасырын heuristic емес, audit жасауға болатын дерек болады.
+
+Failed attempts warning-only memory болып қалады. Ұқсас transaction басталар алдында AgentHub өткен failure reason және mitigation hint көрсете алады; сол warnings context pack ішіне де жазылады.
+
+## CLI Commands
+
+```bash
+agenthub memory inspect
+agenthub memory summary
+agenthub memory audit
+```
+
+`summary` inferred stack, active decisions және known failures көрсетеді. `audit` stale records, ықтимал conflicting decisions, failed-attempt count, low-confidence records және `last_verified_commit` жоқ active records тексереді; ол `.agent/memory/audit.json` файлын да жаңартады.
+
 ## Views And Audit
 
 Compaction current-truth views жазады:

@@ -14,6 +14,7 @@ pub(super) enum ShellCommand {
     Report(Option<String>),
     Effects(Option<String>),
     Explain(Option<String>),
+    Memory(Option<String>),
     Undo(Option<String>),
     Ask(String),
     Do(String),
@@ -58,6 +59,7 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "report" => ShellCommand::Report(optional(rest)),
         "effects" => ShellCommand::Effects(optional(rest)),
         "explain" => ShellCommand::Explain(optional(rest)),
+        "memory" => ShellCommand::Memory(optional(rest)),
         "undo" => ShellCommand::Undo(optional(rest)),
         "ask" => ShellCommand::Ask(rest.trim().to_string()),
         "do" => ShellCommand::Do(rest.trim().to_string()),
@@ -103,6 +105,10 @@ mod tests {
             ShellCommand::Explain(Some("latest".into()))
         );
         assert_eq!(parse_line("undo"), ShellCommand::Undo(None));
+        assert_eq!(
+            parse_line("/memory audit"),
+            ShellCommand::Memory(Some("audit".into()))
+        );
         assert_eq!(
             parse_line("сделай страницу"),
             ShellCommand::Message("сделай страницу".into())

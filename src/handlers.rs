@@ -7,6 +7,7 @@ use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
 
 use crate::cli::{EnterpriseCommands, TxCommands};
 
+mod memory_commands;
 mod plugin_commands;
 mod product_commands;
 mod run_commands;
@@ -185,3 +186,4 @@ pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Re
     }
     Ok(())
 }
+pub use memory_commands::handle_memory;

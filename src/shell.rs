@@ -81,6 +81,7 @@ fn handle(
             let tx = actions::resolve_tx(root, tx_id.as_deref(), current_tx.as_deref())?;
             actions::print_explain(root, &tx)?;
         }
+        ShellCommand::Memory(mode) => actions::print_memory(root, mode.as_deref())?,
         ShellCommand::Undo(tx_id) => {
             let target = tx_id.unwrap_or_else(|| "last".to_string());
             *current_tx = Some(actions::undo_tx(root, &target)?);
@@ -126,13 +127,14 @@ fn print_help(mode: ShellMode) {
     println!("report [tx-id|latest]        print report");
     println!("effects [tx-id|latest]       print effect ledger");
     println!("explain [tx-id|latest]       explain failure/result and next steps");
+    println!("memory [summary|audit]       show memory summary or audit");
     println!("undo [tx-id|last]            git revert a committed transaction");
     println!("ask <request>                write a draft spec");
     println!("do <request>                 write a draft and run it");
     println!("run <spec|request> [--no-commit]");
     println!("quit                         exit");
     println!("plain text                   plan mode: draft; run mode: execute");
-    println!("slash commands               /sessions /open latest /report /explain");
+    println!("slash commands               /sessions /open latest /report /explain /memory");
 }
 
 fn handle_message(

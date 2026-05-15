@@ -126,6 +126,8 @@ pub enum WorkspaceCommands {
 #[derive(Debug, Subcommand)]
 pub enum MemoryCommands {
     Inspect,
+    Summary,
+    Audit,
 }
 
 #[derive(Debug, Subcommand)]

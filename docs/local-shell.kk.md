@@ -28,6 +28,7 @@ cancel [tx-id|latest]        transaction cancellation сұрау
 report [tx-id]               report шығару, әдепкісі ағымдағы tx
 effects [tx-id]              effect ledger шығару
 explain [tx-id]              нәтиже, failure себебі және next steps түсіндіру
+memory [summary|audit]       memory summary немесе audit көрсету
 undo [tx-id|last]            committed transaction үшін git revert жасау
 ask <request>                draft AgentSpec жазу
 do <request>                 draft жазып, бірден іске қосу
@@ -76,6 +77,7 @@ agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
+agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> undo
 ```
 

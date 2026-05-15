@@ -89,3 +89,13 @@ agenthub config set default_provider codex
 ```
 
 Configuration `.agent/config.yaml` ішінде simple key/value settings ретінде сақталады. Config file жоқ болса, `default_provider` мәні `command` болып есептеледі.
+
+## Memory
+
+```bash
+agenthub memory inspect
+agenthub memory summary
+agenthub memory audit
+```
+
+`inspect` committed және failed attempts raw counts шығарады. `summary` stack, active decisions және known failures үшін user-facing view береді. `audit` stale, conflicting, low-confidence және unverified records тексеріп, `.agent/memory/audit.json` жаңартады.

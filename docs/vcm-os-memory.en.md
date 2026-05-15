@@ -22,6 +22,20 @@ These schemas describe facts such as `architecture_decision`, `dependency_policy
 
 Context packs use schema-filtered retrieval first. For a code transaction, AgentHub prefers active `code.memory.v1` and `core.memory.v1` facts, then falls back to recent committed memory if no typed facts exist.
 
+Retrieved records now include `score` and `reasons` in `context_pack.json`, for example `same_domain`, `active_decision`, `verified_commit`, and `high_confidence`. This makes context selection auditable instead of hidden.
+
+Failed attempts remain warning-only memory. Before a similar transaction starts, AgentHub can print a warning with the previous failure reason and a mitigation hint, and the same warnings are written into the context pack.
+
+## CLI Commands
+
+```bash
+agenthub memory inspect
+agenthub memory summary
+agenthub memory audit
+```
+
+`summary` shows inferred stack, active decisions, and known failures. `audit` checks stale records, possible conflicting decisions, failed-attempt count, low-confidence records, and active records without `last_verified_commit`; it also refreshes `.agent/memory/audit.json`.
+
 ## Views And Audit
 
 Compaction writes current-truth views:

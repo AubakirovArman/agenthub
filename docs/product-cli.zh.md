@@ -89,3 +89,13 @@ agenthub config set default_provider codex
 ```
 
 配置以简单 key/value settings 形式保存在 `.agent/config.yaml`。没有 config file 时，`default_provider` 默认为 `command`。
+
+## Memory
+
+```bash
+agenthub memory inspect
+agenthub memory summary
+agenthub memory audit
+```
+
+`inspect` 输出 committed 和 failed attempts 的 raw counts。`summary` 是面向用户的 stack、active decisions 和 known failures 视图。`audit` 检查 stale、conflicting、low-confidence 和 unverified records，并刷新 `.agent/memory/audit.json`。

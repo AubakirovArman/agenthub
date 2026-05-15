@@ -28,6 +28,7 @@ cancel [tx-id|latest]        запросить cancellation транзакци�
 report [tx-id]               показать report, по умолчанию текущей tx
 effects [tx-id]              показать effect ledger
 explain [tx-id]              объяснить результат, причину failure и next steps
+memory [summary|audit]       показать memory summary или audit
 undo [tx-id|last]            git revert committed transaction
 ask <request>                записать draft AgentSpec
 do <request>                 записать draft и сразу выполнить
@@ -76,6 +77,7 @@ agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
+agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> undo
 ```
 

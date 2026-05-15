@@ -66,7 +66,9 @@ pub(super) fn write_context_pack(
     prepared: &PreparedWorkspace,
 ) -> Result<serde_json::Value> {
     let workspace_profile = spec.workspace.profile()?;
-    let memory = memory::retrieve_relevant(project_root, workspace_profile.domain(), 10)?;
+    let memory = memory::retrieve_relevant_scored(project_root, workspace_profile.domain(), 10)?;
+    let failed_attempt_warnings =
+        memory::failed_attempt_warnings(project_root, &task_query(spec), 5)?;
     let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
     let enterprise = enterprise_context(project_root);
     let map_context = code_maps::select_context(project_root, spec)
@@ -99,12 +101,26 @@ pub(super) fn write_context_pack(
         },
         "skills": skills,
         "memory": memory,
+        "failed_attempt_warnings": failed_attempt_warnings,
         "maps": maps,
         "map_context": map_context,
         "enterprise": enterprise,
         "policy": { "least_context": true, "scope_only": true }
     });
     observability::write_context_pack_artifacts(tx_dir, &context)
+}
+
+fn task_query(spec: &AgentSpec) -> String {
+    [
+        Some(spec.task.id.as_str()),
+        Some(spec.task.kind.as_str()),
+        spec.task.title.as_deref(),
+        spec.task.target.as_deref(),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ")
 }
 
 fn enterprise_context(project_root: &Path) -> serde_json::Value {

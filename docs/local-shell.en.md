@@ -28,6 +28,7 @@ cancel [tx-id|latest]        request transaction cancellation
 report [tx-id]               print a report, defaulting to current tx
 effects [tx-id]              print the effect ledger
 explain [tx-id]              explain result, failure cause, and next steps
+memory [summary|audit]       show memory summary or audit
 undo [tx-id|last]            git revert a committed transaction
 ask <request>                write a draft AgentSpec
 do <request>                 write a draft and run it
@@ -76,6 +77,7 @@ agenthub:plan> open latest
 agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
+agenthub:plan[tx-20260515123000-abcd1234]> memory audit
 agenthub:plan[tx-20260515123000-abcd1234]> undo
 ```
 

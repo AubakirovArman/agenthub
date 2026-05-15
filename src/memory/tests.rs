@@ -3,7 +3,10 @@ use serde_json::json;
 
 use crate::agent_dir;
 
-use super::{record_failed_attempt, retrieve_relevant, write_typed_fact, TypedMemoryInput};
+use super::{
+    build_summary, failed_attempt_warnings, record_failed_attempt, retrieve_relevant,
+    retrieve_relevant_scored, run_audit, write_typed_fact, TypedMemoryInput,
+};
 
 #[test]
 fn typed_memory_write_retrieval_and_views() -> Result<()> {
@@ -69,5 +72,58 @@ fn failed_attempts_are_warning_memory_not_truth() -> Result<()> {
     assert!(!committed.contains("blocked_task"));
     assert!(known.contains("\"warning_only\": true"));
     assert!(known.contains("blocked_task"));
+    Ok(())
+}
+
+#[test]
+fn memory_summary_audit_scoring_and_warnings_are_actionable() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    agent_dir::init_project(dir.path(), false)?;
+    std::fs::write(
+        dir.path().join("Cargo.toml"),
+        "[package]\nname = \"demo\"\n",
+    )?;
+
+    write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "architecture_decision".to_string(),
+            domain: "code".to_string(),
+            content: json!({
+                "domain": "code",
+                "topic": "license",
+                "decision": "Use Apache-2.0"
+            }),
+            task_id: Some("task-license".to_string()),
+            supersedes: None,
+            confidence: Some(0.95),
+        },
+    )?;
+    record_failed_attempt(
+        dir.path(),
+        "tx-rollback",
+        "package_lock_change",
+        "package lock changed without approval",
+    )?;
+
+    let summary = build_summary(dir.path())?;
+    assert!(summary.stack.iter().any(|item| item == "Rust CLI"));
+    assert!(summary
+        .active_decisions
+        .iter()
+        .any(|item| item.contains("Apache-2.0")));
+
+    let scored = retrieve_relevant_scored(dir.path(), "code", 10)?;
+    assert!(scored[0].score > 0.7);
+    assert!(scored[0].reasons.contains(&"same_domain".to_string()));
+
+    let warnings = failed_attempt_warnings(dir.path(), "package lock change", 10)?;
+    assert_eq!(warnings.len(), 1);
+    assert!(warnings[0].mitigation.contains("dependency-change"));
+
+    let audit = run_audit(dir.path())?;
+    assert_eq!(audit.active, 1);
+    assert_eq!(audit.failed_attempts, 1);
+    assert!(dir.path().join(".agent/memory/audit.json").exists());
     Ok(())
 }

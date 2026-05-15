@@ -180,6 +180,8 @@ agenthub tx retry tx-... --from VERIFYING
 agenthub tx resume tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
+agenthub memory summary
+agenthub memory audit
 agenthub skills list
 agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic

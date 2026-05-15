@@ -1,8 +1,12 @@
+mod audit;
+mod retrieval;
 mod storage;
+mod summary;
 #[cfg(test)]
 mod tests;
 mod typed;
 mod views;
+mod warnings;
 
 use std::cmp::Reverse;
 use std::path::Path;
@@ -18,8 +22,12 @@ use crate::git;
 use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
+pub use audit::{run_audit, MemoryAudit};
+pub use retrieval::retrieve_relevant_scored;
 use storage::{append_jsonl, count_lines, read_records};
+pub use summary::{build_summary, MemorySummary};
 pub use typed::{write_typed_fact, TypedMemoryInput};
+pub use warnings::{failed_attempt_warnings, FailedAttemptWarning};
 
 pub const STAGING_FILE: &str = "memory_staging.jsonl";
 
@@ -157,7 +165,10 @@ pub fn retrieve_recent(root: &Path, limit: usize) -> Result<Vec<MemoryRecord>> {
 }
 
 pub fn retrieve_relevant(root: &Path, domain: &str, limit: usize) -> Result<Vec<MemoryRecord>> {
-    let records = typed::retrieve_by_schema(root, domain, limit)?;
+    let records = retrieve_relevant_scored(root, domain, limit)?
+        .into_iter()
+        .map(|item| item.record)
+        .collect::<Vec<_>>();
     if records.is_empty() {
         return retrieve_recent(root, limit);
     }

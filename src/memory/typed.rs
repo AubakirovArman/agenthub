@@ -1,4 +1,3 @@
-use std::cmp::Reverse;
 use std::path::Path;
 
 use anyhow::Result;
@@ -41,44 +40,4 @@ pub fn write_typed_fact(root: &Path, input: TypedMemoryInput) -> Result<MemoryRe
     let records = read_records(&paths.memory.join("committed.jsonl"))?;
     views::write_views(root, &records)?;
     Ok(record)
-}
-
-pub(super) fn retrieve_by_schema(
-    root: &Path,
-    domain: &str,
-    limit: usize,
-) -> Result<Vec<MemoryRecord>> {
-    let paths = ensure_runtime_dirs(root)?;
-    let mut records = read_records(&paths.memory.join("committed.jsonl"))?
-        .into_iter()
-        .filter(is_current_truth)
-        .filter(|record| matches_domain(record, domain) || matches_domain(record, "core"))
-        .collect::<Vec<_>>();
-    records.sort_by_key(|record| (Reverse(score(record, domain)), Reverse(record.created_at)));
-    records.truncate(limit);
-    Ok(records)
-}
-
-fn is_current_truth(record: &MemoryRecord) -> bool {
-    !record.stale && record.status.as_deref().unwrap_or("active") == "active"
-}
-
-fn matches_domain(record: &MemoryRecord, domain: &str) -> bool {
-    record.schema.as_deref().is_some_and(|schema| {
-        schema == format!("{domain}.memory.v1") || schema.starts_with(&format!("{domain}."))
-    }) || record
-        .content
-        .get("domain")
-        .and_then(Value::as_str)
-        .is_some_and(|item| item == domain)
-}
-
-fn score(record: &MemoryRecord, domain: &str) -> u8 {
-    if matches_domain(record, domain) && !record.kind.ends_with("_change") {
-        return 3;
-    }
-    if matches_domain(record, "core") {
-        return 2;
-    }
-    1
 }
