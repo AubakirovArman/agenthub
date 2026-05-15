@@ -63,3 +63,8 @@ jobs:
           fi
           "$AGENTHUB_BIN" aal parse examples/add-courses.aal --output target/agenthub-ci/add-courses.yaml
           scripts/smoke-test.sh
+
+      - name: Packaging smoke
+        if: runner.os == 'Linux'
+        shell: bash
+        run: AGENTHUB_PACKAGE_DIST=target/agenthub-package scripts/package.sh

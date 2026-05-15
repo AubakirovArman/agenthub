@@ -4,7 +4,7 @@ AgentHub is a transactional runtime foundation for AI-agent work. It turns a hum
 
 Languages: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [PRD v2](docs/prd-v2.en.md), [PRD v3](docs/prd-v3.en.md), [Repository Rename](docs/repository-rename.en.md), [Release Engineering](docs/release-engineering.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [Metrics Dashboard](docs/metrics-dashboard.en.md), [Analytics History](docs/analytics-history.en.md), [Hosted/Team Surfaces](docs/hosted-team-surfaces.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [Workspace Runtime](docs/workspace-runtime.en.md), [Domain Runtimes](docs/domain-runtimes.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [Sandbox Levels](docs/sandbox-levels.en.md), [Remote Runner](docs/remote-runner.en.md), [Hardened Runner](docs/hardened-runner.en.md), [Network Policy](docs/network-policy-server.en.md), [WAL](docs/wal.en.md), [Effect Ledger](docs/effect-ledger.en.md), [Rollback Handlers](docs/rollback-handlers.en.md), [Resume/Retry](docs/resume-retry.en.md), [Smart Sync](docs/smart-sync.en.md), [VCM-OS Memory](docs/vcm-os-memory.en.md), [Reference Web Fixture](docs/reference-web-fixture.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Plugin signatures](docs/plugin-signatures.en.md), [Plugin Governance](docs/plugin-governance.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Detailed docs: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.en.md), [PRD audit](docs/prd-audit.en.md), [PRD v2](docs/prd-v2.en.md), [PRD v3](docs/prd-v3.en.md), [Repository Rename](docs/repository-rename.en.md), [Release Engineering](docs/release-engineering.en.md), [Install And Packaging](docs/install-packaging.en.md), [TUI](docs/tui.en.md), [Web Dashboard](docs/web-dashboard.en.md), [Metrics Dashboard](docs/metrics-dashboard.en.md), [Analytics History](docs/analytics-history.en.md), [Hosted/Team Surfaces](docs/hosted-team-surfaces.en.md), [AAL](docs/aal.en.md), [Workspaces](docs/workspaces.en.md), [Workspace Runtime](docs/workspace-runtime.en.md), [Domain Runtimes](docs/domain-runtimes.en.md), [MediaWorkspace](docs/media-workspace.en.md), [Research](docs/research-profile.en.md), [Backend TDD](docs/backend-tdd-verifier.en.md), [DB Migration](docs/db-migration-verifier.en.md), [Command Policy](docs/command-policy.en.md), [Sandbox Levels](docs/sandbox-levels.en.md), [Remote Runner](docs/remote-runner.en.md), [Hardened Runner](docs/hardened-runner.en.md), [Network Policy](docs/network-policy-server.en.md), [WAL](docs/wal.en.md), [Effect Ledger](docs/effect-ledger.en.md), [Rollback Handlers](docs/rollback-handlers.en.md), [Resume/Retry](docs/resume-retry.en.md), [Smart Sync](docs/smart-sync.en.md), [VCM-OS Memory](docs/vcm-os-memory.en.md), [Reference Web Fixture](docs/reference-web-fixture.en.md), [IDE](docs/ide.en.md), [Natural language](docs/natural-language.en.md), [Topologies](docs/topologies.en.md), [Agent adapters](docs/agent-adapters.en.md), [Runtime and repair](docs/runtime-repair.en.md), [Context maps](docs/context-maps.en.md), [LLM Gateway](docs/llm-gateway.en.md), [Plugin ecosystem](docs/plugin-ecosystem.en.md), [Plugin signatures](docs/plugin-signatures.en.md), [Plugin Governance](docs/plugin-governance.en.md), [Enterprise](docs/enterprise.en.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 Adaptive docs: [Adaptive Orchestration](docs/adaptive-orchestration.en.md)
 
@@ -50,12 +50,28 @@ The current implementation covers the early PRD foundation:
 
 Rust is required. This repository pins the toolchain in `rust-toolchain.toml`.
 
+Install the current checkout:
+
+```bash
+cargo install --path .
+```
+
+Build and verify from source:
+
 ```bash
 cargo build
 cargo test
 cargo clippy -- -D warnings
 scripts/check-module-size.sh 200
 ```
+
+Create a local release archive:
+
+```bash
+scripts/package.sh
+```
+
+Release artifact installers are documented in [Install And Packaging](docs/install-packaging.en.md).
 
 ## Quick Start
 
