@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Главные open areas: manager/worker и tournament topologies, specialized backend/database verifiers, command policy enforcement, strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards и formal WAL.
+Главные open areas: tournament topology, specialized backend/database verifiers, command policy enforcement, strong sandbox levels, real remote runner execution, cryptographic plugin signing, metrics dashboards и formal WAL.

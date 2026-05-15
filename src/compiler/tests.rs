@@ -62,6 +62,26 @@ fn compiles_swarm_research_roles() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn compiles_manager_worker_fanout() -> Result<()> {
+    let mut spec = test_spec(vec!["src/**".to_string()]);
+    spec.topology.kind = "manager_worker".to_string();
+    spec.topology.swarm_size = 2;
+    let dag = compile(&spec)?;
+
+    assert!(dag.nodes.iter().any(|node| node.id == "manager"));
+    assert!(dag.nodes.iter().any(|node| node.id == "worker_2"));
+    assert!(dag
+        .edges
+        .iter()
+        .any(|edge| edge.from == "manager" && edge.to == "worker_2"));
+    assert!(dag
+        .edges
+        .iter()
+        .any(|edge| edge.from == "worker_1" && edge.to == "executor"));
+    Ok(())
+}
+
 fn test_spec(allow: Vec<String>) -> AgentSpec {
     AgentSpec {
         task: TaskSpec {

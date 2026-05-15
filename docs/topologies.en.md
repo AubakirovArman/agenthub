@@ -13,6 +13,7 @@ Topologies describe which agent roles participate in a transaction DAG. Phase 10
 - `executor_reviewer_repair`: executor, diff guard, reviewer, optional repair.
 - `generator_critic`: generator, critic, executor.
 - `swarm_research`: `researcher_1..N`, aggregator, executor.
+- `manager_worker`: manager fans out to `worker_1..N`, then executor applies the managed result.
 
 Runtime mutation remains controlled by the existing transaction kernel. Executor commands mutate the workspace; reviewer and repair gates run where supported. Other roles are planned, routed, traced, and included in the DAG/gateway metadata.
 
@@ -57,6 +58,20 @@ topology:
 ```
 
 This produces `researcher_1`, `researcher_2`, `researcher_3`, `aggregator`, and `executor` DAG roles.
+
+## Manager / Worker Example
+
+```bash
+agenthub run examples/topology-manager-worker-task.yaml
+```
+
+```yaml
+topology:
+  kind: manager_worker
+  swarm_size: 2
+```
+
+This produces a fan-out DAG: `manager -> worker_1`, `manager -> worker_2`, and each worker feeds `executor`. `swarm_size` controls the worker count.
 
 ## Different Repair Agent
 

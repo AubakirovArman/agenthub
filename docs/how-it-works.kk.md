@@ -130,7 +130,7 @@ AGENTHUB_PRIVATE_MODE=1 agenthub run examples/adapter-dry-run-task.yaml
 
 ## Topologies
 
-AgentSpec `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic` және `swarm_research` қолдайды. Multi-role topologies `dag.json`, `agent_trace.json` және `model_call_metadata.json` ішіне кіреді. Қара: [Topologies](topologies.kk.md).
+AgentSpec `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research` және `manager_worker` қолдайды. Multi-role topologies `dag.json`, `agent_trace.json` және `model_call_metadata.json` ішіне кіреді. Қара: [Topologies](topologies.kk.md).
 
 ## Review және Repair
 

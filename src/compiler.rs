@@ -56,13 +56,11 @@ pub fn compile(spec: &AgentSpec) -> Result<ExecutionDag> {
         node("commit", "transaction", "Commit or rollback"),
         node("report", "observability", "Write transaction report"),
     ]);
-    let edges = nodes
-        .windows(2)
-        .map(|pair| DagEdge {
-            from: pair[0].id.clone(),
-            to: pair[1].id.clone(),
-        })
-        .collect();
+    let edges = if spec.topology.kind == "executor_reviewer_repair" {
+        linear_dag_edges(&nodes)
+    } else {
+        topology_dag_edges(&nodes, &topology_plan)
+    };
 
     Ok(ExecutionDag {
         task_id: spec.task.id.clone(),
@@ -119,5 +117,64 @@ fn node(id: &str, kind: &str, label: &str) -> DagNode {
 fn push_role_nodes(nodes: &mut Vec<DagNode>, roles: &[topology::TopologyRole]) {
     for role in roles {
         nodes.push(node(&role.id, &format!("agent.{}", role.role), &role.label));
+    }
+}
+
+fn linear_dag_edges(nodes: &[DagNode]) -> Vec<DagEdge> {
+    nodes
+        .windows(2)
+        .map(|pair| edge(&pair[0].id, &pair[1].id))
+        .collect()
+}
+
+fn topology_dag_edges(nodes: &[DagNode], topology_plan: &topology::TopologyPlan) -> Vec<DagEdge> {
+    let mut edges = Vec::new();
+    push_linear_until(nodes, "context_pack", &mut edges);
+    if let Some(first) = topology_plan.roles.first() {
+        edges.push(edge("context_pack", &first.id));
+    }
+    edges.extend(
+        topology_plan
+            .edges
+            .iter()
+            .map(|item| edge(&item.from, &item.to)),
+    );
+    for role in terminal_roles(topology_plan) {
+        edges.push(edge(&role.id, "diff_guard"));
+    }
+    push_linear_from(nodes, "diff_guard", &mut edges);
+    edges
+}
+
+fn terminal_roles(plan: &topology::TopologyPlan) -> Vec<&topology::TopologyRole> {
+    plan.roles
+        .iter()
+        .filter(|role| !plan.edges.iter().any(|edge| edge.from == role.id))
+        .collect()
+}
+
+fn push_linear_until(nodes: &[DagNode], stop: &str, edges: &mut Vec<DagEdge>) {
+    for pair in nodes.windows(2) {
+        edges.push(edge(&pair[0].id, &pair[1].id));
+        if pair[1].id == stop {
+            break;
+        }
+    }
+}
+
+fn push_linear_from(nodes: &[DagNode], start: &str, edges: &mut Vec<DagEdge>) {
+    if let Some(index) = nodes.iter().position(|node| node.id == start) {
+        edges.extend(
+            nodes[index..]
+                .windows(2)
+                .map(|pair| edge(&pair[0].id, &pair[1].id)),
+        );
+    }
+}
+
+fn edge(from: &str, to: &str) -> DagEdge {
+    DagEdge {
+        from: from.to_string(),
+        to: to.to_string(),
     }
 }

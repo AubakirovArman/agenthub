@@ -142,6 +142,8 @@ fn config_for_role(spec: &AgentSpec, role: &str) -> AgentConfig {
             .aggregator
             .clone()
             .unwrap_or_else(command_config),
+        "manager" => spec.agents.manager.clone().unwrap_or_else(command_config),
+        "worker" => spec.agents.worker.clone().unwrap_or_else(command_config),
         _ => command_config(),
     }
 }

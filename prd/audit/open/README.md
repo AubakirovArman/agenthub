@@ -2,7 +2,6 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Manager / Worker topology.
 - Tournament topology.
 - Specialized `backend_tdd` verifier profile.
 - Specialized `db_migration` verifier profile.

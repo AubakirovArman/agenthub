@@ -39,9 +39,14 @@ pub fn compile(spec: &AgentSpec) -> Result<TopologyPlan> {
             role("executor", "executor", "Apply accepted result"),
         ],
         "swarm_research" => swarm_roles(spec.topology.swarm_size),
+        "manager_worker" => manager_worker_roles(spec.topology.swarm_size),
         other => return Err(anyhow!("unsupported topology.kind: {other}")),
     };
-    let edges = linear_edges(&roles);
+    let edges = if kind == "manager_worker" {
+        manager_worker_edges(spec.topology.swarm_size)
+    } else {
+        linear_edges(&roles)
+    };
     Ok(TopologyPlan {
         kind: kind.to_string(),
         roles,
@@ -58,6 +63,7 @@ pub fn is_supported(kind: &str) -> bool {
             | "executor_reviewer_repair"
             | "generator_critic"
             | "swarm_research"
+            | "manager_worker"
     )
 }
 
@@ -88,6 +94,30 @@ fn swarm_roles(size: usize) -> Vec<TopologyRole> {
     roles
 }
 
+fn manager_worker_roles(size: usize) -> Vec<TopologyRole> {
+    let size = size.clamp(1, 8);
+    let mut roles = vec![role("manager", "manager", "Manage worker tasks")];
+    roles.extend((1..=size).map(|index| {
+        role(
+            &format!("worker_{index}"),
+            "worker",
+            &format!("Worker branch {index}"),
+        )
+    }));
+    roles.push(role("executor", "executor", "Apply managed result"));
+    roles
+}
+
+fn manager_worker_edges(size: usize) -> Vec<TopologyEdge> {
+    let size = size.clamp(1, 8);
+    let mut edges = Vec::new();
+    for index in 1..=size {
+        edges.push(edge("manager", &format!("worker_{index}")));
+        edges.push(edge(&format!("worker_{index}"), "executor"));
+    }
+    edges
+}
+
 fn linear_edges(roles: &[TopologyRole]) -> Vec<TopologyEdge> {
     roles
         .windows(2)
@@ -103,5 +133,12 @@ fn role(id: &str, role: &str, label: &str) -> TopologyRole {
         id: id.to_string(),
         role: role.to_string(),
         label: label.to_string(),
+    }
+}
+
+fn edge(from: &str, to: &str) -> TopologyEdge {
+    TopologyEdge {
+        from: from.to_string(),
+        to: to.to_string(),
     }
 }

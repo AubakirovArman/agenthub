@@ -20,7 +20,7 @@ AgentHub — транзакционная runtime-основа для работ
 - skill manifests и загрузка зависимостей;
 - plugin package scaffold, manifest validation, trust model и lock files;
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
-- multi-role topologies для planner/executor, generator/critic, reviewer/repair и swarm research DAGs;
+- multi-role topologies для planner/executor, generator/critic, reviewer/repair, swarm research и manager/worker DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
@@ -119,6 +119,7 @@ agenthub run examples/adapter-dry-run-task.yaml
 agenthub run examples/runtime-smoke-task.yaml
 agenthub run examples/topology-planner-task.yaml
 agenthub run examples/topology-swarm-task.yaml
+agenthub run examples/topology-manager-worker-task.yaml
 agenthub tui
 agenthub dashboard
 agenthub dashboard --output tmp/agenthub-dashboard

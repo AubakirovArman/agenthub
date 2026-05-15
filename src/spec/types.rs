@@ -74,6 +74,10 @@ pub struct RoleAgents {
     pub researcher: Option<AgentConfig>,
     #[serde(default)]
     pub aggregator: Option<AgentConfig>,
+    #[serde(default)]
+    pub manager: Option<AgentConfig>,
+    #[serde(default)]
+    pub worker: Option<AgentConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

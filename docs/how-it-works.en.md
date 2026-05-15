@@ -130,7 +130,7 @@ Detailed adapter behavior is documented in [Agent adapters](agent-adapters.en.md
 
 ## Topologies
 
-AgentSpec supports `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, and `swarm_research`. Multi-role topologies appear in `dag.json`, `agent_trace.json`, and `model_call_metadata.json`. See [Topologies](topologies.en.md).
+AgentSpec supports `single_executor`, `planner_executor`, `executor_reviewer_repair`, `generator_critic`, `swarm_research`, and `manager_worker`. Multi-role topologies appear in `dag.json`, `agent_trace.json`, and `model_call_metadata.json`. See [Topologies](topologies.en.md).
 
 ## Review And Repair
 

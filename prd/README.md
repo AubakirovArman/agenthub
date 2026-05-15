@@ -23,7 +23,7 @@ git diff --check
 ## Current Queue
 
 - All tracked PRD phases are in `done/`.
-- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-06-manager-worker-topology.md`.
+- Long-term open PRD tasks continue in [`todo/`](todo/). Current task: `todo/open-07-tournament-topology.md`.
 
 ## Status Index
 

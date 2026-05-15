@@ -68,6 +68,20 @@ fn planner_executor_routes_include_multiple_roles() -> Result<()> {
 }
 
 #[test]
+fn manager_worker_routes_include_workers() -> Result<()> {
+    let mut spec = fixture_spec();
+    spec.topology.kind = "manager_worker".to_string();
+    spec.topology.swarm_size = 2;
+
+    let routes = routes_for_spec(&spec)?;
+
+    assert!(routes.roles.iter().any(|route| route.role == "manager"));
+    assert!(routes.roles.iter().any(|route| route.role == "worker_2"));
+    assert!(routes.roles.iter().any(|route| route.role == "executor"));
+    Ok(())
+}
+
+#[test]
 fn repair_agent_can_differ_from_executor() -> Result<()> {
     let mut spec = fixture_spec();
     spec.topology.kind = "executor_reviewer_repair".to_string();

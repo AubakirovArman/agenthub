@@ -15,6 +15,7 @@ These PRD areas are implemented in the current repository and have tests, docs, 
 - Agent adapters with command/dry-run integration, prompts, transcripts, and role routes.
 - Runtime smoke checks and bounded repair loop.
 - Advanced topologies for planner/executor, generator/critic, reviewer/repair, and swarm research.
+- Manager / Worker topology with fan-out DAG roles and route traces.
 - Code, Content, Data, and Infra workspaces.
 - MediaWorkspace with media memory schema and `media_render` verifier profile.
 - ResearchWorkspace with source, citation, graph, critic, report validation, and research memory schema.

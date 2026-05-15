@@ -13,6 +13,7 @@ Topologies transaction DAG ішінде қандай agent roles қатысат�
 - `executor_reviewer_repair`: executor, diff guard, reviewer, optional repair.
 - `generator_critic`: generator, critic, executor.
 - `swarm_research`: `researcher_1..N`, aggregator, executor.
+- `manager_worker`: manager `worker_1..N` roles ішіне таратады, содан кейін executor managed result қолданады.
 
 Runtime mutation transaction kernel бақылауында қалады. Executor commands workspace өзгертеді; reviewer және repair gates қолдау бар topology ішінде орындалады. Басқа roles planned, routed, traced болады және DAG/gateway metadata ішіне кіреді.
 
@@ -57,6 +58,20 @@ topology:
 ```
 
 Бұл `researcher_1`, `researcher_2`, `researcher_3`, `aggregator` және `executor` DAG roles жасайды.
+
+## Manager / Worker Example
+
+```bash
+agenthub run examples/topology-manager-worker-task.yaml
+```
+
+```yaml
+topology:
+  kind: manager_worker
+  swarm_size: 2
+```
+
+Бұл fan-out DAG жасайды: `manager -> worker_1`, `manager -> worker_2`, және әр worker `executor` ішіне өтеді. `swarm_size` worker санын басқарады.
 
 ## Different Repair Agent
 
