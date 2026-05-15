@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
+use super::docker;
 use super::process::process_control_label;
 use super::RemoteRunner;
 
@@ -44,18 +45,13 @@ pub fn metadata_for(
     match remote_runner {
         Some(runner) => RunnerMetadata {
             runner_id: runner.id.clone(),
-            kind: "remote".to_string(),
+            kind: remote_kind(runner).to_string(),
             trust_level: trust_for_level(sandbox_level).to_string(),
             endpoint: Some(runner.endpoint.clone()),
             platform: std::env::consts::OS.to_string(),
             sandbox_level,
-            process_control: "remote_runner_cancel_or_child_kill".to_string(),
-            capabilities: vec![
-                "timeout".to_string(),
-                "remote_dispatch".to_string(),
-                "artifact_return".to_string(),
-                "cancel_marker".to_string(),
-            ],
+            process_control: remote_process_control(runner).to_string(),
+            capabilities: remote_capabilities(runner),
             resource_limits: limits,
         },
         None => RunnerMetadata {
@@ -70,6 +66,40 @@ pub fn metadata_for(
             resource_limits: limits,
         },
     }
+}
+
+fn remote_kind(runner: &RemoteRunner) -> &'static str {
+    if docker::is_endpoint(&runner.endpoint) {
+        "docker"
+    } else {
+        "remote"
+    }
+}
+
+fn remote_process_control(runner: &RemoteRunner) -> &'static str {
+    if docker::is_endpoint(&runner.endpoint) {
+        "docker_client_timeout_child_kill"
+    } else {
+        "remote_runner_cancel_or_child_kill"
+    }
+}
+
+fn remote_capabilities(runner: &RemoteRunner) -> Vec<String> {
+    let mut values = vec![
+        "timeout".to_string(),
+        "remote_dispatch".to_string(),
+        "artifact_return".to_string(),
+        "cancel_marker".to_string(),
+    ];
+    if docker::is_endpoint(&runner.endpoint) {
+        values.extend([
+            "container_backend".to_string(),
+            "cpu_limit".to_string(),
+            "memory_limit".to_string(),
+            "network_mode".to_string(),
+        ]);
+    }
+    values
 }
 
 pub fn usage(duration_ms: u128, exit_code: Option<i32>, timed_out: bool) -> ResourceUsage {

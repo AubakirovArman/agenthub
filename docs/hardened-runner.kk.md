@@ -18,7 +18,7 @@ Hardened Runner AgentHub командаларды local немесе remote runn
 
 ## Resource Policy
 
-`runner.json` timeout, CPU, memory, disk, network және filesystem policy жазады. Қазіргі local execution timeout және process-tree cleanup қолданады. CPU, memory және disk hardened backends үшін explicit policy slots ретінде сақталады.
+`runner.json` timeout, CPU, memory, disk, network және filesystem policy жазады. Қазіргі local execution timeout және process-tree cleanup қолданады. Docker remote runners `AGENTHUB_CPU_CORES`, `AGENTHUB_MEMORY_MB` және `AGENTHUB_NETWORK_MODE` берілсе, CPU, memory және network options қолданады. Disk болашақ hardened backends үшін recorded policy slot болып қалады.
 
 ## Cancellation
 

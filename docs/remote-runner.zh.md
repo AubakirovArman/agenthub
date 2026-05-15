@@ -21,6 +21,13 @@ enterprise:
 
 - `local://name`: 用于 local integration tests 和 single-host deployments 的 dispatch path。
 - `ssh://host/path`: 运行 `ssh host 'cd path && sh -lc <command>'`。
+- `docker://image`: 运行 `docker run --rm -i -v <worktree>:/workspace -w /workspace image sh -lc <command>`。
+
+Docker runners 是 optional。Host 上需要可用的 Docker-compatible CLI。Resource env vars 会应用到 container run：
+
+```bash
+AGENTHUB_CPU_CORES=2 AGENTHUB_MEMORY_MB=2048 AGENTHUB_NETWORK_MODE=none agenthub run task.yaml
+```
 
 ## AgentSpec
 

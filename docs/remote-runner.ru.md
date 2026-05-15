@@ -21,6 +21,13 @@ enterprise:
 
 - `local://name`: dispatch path для local integration tests и single-host deployments.
 - `ssh://host/path`: запускает `ssh host 'cd path && sh -lc <command>'`.
+- `docker://image`: запускает `docker run --rm -i -v <worktree>:/workspace -w /workspace image sh -lc <command>`.
+
+Docker runners optional. Нужен рабочий Docker-compatible CLI на host. Resource env vars применяются к container run:
+
+```bash
+AGENTHUB_CPU_CORES=2 AGENTHUB_MEMORY_MB=2048 AGENTHUB_NETWORK_MODE=none agenthub run task.yaml
+```
 
 ## AgentSpec
 

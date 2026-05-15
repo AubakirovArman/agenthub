@@ -18,7 +18,7 @@ Commands in `execution.json`, `review.json`, `repair.json`, and `verifier.json` 
 
 ## Resource Policy
 
-`runner.json` records timeout, CPU, memory, disk, network, and filesystem policy. Current local execution enforces timeout and process-tree cleanup. CPU, memory, and disk are recorded as explicit policy slots for hardened backends.
+`runner.json` records timeout, CPU, memory, disk, network, and filesystem policy. Current local execution enforces timeout and process-tree cleanup. Docker remote runners apply CPU, memory, and network options when `AGENTHUB_CPU_CORES`, `AGENTHUB_MEMORY_MB`, and `AGENTHUB_NETWORK_MODE` are set. Disk remains a recorded policy slot for future hardened backends.
 
 ## Cancellation
 

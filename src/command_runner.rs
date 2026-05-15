@@ -1,4 +1,5 @@
 mod cancel;
+mod docker;
 mod local;
 mod metadata;
 mod monitor;

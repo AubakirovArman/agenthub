@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+use super::docker;
 use super::metadata::{metadata_for, usage};
 use super::output;
 use super::CommandResult;
@@ -76,6 +77,9 @@ fn remote_command(
     sandbox_level: u8,
     runner: &RemoteRunner,
 ) -> Result<Command> {
+    if docker::is_endpoint(&runner.endpoint) {
+        return docker::command(command, cwd, sandbox_level, runner);
+    }
     if runner.endpoint.starts_with("local://") {
         let mut process = Command::new("sh");
         process

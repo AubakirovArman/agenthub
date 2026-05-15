@@ -21,6 +21,13 @@ Supported endpoints:
 
 - `local://name`: dispatch path for local integration tests and single-host deployments.
 - `ssh://host/path`: runs `ssh host 'cd path && sh -lc <command>'`.
+- `docker://image`: runs `docker run --rm -i -v <worktree>:/workspace -w /workspace image sh -lc <command>`.
+
+Docker runners are optional. They require a working Docker-compatible CLI on the host and inherit AgentHub resource environment variables:
+
+```bash
+AGENTHUB_CPU_CORES=2 AGENTHUB_MEMORY_MB=2048 AGENTHUB_NETWORK_MODE=none agenthub run task.yaml
+```
 
 ## AgentSpec
 
