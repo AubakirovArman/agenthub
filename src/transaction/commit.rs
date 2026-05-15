@@ -61,14 +61,17 @@ pub(super) fn sync_and_commit(ctx: CommitContext<'_>, state: &mut RunState) -> R
         "COMMITTING",
         "committing and fast-forward merging transaction branch",
     )?;
-    state.committed = workspace::commit_and_merge(
-        &prepared,
-        &format!("AgentHub {}: {}", ctx.tx_id, ctx.spec.task.id),
-    )?;
+    let runtime = workspace::runtime_for_prepared(&prepared);
+    state.committed = runtime
+        .commit(
+            &prepared,
+            &format!("AgentHub {}: {}", ctx.tx_id, ctx.spec.task.id),
+        )?
+        .committed;
     if ctx.spec.transaction.memory_promotion == "on_success" {
         memory::promote_staging(ctx.project_root, ctx.tx_dir)?;
     }
-    let _ = workspace::rollback(&prepared);
+    let _ = runtime.cleanup(&prepared);
     state.status = Some(TransactionStatus::Committed);
     ctx.journal.append("COMMITTED", "transaction committed")
 }

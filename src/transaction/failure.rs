@@ -45,7 +45,8 @@ pub(super) fn handle_failure(
     let changed = changed_files(state);
     ledger.record_rollback_pending_files("rollback", &changed)?;
     if let Some(prepared) = &state.prepared {
-        let _ = workspace::rollback(prepared);
+        let runtime = workspace::runtime_for_prepared(prepared);
+        let _ = runtime.rollback(prepared);
     }
     rollback::write_report(tx_dir, tx_id, &changed, "rolled_back")?;
     ledger.record_rolled_back_files("rollback", &changed)?;

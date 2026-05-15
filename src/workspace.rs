@@ -1,10 +1,14 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::agent_dir::AgentPaths;
 use crate::git;
+use crate::spec::WorkspaceProfile;
+
+mod runtime;
+pub use runtime::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorkspaceScan {
@@ -46,32 +50,21 @@ pub fn prepare_git_worktree(
     paths: &AgentPaths,
     tx_id: &str,
 ) -> Result<PreparedWorkspace> {
-    if !git::is_repo(root) {
-        return Err(anyhow!("project root is not a git repository"));
-    }
-    let base_head = git::head(root)?.ok_or_else(|| {
-        anyhow!("git repository has no HEAD; create an initial commit before running transactions")
-    })?;
-    let dirty_blockers = git::dirty_blockers(root)?;
-    if !dirty_blockers.is_empty() {
-        return Err(anyhow!(
-            "project root has uncommitted changes; commit or stash them before opening a transaction: {}",
-            dirty_blockers.join(", ")
-        ));
-    }
+    let mut runtime = CodeGitWorkspace::new(root, paths, tx_id, WorkspaceProfile::Code);
+    runtime.prepare()
+}
 
-    let base_branch = git::current_branch(root)?;
-    let tx_branch = format!("agenthub/{tx_id}");
-    let worktree_path = paths.workspaces.join(tx_id);
-    git::create_worktree(root, &tx_branch, &worktree_path)?;
+pub fn runtime_for_profile(
+    root: &Path,
+    paths: &AgentPaths,
+    tx_id: &str,
+    profile: WorkspaceProfile,
+) -> Box<dyn WorkspaceRuntime> {
+    Box::new(CodeGitWorkspace::new(root, paths, tx_id, profile))
+}
 
-    Ok(PreparedWorkspace {
-        project_root: root.to_path_buf(),
-        worktree_path,
-        base_head,
-        base_branch,
-        tx_branch,
-    })
+pub fn runtime_for_prepared(prepared: &PreparedWorkspace) -> Box<dyn WorkspaceRuntime> {
+    Box::new(CodeGitWorkspace::from_prepared(prepared))
 }
 
 pub fn sync_check(prepared: &PreparedWorkspace) -> Result<bool> {
@@ -80,14 +73,11 @@ pub fn sync_check(prepared: &PreparedWorkspace) -> Result<bool> {
 }
 
 pub fn commit_and_merge(prepared: &PreparedWorkspace, message: &str) -> Result<bool> {
-    git::add_all(&prepared.worktree_path)?;
-    let committed = git::commit(&prepared.worktree_path, message)?;
-    if committed {
-        git::merge_ff_only(&prepared.project_root, &prepared.tx_branch)?;
-    }
-    Ok(committed)
+    let runtime = runtime_for_prepared(prepared);
+    Ok(runtime.commit(prepared, message)?.committed)
 }
 
 pub fn rollback(prepared: &PreparedWorkspace) -> Result<()> {
-    git::remove_worktree(&prepared.project_root, &prepared.worktree_path)
+    let runtime = runtime_for_prepared(prepared);
+    runtime.rollback(prepared).map(|_| ())
 }

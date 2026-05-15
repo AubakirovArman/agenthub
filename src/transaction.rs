@@ -30,7 +30,7 @@ use crate::skill_registry;
 use crate::smart_sync::SmartSyncDecision;
 use crate::spec::AgentSpec;
 use crate::verifier::VerifierResult;
-use crate::workspace::PreparedWorkspace;
+use crate::workspace::{PreparedWorkspace, WorkspaceRuntimeMetadata};
 
 #[derive(Debug, Clone)]
 pub struct TransactionOutcome {
@@ -65,6 +65,7 @@ pub(super) struct RunState {
     review: Option<ReviewResult>,
     verifier: Option<VerifierResult>,
     sync: Option<SmartSyncDecision>,
+    workspace_runtime: Option<WorkspaceRuntimeMetadata>,
     cost_profile: Option<CostProfile>,
     error_fingerprint: Option<String>,
     failure_reason: Option<String>,
@@ -149,6 +150,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         review: state.review,
         verifier: state.verifier,
         sync: state.sync,
+        workspace_runtime: state.workspace_runtime,
         cost_profile: state.cost_profile,
         error_fingerprint: state.error_fingerprint,
         failure_reason: state.failure_reason,

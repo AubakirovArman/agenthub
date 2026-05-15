@@ -36,7 +36,7 @@ pub(super) fn run_inner(
     no_commit: bool,
     state: &mut RunState,
 ) -> Result<()> {
-    let prepared = prepare(
+    let (prepared, runtime_metadata) = prepare(
         project_root,
         paths,
         spec,
@@ -46,6 +46,7 @@ pub(super) fn run_inner(
         workspace_profile,
     )?;
     state.prepared = Some(prepared.clone());
+    state.workspace_runtime = Some(runtime_metadata);
     agent_adapter::write_agent_trace(tx_dir, agent_routes)?;
     build_context(
         ContextBuild {
@@ -111,8 +112,17 @@ fn prepare(
     tx_dir: &Path,
     journal: &Journal,
     profile: WorkspaceProfile,
-) -> Result<crate::workspace::PreparedWorkspace> {
-    let prepared = workspace::prepare_git_worktree(project_root, paths, tx_id)?;
+) -> Result<(
+    crate::workspace::PreparedWorkspace,
+    crate::workspace::WorkspaceRuntimeMetadata,
+)> {
+    let mut runtime = workspace::runtime_for_profile(project_root, paths, tx_id, profile);
+    let prepared = runtime.prepare()?;
+    let runtime_metadata = runtime.metadata(Some(&prepared));
+    fs::write(
+        tx_dir.join("workspace_runtime.json"),
+        serde_json::to_string_pretty(&runtime_metadata)?,
+    )?;
     let baseline = baseline::capture(project_root, spec, &prepared.base_head)?;
     baseline::write(tx_dir, &baseline)?;
     journal.append_data(
@@ -125,6 +135,11 @@ fn prepare(
         }),
     )?;
     journal.append_data(
+        "WORKSPACE_RUNTIME",
+        "workspace runtime selected",
+        json!(&runtime_metadata),
+    )?;
+    journal.append_data(
         "WORKSPACE_READY",
         "isolated worktree ready",
         json!({
@@ -135,7 +150,7 @@ fn prepare(
             "tx_branch": &prepared.tx_branch,
         }),
     )?;
-    Ok(prepared)
+    Ok((prepared, runtime_metadata))
 }
 
 fn guard_and_review(

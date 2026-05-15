@@ -10,6 +10,7 @@ use crate::observability::CostProfile;
 use crate::reviewer::ReviewResult;
 use crate::smart_sync::SmartSyncDecision;
 use crate::verifier::VerifierResult;
+use crate::workspace::WorkspaceRuntimeMetadata;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransactionReport {
@@ -25,6 +26,7 @@ pub struct TransactionReport {
     pub review: Option<ReviewResult>,
     pub verifier: Option<VerifierResult>,
     pub sync: Option<SmartSyncDecision>,
+    pub workspace_runtime: Option<WorkspaceRuntimeMetadata>,
     pub cost_profile: Option<CostProfile>,
     pub error_fingerprint: Option<String>,
     pub failure_reason: Option<String>,
@@ -137,6 +139,17 @@ impl TransactionReport {
                     md.push_str(&format!("- `{file}`\n"));
                 }
             }
+        }
+
+        if let Some(runtime) = &self.workspace_runtime {
+            md.push_str("\n## Workspace Runtime\n\n");
+            md.push_str(&format!("- Runtime: `{}`\n", runtime.runtime));
+            md.push_str(&format!("- Domain: `{}`\n", runtime.domain));
+            md.push_str(&format!("- Isolation: `{}`\n", runtime.isolation));
+            md.push_str(&format!(
+                "- Capabilities: `{}`\n",
+                runtime.capabilities.join(", ")
+            ));
         }
 
         if let Some(cost) = &self.cost_profile {

@@ -74,6 +74,11 @@ transaction:
         .with_file_name("llm_gateway_summary.json")
         .exists());
     assert!(outcome.report_path.with_file_name("cost.json").exists());
+    let runtime = fs::read_to_string(outcome.report_path.with_file_name("workspace_runtime.json"))?;
+    assert!(runtime.contains("CodeGitWorkspace"));
+    assert!(runtime.contains("commit"));
+    let report = fs::read_to_string(&outcome.report_path)?;
+    assert!(report.contains("## Workspace Runtime"));
     assert!(outcome
         .report_path
         .with_file_name("skill_trace.json")
@@ -220,6 +225,9 @@ transaction:
     assert!(effects.contains("\"path\":\"forbidden.txt\""));
     let rollback = fs::read_to_string(outcome.report_path.with_file_name("rollback.json"))?;
     assert!(rollback.contains("\"handler\": \"file_restore\""));
+    let runtime = fs::read_to_string(outcome.report_path.with_file_name("workspace_runtime.json"))?;
+    assert!(runtime.contains("CodeGitWorkspace"));
+    assert!(runtime.contains("rollback"));
 
     let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
     let failed_memory =

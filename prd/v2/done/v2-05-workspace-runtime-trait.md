@@ -1,6 +1,6 @@
 # PRD v2 Task 05 — Workspace Runtime Trait
 
-Status: Todo
+Status: Done
 
 ## Goal
 
@@ -16,3 +16,17 @@ Move workspace execution behind a real `WorkspaceRuntime` abstraction so transac
 - Tests prove existing code-git transactions still commit and roll back through the runtime path.
 - README and docs are updated in English, Russian, Chinese, and Kazakh for user-facing behavior.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
+
+## Completed
+
+- Added `WorkspaceRuntime` with prepare, snapshot, run, diff, verify, commit, rollback, and cleanup methods.
+- Added `CodeGitWorkspace` and moved Git worktree prepare/commit/rollback behavior behind the runtime implementation.
+- Routed transaction prepare, commit, rollback, and cleanup through the runtime path while preserving existing `*.git` AgentSpec compatibility.
+- Added `.agent/tx/<tx-id>/workspace_runtime.json` and a `Workspace Runtime` report section.
+- Added runtime metadata assertions to commit and rollback transaction tests.
+- Updated README and workspace runtime docs in English, Russian, Chinese, and Kazakh.
+
+## Evidence
+
+- Implementation commit: pending.
+- Checks: pending.
