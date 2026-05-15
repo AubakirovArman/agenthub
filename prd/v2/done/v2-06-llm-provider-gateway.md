@@ -30,5 +30,5 @@ Turn the current LLM Gateway trace layer into a provider control plane that can 
 
 ## Evidence
 
-- Implementation commit: pending.
-- Checks: pending.
+- Implementation commit: `bfb7684`.
+- Checks: `cargo fmt -- --check`; `scripts/check-module-size.sh 200`; `git diff --check`; `cargo test llm_gateway`; `cargo test dry_run_cli_adapter_writes_invocation_artifacts`; `cargo clippy -- -D warnings`; `cargo test`; `npm run check` in `editors/vscode`.
