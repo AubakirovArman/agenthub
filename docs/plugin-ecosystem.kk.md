@@ -6,6 +6,8 @@
 
 Phase 13 жергілікті marketplace/package layer қосады. Package skills, workspace plugin metadata, verifier plugin metadata және SHA-256 signature metadata жариялай алады. Орнату кезінде skills жобаға көшіріледі, referenced files тексеріледі, бар signature тексеріледі және lock files жазылады.
 
+Plugin Governance permissions, publisher/review metadata, compatibility, tests, advisories және scorecards қосады. Қараңыз: [Plugin Governance](plugin-governance.kk.md).
+
 ## Package құрылымы
 
 ```text

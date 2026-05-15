@@ -1,17 +1,18 @@
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 
 use crate::agent_dir::ensure_runtime_dirs;
+use crate::plugin_registry::governance;
 use crate::plugin_registry::lock::{
     upsert_skill_locks, write_plugin_lock, LockedPlugin, LockedSkill, LockedVerifierPlugin,
     LockedWorkspacePlugin,
 };
+use crate::plugin_registry::package::{manifest_path, read_skill_manifest, validate_package_files};
 use crate::plugin_registry::signature;
 use crate::plugin_registry::types::{PluginManifest, PluginTrust};
-use crate::skill_registry::SkillManifest;
 
 #[derive(Debug, Clone)]
 pub struct InstallOptions {
@@ -61,6 +62,14 @@ pub fn install_package(
             "trusted plugin install requires a verified cryptographic signature"
         ));
     }
+    governance::enforce_install(&manifest, options.trust, options.allow_untrusted)?;
+    let (_, scorecard_path) = governance::write_scorecard(
+        project_root,
+        package_root,
+        &manifest,
+        options.trust,
+        signature.verified,
+    )?;
     let mut locked_skills = Vec::new();
 
     for skill in &manifest.skills {
@@ -138,6 +147,12 @@ pub fn install_package(
             .collect(),
         signature: manifest.signature.clone(),
         signature_verified: signature.verified,
+        permissions: manifest.governance.permissions.clone(),
+        publisher: manifest.governance.publisher.clone(),
+        review: manifest.governance.review.clone(),
+        compatibility: manifest.governance.compatibility.clone(),
+        advisories: manifest.governance.advisories.clone(),
+        scorecard_path: Some(scorecard_path),
     };
 
     write_plugin_lock(project_root, lock)?;
@@ -150,47 +165,4 @@ pub fn install_package(
         package_version: manifest.package.version,
         skills: locked_skills,
     })
-}
-
-fn manifest_path(path: &Path) -> Result<PathBuf> {
-    if path.is_file() {
-        return Ok(path.to_path_buf());
-    }
-    for name in ["agenthub-plugin.yaml", "plugin.yaml"] {
-        let candidate = path.join(name);
-        if candidate.exists() {
-            return Ok(candidate);
-        }
-    }
-    Err(anyhow!("plugin manifest not found in {}", path.display()))
-}
-
-fn read_skill_manifest(path: &Path) -> Result<SkillManifest> {
-    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    let manifest: SkillManifest =
-        serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))?;
-    if manifest.skill.id.trim().is_empty() || manifest.skill.version.trim().is_empty() {
-        return Err(anyhow!(
-            "skill manifest requires skill.id and skill.version"
-        ));
-    }
-    Ok(manifest)
-}
-
-fn validate_package_files(package_root: &Path, manifest: &PluginManifest) -> Result<()> {
-    for skill in &manifest.skills {
-        let path = package_root.join(&skill.path);
-        if !path.exists() {
-            return Err(anyhow!("skill manifest not found at {}", path.display()));
-        }
-    }
-    for workspace in &manifest.workspace_plugins {
-        if let Some(schema_path) = &workspace.schema_path {
-            let path = package_root.join(schema_path);
-            if !path.exists() {
-                return Err(anyhow!("workspace schema not found at {}", path.display()));
-            }
-        }
-    }
-    Ok(())
 }

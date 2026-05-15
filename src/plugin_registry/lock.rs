@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::agent_dir::ensure_runtime_dirs;
+use crate::plugin_registry::governance::{
+    PluginAdvisory, PluginCompatibility, PluginPermissions, PublisherIdentity, ReviewMetadata,
+};
 use crate::plugin_registry::types::SignatureMetadata;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,6 +32,18 @@ pub struct LockedPlugin {
     pub signature: Option<SignatureMetadata>,
     #[serde(default)]
     pub signature_verified: bool,
+    #[serde(default)]
+    pub permissions: PluginPermissions,
+    #[serde(default)]
+    pub publisher: Option<PublisherIdentity>,
+    #[serde(default)]
+    pub review: Option<ReviewMetadata>,
+    #[serde(default)]
+    pub compatibility: PluginCompatibility,
+    #[serde(default)]
+    pub advisories: Vec<PluginAdvisory>,
+    #[serde(default)]
+    pub scorecard_path: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

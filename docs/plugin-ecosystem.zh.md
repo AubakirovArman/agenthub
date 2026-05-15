@@ -6,6 +6,8 @@
 
 Phase 13 引入本地 marketplace/package layer。一个 package 可以发布 skills、workspace plugin metadata、verifier plugin metadata 和 SHA-256 signature metadata。安装时会把 skills 复制到项目中，验证 referenced files，验证已有 signature，并写入 lock files。
 
+Plugin Governance 增加 permissions、publisher/review metadata、compatibility、tests、advisories 和 scorecards。参见 [Plugin Governance](plugin-governance.zh.md)。
+
 ## Package 结构
 
 ```text

@@ -6,6 +6,8 @@ Languages: [English](plugin-ecosystem.en.md), [Русский](plugin-ecosystem.
 
 Phase 13 introduces a local marketplace/package layer. A package can publish skills, workspace plugin metadata, verifier plugin metadata, and SHA-256 signature metadata. Installation copies skills into the project, validates referenced files, verifies signatures when present, and writes lock files.
 
+Plugin Governance adds permissions, publisher/review metadata, compatibility, tests, advisories, and scorecards. See [Plugin Governance](plugin-governance.en.md).
+
 ## Package Layout
 
 ```text

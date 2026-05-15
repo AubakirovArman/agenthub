@@ -5,6 +5,8 @@ use std::str::FromStr;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::plugin_registry::governance::GovernanceManifest;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginManifest {
     pub package: PluginPackage,
@@ -16,6 +18,8 @@ pub struct PluginManifest {
     pub verifier_plugins: Vec<VerifierPlugin>,
     #[serde(default)]
     pub signature: Option<SignatureMetadata>,
+    #[serde(default)]
+    pub governance: GovernanceManifest,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -122,6 +126,7 @@ impl PluginManifest {
                 ensure_non_empty("signature.signer", signer)?;
             }
         }
+        self.governance.validate()?;
         Ok(())
     }
 }

@@ -6,6 +6,8 @@
 
 Phase 13 добавляет локальный marketplace/package layer. Пакет может публиковать skills, workspace plugin metadata, verifier plugin metadata и SHA-256 signature metadata. Установка копирует skills в проект, проверяет referenced files, verifies signatures when present и пишет lock-файлы.
 
+Plugin Governance добавляет permissions, publisher/review metadata, compatibility, tests, advisories и scorecards. См. [Plugin Governance](plugin-governance.ru.md).
+
 ## Структура пакета
 
 ```text

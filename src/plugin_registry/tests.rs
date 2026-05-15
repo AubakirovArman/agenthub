@@ -3,6 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
+mod governance_tests;
 mod signature_tests;
 
 use super::{
