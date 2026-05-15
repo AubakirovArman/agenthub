@@ -4,7 +4,7 @@
 
 ## Мақсаты
 
-Phase 13 жергілікті marketplace/package layer қосады. Package skills, workspace plugin metadata, verifier plugin metadata және optional signature metadata жариялай алады. Орнату кезінде skills жобаға көшіріледі, referenced files тексеріледі және lock files жазылады.
+Phase 13 жергілікті marketplace/package layer қосады. Package skills, workspace plugin metadata, verifier plugin metadata және SHA-256 signature metadata жариялай алады. Орнату кезінде skills жобаға көшіріледі, referenced files тексеріледі, бар signature тексеріледі және lock files жазылады.
 
 ## Package құрылымы
 
@@ -69,9 +69,10 @@ agenthub plugins scaffold marketplace/skill-packs/my-pack \
 
 ```bash
 agenthub plugins inspect marketplace/skill-packs/my-pack
+agenthub plugins digest marketplace/skill-packs/my-pack
 ```
 
-`inspect` `package.version` мәнін `major.minor.patch` ретінде тексереді, safe relative paths тексереді және referenced skill manifests пен workspace schemas бар екенін қарайды.
+`inspect` `package.version` мәнін `major.minor.patch` ретінде тексереді, safe relative paths, skill manifests, workspace schemas қарайды және mismatched `sha256` signatures қабылдамайды. `digest` `signature.value` үшін SHA-256 package digest шығарады.
 
 ## Install flow
 
@@ -98,7 +99,7 @@ agenthub plugins list
 `--trust` мәндері:
 
 - `local`: package жергілікті project/repo ішінен.
-- `trusted`: package сенімді source ішінен.
+- `trusted`: package сенімді source ішінен және verified `sha256` signature болуы керек.
 - `untrusted`: package сенімсіз деп белгіленеді және `--allow-untrusted` талап етеді.
 
 Мысал:
@@ -107,13 +108,13 @@ agenthub plugins list
 agenthub plugins install ./some-package --trust untrusted --allow-untrusted
 ```
 
-`signature` optional metadata. Phase 13 оны lock file ішіне жазады; cryptographic verification кейінгі қабатқа қалдырылды, сондықтан қазір enforcement `--trust` арқылы жүреді.
+`signature.algorithm: sha256` inspect немесе install сәтті аяқталмай тұрып cryptographically verified болады. Local packages unsigned бола алады немесе `algorithm: none` қолдана алады; trusted installs үшін verified digest керек. Қара: [Plugin Signatures](plugin-signatures.kk.md).
 
 ## Lock files
 
 AgentHub екі lock file жазады:
 
-- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugin metadata, workspace plugin metadata, signature metadata.
+- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugin metadata, workspace plugin metadata, signature metadata және signature verification status.
 - `.agent/skills/installed.json`: skill id, version, target path және source package.
 
 Бұл lock files болашақ транзакциялар үшін plugin және skill versions қайталанатын етеді.

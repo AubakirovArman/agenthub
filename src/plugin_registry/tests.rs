@@ -3,6 +3,8 @@ use std::path::Path;
 
 use anyhow::Result;
 
+mod signature_tests;
+
 use super::{
     inspect_package, install_package, list_installed, scaffold_package, InstallOptions,
     PluginTrust, ScaffoldOptions,
@@ -63,6 +65,7 @@ fn locks_workspace_verifier_and_signature_metadata() -> Result<()> {
     );
     assert_eq!(plugin.verifier_plugin_metadata[0].timeout_secs, Some(30));
     assert_eq!(plugin.signature.as_ref().unwrap().algorithm, "none");
+    assert!(!plugin.signature_verified);
     Ok(())
 }
 
@@ -110,7 +113,7 @@ fn local_options() -> InstallOptions {
     }
 }
 
-fn write_package(root: &Path, skill_id: &str, version: &str) -> Result<()> {
+pub(super) fn write_package(root: &Path, skill_id: &str, version: &str) -> Result<()> {
     let skill_dir = root.join("skills").join(skill_id);
     fs::create_dir_all(&skill_dir)?;
     fs::write(root.join("agenthub-plugin.yaml"), package_yaml())?;

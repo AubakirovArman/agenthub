@@ -16,4 +16,4 @@ ls prd/source
 ls prd/audit/open
 ```
 
-Негізгі open areas: cryptographic plugin signing, metrics dashboards және formal WAL.
+Негізгі open areas: metrics dashboards және formal WAL.

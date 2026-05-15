@@ -4,7 +4,7 @@
 
 ## Назначение
 
-Phase 13 добавляет локальный marketplace/package layer. Пакет может публиковать skills, workspace plugin metadata, verifier plugin metadata и optional signature metadata. Установка копирует skills в проект, проверяет referenced files и пишет lock-файлы.
+Phase 13 добавляет локальный marketplace/package layer. Пакет может публиковать skills, workspace plugin metadata, verifier plugin metadata и SHA-256 signature metadata. Установка копирует skills в проект, проверяет referenced files, verifies signatures when present и пишет lock-файлы.
 
 ## Структура пакета
 
@@ -69,9 +69,10 @@ agenthub plugins scaffold marketplace/skill-packs/my-pack \
 
 ```bash
 agenthub plugins inspect marketplace/skill-packs/my-pack
+agenthub plugins digest marketplace/skill-packs/my-pack
 ```
 
-`inspect` проверяет `package.version` как `major.minor.patch`, safe relative paths, существование skill manifests и workspace schemas.
+`inspect` проверяет `package.version` как `major.minor.patch`, safe relative paths, skill manifests, workspace schemas и отклоняет mismatched `sha256` signatures. `digest` печатает SHA-256 package digest для `signature.value`.
 
 ## Install flow
 
@@ -98,7 +99,7 @@ agenthub plugins list
 `--trust` принимает:
 
 - `local`: пакет находится в локальном проекте или репозитории.
-- `trusted`: пакет получен из доверенного источника.
+- `trusted`: пакет получен из доверенного источника и должен иметь verified `sha256` signature.
 - `untrusted`: пакет помечается как недоверенный и требует `--allow-untrusted`.
 
 Пример:
@@ -107,13 +108,13 @@ agenthub plugins list
 agenthub plugins install ./some-package --trust untrusted --allow-untrusted
 ```
 
-`signature` — optional metadata. Phase 13 записывает её в lock file; cryptographic verification оставлена для следующего слоя, поэтому enforcement сейчас идёт через `--trust`.
+`signature.algorithm: sha256` cryptographically verified до успешного inspect или install. Local packages могут быть unsigned или использовать `algorithm: none`; trusted installs требуют verified digest. См. [Plugin Signatures](plugin-signatures.ru.md).
 
 ## Lock files
 
 AgentHub пишет два lock-файла:
 
-- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugin metadata, workspace plugin metadata, signature metadata.
+- `.agent/plugins/installed.json`: package id, version, source, trust, installed skills, verifier plugin metadata, workspace plugin metadata, signature metadata и signature verification status.
 - `.agent/skills/installed.json`: skill id, version, target path и source package.
 
 Эти lock-файлы делают plugin и skill versions воспроизводимыми для будущих транзакций.

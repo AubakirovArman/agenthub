@@ -3,95 +3,13 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
-use agenthub::{enterprise, plugin_registry};
+use agenthub::enterprise;
 
-use crate::cli::{EnterpriseCommands, PluginCommands};
+use crate::cli::EnterpriseCommands;
 
-pub fn handle_plugins(project_root: &Path, command: PluginCommands) -> Result<()> {
-    match command {
-        PluginCommands::List => {
-            enterprise::authorize(project_root, "plugins.read")?;
-            for plugin in plugin_registry::list_installed(project_root)? {
-                println!(
-                    "{}\t{}\t{}\t{}",
-                    plugin.id, plugin.version, plugin.trust, plugin.source
-                );
-            }
-        }
-        PluginCommands::Inspect { package } => {
-            enterprise::authorize(project_root, "plugins.read")?;
-            let manifest = plugin_registry::inspect_package(&package)?;
-            println!(
-                "{}\t{}\t{}",
-                manifest.package.id, manifest.package.version, manifest.package.description
-            );
-            println!("skills: {}", manifest.skills.len());
-            println!("workspace_plugins: {}", manifest.workspace_plugins.len());
-            println!("verifier_plugins: {}", manifest.verifier_plugins.len());
-            println!(
-                "signature: {}",
-                if manifest.signature.is_some() {
-                    "present"
-                } else {
-                    "none"
-                }
-            );
-        }
-        PluginCommands::Scaffold {
-            output,
-            package_id,
-            skill_id,
-            description,
-            author,
-            force,
-        } => {
-            enterprise::authorize(project_root, "plugins.install")?;
-            let manifest = plugin_registry::scaffold_package(
-                &output,
-                plugin_registry::ScaffoldOptions {
-                    package_id,
-                    skill_id,
-                    description,
-                    author,
-                    force,
-                },
-            )?;
-            println!("{}", manifest.display());
-        }
-        PluginCommands::Install {
-            package,
-            trust,
-            allow_untrusted,
-            force,
-        } => {
-            let actor = enterprise::authorize(project_root, "plugins.install")?;
-            let trust = trust.parse()?;
-            let result = plugin_registry::install_package(
-                project_root,
-                &package,
-                plugin_registry::InstallOptions {
-                    trust,
-                    allow_untrusted,
-                    force,
-                },
-            )?;
-            enterprise::record_event(
-                project_root,
-                &actor,
-                "agenthub.plugins.install",
-                "plugins.install",
-                "ok",
-                Some(package.display().to_string()),
-                json!({ "package": result.package_id, "version": result.package_version }),
-            )?;
-            println!("installed {} {}", result.package_id, result.package_version);
-            for skill in result.skills {
-                println!("skill\t{}\t{}\t{}", skill.id, skill.version, skill.target);
-            }
-        }
-    }
-    Ok(())
-}
+mod plugin_commands;
+
+pub use plugin_commands::handle_plugins;
 
 pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Result<()> {
     match command {

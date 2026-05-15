@@ -27,6 +27,8 @@ pub struct LockedPlugin {
     pub verifier_plugin_metadata: Vec<LockedVerifierPlugin>,
     #[serde(default)]
     pub signature: Option<SignatureMetadata>,
+    #[serde(default)]
+    pub signature_verified: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -9,6 +9,7 @@ use crate::plugin_registry::lock::{
     upsert_skill_locks, write_plugin_lock, LockedPlugin, LockedSkill, LockedVerifierPlugin,
     LockedWorkspacePlugin,
 };
+use crate::plugin_registry::signature;
 use crate::plugin_registry::types::{PluginManifest, PluginTrust};
 use crate::skill_registry::SkillManifest;
 
@@ -35,6 +36,7 @@ pub fn inspect_package(path: &Path) -> Result<PluginManifest> {
         .with_context(|| format!("parse {}", manifest_path.display()))?;
     manifest.validate()?;
     validate_package_files(package_root, &manifest)?;
+    signature::verify_package(package_root, &manifest_path, &manifest)?;
     Ok(manifest)
 }
 
@@ -53,6 +55,12 @@ pub fn install_package(
     let manifest_path = manifest_path(package_path)?;
     let package_root = manifest_path.parent().expect("manifest has parent");
     let manifest = inspect_package(package_path)?;
+    let signature = signature::verify_package(package_root, &manifest_path, &manifest)?;
+    if options.trust == PluginTrust::Trusted && !signature.verified {
+        return Err(anyhow!(
+            "trusted plugin install requires a verified cryptographic signature"
+        ));
+    }
     let mut locked_skills = Vec::new();
 
     for skill in &manifest.skills {
@@ -129,6 +137,7 @@ pub fn install_package(
             })
             .collect(),
         signature: manifest.signature.clone(),
+        signature_verified: signature.verified,
     };
 
     write_plugin_lock(project_root, lock)?;

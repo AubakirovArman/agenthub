@@ -113,6 +113,9 @@ pub enum PluginCommands {
     Inspect {
         package: PathBuf,
     },
+    Digest {
+        package: PathBuf,
+    },
     Scaffold {
         output: PathBuf,
 

@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -18,7 +18,7 @@ AgentHub — транзакционная runtime-основа для работ
 - ограниченный repair loop и reviewer gate;
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;
-- plugin package scaffold, manifest validation, trust model и lock files;
+- plugin package scaffold, manifest validation, SHA-256 signature verification, trust model и lock files;
 - agent adapter routing, CLI dry-run invocation, prompts и transcripts;
 - multi-role topologies для planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker и tournament DAGs;
 - LLM Gateway metadata, redacted traces, optional raw traces и token/cost accounting;
@@ -199,16 +199,17 @@ Dashboard пишет `index.html`, `data.json`, `data.js`, `dashboard.css` и `d
 
 ## Plugin Ecosystem
 
-Phase 13 начинается с локальных marketplace packages. Пакет содержит `agenthub-plugin.yaml`, может поставлять skills, workspace plugin metadata, verifier plugin metadata, optional signature metadata и устанавливается с lock-файлами проекта.
+Phase 13 начинается с локальных marketplace packages. Пакет содержит `agenthub-plugin.yaml`, может поставлять skills, workspace plugin metadata, verifier plugin metadata, SHA-256 signature metadata и устанавливается с lock-файлами проекта.
 
 ```bash
 agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.example.my-pack --skill-id com.example.article_outline --description "Article outline skill"
 agenthub plugins inspect marketplace/skill-packs/content-basic
+agenthub plugins digest marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
 ```
 
-`inspect` проверяет semver package versions, safe relative paths, referenced skill manifests и workspace schemas. Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
+`inspect` проверяет semver package versions, safe relative paths, referenced skill manifests, workspace schemas и SHA-256 signatures when present. Installed plugin locks хранятся в `.agent/plugins/installed.json`; версии установленных skills фиксируются в `.agent/skills/installed.json`.
 
 ## Enterprise
 

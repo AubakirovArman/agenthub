@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: metrics dashboards and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -70,7 +70,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Memory | committed, staged, failed attempts, compaction, domain schemas | larger retrieval policy tuning |
 | Context | context pack, map context, trace, stale detection | larger context policy tuning |
 | Agent Lock | `.agent/agent.lock` and locks for plugins/skills | central lock governance |
-| Skills | skill manifests, dependency loading, plugin packages, scaffold | remote marketplace publishing workflow |
+| Skills | skill manifests, dependency loading, plugin packages, scaffold, SHA-256 signature verification | remote marketplace publishing workflow |
 | Workspaces | Code, Content, Data, Infra, Media | deeper specialized runtimes |
 | Transactions | lifecycle, rollback, sync, diff guard, repair, reviewer, report | full external effect tracking/rollback |
 | Verifiers | command, runtime smoke, content/data/infra/media/research/backend_tdd/db_migration domain checks | deeper external verifier integrations |

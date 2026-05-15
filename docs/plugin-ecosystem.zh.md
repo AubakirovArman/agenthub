@@ -4,7 +4,7 @@
 
 ## 目的
 
-Phase 13 引入本地 marketplace/package layer。一个 package 可以发布 skills、workspace plugin metadata、verifier plugin metadata 和 optional signature metadata。安装时会把 skills 复制到项目中，验证 referenced files，并写入 lock files。
+Phase 13 引入本地 marketplace/package layer。一个 package 可以发布 skills、workspace plugin metadata、verifier plugin metadata 和 SHA-256 signature metadata。安装时会把 skills 复制到项目中，验证 referenced files，验证已有 signature，并写入 lock files。
 
 ## Package 结构
 
@@ -69,9 +69,10 @@ agenthub plugins scaffold marketplace/skill-packs/my-pack \
 
 ```bash
 agenthub plugins inspect marketplace/skill-packs/my-pack
+agenthub plugins digest marketplace/skill-packs/my-pack
 ```
 
-`inspect` 会验证 `package.version` 为 `major.minor.patch`，验证 safe relative paths，并检查 referenced skill manifests 和 workspace schemas 是否存在。
+`inspect` 会验证 `package.version` 为 `major.minor.patch`，验证 safe relative paths，检查 skill manifests 和 workspace schemas，并拒绝 mismatched `sha256` signatures。`digest` 输出用于 `signature.value` 的 SHA-256 package digest。
 
 ## 安装流程
 
@@ -98,7 +99,7 @@ agenthub plugins list
 `--trust` 支持：
 
 - `local`: package 来自本地项目或仓库。
-- `trusted`: package 来自可信来源。
+- `trusted`: package 来自可信来源，并且必须有 verified `sha256` signature。
 - `untrusted`: package 记录为不可信，需要 `--allow-untrusted`。
 
 示例：
@@ -107,13 +108,13 @@ agenthub plugins list
 agenthub plugins install ./some-package --trust untrusted --allow-untrusted
 ```
 
-`signature` 是 optional metadata。Phase 13 会把它写入 lock file；cryptographic verification 留给后续层，因此当前 enforcement 仍由 `--trust` 控制。
+`signature.algorithm: sha256` 会在 inspect 或 install 成功前进行 cryptographic verification。Local packages 可以保持 unsigned 或使用 `algorithm: none`；trusted installs 需要 verified digest。见 [Plugin Signatures](plugin-signatures.zh.md)。
 
 ## Lock Files
 
 AgentHub 写入两个 lock files：
 
-- `.agent/plugins/installed.json`: package id、version、source、trust、installed skills、verifier plugin metadata、workspace plugin metadata、signature metadata。
+- `.agent/plugins/installed.json`: package id、version、source、trust、installed skills、verifier plugin metadata、workspace plugin metadata、signature metadata 和 signature verification status。
 - `.agent/skills/installed.json`: skill id、version、target path 和 source package。
 
 这些 lock files 让 plugin 和 skill versions 在未来事务中可复现。
