@@ -27,7 +27,7 @@ pub fn current_branch(root: &Path) -> Result<String> {
 }
 
 pub fn status_porcelain(root: &Path) -> Result<String> {
-    Ok(run(root, &["status", "--porcelain"])?.stdout)
+    Ok(run(root, &["status", "--porcelain", "--untracked-files=all"])?.stdout)
 }
 
 pub fn dirty(root: &Path) -> bool {

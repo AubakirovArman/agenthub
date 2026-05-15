@@ -77,6 +77,7 @@ pub enum Commands {
 pub enum TxCommands {
     Status,
     Report { tx_id: String },
+    Effects { tx_id: String },
 }
 
 #[derive(Debug, Subcommand)]

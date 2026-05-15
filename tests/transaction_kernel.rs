@@ -89,6 +89,9 @@ transaction:
         .report_path
         .with_file_name("memory_staging.jsonl")
         .exists());
+    let effects = fs::read_to_string(outcome.report_path.with_file_name("effects.jsonl"))?;
+    assert!(effects.contains("\"status\":\"verified\""));
+    assert!(effects.contains("\"path\":\"generated/result.txt\""));
     assert!(outcome.report_path.with_file_name("wal.jsonl").exists());
     let wal_replay = fs::read_to_string(outcome.report_path.with_file_name("wal_replay.json"))?;
     assert!(wal_replay.contains("\"latest_state\": \"CLOSED\""));
@@ -211,6 +214,9 @@ transaction:
         .report_path
         .with_file_name("error_fingerprint.json")
         .exists());
+    let effects = fs::read_to_string(outcome.report_path.with_file_name("effects.jsonl"))?;
+    assert!(effects.contains("\"status\":\"rolled_back\""));
+    assert!(effects.contains("\"path\":\"forbidden.txt\""));
 
     let committed_memory = fs::read_to_string(repo.path().join(".agent/memory/committed.jsonl"))?;
     let failed_memory =

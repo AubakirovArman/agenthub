@@ -13,8 +13,7 @@ use agenthub::{
 };
 
 use crate::cli::{
-    AalCommands, AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, TxCommands,
-    WorkspaceCommands,
+    AalCommands, AgentCommands, Cli, Commands, MemoryCommands, SkillCommands, WorkspaceCommands,
 };
 
 fn main() {
@@ -124,19 +123,7 @@ fn run() -> Result<()> {
                 }
             }
         },
-        Commands::Tx { command } => match command {
-            TxCommands::Status => {
-                enterprise::authorize(&project_root, "transaction.read")?;
-                for row in agent_dir::list_transactions(&project_root)? {
-                    println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
-                }
-            }
-            TxCommands::Report { tx_id } => {
-                enterprise::authorize(&project_root, "transaction.read")?;
-                let report = agent_dir::read_report(&project_root, &tx_id)?;
-                print!("{report}");
-            }
-        },
+        Commands::Tx { command } => handlers::handle_tx(&project_root, command)?,
         Commands::Workspace { command } => match command {
             WorkspaceCommands::Scan { write_maps } => {
                 enterprise::authorize(&project_root, "workspace.read")?;

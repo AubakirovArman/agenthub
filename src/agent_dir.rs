@@ -178,6 +178,11 @@ pub fn read_report(root: &Path, tx_id: &str) -> Result<String> {
     fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))
 }
 
+pub fn read_effects(root: &Path, tx_id: &str) -> Result<String> {
+    let path = AgentPaths::new(root).tx_dir(tx_id).join("effects.jsonl");
+    fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))
+}
+
 fn write_default(path: &Path, content: &str, force: bool) -> Result<()> {
     if path.exists() && !force {
         return Ok(());

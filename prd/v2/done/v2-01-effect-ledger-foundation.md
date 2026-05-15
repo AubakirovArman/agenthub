@@ -1,6 +1,6 @@
 # PRD v2 Task 01 — Effect Ledger Foundation
 
-Status: Todo
+Status: Done
 
 ## Goal
 
@@ -17,3 +17,17 @@ Introduce `.agent/tx/<tx-id>/effects.jsonl` as the append-only foundation for ef
 - Tests cover successful commit and rollback records.
 - README and feature docs are updated in English, Russian, Chinese, and Kazakh.
 - Module-size check stays under 200 lines per Rust/JS implementation file.
+
+## Completed
+
+- Added the `effects` module and append-only `.agent/tx/<tx-id>/effects.jsonl` records.
+- Recorded planned transaction and command/process effects.
+- Recorded applied, verified, rollback-pending, and rolled-back file effects from transaction diffs.
+- Added `agenthub tx effects <tx-id>` to print the effect ledger.
+- Added unit and transaction tests for successful verified effects and rollback effects.
+- Updated README and effect-ledger docs in English, Russian, Chinese, and Kazakh.
+
+## Evidence
+
+- Implementation commit: pending.
+- Checks: pending.

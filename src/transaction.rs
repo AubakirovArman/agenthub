@@ -1,6 +1,7 @@
 mod commit;
 mod context;
 mod execution;
+mod failure;
 mod guards;
 mod id;
 mod policy;
@@ -22,14 +23,13 @@ use crate::command_runner::RemoteRunner;
 use crate::compiler;
 use crate::diff_guard::DiffGuardResult;
 use crate::journal::Journal;
-use crate::memory;
-use crate::observability::{self, CostProfile};
+use crate::observability::CostProfile;
 use crate::report::TransactionReport;
 use crate::reviewer::ReviewResult;
 use crate::skill_registry;
 use crate::spec::AgentSpec;
 use crate::verifier::VerifierResult;
-use crate::workspace::{self, PreparedWorkspace};
+use crate::workspace::PreparedWorkspace;
 
 #[derive(Debug, Clone)]
 pub struct TransactionOutcome {
@@ -89,7 +89,9 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     fs::write(tx_dir.join("dag.json"), serde_json::to_string_pretty(&dag)?)?;
 
     let journal = Journal::new(&tx_id, tx_dir.join("journal.jsonl"));
+    let effects = crate::effects::EffectLedger::for_tx_dir(&tx_dir);
     journal.append("CREATED", "transaction created")?;
+    effects.record_transaction_planned(&spec.task.id)?;
     journal.append_data(
         "PREFLIGHT_CHECK",
         "loaded and validated AgentSpec",
@@ -116,7 +118,7 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
     })();
 
     if let Err(error) = result {
-        handle_failure(
+        failure::handle_failure(
             project_root,
             &spec,
             &tx_id,
@@ -156,43 +158,4 @@ pub fn run(project_root: &Path, spec_path: &Path, no_commit: bool) -> Result<Tra
         status,
         report_path,
     })
-}
-
-fn handle_failure(
-    project_root: &Path,
-    spec: &AgentSpec,
-    tx_id: &str,
-    tx_dir: &Path,
-    journal: &Journal,
-    error: anyhow::Error,
-    state: &mut RunState,
-) -> Result<()> {
-    let error_text = error.to_string();
-    state.failure_reason = Some(error_text.clone());
-    if matches!(
-        state.status.unwrap_or(TransactionStatus::RolledBack),
-        TransactionStatus::BlockedOnHuman
-    ) {
-        journal.append_data(
-            "BLOCKED_ON_HUMAN",
-            "transaction requires human intervention",
-            json!({ "error": error_text }),
-        )?;
-        return Ok(());
-    }
-
-    journal.append_data(
-        "ROLLING_BACK",
-        "transaction failed; rollback requested",
-        json!({ "error": error_text }),
-    )?;
-    if let Some(prepared) = &state.prepared {
-        let _ = workspace::rollback(prepared);
-    }
-    memory::record_failed_attempt(project_root, tx_id, &spec.task.id, &error.to_string())?;
-    let fingerprint =
-        observability::write_error_fingerprint(tx_dir, tx_id, &spec.task.id, &error_text)?;
-    state.error_fingerprint = Some(fingerprint.fingerprint);
-    state.status = Some(TransactionStatus::RolledBack);
-    journal.append("ROLLED_BACK", "transaction rolled back")
 }

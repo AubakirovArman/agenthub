@@ -6,6 +6,7 @@ use anyhow::{anyhow, Result};
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::command_runner::{run_shell_with_sandbox, CommandResult, CommandSandbox, RemoteRunner};
+use crate::effects::EffectLedger;
 use crate::spec::AgentSpec;
 
 pub(super) fn execute(
@@ -27,6 +28,7 @@ pub(super) fn execute(
         tx_dir.join("execution.json"),
         serde_json::to_string_pretty(&results)?,
     )?;
+    record_process_effects(tx_dir, "execution", &results)?;
     agent_adapter::write_transcript(tx_dir, &agent_routes.executor, &results)?;
     if let Some(failed) = results.iter().find(|result| !result.success) {
         return Err(anyhow!(
@@ -34,6 +36,23 @@ pub(super) fn execute(
             failed.command,
             failed.exit_code
         ));
+    }
+    Ok(())
+}
+
+fn record_process_effects(tx_dir: &Path, stage: &str, results: &[CommandResult]) -> Result<()> {
+    let ledger = EffectLedger::for_tx_dir(tx_dir);
+    for (index, result) in results
+        .iter()
+        .enumerate()
+        .filter(|(_, result)| result.success)
+    {
+        ledger.record_non_rollbackable_command(
+            stage,
+            index,
+            &result.command,
+            "process execution cannot be generally undone; file changes are tracked separately",
+        )?;
     }
     Ok(())
 }

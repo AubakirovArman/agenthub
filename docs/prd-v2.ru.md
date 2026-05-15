@@ -4,4 +4,4 @@
 
 AgentHub v2 переводит проект из feature-complete foundation в hardened platform. Первые приоритеты: effect-aware transactions, smart sync, настоящий LLM Gateway control, typed VCM-OS memory, hardened runners, затем AAL v2 и team/hosted surfaces.
 
-Рабочий backlog находится в `prd/v2/`. Текущая implementation task — effect ledger foundation: `.agent/tx/<tx-id>/effects.jsonl` записывает planned, applied, verified, rollback-pending, rolled-back и non-rollbackable effects.
+Рабочий backlog находится в `prd/v2/`. Effect ledger foundation сделан: `.agent/tx/<tx-id>/effects.jsonl` записывает planned, applied, verified, rollback-pending, rolled-back и non-rollbackable effects. Следующая task — concrete rollback handlers.

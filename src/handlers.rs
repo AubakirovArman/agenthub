@@ -3,13 +3,33 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
-use agenthub::enterprise;
+use agenthub::{agent_dir, enterprise};
 
-use crate::cli::EnterpriseCommands;
+use crate::cli::{EnterpriseCommands, TxCommands};
 
 mod plugin_commands;
 
 pub use plugin_commands::handle_plugins;
+
+pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
+    match command {
+        TxCommands::Status => {
+            enterprise::authorize(project_root, "transaction.read")?;
+            for row in agent_dir::list_transactions(project_root)? {
+                println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
+            }
+        }
+        TxCommands::Report { tx_id } => {
+            enterprise::authorize(project_root, "transaction.read")?;
+            print!("{}", agent_dir::read_report(project_root, &tx_id)?);
+        }
+        TxCommands::Effects { tx_id } => {
+            enterprise::authorize(project_root, "transaction.read")?;
+            print!("{}", agent_dir::read_effects(project_root, &tx_id)?);
+        }
+    }
+    Ok(())
+}
 
 pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Result<()> {
     match command {

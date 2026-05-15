@@ -6,6 +6,7 @@ use serde_json::json;
 
 use crate::agent_adapter::{self, AgentRoutes};
 use crate::agent_dir::AgentPaths;
+use crate::effects::EffectLedger;
 use crate::journal::Journal;
 use crate::memory;
 use crate::skill_registry::SkillManifest;
@@ -117,6 +118,8 @@ fn guard_and_review(
 ) -> Result<crate::diff_guard::DiffGuardResult> {
     journal.append("DIFF_GUARD", "checking scope and diff limits")?;
     let mut diff_guard = check_diff_guard(spec, worktree, tx_dir)?;
+    EffectLedger::for_tx_dir(tx_dir)
+        .record_applied_files("diff_guard", &diff_guard.summary.changed_files)?;
     if !diff_guard.passed {
         let reason = format!("diff guard failed: {}", diff_guard.violations.join("; "));
         state.diff_guard = Some(diff_guard);
@@ -183,6 +186,10 @@ fn verify(
         state.verifier = Some(verifier);
         state.failure_reason = Some("verifier failed".to_string());
         return Err(anyhow!("verifier failed"));
+    }
+    if let Some(diff_guard) = &state.diff_guard {
+        EffectLedger::for_tx_dir(tx_dir)
+            .record_verified_files("verifier", &diff_guard.summary.changed_files)?;
     }
     state.verifier = Some(verifier);
     Ok(())

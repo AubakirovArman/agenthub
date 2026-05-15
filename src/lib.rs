@@ -6,6 +6,7 @@ pub mod command_policy;
 pub mod command_runner;
 pub mod compiler;
 pub mod diff_guard;
+pub mod effects;
 pub mod enterprise;
 pub mod git;
 pub mod intent;
