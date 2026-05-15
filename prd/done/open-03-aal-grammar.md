@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: AAL parser implementation commit.
+Closing evidence: `edf2594 Complete AAL grammar task`
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
