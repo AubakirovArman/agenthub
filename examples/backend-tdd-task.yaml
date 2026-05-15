@@ -1,0 +1,35 @@
+task:
+  id: backend_tdd_demo
+  type: code.command
+  title: Verify backend TDD artifacts
+
+workspace:
+  type: code.git
+  isolation: git_worktree
+
+execution:
+  commands:
+    - mkdir -p backend/tests/unit backend/tests/integration
+    - printf 'unit ok\n' > backend/tests/unit/health.test.ts
+    - printf 'integration ok\n' > backend/tests/integration/health.test.ts
+    - "printf '{\"unit_tests\":[\"backend/tests/unit/health.test.ts\"],\"integration_tests\":[\"backend/tests/integration/health.test.ts\"],\"api_responses\":[{\"method\":\"GET\",\"path\":\"/health\",\"status\":200,\"body\":{\"ok\":true}}]}\n' > backend/tdd.json"
+
+scope:
+  allow:
+    - backend/**
+  deny:
+    - .agent/**
+
+verify:
+  profile: backend_tdd
+  commands:
+    - test -f backend/tests/unit/health.test.ts
+    - test -f backend/tests/integration/health.test.ts
+
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 4
+    max_lines_added: 10
+    max_lines_deleted: 0

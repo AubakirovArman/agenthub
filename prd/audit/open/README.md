@@ -2,7 +2,6 @@
 
 These are explicit PRD items that are not fully implemented yet.
 
-- Specialized `backend_tdd` verifier profile.
 - Specialized `db_migration` verifier profile.
 - Command policy enforcement for `safe`, `needs_approval`, and `restricted` command lists.
 - Sandbox Level 1, Level 2, and Level 3 execution isolation beyond current local controlled process supervision.

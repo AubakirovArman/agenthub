@@ -33,6 +33,63 @@ fn infra_plan_accepts_yaml_plan() -> Result<()> {
 }
 
 #[test]
+fn backend_tdd_accepts_manifest_tests_and_api_responses() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    fs::create_dir_all(dir.path().join("backend/tests/unit"))?;
+    fs::create_dir_all(dir.path().join("backend/tests/integration"))?;
+    fs::write(dir.path().join("backend/tests/unit/health.test.ts"), "ok\n")?;
+    fs::write(
+        dir.path().join("backend/tests/integration/health.test.ts"),
+        "ok\n",
+    )?;
+    fs::write(
+        dir.path().join("backend/tdd.json"),
+        r#"{
+  "unit_tests": ["backend/tests/unit/health.test.ts"],
+  "integration_tests": ["backend/tests/integration/health.test.ts"],
+  "api_responses": [
+    {"method": "GET", "path": "/health", "status": 200, "body": {"ok": true}}
+  ]
+}"#,
+    )?;
+
+    let result = domain::run(Some("backend_tdd"), dir.path())?.expect("domain result");
+
+    assert!(result.passed);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.name == "backend_api_responses_valid" && check.success));
+    Ok(())
+}
+
+#[test]
+fn backend_tdd_rejects_missing_integration_test() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    fs::create_dir_all(dir.path().join("backend/tests/unit"))?;
+    fs::write(dir.path().join("backend/tests/unit/health.test.ts"), "ok\n")?;
+    fs::write(
+        dir.path().join("backend/tdd.json"),
+        r#"{
+  "unit_tests": ["backend/tests/unit/health.test.ts"],
+  "integration_tests": ["backend/tests/integration/missing.test.ts"],
+  "api_responses": [
+    {"method": "GET", "path": "/health", "status": 200, "body": {"ok": true}}
+  ]
+}"#,
+    )?;
+
+    let result = domain::run(Some("backend_tdd"), dir.path())?.expect("domain result");
+
+    assert!(!result.passed);
+    assert!(result
+        .checks
+        .iter()
+        .any(|check| check.name == "backend_integration_tests_present" && !check.success));
+    Ok(())
+}
+
+#[test]
 fn media_render_accepts_manifest_and_assets() -> Result<()> {
     let dir = tempfile::tempdir()?;
     fs::create_dir_all(dir.path().join("media/renders"))?;

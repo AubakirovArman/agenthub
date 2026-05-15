@@ -23,4 +23,4 @@ The complete PRD split and completion audit are tracked separately:
 
 - `prd/source/`: top-level split of `prd.md`.
 - `prd/audit/`: done, partial, and open PRD areas.
-- `prd/todo/open-*.md`: long-term PRD tasks; current task is `open-08-backend-tdd-verifier.md`.
+- `prd/todo/open-*.md`: long-term PRD tasks; current task is `open-09-db-migration-verifier.md`.

@@ -83,14 +83,16 @@ transaction:
 
 ## Workspaces
 
-Қазір төрт git-backed domain profile бар:
+Қазір алты git-backed domain profile бар:
 
 - `code.git`: source code, builds, tests, runtime checks.
 - `content.git`: markdown, articles, docs, brand/tone rules.
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
+- `media.git`: prompts, scripts, voice tracks, renders және media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes және reports.
 
-Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` бос емес content artifacts тексереді, `data_quality` JSON artifacts валидтейді, `infra_plan` infra plan artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md).
+Domain verifier profiles configured commands кейін structural checks қосады: `content_quality` content artifacts тексереді, `data_quality` JSON валидтейді, `infra_plan` plans валидтейді, `media_render` media manifests/assets валидтейді, `research_report` cited claims валидтейді, ал `backend_tdd` test және API response artifacts валидтейді. Толығырақ: [Workspaces](workspaces.kk.md), [Research](research-profile.kk.md), [Backend TDD](backend-tdd-verifier.kk.md).
 
 Мысалдар:
 
@@ -99,6 +101,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/backend-tdd-task.yaml
 ```
 
 ## Agent Adapters

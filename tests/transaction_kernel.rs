@@ -726,6 +726,53 @@ transaction:
     Ok(())
 }
 
+#[test]
+fn backend_tdd_verifier_profile_uses_transaction_kernel() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "backend_tdd.yaml",
+        r#"
+task:
+  id: backend_tdd_demo
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p backend/tests/unit backend/tests/integration
+    - printf 'unit ok\n' > backend/tests/unit/health.test.ts
+    - printf 'integration ok\n' > backend/tests/integration/health.test.ts
+    - "printf '{\"unit_tests\":[\"backend/tests/unit/health.test.ts\"],\"integration_tests\":[\"backend/tests/integration/health.test.ts\"],\"api_responses\":[{\"method\":\"GET\",\"path\":\"/health\",\"status\":200,\"body\":{\"ok\":true}}]}\n' > backend/tdd.json"
+scope:
+  allow:
+    - backend/**
+verify:
+  profile: backend_tdd
+  commands:
+    - test -f backend/tests/unit/health.test.ts
+    - test -f backend/tests/integration/health.test.ts
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 4
+    max_lines_added: 10
+    max_lines_deleted: 0
+"#,
+    )?;
+    let outcome = transaction::run(repo.path(), &spec, false)?;
+
+    assert!(matches!(outcome.status, TransactionStatus::Committed));
+    let verifier = fs::read_to_string(outcome.report_path.with_file_name("verifier.json"))?;
+    assert!(verifier.contains("backend_tdd"));
+    assert!(verifier.contains("backend_api_responses_valid"));
+    Ok(())
+}
+
 fn research_spec() -> &'static str {
     r#"
 task:

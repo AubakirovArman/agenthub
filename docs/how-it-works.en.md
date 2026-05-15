@@ -83,14 +83,16 @@ Important fields:
 
 ## Workspaces
 
-AgentHub currently supports four git-backed domain profiles:
+AgentHub currently supports six git-backed domain profiles:
 
 - `code.git`: source code, builds, tests, runtime checks.
 - `content.git`: markdown, articles, docs, brand/tone rules.
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
+- `media.git`: prompts, scripts, voice tracks, renders, and media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes, and reports.
 
-Domain verifier profiles add structural checks after configured commands: `content_quality` checks non-empty content artifacts, `data_quality` validates JSON artifacts, and `infra_plan` validates infra plan artifacts. Details: [Workspaces](workspaces.en.md).
+Domain verifier profiles add structural checks after configured commands: `content_quality` checks content artifacts, `data_quality` validates JSON, `infra_plan` validates plans, `media_render` validates media manifests/assets, `research_report` validates cited claims, and `backend_tdd` validates test and API response artifacts. Details: [Workspaces](workspaces.en.md), [Research](research-profile.en.md), and [Backend TDD](backend-tdd-verifier.en.md).
 
 Examples:
 
@@ -99,6 +101,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/backend-tdd-task.yaml
 ```
 
 ## Agent Adapters

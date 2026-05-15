@@ -6,7 +6,7 @@ Source: [`../../prd.md`](../../prd.md)
 
 The staged roadmap in section 21 is done: Phase 1 through Phase 14 are in [`../done`](../done), and [`../todo`](../todo) has no phase files.
 
-The full PRD is broader than those phases. Some long-term product points remain partial or open: specialized database/backend verifiers, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
+The full PRD is broader than those phases. Some long-term product points remain partial or open: specialized database migration verifier, full command policy enforcement, sandbox levels beyond local control, real remote runner execution, cryptographic package signing, metrics dashboards, and a formal WAL layer.
 
 ## Top-Level Section Matrix
 
@@ -27,7 +27,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | 12. Skill Registry | Done | Skill manifests, dependency loading, plugin packages, version locks, trust model, and scaffold exist. |
 | 13. Workspace Runtime | Mostly done | Code, Content, Data, Infra, and Media workspaces exist; deeper specialized runtimes remain future. |
 | 14. Transaction Manager | Mostly done | Lifecycle, rollback, sync, diff guard, repair, reviewer gate, reports, memory promotion exist; full external effect rollback handlers remain partial. |
-| 15. Verifier Layer | Partial | command checks, runtime smoke, infra/data/content domain verifiers exist; backend_tdd and db_migration are not specialized profiles yet. |
+| 15. Verifier Layer | Partial | command checks, runtime smoke, content/data/infra/media/research/backend_tdd domain verifiers exist; db_migration is not specialized yet. |
 | 16. Agent Orchestration | Mostly done | single, planner/executor, generator/critic, reviewer/repair, swarm research, manager/worker, and tournament exist; deeper adaptive orchestration remains future work. |
 | 17. LLM Gateway and Observability | Mostly done | Redaction, raw traces, token/cost estimates, metadata, reports exist; it is not a full provider network gateway yet. |
 | 18. `.agent/` Project Structure | Done | Runtime directories, locks, maps, policies, schemas, memory, tx artifacts, plugins, and enterprise files exist. |
@@ -73,7 +73,7 @@ The full PRD is broader than those phases. Some long-term product points remain 
 | Skills | skill manifests, dependency loading, plugin packages, scaffold | remote marketplace publishing workflow |
 | Workspaces | Code, Content, Data, Infra, Media | deeper specialized runtimes |
 | Transactions | lifecycle, rollback, sync, diff guard, repair, reviewer, report | full external effect tracking/rollback |
-| Verifiers | command, runtime smoke, content/data/infra domain checks | backend_tdd and db_migration specialization |
+| Verifiers | command, runtime smoke, content/data/infra/media/research/backend_tdd domain checks | db_migration specialization |
 | Orchestration | single, planner/executor, generator/critic, reviewer/repair, swarm, manager/worker, tournament | deeper adaptive orchestration |
 | LLM Gateway | metadata, redaction, raw trace option, cost estimates, private model routing metadata | full provider proxy |
 | Enterprise | RBAC, policy source, audit, secrets check, runners inventory, compliance | real remote runner execution and network policy server |

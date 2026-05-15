@@ -23,4 +23,4 @@ sed -n '1,120p' prd/status.md
 
 - `prd/source/`: `prd.md` 的 top-level split。
 - `prd/audit/`: done、partial、open PRD areas。
-- `prd/todo/open-*.md`: long-term PRD tasks；当前 task 是 `open-08-backend-tdd-verifier.md`。
+- `prd/todo/open-*.md`: long-term PRD tasks；当前 task 是 `open-09-db-migration-verifier.md`。

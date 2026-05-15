@@ -83,14 +83,16 @@ transaction:
 
 ## Workspaces
 
-Сейчас поддерживаются четыре git-backed профиля:
+Сейчас поддерживаются шесть git-backed профилей:
 
 - `code.git`: исходный код, build, tests, runtime checks.
 - `content.git`: markdown, articles, docs, brand/tone rules.
 - `data.git`: reports, data artifacts, metric checks.
 - `infra.git`: plans, config, infrastructure review artifacts.
+- `media.git`: prompts, scripts, voice tracks, renders и media assets.
+- `research.git`: sources, claims, citations, graphs, critic notes и reports.
 
-Domain verifier profiles добавляют structural checks после configured commands: `content_quality` проверяет непустые content artifacts, `data_quality` валидирует JSON artifacts, `infra_plan` валидирует infra plan artifacts. Подробно: [Workspaces](workspaces.ru.md).
+Domain verifier profiles добавляют structural checks после configured commands: `content_quality` проверяет content artifacts, `data_quality` валидирует JSON, `infra_plan` валидирует plans, `media_render` валидирует media manifests/assets, `research_report` валидирует cited claims, а `backend_tdd` валидирует test и API response artifacts. Подробно: [Workspaces](workspaces.ru.md), [Research](research-profile.ru.md), [Backend TDD](backend-tdd-verifier.ru.md).
 
 Примеры:
 
@@ -99,6 +101,7 @@ agenthub run examples/command-task.yaml
 agenthub run examples/content-task.yaml
 agenthub run examples/data-task.yaml
 agenthub run examples/infra-task.yaml
+agenthub run examples/backend-tdd-task.yaml
 ```
 
 ## Agent Adapters
