@@ -2,7 +2,7 @@
 
 Status: Done
 
-Closing evidence: Research profile implementation commit.
+Closing evidence: `1568a61 Complete Research profile task`
 
 Source: `prd/audit/open/README.md`, `prd.md`
 
