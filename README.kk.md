@@ -4,7 +4,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [Workspaces](docs/workspaces.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Толық құжаттама: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.kk.md), [PRD audit](docs/prd-audit.kk.md), [TUI](docs/tui.kk.md), [Workspaces](docs/workspaces.kk.md), [IDE](docs/ide.kk.md), [Natural language](docs/natural-language.kk.md), [Topologies](docs/topologies.kk.md), [Agent adapters](docs/agent-adapters.kk.md), [Runtime and repair](docs/runtime-repair.kk.md), [Context maps](docs/context-maps.kk.md), [LLM Gateway](docs/llm-gateway.kk.md), [Plugin ecosystem](docs/plugin-ecosystem.kk.md), [Enterprise](docs/enterprise.kk.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Қазіргі күйі
 
@@ -24,6 +24,7 @@ AgentHub — AI агенттерінің жұмысын транзакциялы
 - LLM Gateway metadata, redacted traces, optional raw traces және token/cost accounting;
 - routes, components, exports үшін context maps, stale-hash detection және map-based context selection;
 - defaults, approval marking және clarification questions бар AgentSpec preview жасайтын `ask` командасы;
+- transactions, DAG, verifier, cost, memory және approvals көрсететін terminal TUI dashboard;
 - transaction, memory, AgentSpec, approval және DAG көруге арналған VS Code extension;
 - enterprise policy source, RBAC checks, secret checks, runner/model routing, audit log және compliance reports.
 - PRD tracker `prd/done` және `prd/todo` болып бөлінді.
@@ -105,6 +106,7 @@ agenthub run examples/adapter-dry-run-task.yaml
 agenthub run examples/runtime-smoke-task.yaml
 agenthub run examples/topology-planner-task.yaml
 agenthub run examples/topology-swarm-task.yaml
+agenthub tui
 agenthub tx status
 agenthub tx report tx-...
 agenthub workspace scan --write-maps

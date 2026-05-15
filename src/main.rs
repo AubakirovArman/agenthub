@@ -7,7 +7,7 @@ use serde_json::json;
 
 use agenthub::{
     agent_adapter, agent_dir, code_maps, enterprise, intent, memory, skill_registry, transaction,
-    workspace,
+    tui, workspace,
 };
 
 use crate::cli::{
@@ -87,6 +87,10 @@ fn run() -> Result<()> {
                 outcome.status.as_str(),
                 outcome.report_path.display()
             );
+        }
+        Commands::Tui => {
+            enterprise::authorize(&project_root, "transaction.read")?;
+            print!("{}", tui::dashboard_text(&project_root)?);
         }
         Commands::Tx { command } => match command {
             TxCommands::Status => {

@@ -3,7 +3,7 @@
 These PRD areas have an implemented foundation but are not complete compared with the full long-term PRD.
 
 - Product vision as universal agent OS: foundation exists, full product surface is not complete.
-- AgentHub layers: CLI and VS Code exist; TUI and web dashboard are not implemented.
+- AgentHub layers: CLI, TUI, and VS Code exist; web dashboard is not implemented.
 - AAL: AgentSpec and AgentIR exist, but a standalone AAL grammar/parser is not implemented.
 - Agent Lock: `.agent/agent.lock` exists, but deeper central lock governance is future work.
 - Transaction Manager effect tracking: local git/file rollback exists, but not all external effects have rollback handlers.

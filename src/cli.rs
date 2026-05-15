@@ -34,6 +34,7 @@ pub enum Commands {
         #[arg(long)]
         no_commit: bool,
     },
+    Tui,
     Tx {
         #[command(subcommand)]
         command: TxCommands,

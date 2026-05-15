@@ -18,5 +18,6 @@ pub mod skill_registry;
 pub mod spec;
 pub mod topology;
 pub mod transaction;
+pub mod tui;
 pub mod verifier;
 pub mod workspace;
