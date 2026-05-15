@@ -1,6 +1,4 @@
 use std::process::{Child, Command};
-use std::thread;
-use std::time::{Duration, Instant};
 
 #[cfg(unix)]
 pub(super) fn configure_process_group(command: &mut Command) {
@@ -22,6 +20,9 @@ pub(super) fn configure_process_group(_command: &mut Command) {}
 
 #[cfg(unix)]
 pub(super) fn terminate_process_tree(child: &mut Child) {
+    use std::thread;
+    use std::time::{Duration, Instant};
+
     let pgid = -(child.id() as i32);
     unsafe {
         libc::kill(pgid, libc::SIGTERM);

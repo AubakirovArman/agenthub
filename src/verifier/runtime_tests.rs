@@ -10,7 +10,7 @@ use crate::verifier::run;
 
 #[test]
 fn runtime_smoke_checks_http_route() -> Result<()> {
-    if !command_exists("python3") || !command_exists("curl") {
+    if !command_exists("python3") {
         return Ok(());
     }
 
@@ -37,7 +37,7 @@ fn runtime_smoke_checks_http_route() -> Result<()> {
 
 #[test]
 fn runtime_smoke_catches_route_failure_after_commands_pass() -> Result<()> {
-    if !command_exists("python3") || !command_exists("curl") {
+    if !command_exists("python3") {
         return Ok(());
     }
 
@@ -71,7 +71,7 @@ fn runtime_verify(_root: &std::path::Path, port: u16, path: &str, expect: u16) -
         runtime: Some(RuntimeSmokeSpec {
             start_command: format!("python3 -m http.server {port} --bind 127.0.0.1"),
             base_url: format!("http://127.0.0.1:{port}"),
-            timeout_secs: 5,
+            timeout_secs: 10,
         }),
         routes: vec![RouteCheckSpec {
             path: path.to_string(),

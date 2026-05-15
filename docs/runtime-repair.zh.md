@@ -24,6 +24,8 @@ verify:
 
 AgentHub 先运行 `verify.commands`。通过后启动 `verify.runtime.start_command`，轮询 routes，直到所有 expected statuses 匹配或 timeout 到期，然后终止整个 process group。
 
+对于 `http://` `base_url`，route checks 使用 AgentHub 内置的 HTTP status probe，因此 runtime smoke verification 不需要 `curl`。
+
 静态示例：
 
 ```bash

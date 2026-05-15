@@ -24,6 +24,8 @@ verify:
 
 AgentHub runs `verify.commands` first. If they pass, it starts `verify.runtime.start_command`, polls each route until all expected statuses match or the timeout expires, then terminates the whole process group.
 
+For `http://` `base_url` values, route checks use AgentHub's built-in HTTP status probe, so `curl` is not required for runtime smoke verification.
+
 Try the static example:
 
 ```bash
