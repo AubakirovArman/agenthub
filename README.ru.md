@@ -25,7 +25,7 @@ AgentHub — транзакционная runtime-основа для работ
 - context maps для routes, components, exports, stale-hash detection и map-based context selection;
 - команда `ask` для AgentSpec preview с defaults, approval marking и clarification questions;
 - VS Code extension для просмотра транзакций, memory, AgentSpec, approval и DAG;
-- локальная enterprise policy, RBAC checks, audit log и compliance report generation.
+- enterprise policy source, RBAC checks, secret checks, runner/model routing, audit log и compliance reports.
 - PRD tracker разбит на `prd/done` и `prd/todo`.
 
 ## Установка и сборка
@@ -114,6 +114,10 @@ agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.examp
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
+AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise runners
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
 AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
@@ -178,9 +182,12 @@ agenthub plugins list
 
 ## Enterprise
 
-Phase 14 начинается с локального enterprise governance. Policy находится в `.agent/enterprise/policy.yaml`; audit events дописываются в `.agent/enterprise/audit.jsonl`; compliance reports создаются в `.agent/enterprise/`.
+Phase 14 даёт enterprise governance. Policy находится в `.agent/enterprise/policy.yaml` или central `AGENTHUB_POLICY_PATH`; secret checks не печатают значения; runner и private model routing управляются policy; audit events и compliance reports находятся в `.agent/enterprise/`.
 
 ```bash
+AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 ```

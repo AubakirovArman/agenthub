@@ -5,16 +5,53 @@ use std::path::Path;
 use anyhow::{anyhow, Context, Result};
 
 use crate::agent_dir::ensure_runtime_dirs;
-use crate::enterprise::types::{ActorContext, EnterprisePolicy};
+use crate::enterprise::types::{ActorContext, EnterprisePolicy, PolicySource};
 
 pub fn load_policy(project_root: &Path) -> Result<EnterprisePolicy> {
+    Ok(load_policy_with_source(project_root)?.0)
+}
+
+pub fn load_policy_with_source(project_root: &Path) -> Result<(EnterprisePolicy, PolicySource)> {
+    if let Ok(path) = env::var("AGENTHUB_POLICY_PATH") {
+        let path = Path::new(&path);
+        return read_policy(
+            path,
+            PolicySource {
+                mode: "central_path".to_string(),
+                path: path.display().to_string(),
+            },
+        );
+    }
+
     let paths = ensure_runtime_dirs(project_root)?;
     let path = paths.enterprise.join("policy.yaml");
     if !path.exists() {
-        return Ok(EnterprisePolicy::default());
+        return Ok((
+            EnterprisePolicy::default(),
+            PolicySource {
+                mode: "default".to_string(),
+                path: path.display().to_string(),
+            },
+        ));
     }
-    let content = fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
-    serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))
+    read_policy(
+        &path,
+        PolicySource {
+            mode: "local".to_string(),
+            path: path.display().to_string(),
+        },
+    )
+}
+
+pub fn policy_source(project_root: &Path) -> Result<PolicySource> {
+    Ok(load_policy_with_source(project_root)?.1)
+}
+
+fn read_policy(path: &Path, source: PolicySource) -> Result<(EnterprisePolicy, PolicySource)> {
+    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    let policy =
+        serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))?;
+    Ok((policy, source))
 }
 
 pub fn authorize(project_root: &Path, permission: &str) -> Result<ActorContext> {

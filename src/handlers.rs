@@ -95,6 +95,50 @@ pub fn handle_plugins(project_root: &Path, command: PluginCommands) -> Result<()
 
 pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Result<()> {
     match command {
+        EnterpriseCommands::Policy => {
+            enterprise::authorize(project_root, "enterprise.policy.read")?;
+            let source = enterprise::policy_source(project_root)?;
+            let policy = enterprise::load_policy(project_root)?;
+            println!("source\t{}\t{}", source.mode, source.path);
+            println!("enabled\t{}", policy.enterprise.enabled);
+            println!("default_role\t{}", policy.enterprise.default_role);
+            println!("roles\t{}", policy.enterprise.roles.len());
+        }
+        EnterpriseCommands::Secrets { name } => {
+            enterprise::authorize(project_root, "enterprise.secrets.check")?;
+            let checks = if let Some(name) = name {
+                vec![enterprise::check_secret(project_root, &name)?]
+            } else {
+                enterprise::check_required_secrets(project_root)?
+            };
+            for check in checks {
+                println!(
+                    "{}\t{}\tallowed:{}\tpresent:{}",
+                    check.name, check.provider, check.allowed, check.present
+                );
+            }
+        }
+        EnterpriseCommands::Runners => {
+            enterprise::authorize(project_root, "enterprise.runners.read")?;
+            let inventory = enterprise::runner_inventory(project_root)?;
+            println!("default\t{}", inventory.default);
+            for runner in inventory.remote {
+                println!(
+                    "remote\t{}\t{}\t{}",
+                    runner.id,
+                    runner.endpoint,
+                    runner.labels.join(",")
+                );
+            }
+        }
+        EnterpriseCommands::ModelRoute { model } => {
+            enterprise::authorize(project_root, "enterprise.policy.read")?;
+            let route = enterprise::route_model(project_root, &model)?;
+            println!(
+                "{}\tprivate:{}\trunner:{}",
+                route.model, route.private, route.runner
+            );
+        }
         EnterpriseCommands::Audit { limit } => {
             enterprise::authorize(project_root, "enterprise.audit.read")?;
             for event in enterprise::list_audit(project_root, limit)? {

@@ -43,25 +43,37 @@ pub(super) const DEFAULT_ENTERPRISE_POLICY: &str = r#"enterprise:
         - skills.read
         - plugins.read
         - plugins.install
+        - enterprise.policy.read
+        - enterprise.secrets.check
+        - enterprise.runners.read
     auditor:
       permissions:
         - transaction.read
         - memory.read
         - plugins.read
+        - enterprise.policy.read
+        - enterprise.secrets.check
+        - enterprise.runners.read
         - enterprise.audit.read
         - enterprise.compliance.generate
     admin:
       permissions:
         - "*"
+  policy_server:
+    mode: local
+    url: null
+    policy_path: null
   secrets:
     provider: env
     allowed_prefixes:
       - AGENTHUB_
+    required: []
   runners:
     default: local
     remote: []
   model_routing:
     private_models: []
+    private_runner: null
 "#;
 
 pub(super) const DEFAULT_CORE_POLICY: &str = r#"commands:

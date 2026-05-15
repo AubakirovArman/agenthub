@@ -57,3 +57,34 @@ fn writes_model_metadata_for_topology_roles() -> Result<()> {
         .any(|call| call.role == "critic"));
     Ok(())
 }
+
+#[test]
+fn marks_private_model_routes() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let context = json!({
+        "agent_spec": { "task": { "id": "demo" } },
+        "agent_routes": {
+            "executor": {
+                "requested_adapter": "codex",
+                "selected_adapter": "command",
+                "role": "executor",
+                "model": "internal-model"
+            }
+        },
+        "enterprise": {
+            "runner_default": "local",
+            "private_models": ["internal-model"],
+            "private_runner": "private-runner"
+        },
+        "skills": [],
+        "memory": []
+    });
+
+    let artifacts = write_gateway_artifacts(dir.path(), &context, "hash")?;
+
+    let call = &artifacts.model_calls[0];
+    assert!(call.private_model);
+    assert_eq!(call.runner.as_deref(), Some("private-runner"));
+    assert_eq!(call.routing_policy, "private_model");
+    Ok(())
+}

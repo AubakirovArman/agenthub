@@ -4,7 +4,7 @@ Languages: [English](enterprise.en.md), [Русский](enterprise.ru.md), [中
 
 ## Purpose
 
-Phase 14 begins with local enterprise governance: project policy, role-based permissions, audit logs, and compliance reports. This is the local foundation for a future central policy server and remote enterprise runners.
+Phase 14 provides enterprise governance: project or central policy source, role-based permissions, append-only audit logs, central secret checks, runner inventory, private model routing, and compliance reports.
 
 ## Files
 
@@ -35,16 +35,38 @@ enterprise:
     admin:
       permissions:
         - "*"
+  policy_server:
+    mode: local
+    url: null
+    policy_path: null
   secrets:
     provider: env
     allowed_prefixes:
       - AGENTHUB_
+    required:
+      - AGENTHUB_TOKEN
   runners:
     default: local
-    remote: []
+    remote:
+      - id: private-runner
+        endpoint: ssh://runner.internal
+        labels:
+          - private-model
   model_routing:
-    private_models: []
+    private_models:
+      - internal-model
+    private_runner: private-runner
 ```
+
+## Policy Source
+
+By default AgentHub reads `.agent/enterprise/policy.yaml` from the project. To enforce one central policy across projects, set:
+
+```bash
+AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml agenthub enterprise policy
+```
+
+This is the file-backed policy-server mode for Phase 14. The policy source is also included in compliance reports.
 
 ## RBAC
 
@@ -57,6 +79,34 @@ AGENTHUB_ACTOR=alice AGENTHUB_ROLE=developer agenthub run examples/command-task.
 AGENTHUB_ACTOR=bob AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 AGENTHUB_ACTOR=carol AGENTHUB_ROLE=admin agenthub plugins install marketplace/skill-packs/content-basic --trust local
 ```
+
+Inspect policy source and role count:
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise policy
+```
+
+## Secrets
+
+Secret checks never print secret values. They verify the configured provider, allowed prefixes, and whether an environment secret is present when `provider: env`.
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise secrets
+```
+
+Without a name, AgentHub checks `enterprise.secrets.required`.
+
+## Runners And Model Routing
+
+Remote runners are policy metadata. Private model routing selects `model_routing.private_runner` when the requested model is listed in `private_models`.
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise runners
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
+```
+
+LLM gateway metadata records `private_model`, `runner`, and `routing_policy` for planned model calls.
 
 ## Auditing
 
@@ -86,4 +136,4 @@ Generate to a fixed path:
 AGENTHUB_ROLE=admin agenthub enterprise compliance --output tmp/compliance.md
 ```
 
-The report includes policy status, default role, secret provider, runner mode, configured roles, installed plugin count, transaction count, and recent audit count.
+The report includes policy source, default role, secret provider, required secret count, runner inventory, private model count, configured roles, installed plugin count, transaction count, and recent audit count.

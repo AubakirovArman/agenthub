@@ -4,7 +4,7 @@
 
 ## 目的
 
-Phase 14 从本地 enterprise governance 开始：project policy、role-based permissions、audit logs 和 compliance reports。这是未来 central policy server 与 remote enterprise runners 的本地基础。
+Phase 14 提供 enterprise governance：project 或 central policy source、role-based permissions、append-only audit logs、central secret checks、runner inventory、private model routing 和 compliance reports。
 
 ## 文件
 
@@ -35,16 +35,38 @@ enterprise:
     admin:
       permissions:
         - "*"
+  policy_server:
+    mode: local
+    url: null
+    policy_path: null
   secrets:
     provider: env
     allowed_prefixes:
       - AGENTHUB_
+    required:
+      - AGENTHUB_TOKEN
   runners:
     default: local
-    remote: []
+    remote:
+      - id: private-runner
+        endpoint: ssh://runner.internal
+        labels:
+          - private-model
   model_routing:
-    private_models: []
+    private_models:
+      - internal-model
+    private_runner: private-runner
 ```
+
+## Policy Source
+
+默认情况下，AgentHub 读取项目中的 `.agent/enterprise/policy.yaml`。要在多个项目中强制使用同一 central policy：
+
+```bash
+AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml agenthub enterprise policy
+```
+
+这是 Phase 14 的 file-backed policy-server mode。Policy source 也会写入 compliance reports。
 
 ## RBAC
 
@@ -57,6 +79,34 @@ AGENTHUB_ACTOR=alice AGENTHUB_ROLE=developer agenthub run examples/command-task.
 AGENTHUB_ACTOR=bob AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 AGENTHUB_ACTOR=carol AGENTHUB_ROLE=admin agenthub plugins install marketplace/skill-packs/content-basic --trust local
 ```
+
+查看 policy source 和 role 数量：
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise policy
+```
+
+## Secrets
+
+Secret checks 永远不会打印 secret 值。它们检查 provider、allowed prefixes，以及 `provider: env` 时环境变量是否存在。
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise secrets
+```
+
+不传 name 时，AgentHub 检查 `enterprise.secrets.required`。
+
+## Runners And Model Routing
+
+Remote runners 是 policy metadata。Private model routing 会在 requested model 位于 `private_models` 时选择 `model_routing.private_runner`。
+
+```bash
+AGENTHUB_ROLE=admin agenthub enterprise runners
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
+```
+
+LLM Gateway metadata 会为 planned model calls 记录 `private_model`、`runner` 和 `routing_policy`。
 
 ## Audit
 
@@ -86,4 +136,4 @@ AGENTHUB_ROLE=admin agenthub enterprise compliance
 AGENTHUB_ROLE=admin agenthub enterprise compliance --output tmp/compliance.md
 ```
 
-Report 包含 policy status、default role、secret provider、runner mode、configured roles、installed plugin count、transaction count 和 recent audit count。
+Report 包含 policy source、default role、secret provider、required secret count、runner inventory、private model count、configured roles、installed plugin count、transaction count 和 recent audit count。

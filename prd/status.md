@@ -15,7 +15,7 @@
 | Phase 11 — Additional Workspaces | Done | `done/phase-11-additional-workspaces.md` | `fbbe0bd` |
 | Phase 12 — IDE and Visual Layer | Done | `done/phase-12-ide-and-visual-layer.md` | `d3517eb` |
 | Phase 13 — Marketplace / Plugin Ecosystem | Done | `done/phase-13-marketplace-plugin-ecosystem.md` | `ab46f97` |
-| Phase 14 — Enterprise Layer | Partial / verify fully | `todo/phase-14-enterprise-layer.md` | existing foundation in `20cf11b`; needs PRD audit |
+| Phase 14 — Enterprise Layer | Done | `done/phase-14-enterprise-layer.md` | Phase 14 implementation commit |
 
 ## Move Rule
 

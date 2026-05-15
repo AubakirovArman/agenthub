@@ -17,4 +17,4 @@ sed -n '1,120p' prd/status.md
 - 只有 code、tests、acceptance 和 4-language docs 完成后，才能移动到 `prd/done/`。
 - 在 phase 文件和 `prd/status.md` 中记录 closing commit hash。
 
-当前下一阶段：Phase 14, enterprise layer。
+当前下一阶段：无；所有 tracked PRD phases 已完成。

@@ -25,7 +25,7 @@ The current implementation covers the early PRD foundation:
 - context maps for routes, components, exports, stale-hash detection, and map-based context selection;
 - `ask` command for AgentSpec preview with defaults, approval marking, and clarification questions;
 - VS Code extension for transaction, memory, AgentSpec, approval, and DAG inspection;
-- local enterprise policy, RBAC checks, audit log, and compliance report generation.
+- enterprise policy source, RBAC checks, secret checks, runner/model routing, audit log, and compliance reports.
 - PRD tracker split into `prd/done` and `prd/todo`.
 
 ## Install And Build
@@ -114,6 +114,10 @@ agenthub plugins scaffold marketplace/skill-packs/my-pack --package-id com.examp
 agenthub plugins inspect marketplace/skill-packs/content-basic
 agenthub plugins install marketplace/skill-packs/content-basic --trust local
 agenthub plugins list
+AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise runners
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ROLE=admin agenthub enterprise audit --limit 20
 AGENTHUB_ROLE=admin agenthub enterprise compliance
 agenthub agents list
@@ -178,9 +182,12 @@ agenthub plugins list
 
 ## Enterprise
 
-Phase 14 starts with local enterprise governance. Policy lives in `.agent/enterprise/policy.yaml`; audit events are appended to `.agent/enterprise/audit.jsonl`; compliance reports are generated under `.agent/enterprise/`.
+Phase 14 provides enterprise governance. Policy lives in `.agent/enterprise/policy.yaml` or a central `AGENTHUB_POLICY_PATH`; secret checks do not print values; runner and private model routing are policy-driven; audit events and compliance reports live under `.agent/enterprise/`.
 
 ```bash
+AGENTHUB_POLICY_PATH=/etc/agenthub/policy.yaml AGENTHUB_ROLE=admin agenthub enterprise policy
+AGENTHUB_ROLE=admin agenthub enterprise secrets AGENTHUB_TOKEN
+AGENTHUB_ROLE=admin agenthub enterprise model-route internal-model
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=admin agenthub enterprise compliance
 AGENTHUB_ACTOR=alice AGENTHUB_ROLE=auditor agenthub enterprise audit --limit 20
 ```

@@ -18,6 +18,8 @@ pub struct EnterpriseConfig {
     #[serde(default)]
     pub roles: BTreeMap<String, RolePolicy>,
     #[serde(default)]
+    pub policy_server: PolicyServerPolicy,
+    #[serde(default)]
     pub secrets: SecretsPolicy,
     #[serde(default)]
     pub runners: RunnerPolicy,
@@ -32,11 +34,23 @@ pub struct RolePolicy {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PolicyServerPolicy {
+    #[serde(default = "default_policy_server_mode")]
+    pub mode: String,
+    #[serde(default)]
+    pub url: Option<String>,
+    #[serde(default)]
+    pub policy_path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SecretsPolicy {
     #[serde(default = "default_secret_provider")]
     pub provider: String,
     #[serde(default)]
     pub allowed_prefixes: Vec<String>,
+    #[serde(default)]
+    pub required: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,13 +58,23 @@ pub struct RunnerPolicy {
     #[serde(default = "default_runner")]
     pub default: String,
     #[serde(default)]
-    pub remote: Vec<String>,
+    pub remote: Vec<RemoteRunnerPolicy>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RemoteRunnerPolicy {
+    pub id: String,
+    pub endpoint: String,
+    #[serde(default)]
+    pub labels: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ModelRoutingPolicy {
     #[serde(default)]
     pub private_models: Vec<String>,
+    #[serde(default)]
+    pub private_runner: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -73,70 +97,28 @@ pub struct AuditEvent {
     pub details: Value,
 }
 
-impl Default for EnterpriseConfig {
-    fn default() -> Self {
-        let mut roles = BTreeMap::new();
-        roles.insert(
-            "developer".to_string(),
-            RolePolicy {
-                permissions: vec![
-                    "transaction.run".to_string(),
-                    "transaction.read".to_string(),
-                    "workspace.read".to_string(),
-                    "memory.read".to_string(),
-                    "skills.read".to_string(),
-                    "plugins.read".to_string(),
-                    "plugins.install".to_string(),
-                ],
-            },
-        );
-        roles.insert(
-            "admin".to_string(),
-            RolePolicy {
-                permissions: vec!["*".to_string()],
-            },
-        );
-        Self {
-            enabled: true,
-            default_role: default_role(),
-            roles,
-            secrets: SecretsPolicy::default(),
-            runners: RunnerPolicy::default(),
-            model_routing: ModelRoutingPolicy::default(),
-        }
-    }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PolicySource {
+    pub mode: String,
+    pub path: String,
 }
 
-impl Default for SecretsPolicy {
-    fn default() -> Self {
-        Self {
-            provider: default_secret_provider(),
-            allowed_prefixes: vec!["AGENTHUB_".to_string()],
-        }
-    }
-}
-
-impl Default for RunnerPolicy {
-    fn default() -> Self {
-        Self {
-            default: default_runner(),
-            remote: Vec::new(),
-        }
-    }
-}
-
-fn default_true() -> bool {
+pub(super) fn default_true() -> bool {
     true
 }
 
-fn default_role() -> String {
+pub(super) fn default_role() -> String {
     "developer".to_string()
 }
 
-fn default_secret_provider() -> String {
+pub(super) fn default_secret_provider() -> String {
     "env".to_string()
 }
 
-fn default_runner() -> String {
+pub(super) fn default_policy_server_mode() -> String {
+    "local".to_string()
+}
+
+pub(super) fn default_runner() -> String {
     "local".to_string()
 }

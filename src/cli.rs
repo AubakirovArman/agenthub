@@ -128,6 +128,14 @@ pub enum PluginCommands {
 
 #[derive(Debug, Subcommand)]
 pub enum EnterpriseCommands {
+    Policy,
+    Secrets {
+        name: Option<String>,
+    },
+    Runners,
+    ModelRoute {
+        model: String,
+    },
     Audit {
         #[arg(long, default_value_t = 20)]
         limit: usize,

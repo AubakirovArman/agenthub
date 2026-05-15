@@ -22,7 +22,7 @@ git diff --check
 
 ## Current Queue
 
-- Current: `todo/phase-14-enterprise-layer.md`
+- All tracked PRD phases are in `done/`.
 
 ## Status Index
 

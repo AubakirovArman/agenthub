@@ -67,6 +67,7 @@ pub(super) fn write_context_pack(
 ) -> Result<serde_json::Value> {
     let memory = memory::retrieve_recent(project_root, 10)?;
     let maps = code_maps::read_existing(project_root).unwrap_or_else(|_| json!({}));
+    let enterprise = enterprise_context(project_root);
     let map_context = code_maps::select_context(project_root, spec)
         .ok()
         .and_then(|selection| serde_json::to_value(selection).ok())
@@ -99,7 +100,22 @@ pub(super) fn write_context_pack(
         "memory": memory,
         "maps": maps,
         "map_context": map_context,
+        "enterprise": enterprise,
         "policy": { "least_context": true, "scope_only": true }
     });
     observability::write_context_pack_artifacts(tx_dir, &context)
+}
+
+fn enterprise_context(project_root: &Path) -> serde_json::Value {
+    crate::enterprise::load_policy(project_root)
+        .map(|policy| {
+            json!({
+                "secrets_provider": policy.enterprise.secrets.provider,
+                "runner_default": policy.enterprise.runners.default,
+                "remote_runners": policy.enterprise.runners.remote.len(),
+                "private_models": policy.enterprise.model_routing.private_models,
+                "private_runner": policy.enterprise.model_routing.private_runner,
+            })
+        })
+        .unwrap_or_else(|_| json!({}))
 }
