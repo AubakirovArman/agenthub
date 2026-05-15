@@ -7,6 +7,7 @@ use tempfile::TempDir;
 
 use agenthub::agent_dir;
 use agenthub::transaction::{self, TransactionStatus};
+use agenthub::tx_control;
 
 #[test]
 fn successful_transaction_commits_and_promotes_memory() -> Result<()> {
@@ -259,6 +260,59 @@ transaction:
     assert!(matches!(outcome.status, TransactionStatus::BlockedOnHuman));
     let policy = fs::read_to_string(outcome.report_path.with_file_name("command_policy.json"))?;
     assert!(policy.contains("needs_approval"));
+    Ok(())
+}
+
+#[test]
+fn resolve_and_resume_blocked_transaction() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    fs::write(
+        repo.path().join(".agent/policies/core.yaml"),
+        "commands:\n  needs_approval:\n    - printf\n",
+    )?;
+    repo.commit_all("agenthub baseline")?;
+
+    let spec = repo.write_spec(
+        "resume_blocked.yaml",
+        r#"
+task:
+  id: resume_blocked
+  type: code.command
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands:
+    - mkdir -p generated
+    - printf 'approved\n' > generated/resumed.txt
+scope:
+  allow:
+    - generated/**
+verify:
+  commands:
+    - test -f generated/resumed.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 1
+    max_lines_added: 1
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    let blocked = transaction::run(repo.path(), &spec, false)?;
+    assert!(matches!(blocked.status, TransactionStatus::BlockedOnHuman));
+    tx_control::resolve(repo.path(), &blocked.tx_id, "approved printf")?;
+    let resumed = tx_control::resume(repo.path(), &blocked.tx_id)?;
+
+    assert_eq!(resumed.status, "COMMITTED");
+    assert!(repo.path().join("generated/resumed.txt").exists());
+    assert!(blocked.report_path.with_file_name("resume.json").exists());
+    let effects = fs::read_to_string(blocked.report_path.with_file_name("effects.jsonl"))?;
+    assert!(effects.contains("control:resolve"));
+    assert!(effects.contains("control:resume"));
     Ok(())
 }
 

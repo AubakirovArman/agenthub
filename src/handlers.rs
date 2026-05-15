@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
-use agenthub::{agent_dir, enterprise};
+use agenthub::{agent_dir, enterprise, tx_control};
 
 use crate::cli::{EnterpriseCommands, TxCommands};
 
@@ -26,6 +26,24 @@ pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
         TxCommands::Effects { tx_id } => {
             enterprise::authorize(project_root, "transaction.read")?;
             print!("{}", agent_dir::read_effects(project_root, &tx_id)?);
+        }
+        TxCommands::Resolve { tx_id, note } => {
+            enterprise::authorize(project_root, "transaction.run")?;
+            let record = tx_control::resolve(project_root, &tx_id, &note)?;
+            println!("resolved\t{}\t{}", record.tx_id, record.ts);
+        }
+        TxCommands::Resume { tx_id } => {
+            enterprise::authorize(project_root, "transaction.run")?;
+            let report = tx_control::resume(project_root, &tx_id)?;
+            println!(
+                "resumed\t{}\t{}\t{}",
+                report.tx_id, report.resumed_tx_id, report.status
+            );
+        }
+        TxCommands::Retry { tx_id, from_state } => {
+            enterprise::authorize(project_root, "transaction.run")?;
+            let plan = tx_control::retry(project_root, &tx_id, &from_state)?;
+            println!("{}", plan.retry_plan.display());
         }
     }
     Ok(())

@@ -2,6 +2,10 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+mod tx;
+
+pub use tx::TxCommands;
+
 #[derive(Debug, Parser)]
 #[command(name = "agenthub")]
 #[command(about = "Transactional runtime foundation for AI-agent workflows")]
@@ -71,13 +75,6 @@ pub enum Commands {
         #[command(subcommand)]
         command: AgentCommands,
     },
-}
-
-#[derive(Debug, Subcommand)]
-pub enum TxCommands {
-    Status,
-    Report { tx_id: String },
-    Effects { tx_id: String },
 }
 
 #[derive(Debug, Subcommand)]

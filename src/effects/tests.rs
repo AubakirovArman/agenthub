@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use super::{read_jsonl, EffectLedger};
+use super::{EffectLedger, EffectRecord};
 
 #[test]
 fn records_file_lifecycle_and_command_effects() -> Result<()> {
@@ -19,10 +19,17 @@ fn records_file_lifecycle_and_command_effects() -> Result<()> {
     ledger.record_applied_files("diff_guard", &files)?;
     ledger.record_verified_files("verifier", &files)?;
 
-    let records = read_jsonl(ledger.path())?;
+    let records = read_records(&std::fs::read_to_string(ledger.path())?)?;
     assert_eq!(records.len(), 5);
     assert!(records.iter().any(|item| item.status == "planned"));
     assert!(records.iter().any(|item| item.status == "verified"));
     assert!(records.iter().any(|item| item.status == "non_rollbackable"));
     Ok(())
+}
+
+fn read_records(content: &str) -> Result<Vec<EffectRecord>> {
+    content
+        .lines()
+        .map(|line| serde_json::from_str(line).map_err(Into::into))
+        .collect()
 }

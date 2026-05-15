@@ -24,6 +24,7 @@ pub mod spec;
 pub mod topology;
 pub mod transaction;
 pub mod tui;
+pub mod tx_control;
 pub mod verifier;
 pub mod wal;
 pub mod web_dashboard;

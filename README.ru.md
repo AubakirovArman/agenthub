@@ -4,7 +4,7 @@ AgentHub — транзакционная runtime-основа для работ
 
 Языки: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 
-Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [PRD v2](docs/prd-v2.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [Metrics Dashboard](docs/metrics-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [WAL](docs/wal.ru.md), [Effect Ledger](docs/effect-ledger.ru.md), [Rollback Handlers](docs/rollback-handlers.ru.md), [Reference Web Fixture](docs/reference-web-fixture.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
+Подробная документация: [How it works](docs/how-it-works.en.md), [PRD tracker](docs/prd-tracker.ru.md), [PRD audit](docs/prd-audit.ru.md), [PRD v2](docs/prd-v2.ru.md), [TUI](docs/tui.ru.md), [Web Dashboard](docs/web-dashboard.ru.md), [Metrics Dashboard](docs/metrics-dashboard.ru.md), [AAL](docs/aal.ru.md), [Workspaces](docs/workspaces.ru.md), [MediaWorkspace](docs/media-workspace.ru.md), [Research](docs/research-profile.ru.md), [Backend TDD](docs/backend-tdd-verifier.ru.md), [DB Migration](docs/db-migration-verifier.ru.md), [Command Policy](docs/command-policy.ru.md), [Sandbox Levels](docs/sandbox-levels.ru.md), [Remote Runner](docs/remote-runner.ru.md), [Network Policy](docs/network-policy-server.ru.md), [WAL](docs/wal.ru.md), [Effect Ledger](docs/effect-ledger.ru.md), [Rollback Handlers](docs/rollback-handlers.ru.md), [Resume/Retry](docs/resume-retry.ru.md), [Reference Web Fixture](docs/reference-web-fixture.ru.md), [IDE](docs/ide.ru.md), [Natural language](docs/natural-language.ru.md), [Topologies](docs/topologies.ru.md), [Agent adapters](docs/agent-adapters.ru.md), [Runtime and repair](docs/runtime-repair.ru.md), [Context maps](docs/context-maps.ru.md), [LLM Gateway](docs/llm-gateway.ru.md), [Plugin ecosystem](docs/plugin-ecosystem.ru.md), [Plugin signatures](docs/plugin-signatures.ru.md), [Enterprise](docs/enterprise.ru.md), [Русский](docs/how-it-works.ru.md), [中文](docs/how-it-works.zh.md), [Қазақша](docs/how-it-works.kk.md)
 
 ## Текущий статус
 
@@ -17,6 +17,7 @@ AgentHub — транзакционная runtime-основа для работ
 - команды verifier, runtime smoke checks и domain verifiers для content/data/infra/media/research/backend TDD/DB migration;
 - end-to-end reference web fixture для добавления `/courses` в existing app с build, runtime smoke, scope rollback, memory, report, cost и WAL evidence;
 - ограниченный repair loop и reviewer gate;
+- transaction resolve, retry planning и supported resume для human-blocked transactions;
 - VCM-память: staging, promotion, failed attempts, compacted project state;
 - skill manifests и загрузка зависимостей;
 - plugin package scaffold, manifest validation, SHA-256 signature verification, trust model и lock files;
@@ -128,6 +129,9 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 agenthub tx status
 agenthub tx report tx-...
 agenthub tx effects tx-...
+agenthub tx resolve tx-... --note "Approved"
+agenthub tx retry tx-... --from VERIFYING
+agenthub tx resume tx-...
 agenthub workspace scan --write-maps
 agenthub memory inspect
 agenthub skills list

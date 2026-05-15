@@ -65,6 +65,20 @@ impl EffectLedger {
         ))
     }
 
+    pub fn record_control(&self, action: &str, status: &str, data: Value) -> Result<()> {
+        self.append(record(
+            &self.tx_id,
+            &format!("control:{action}"),
+            "control",
+            status,
+            "tx_control",
+            None,
+            false,
+            None,
+            data,
+        ))
+    }
+
     pub fn record_planned_command(
         &self,
         stage: &str,
@@ -153,18 +167,6 @@ impl EffectLedger {
         file.sync_data()
             .with_context(|| format!("sync {}", self.path.display()))
     }
-}
-
-pub fn read_jsonl(path: &Path) -> Result<Vec<EffectRecord>> {
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let content = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
-    content
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-        .map(|line| serde_json::from_str(line).with_context(|| "parse effect record"))
-        .collect()
 }
 
 #[allow(clippy::too_many_arguments)]
