@@ -6,6 +6,11 @@ use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+mod scorecard;
+#[cfg(test)]
+mod tests;
+pub use scorecard::{scorecards, SkillScorecard};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SkillManifest {
     pub skill: SkillMeta,
@@ -120,46 +125,4 @@ fn load_manifest(path: &Path) -> Result<SkillManifest> {
         serde_yaml::from_str(&content).with_context(|| format!("parse {}", path.display()))?;
     manifest.source_path = Some(path.to_path_buf());
     Ok(manifest)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn resolves_dependencies() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        write_skill(dir.path(), "base", "base.skill", &[])?;
-        write_skill(dir.path(), "feature", "feature.skill", &["base.skill"])?;
-
-        let loaded = load_requested(dir.path(), &["feature.skill".to_string()])?;
-        let ids = loaded
-            .into_iter()
-            .map(|manifest| manifest.skill.id)
-            .collect::<Vec<_>>();
-
-        assert_eq!(ids, vec!["base.skill", "feature.skill"]);
-        Ok(())
-    }
-
-    fn write_skill(root: &Path, dir_name: &str, id: &str, dependencies: &[&str]) -> Result<()> {
-        let dir = root.join("skills").join(dir_name);
-        fs::create_dir_all(&dir)?;
-        let dependency_yaml = dependencies
-            .iter()
-            .map(|dependency| format!("  - {dependency}\n"))
-            .collect::<String>();
-        let dependencies_block = if dependencies.is_empty() {
-            String::new()
-        } else {
-            format!("dependencies:\n{dependency_yaml}")
-        };
-        fs::write(
-            dir.join("skill.yaml"),
-            format!(
-                "skill:\n  id: {id}\n  version: 1.0.0\n  description: test skill\n{dependencies_block}"
-            ),
-        )?;
-        Ok(())
-    }
 }

@@ -1,0 +1,23 @@
+skill:
+  id: code.rust.fix_clippy
+  version: 1.0.0
+  description: Fixes Rust clippy warnings without changing behavior.
+requires:
+  workspace: code.git
+  runtime_pack: code.rust
+provides:
+  actions: [run_clippy, patch_warning, rerun_clippy]
+policies:
+  require_scope: true
+  behavior_change_allowed: false
+verifiers: [cargo_clippy]
+common_errors: [silenced_warning, behavior_change]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:rust-clippy
+tests:
+  success: clippy passes with no behavior change
+  failure: warning is silenced instead of fixed
+prompt_fragments:
+  - Prefer idiomatic Rust fixes over allow attributes.

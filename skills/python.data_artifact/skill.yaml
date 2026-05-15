@@ -1,0 +1,23 @@
+skill:
+  id: python.data_artifact
+  version: 1.0.0
+  description: Produces validated Python data artifacts from scoped inputs.
+requires:
+  workspace: data.git
+  runtime_pack: data.python
+provides:
+  actions: [read_input_data, produce_artifact, validate_schema]
+policies:
+  require_scope: true
+  write_artifacts_only: true
+verifiers: [python_script, data_schema]
+common_errors: [missing_output_artifact, invalid_json]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:python-data
+tests:
+  success: output artifact validates against schema
+  failure: missing artifact fails verifier
+prompt_fragments:
+  - Keep generated data artifacts deterministic and validate them before commit.

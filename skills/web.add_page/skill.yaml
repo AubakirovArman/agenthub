@@ -1,0 +1,23 @@
+skill:
+  id: web.add_page
+  version: 1.0.0
+  description: Adds a web route or page while reusing existing UI conventions.
+requires:
+  workspace: code.git
+provides:
+  actions: [inspect_routes, add_page, update_navigation_optional]
+policies:
+  require_scope: true
+  allow_package_change: false
+verifiers: [web_build, route_smoke]
+dependencies: [web.reuse_component]
+common_errors: [wrong_route_path, unused_component]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:reference-web-app
+tests:
+  success: new route builds and returns expected status
+  failure: missing route smoke fails verification
+prompt_fragments:
+  - Reuse existing route layout, components, spacing, and naming conventions.

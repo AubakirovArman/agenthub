@@ -1,0 +1,22 @@
+skill:
+  id: web.runtime_smoke
+  version: 1.0.0
+  description: Starts a web app and checks changed HTTP routes.
+requires:
+  workspace: code.git
+provides:
+  actions: [start_runtime, check_route, stop_runtime]
+policies:
+  require_timeout: true
+  kill_process_tree: true
+verifiers: [runtime_start, route_http_check]
+common_errors: [server_not_ready, checked_wrong_route]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:reference-web-app
+tests:
+  success: expected route returns expected status
+  failure: broken route fails after build passes
+prompt_fragments:
+  - Runtime smoke must check the changed route, not only the home page.

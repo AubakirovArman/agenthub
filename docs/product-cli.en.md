@@ -99,3 +99,12 @@ agenthub memory audit
 ```
 
 `inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records and refreshes `.agent/memory/audit.json`.
+
+## Skills
+
+```bash
+agenthub skills list
+agenthub skills scorecard
+```
+
+`scorecard` reports each local standard-library skill with analytics-backed runs, success rate, rollback rate, average duration, average cost, and known failure count.

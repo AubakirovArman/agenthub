@@ -1,0 +1,23 @@
+skill:
+  id: code.rust.add_test
+  version: 1.0.0
+  description: Adds focused Rust tests for new or changed behavior.
+requires:
+  workspace: code.git
+  runtime_pack: code.rust
+provides:
+  actions: [identify_behavior, add_test, run_cargo_test]
+policies:
+  require_scope: true
+  require_test_assertion: true
+verifiers: [cargo_test]
+common_errors: [test_without_assertion, overbroad_fixture]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:rust-basic
+tests:
+  success: added test fails before fix and passes after
+  failure: test file added without assertions
+prompt_fragments:
+  - Add the smallest test that proves the requested behavior.

@@ -1,0 +1,22 @@
+skill:
+  id: core.file.create
+  version: 1.0.0
+  description: Creates scoped files without package, secret, or out-of-scope changes.
+requires:
+  workspace: code.git
+provides:
+  actions: [create_file, verify_scope]
+policies:
+  require_scope: true
+  allow_package_change: false
+verifiers: [scope_guard, file_presence]
+common_errors: [outside_scope, missing_parent_directory]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:empty-git-project
+tests:
+  success: create allowed file and pass scope guard
+  failure: try creating a denied path and expect rollback
+prompt_fragments:
+  - Create only files declared in scope.allow and keep parent directories explicit.

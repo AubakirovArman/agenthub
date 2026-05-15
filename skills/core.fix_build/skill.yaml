@@ -1,0 +1,22 @@
+skill:
+  id: core.fix_build
+  version: 1.0.0
+  description: Fixes failing build or test commands without broad refactors.
+requires:
+  workspace: code.git
+provides:
+  actions: [read_failure, patch_minimally, rerun_verifier]
+policies:
+  require_scope: true
+  prefer_minimal_diff: true
+verifiers: [build_command, test_command]
+common_errors: [fixed_symptom_only, skipped_failing_command]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:failing-build
+tests:
+  success: failing command passes after minimal fix
+  failure: verifier still fails and transaction rolls back
+prompt_fragments:
+  - Fix the root failing command and rerun the same verifier before commit.

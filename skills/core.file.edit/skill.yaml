@@ -1,0 +1,22 @@
+skill:
+  id: core.file.edit
+  version: 1.0.0
+  description: Edits existing scoped files while preserving unrelated content.
+requires:
+  workspace: code.git
+provides:
+  actions: [inspect_file, edit_file, verify_diff]
+policies:
+  require_scope: true
+  prefer_minimal_diff: true
+verifiers: [scope_guard, targeted_diff]
+common_errors: [rewrote_unrelated_content, edited_denied_file]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:existing-file
+tests:
+  success: edit one allowed line and pass verifier
+  failure: edit denied file and expect rollback
+prompt_fragments:
+  - Keep edits minimal and avoid rewriting unrelated sections.

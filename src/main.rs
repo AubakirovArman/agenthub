@@ -129,6 +129,22 @@ fn run() -> Result<()> {
                     );
                 }
             }
+            SkillCommands::Scorecard => {
+                enterprise::authorize(&project_root, "skills.read")?;
+                println!("skill\truns\tsuccess\trollback\tavg_ms\tavg_cost\tknown_failures");
+                for card in skill_registry::scorecards(&project_root)? {
+                    println!(
+                        "{}\t{}\t{:.2}\t{:.2}\t{:.0}\t{:.4}\t{}",
+                        card.id,
+                        card.runs,
+                        card.success_rate,
+                        card.rollback_rate,
+                        card.avg_duration_ms,
+                        card.avg_cost_usd,
+                        card.known_failures
+                    );
+                }
+            }
         },
         Commands::Plugins { command } => handlers::handle_plugins(&project_root, command)?,
         Commands::Enterprise { command } => handlers::handle_enterprise(&project_root, command)?,

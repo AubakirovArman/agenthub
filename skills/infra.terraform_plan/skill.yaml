@@ -1,0 +1,23 @@
+skill:
+  id: infra.terraform_plan
+  version: 1.0.0
+  description: Runs Terraform fmt/validate/plan without applying infrastructure changes.
+requires:
+  workspace: infra.git
+  runtime_pack: infra.terraform
+provides:
+  actions: [terraform_fmt, terraform_validate, terraform_plan]
+policies:
+  no_apply: true
+  require_scope: true
+verifiers: [terraform_fmt, terraform_validate, terraform_plan]
+common_errors: [terraform_apply_attempt, missing_plan_artifact]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:terraform-basic
+tests:
+  success: plan artifact is generated
+  failure: apply command is blocked
+prompt_fragments:
+  - Never run terraform apply; produce a plan artifact for review.

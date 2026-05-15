@@ -1,0 +1,23 @@
+skill:
+  id: code.rust.refactor_module
+  version: 1.0.0
+  description: Refactors Rust modules while preserving public behavior and file-size limits.
+requires:
+  workspace: code.git
+  runtime_pack: code.rust
+provides:
+  actions: [split_module, update_mods, run_tests]
+policies:
+  max_file_lines: 200
+  require_scope: true
+verifiers: [cargo_test, cargo_clippy, module_size]
+common_errors: [broken_module_path, public_api_drift]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:rust-large-module
+tests:
+  success: module split keeps tests green
+  failure: file remains above line limit
+prompt_fragments:
+  - Split by ownership boundaries and keep public module exports stable.

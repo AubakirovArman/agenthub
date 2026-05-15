@@ -15,6 +15,7 @@ pub(super) enum ShellCommand {
     Effects(Option<String>),
     Explain(Option<String>),
     Memory(Option<String>),
+    Skills(Option<String>),
     Undo(Option<String>),
     Ask(String),
     Do(String),
@@ -60,6 +61,7 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "effects" => ShellCommand::Effects(optional(rest)),
         "explain" => ShellCommand::Explain(optional(rest)),
         "memory" => ShellCommand::Memory(optional(rest)),
+        "skills" => ShellCommand::Skills(optional(rest)),
         "undo" => ShellCommand::Undo(optional(rest)),
         "ask" => ShellCommand::Ask(rest.trim().to_string()),
         "do" => ShellCommand::Do(rest.trim().to_string()),
@@ -108,6 +110,10 @@ mod tests {
         assert_eq!(
             parse_line("/memory audit"),
             ShellCommand::Memory(Some("audit".into()))
+        );
+        assert_eq!(
+            parse_line("/skills scorecard"),
+            ShellCommand::Skills(Some("scorecard".into()))
         );
         assert_eq!(
             parse_line("сделай страницу"),

@@ -1,0 +1,22 @@
+skill:
+  id: core.docs.update
+  version: 1.0.0
+  description: Updates project documentation and matching localized docs when required.
+requires:
+  workspace: content.git
+provides:
+  actions: [update_docs, sync_localized_docs]
+policies:
+  require_scope: true
+  require_examples: true
+verifiers: [markdown_presence, link_check]
+common_errors: [missing_localized_doc, stale_example]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:docs-project
+tests:
+  success: update docs and examples together
+  failure: omit required localized doc and expect verifier failure
+prompt_fragments:
+  - When behavior changes, update README and matching docs with concrete examples.

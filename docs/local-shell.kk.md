@@ -29,6 +29,7 @@ report [tx-id]               report шығару, әдепкісі ағымда�
 effects [tx-id]              effect ledger шығару
 explain [tx-id]              нәтиже, failure себебі және next steps түсіндіру
 memory [summary|audit]       memory summary немесе audit көрсету
+skills [scorecard]           skills тізімі немесе scorecard көрсету
 undo [tx-id|last]            committed transaction үшін git revert жасау
 ask <request>                draft AgentSpec жазу
 do <request>                 draft жазып, бірден іске қосу
@@ -78,6 +79,7 @@ agenthub:plan[tx-20260515123000-abcd1234]> watch
 agenthub:plan[tx-20260515123000-abcd1234]> explain
 agenthub:plan[tx-20260515123000-abcd1234]> effects
 agenthub:plan[tx-20260515123000-abcd1234]> memory audit
+agenthub:plan[tx-20260515123000-abcd1234]> skills scorecard
 agenthub:plan[tx-20260515123000-abcd1234]> undo
 ```
 

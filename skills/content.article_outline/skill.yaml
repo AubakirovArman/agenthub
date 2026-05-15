@@ -1,0 +1,26 @@
+skill:
+  id: content.article_outline
+  version: 1.0.0
+  description: Creates a structured article outline using existing content voice.
+inputs:
+  topic: string
+  audience: optional<string>
+requires:
+  workspace: content.git
+  memory_schema: [content.memory.v1]
+provides:
+  actions: [inspect_existing_content, draft_outline, verify_markdown]
+policies:
+  require_scope: true
+  allow_package_change: false
+verifiers: [content_markdown, tone_check]
+common_errors: [outline_too_generic, missing_target_audience]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:content-basic
+tests:
+  success: markdown outline follows required structure
+  failure: missing audience fails content checklist
+prompt_fragments:
+  - Reuse existing content tone, structure, and headings before drafting.

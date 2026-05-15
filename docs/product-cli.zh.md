@@ -99,3 +99,12 @@ agenthub memory audit
 ```
 
 `inspect` 输出 committed 和 failed attempts 的 raw counts。`summary` 是面向用户的 stack、active decisions 和 known failures 视图。`audit` 检查 stale、conflicting、low-confidence 和 unverified records，并刷新 `.agent/memory/audit.json`。
+
+## Skills
+
+```bash
+agenthub skills list
+agenthub skills scorecard
+```
+
+`scorecard` 显示每个本地 standard-library skill，并包含 analytics-backed runs、success rate、rollback rate、average duration、average cost 和 known failure count。

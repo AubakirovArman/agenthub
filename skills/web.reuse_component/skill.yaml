@@ -1,0 +1,22 @@
+skill:
+  id: web.reuse_component
+  version: 1.0.0
+  description: Reuses existing web components and visual conventions.
+requires:
+  workspace: code.git
+provides:
+  actions: [inspect_components, reuse_component, avoid_new_design_system]
+policies:
+  allow_package_change: false
+  prefer_existing_components: true
+verifiers: [web_build]
+common_errors: [duplicate_component_pattern, one_off_visual_language]
+examples:
+  agent_spec: README.md#example-agentspec
+fixtures:
+  project: fixture:reference-web-app
+tests:
+  success: page uses existing component convention
+  failure: duplicate component pattern is flagged
+prompt_fragments:
+  - Prefer local components and tokens before creating new UI primitives.

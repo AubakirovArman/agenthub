@@ -99,3 +99,12 @@ agenthub memory audit
 ```
 
 `inspect` committed және failed attempts raw counts шығарады. `summary` stack, active decisions және known failures үшін user-facing view береді. `audit` stale, conflicting, low-confidence және unverified records тексеріп, `.agent/memory/audit.json` жаңартады.
+
+## Skills
+
+```bash
+agenthub skills list
+agenthub skills scorecard
+```
+
+`scorecard` әр local standard-library skill үшін analytics-backed runs, success rate, rollback rate, average duration, average cost және known failure count көрсетеді.

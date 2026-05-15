@@ -2,7 +2,9 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use crate::{agent_dir, enterprise, memory, tx_control, tx_explain, tx_undo, tx_watch};
+use crate::{
+    agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_undo, tx_watch,
+};
 
 pub(super) fn list_sessions(root: &Path) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
@@ -70,6 +72,32 @@ pub(super) fn print_memory(root: &Path, mode: Option<&str>) -> Result<()> {
             print_section("Active decisions", &summary.active_decisions);
             print_section("Known failures", &summary.known_failures);
         }
+    }
+    Ok(())
+}
+
+pub(super) fn print_skills(root: &Path, mode: Option<&str>) -> Result<()> {
+    enterprise::authorize(root, "skills.read")?;
+    if mode == Some("scorecard") {
+        println!("skill\truns\tsuccess\trollback\tavg_ms\tknown_failures");
+        for card in skill_registry::scorecards(root)? {
+            println!(
+                "{}\t{}\t{:.2}\t{:.2}\t{:.0}\t{}",
+                card.id,
+                card.runs,
+                card.success_rate,
+                card.rollback_rate,
+                card.avg_duration_ms,
+                card.known_failures
+            );
+        }
+        return Ok(());
+    }
+    for manifest in skill_registry::list_available(root)? {
+        println!(
+            "{}\t{}\t{}",
+            manifest.skill.id, manifest.skill.version, manifest.skill.description
+        );
     }
     Ok(())
 }

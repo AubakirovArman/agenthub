@@ -133,4 +133,5 @@ pub enum MemoryCommands {
 #[derive(Debug, Subcommand)]
 pub enum SkillCommands {
     List,
+    Scorecard,
 }
