@@ -2,7 +2,7 @@
 
 ## Current Queue
 
-- Current: `v2-12-governance-v2.md`
+- Current: `v2-13-analytics-history.md`
 - Done: `../done/v2-00-brand-audit.md`
 - Done: `../done/v2-01-effect-ledger-foundation.md`
 - Done: `../done/v2-02-rollback-handlers.md`
@@ -15,11 +15,11 @@
 - Done: `../done/v2-09-aal-v2-semantics.md`
 - Done: `../done/v2-10-adaptive-orchestration.md`
 - Done: `../done/v2-11-verifier-integrations.md`
+- Done: `../done/v2-12-governance-v2.md`
 
 ## Remaining Tasks
 
-1. `v2-12-governance-v2.md` — central lock/policy and auditable approval workflows.
-2. `v2-13-analytics-history.md` — persisted metrics history and exports.
-3. `v2-14-domain-runtimes.md` — specialized real runtime packs.
-4. `v2-15-plugin-governance.md` — marketplace governance, permissions, signing, and test harness.
-5. `v2-16-hosted-team-surfaces.md` — hosted/team product surfaces after hardening.
+1. `v2-13-analytics-history.md` — persisted metrics history and exports.
+2. `v2-14-domain-runtimes.md` — specialized real runtime packs.
+3. `v2-15-plugin-governance.md` — marketplace governance, permissions, signing, and test harness.
+4. `v2-16-hosted-team-surfaces.md` — hosted/team product surfaces after hardening.
