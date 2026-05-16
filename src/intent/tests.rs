@@ -99,3 +99,19 @@ fn empty_project_web_app_request_generates_static_app_spec() {
     let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
     assert!(spec.validate().is_ok());
 }
+
+#[test]
+fn empty_project_web_app_request_uses_command_when_provider_is_only_project_default() {
+    let dir = tempfile::tempdir().unwrap();
+    crate::product_cli::config::set_value(dir.path(), "default_provider", "codex").unwrap();
+
+    let preview = normalize_to_spec_for_project(
+        dir.path(),
+        "создай анимированное вэб приложение",
+        IntentOptions::default(),
+    );
+
+    assert_eq!(preview.inferred_intent, "code.static_web_app");
+    assert!(preview.agent_spec_yaml.contains("adapter: command"));
+    assert!(preview.agent_spec_yaml.contains("cat > index.html"));
+}

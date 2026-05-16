@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.3.2-local-preview - 2026-05-16
+
+- Avoid routing generic static web app requests through the configured external provider when no explicit adapter was requested; the built-in command fallback now creates `index.html` immediately.
+- Add live heartbeat lines to transaction watch output during long-running execute phases, including elapsed time, idle output time, and a direct logs command hint.
+
 ## 0.3.1-local-preview - 2026-05-16
 
 - Fix provider setup config handling so `.agent/config.yaml` no longer blocks the first transaction after choosing Codex, Kimi, or another provider.

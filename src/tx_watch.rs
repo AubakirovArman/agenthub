@@ -9,6 +9,7 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
+use serde::Deserialize;
 
 use crate::agent_dir::AgentPaths;
 use crate::journal::JournalEvent;
@@ -39,11 +40,15 @@ fn watch_inner(
     options: WatchOptions,
     cancel: Option<Arc<AtomicBool>>,
 ) -> Result<()> {
-    let path = AgentPaths::new(root).tx_dir(tx_id).join("journal.jsonl");
+    let tx_dir = AgentPaths::new(root).tx_dir(tx_id);
+    let path = tx_dir.join("journal.jsonl");
+    let heartbeat_path = tx_dir.join("heartbeat.jsonl");
     let mut seen = 0usize;
+    let mut seen_heartbeats = 0usize;
     loop {
         let events = read_events(&path)?;
-        for line in render_new(&events, seen) {
+        let rendered = render_new(&events, seen);
+        for line in &rendered {
             println!("{line}");
         }
         seen = events.len();
@@ -53,6 +58,13 @@ fn watch_inner(
                 .is_some_and(|event| model::is_final_state(&event.state))
         {
             break;
+        }
+        if rendered.is_empty() {
+            let heartbeats = read_heartbeats(&heartbeat_path)?;
+            for heartbeat in heartbeats.iter().skip(seen_heartbeats) {
+                println!("{}", format_heartbeat(tx_id, heartbeat));
+            }
+            seen_heartbeats = heartbeats.len();
         }
         if cancel
             .as_ref()
@@ -64,6 +76,33 @@ fn watch_inner(
         thread::sleep(Duration::from_millis(options.interval_ms.max(100)));
     }
     Ok(())
+}
+
+#[derive(Debug, Deserialize)]
+struct HeartbeatEvent {
+    node: Option<String>,
+    elapsed_sec: Option<u64>,
+    last_output_sec: Option<u64>,
+}
+
+fn read_heartbeats(path: &Path) -> Result<Vec<HeartbeatEvent>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let file = fs::File::open(path).with_context(|| format!("open {}", path.display()))?;
+    let reader = BufReader::new(file);
+    let mut events = Vec::new();
+    for line in reader.lines() {
+        let line = line?;
+        if line.trim().is_empty() {
+            continue;
+        }
+        events.push(
+            serde_json::from_str(&line)
+                .with_context(|| format!("parse heartbeat line in {}", path.display()))?,
+        );
+    }
+    Ok(events)
 }
 
 fn read_events(path: &Path) -> Result<Vec<JournalEvent>> {
@@ -103,6 +142,20 @@ fn format_event(event: &JournalEvent, latest: bool, latest_is_final: bool) -> St
     event_bus::format_console_event(&ui_event, latest && !latest_is_final)
 }
 
+fn format_heartbeat(tx_id: &str, heartbeat: &HeartbeatEvent) -> String {
+    let node = heartbeat.node.as_deref().unwrap_or("runner");
+    let elapsed = heartbeat.elapsed_sec.unwrap_or(0);
+    let last_output = heartbeat.last_output_sec.unwrap_or(0);
+    let output_detail = if last_output >= 60 {
+        format!("no output for {last_output}s")
+    } else {
+        format!("last output {last_output}s ago")
+    };
+    format!(
+        "[run] execute    HEARTBEAT        {node} running {elapsed}s; {output_detail}; logs: agenthub tx logs {tx_id}"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
@@ -129,6 +182,20 @@ mod tests {
         let events = vec![event("CREATED", "created"), event("COMMITTED", "done")];
         let lines = render_new(&events, 0);
         assert_eq!(lines[1], "[done] commit     COMMITTED        done");
+    }
+
+    #[test]
+    fn renders_heartbeat_with_log_hint() {
+        let heartbeat = HeartbeatEvent {
+            node: Some("adapter-executor".to_string()),
+            elapsed_sec: Some(120),
+            last_output_sec: Some(87),
+        };
+
+        assert_eq!(
+            format_heartbeat("tx-test", &heartbeat),
+            "[run] execute    HEARTBEAT        adapter-executor running 120s; no output for 87s; logs: agenthub tx logs tx-test"
+        );
     }
 
     fn event(state: &str, message: &str) -> JournalEvent {
