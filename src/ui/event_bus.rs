@@ -53,6 +53,7 @@ impl UiEvent {
             "assistant_delta" => "running",
             "assistant_message" => "succeeded",
             "user_message" => "pending",
+            "intent_classified" => "info",
             _ => "info",
         };
         Some(Self {
@@ -72,7 +73,10 @@ impl UiEvent {
                 "chat_id": row.chat_id,
                 "kind": row.event.kind,
                 "text": row.event.text,
+                "intent": row.event.intent,
+                "mode": row.event.mode,
                 "provider": row.event.provider,
+                "reason": row.event.reason,
                 "path": row.event.path,
             }),
         })

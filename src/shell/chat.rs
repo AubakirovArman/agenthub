@@ -142,6 +142,25 @@ pub(super) fn append_command(session: &ChatSession, kind: &str, text: &str) -> R
     append_event(session, kind, json!({ "text": text }))
 }
 
+pub(super) fn append_intent(
+    session: &ChatSession,
+    intent: &str,
+    mode: &str,
+    text: &str,
+    reason: &str,
+) -> Result<()> {
+    append_event(
+        session,
+        "intent_classified",
+        json!({
+            "intent": intent,
+            "mode": mode,
+            "text": text,
+            "reason": reason
+        }),
+    )
+}
+
 pub(super) fn append_assistant(session: &ChatSession, provider: &str, message: &str) -> Result<()> {
     append_event(
         session,

@@ -28,6 +28,14 @@ pub(super) fn handle_message(
         }
     }
     chat::append_user(current_chat, mode.as_str(), request)?;
+    let classified = classify_message(root, mode, &enriched.text);
+    chat::append_intent(
+        current_chat,
+        classified.intent,
+        classified.mode,
+        request,
+        classified.reason,
+    )?;
     if matches!(mode, ShellMode::Run) && !home::project_has_runtime(root) {
         api_chat::answer(root, current_chat, &enriched.text)?;
         return Ok(());
@@ -54,6 +62,65 @@ pub(super) fn handle_message(
         }
     }
     Ok(())
+}
+
+struct ClassifiedIntent {
+    intent: &'static str,
+    mode: &'static str,
+    reason: &'static str,
+}
+
+fn classify_message(root: &Path, mode: ShellMode, request: &str) -> ClassifiedIntent {
+    if is_ops_advice(request) && !home::project_has_runtime(root) {
+        return ClassifiedIntent {
+            intent: "ops_advice",
+            mode: "ops",
+            reason: "server or operations wording without project runtime",
+        };
+    }
+    if !home::project_has_runtime(root) {
+        return ClassifiedIntent {
+            intent: "chat",
+            mode: "chat",
+            reason: "no project runtime in current folder",
+        };
+    }
+    match mode {
+        ShellMode::Plan => ClassifiedIntent {
+            intent: "project_plan",
+            mode: "project",
+            reason: "project runtime is initialized and shell mode is plan",
+        },
+        ShellMode::Run => ClassifiedIntent {
+            intent: "project_edit",
+            mode: "project",
+            reason: "project runtime is initialized and shell mode is run",
+        },
+    }
+}
+
+fn is_ops_advice(request: &str) -> bool {
+    let lower = request.to_lowercase();
+    [
+        "server",
+        "ssh",
+        "kubectl",
+        "docker",
+        "systemctl",
+        "journalctl",
+        "nginx",
+        "postgres",
+        "cpu",
+        "memory",
+        "disk",
+        "load",
+        "deploy",
+        "сервер",
+        "нагруз",
+        "деплой",
+    ]
+    .iter()
+    .any(|needle| lower.contains(needle))
 }
 
 pub(super) fn update_mode(

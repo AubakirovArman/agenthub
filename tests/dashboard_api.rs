@@ -19,6 +19,7 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     fs::write(
         chat_dir.join("chat-api.jsonl"),
         "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"user_message\",\"text\":\"review api dashboard\"}\n\
+         {\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"intent_classified\",\"intent\":\"chat\",\"mode\":\"chat\",\"reason\":\"no project runtime\",\"text\":\"review api dashboard\"}\n\
          {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n",
     )?;
 
@@ -35,6 +36,8 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     let events = String::from_utf8(events.body)?;
     assert!(events.starts_with("event: snapshot"));
     assert!(events.contains("\"source\":\"chat\""));
+    assert!(events.contains("intent_classified"));
+    assert!(events.contains("\"intent\":\"chat\""));
     assert!(events.contains("assistant_delta"));
     assert!(events.contains("stream chunk"));
     Ok(())

@@ -35,7 +35,10 @@ pub struct ChatEventView {
     pub at: String,
     pub kind: String,
     pub text: String,
+    pub intent: Option<String>,
+    pub mode: Option<String>,
     pub provider: Option<String>,
+    pub reason: Option<String>,
     pub tx_id: Option<String>,
     pub path: Option<String>,
 }
@@ -344,8 +347,20 @@ fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
                 at: event["at"].as_str().unwrap_or("").to_string(),
                 kind: event["kind"].as_str().unwrap_or("event").to_string(),
                 text: event["text"].as_str().unwrap_or("").to_string(),
+                intent: event
+                    .get("intent")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
+                mode: event
+                    .get("mode")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
                 provider: event
                     .get("provider")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
+                reason: event
+                    .get("reason")
                     .and_then(Value::as_str)
                     .map(str::to_string),
                 tx_id: event

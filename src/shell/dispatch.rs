@@ -57,7 +57,17 @@ pub(super) fn handle(
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,
         ShellCommand::Serve(args) => product::serve_dashboard(root, args.as_deref())?,
-        ShellCommand::Shell(command) => system::run(root, &command)?,
+        ShellCommand::Shell(command) => {
+            chat::append_intent(
+                current_chat,
+                "ops_command",
+                "ops",
+                &command,
+                "explicit ! shell command",
+            )?;
+            chat::append_command(current_chat, "ops_command", &command)?;
+            system::run(root, &command)?;
+        }
         ShellCommand::MemoryAdd(note) => memory_note::add(root, &note)?,
         ShellCommand::Open(tx_id) => open_tx(root, current_tx, &tx_id)?,
         ShellCommand::Watch(tx_id) => {
