@@ -38,6 +38,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 
+use crate::workspace::{self, WorkspaceMode};
+
 use commands::{parse_line, ShellMode};
 
 pub fn exec(project_root: &Path, request: &str, jsonl: bool) -> Result<()> {
@@ -45,7 +47,13 @@ pub fn exec(project_root: &Path, request: &str, jsonl: bool) -> Result<()> {
         .with_context(|| format!("create {}", project_root.display()))?;
     let session = chat::create(project_root)?;
     chat::append_user(&session, "exec", request)?;
-    chat::append_intent(&session, "chat", "chat", request, "headless exec request")?;
+    let mode = workspace::classify_request(project_root, request);
+    let intent = match mode.mode {
+        WorkspaceMode::Chat => "chat",
+        WorkspaceMode::Ops => "ops_advice",
+        WorkspaceMode::Project => "project_context",
+    };
+    chat::append_intent(&session, intent, mode.mode.as_str(), request, mode.reason)?;
     if jsonl {
         for event in chat::read_events(&session.path)? {
             println!("{}", serde_json::to_string(&event)?);

@@ -11,7 +11,7 @@ use super::commands::ShellMode;
 use super::context_input;
 use super::run;
 use super::suggestions;
-use crate::home;
+use crate::{home, workspace};
 
 pub(super) fn handle_message(
     root: &Path,
@@ -71,18 +71,19 @@ struct ClassifiedIntent {
 }
 
 fn classify_message(root: &Path, mode: ShellMode, request: &str) -> ClassifiedIntent {
-    if is_ops_advice(request) && !home::project_has_runtime(root) {
+    let decision = workspace::classify_request(root, request);
+    if matches!(decision.mode, workspace::WorkspaceMode::Ops) {
         return ClassifiedIntent {
             intent: "ops_advice",
-            mode: "ops",
-            reason: "server or operations wording without project runtime",
+            mode: decision.mode.as_str(),
+            reason: decision.reason,
         };
     }
     if !home::project_has_runtime(root) {
         return ClassifiedIntent {
             intent: "chat",
-            mode: "chat",
-            reason: "no project runtime in current folder",
+            mode: decision.mode.as_str(),
+            reason: decision.reason,
         };
     }
     match mode {
@@ -97,30 +98,6 @@ fn classify_message(root: &Path, mode: ShellMode, request: &str) -> ClassifiedIn
             reason: "project runtime is initialized and shell mode is run",
         },
     }
-}
-
-fn is_ops_advice(request: &str) -> bool {
-    let lower = request.to_lowercase();
-    [
-        "server",
-        "ssh",
-        "kubectl",
-        "docker",
-        "systemctl",
-        "journalctl",
-        "nginx",
-        "postgres",
-        "cpu",
-        "memory",
-        "disk",
-        "load",
-        "deploy",
-        "сервер",
-        "нагруз",
-        "деплой",
-    ]
-    .iter()
-    .any(|needle| lower.contains(needle))
 }
 
 pub(super) fn update_mode(

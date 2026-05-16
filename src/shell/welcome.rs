@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::{agent_dir, git, home, memory, product_cli, skill_registry};
+use crate::{agent_dir, git, memory, product_cli, skill_registry, workspace};
 
 use super::format;
 
@@ -23,13 +23,12 @@ pub(super) fn print(root: &Path) -> Result<()> {
         product_cli::version(),
         format::reset()
     );
-    let mode = if home::project_has_runtime(root) {
-        "project"
-    } else {
-        "chat"
-    };
-    let (provider, provider_ready) = display_provider(root, mode)?;
-    println!("  Mode: {mode}  Folder: {project} ({project_type})");
+    let mode = workspace::detect_mode(root).mode;
+    let (provider, provider_ready) = display_provider(root, mode.as_str())?;
+    println!(
+        "  Mode: {}  Folder: {project} ({project_type})",
+        mode.as_str()
+    );
     println!(
         "  Provider: {}  Git: {}  .agent: {}",
         if provider_ready {
@@ -37,7 +36,7 @@ pub(super) fn print(root: &Path) -> Result<()> {
         } else {
             format::styled(&format!("{provider} limited"), format::Color::Yellow)
         },
-        if mode == "chat" {
+        if mode == workspace::WorkspaceMode::Chat {
             "not required"
         } else if git::is_repo(root) {
             "ok"

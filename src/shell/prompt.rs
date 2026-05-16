@@ -1,22 +1,18 @@
 use std::fs;
 use std::path::Path;
 
-use crate::{agent_dir, git, home, product_cli};
+use crate::{agent_dir, git, home, product_cli, workspace};
 
 use super::chat::ChatSession;
 use super::format;
 
-pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> String {
+pub(super) fn render(root: &Path, session: &ChatSession, tx: Option<&str>) -> String {
     let project = root
         .file_name()
         .and_then(|value| value.to_str())
         .unwrap_or("project");
-    let mode = if home::project_has_runtime(root) {
-        "project"
-    } else {
-        "chat"
-    };
-    let (provider, provider_ready) = display_provider(root, mode);
+    let mode = prompt_mode(root, session);
+    let (provider, provider_ready) = display_provider(root, mode.as_str());
     let git_state = if !home::project_has_runtime(root) {
         "git optional"
     } else if git::is_repo(root) {
@@ -37,7 +33,11 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
     } else {
         format::styled(&format!("{provider} warn"), format::Color::Yellow)
     };
-    let mut context = format!("{project} | {mode} | {provider_label} | {git_state}");
+    let mut context = format!(
+        "{} | {} | {provider_label} | {git_state}",
+        project,
+        mode.as_str()
+    );
     if let Some(tx_label) = tx_label {
         context.push_str(" | ");
         context.push_str(&tx_label);
@@ -54,6 +54,22 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
         context,
         format::reset()
     )
+}
+
+fn prompt_mode(root: &Path, session: &ChatSession) -> workspace::WorkspaceMode {
+    if home::project_has_runtime(root) {
+        return workspace::WorkspaceMode::Project;
+    }
+    super::chat::latest_intent_mode(session)
+        .ok()
+        .flatten()
+        .as_deref()
+        .and_then(|mode| match mode {
+            "ops" => Some(workspace::WorkspaceMode::Ops),
+            "chat" => Some(workspace::WorkspaceMode::Chat),
+            _ => None,
+        })
+        .unwrap_or_else(|| workspace::detect_mode(root).mode)
 }
 
 fn display_provider(root: &Path, mode: &str) -> (String, bool) {
@@ -161,6 +177,25 @@ mod tests {
         assert!(prompt.contains("agenthub"));
         assert!(prompt.contains("deepseek"));
         assert!(prompt.contains("git"));
+        Ok(())
+    }
+
+    #[test]
+    fn prompt_surfaces_latest_ops_mode_without_project_runtime() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
+        let chat = crate::shell::chat::create(dir.path())?;
+        crate::shell::chat::append_intent(
+            &chat,
+            "ops_advice",
+            "ops",
+            "check server load",
+            "server or operations wording without project runtime",
+        )?;
+
+        let prompt = render(dir.path(), &chat, None);
+
+        assert!(prompt.contains("ops"));
         Ok(())
     }
 }

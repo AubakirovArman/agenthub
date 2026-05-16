@@ -12,6 +12,8 @@ agenthub
 
 Running `agenthub` without a subcommand is the recommended daily entry. In an uninitialized folder it starts Chat Mode without creating Git or `.agent`; project bootstrap is deferred until a project transaction really needs it. The shell restores the latest chat, shows provider readiness, and lets you type a normal task. File-changing tasks still create a draft plan, ask for inline approval, run the transaction, and then suggest `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
+AgentHub records and displays Chat/Ops/Project mode decisions. Plain chat stays in Chat Mode, server or operations wording without a project runtime is marked as Ops Mode, and initialized `.agent` workspaces are Project Mode. Prompt chips, `/context`, `/status`, and headless `exec --jsonl` expose the selected mode.
+
 Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
 Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.

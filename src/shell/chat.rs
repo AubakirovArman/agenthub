@@ -345,6 +345,17 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<Value>> {
         .collect()
 }
 
+pub(super) fn latest_intent_mode(session: &ChatSession) -> Result<Option<String>> {
+    Ok(read_events(&session.path)?
+        .into_iter()
+        .rev()
+        .find_map(|event| {
+            (event["kind"].as_str() == Some("intent_classified"))
+                .then(|| event["mode"].as_str().map(str::to_string))
+                .flatten()
+        }))
+}
+
 fn chats_dir(root: &Path) -> PathBuf {
     if home::project_has_shell_state(root) {
         root.join(".agent").join("shell").join("chats")

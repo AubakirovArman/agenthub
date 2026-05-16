@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::{Context, Result};
 
 use crate::product_cli::{config, providers};
-use crate::{git, home};
+use crate::{git, workspace};
 
 pub(super) fn prepare(root: &Path) -> Result<()> {
     println!("AgentHub {}", crate::product_cli::version());
@@ -44,15 +44,19 @@ fn suggest_provider(root: &Path) -> Result<()> {
 }
 
 fn print_mode(root: &Path) {
-    if home::project_has_runtime(root) {
-        println!(
-            "Mode: project  Git: {}  .agent: ok",
-            if git::is_repo(root) { "ok" } else { "missing" }
-        );
-    } else if git::is_repo(root) {
-        println!("Mode: chat  Git: detected  .agent: not initialized");
-        println!("Project transactions are available after /init or `agenthub run ...`.");
-    } else {
-        println!("Mode: chat  Git: not required  .agent: not required");
+    match workspace::detect_mode(root).mode {
+        workspace::WorkspaceMode::Project => {
+            println!(
+                "Mode: project  Git: {}  .agent: ok",
+                if git::is_repo(root) { "ok" } else { "missing" }
+            );
+        }
+        workspace::WorkspaceMode::Chat | workspace::WorkspaceMode::Ops if git::is_repo(root) => {
+            println!("Mode: chat  Git: detected  .agent: not initialized");
+            println!("Project transactions are available after /init or `agenthub run ...`.");
+        }
+        workspace::WorkspaceMode::Chat | workspace::WorkspaceMode::Ops => {
+            println!("Mode: chat  Git: not required  .agent: not required");
+        }
     }
 }

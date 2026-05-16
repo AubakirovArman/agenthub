@@ -114,6 +114,26 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
 }
 
 #[test]
+fn chat_answer_without_project_runtime_does_not_create_agent_dir() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let session = chat::create(dir.path())?;
+    chat::append_user(&session, "exec", "ping")?;
+
+    let outcome = answer_with_providers(
+        dir.path(),
+        &session,
+        "ping",
+        vec![test_provider("deepseek", stub_sse_server())],
+        false,
+        None,
+    )?;
+
+    assert_eq!(outcome.content, "ok");
+    assert!(!dir.path().join(".agent").exists());
+    Ok(())
+}
+
+#[test]
 fn prompt_uses_only_committed_memory() -> Result<()> {
     let dir = tempfile::tempdir()?;
     agent_dir::init_project(dir.path(), false)?;

@@ -5,9 +5,12 @@ use anyhow::Result;
 use crate::{
     agent_dir, git,
     product_cli::{config, providers},
+    workspace,
 };
 
 pub(super) fn print(root: &Path) -> Result<()> {
+    let mode = workspace::detect_mode(root).mode;
+    println!("mode {}", mode.as_str());
     println!("project {}", root.display());
     println!("git {}", if git::is_repo(root) { "ok" } else { "missing" });
     println!(

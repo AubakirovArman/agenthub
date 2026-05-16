@@ -122,7 +122,11 @@ fn read_new(path: &Path, offset: &mut u64) -> Result<Option<String>> {
     if !path.exists() {
         return Ok(None);
     }
-    let mut file = File::open(path)?;
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(error.into()),
+    };
     let len = file.metadata()?.len();
     if len <= *offset {
         return Ok(None);
@@ -182,7 +186,7 @@ mod tests {
 
     use anyhow::Result;
 
-    use super::read_new;
+    use super::{read_new, run_with_live_tail};
 
     #[test]
     fn live_tail_reads_only_new_bytes() -> Result<()> {
@@ -196,6 +200,29 @@ mod tests {
 
         fs::write(&path, "one\ntwo\n")?;
         assert_eq!(read_new(&path, &mut offset)?.as_deref(), Some("two\n"));
+        Ok(())
+    }
+
+    #[test]
+    fn ops_command_without_project_runtime_does_not_create_agent_dir() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let logs = tempfile::tempdir()?;
+        let prefix = "shell-test";
+        let stdout_log = logs.path().join(format!("{prefix}.stdout.log"));
+        let stderr_log = logs.path().join(format!("{prefix}.stderr.log"));
+
+        let result = run_with_live_tail(
+            dir.path(),
+            "printf ops-ok",
+            logs.path(),
+            prefix,
+            &stdout_log,
+            &stderr_log,
+        )?;
+
+        assert!(result.success);
+        assert_eq!(result.stdout, "ops-ok");
+        assert!(!dir.path().join(".agent").exists());
         Ok(())
     }
 }

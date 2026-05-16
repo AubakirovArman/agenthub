@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::{agent_dir, memory, product_cli::config};
+use crate::{agent_dir, memory, product_cli::config, workspace};
 
 use super::chat::{self, ChatSession};
 use super::chat_meta;
@@ -10,12 +10,21 @@ use super::chat_meta;
 pub(super) fn print(root: &Path, chat: &ChatSession, current_tx: Option<&str>) -> Result<()> {
     println!("Context preview");
     println!("project\t{}", root.display());
+    println!("mode\t{}", context_mode(root, chat)?);
     println!("provider\t{}", config::default_provider(root)?);
     print_chat(chat)?;
     print_transaction(root, current_tx)?;
     print_memory(root)?;
     println!("mentions\t@file @folder @last @tx @memory");
     Ok(())
+}
+
+fn context_mode(root: &Path, chat: &ChatSession) -> Result<String> {
+    if workspace::detect_mode(root).mode == workspace::WorkspaceMode::Project {
+        return Ok(workspace::WorkspaceMode::Project.as_str().to_string());
+    }
+    Ok(chat::latest_intent_mode(chat)?
+        .unwrap_or_else(|| workspace::detect_mode(root).mode.as_str().to_string()))
 }
 
 fn print_chat(chat: &ChatSession) -> Result<()> {

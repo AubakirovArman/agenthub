@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.13-local-preview - 2026-05-16
+
+- Add a shared Chat/Ops/Project workspace mode classifier and use it for headless exec intent events, prompt mode chips, welcome/onboarding output, `/context`, and `/status`.
+- Add regression coverage that Chat API turns and explicit Ops shell commands from an empty folder do not create `.agent`.
+- Harden live shell log tailing so very short Ops commands do not fail if stdout/stderr log files are not visible yet.
+
 ## 0.4.12-local-preview - 2026-05-16
 
 - Harden DeepSeek/Kimi provider tests: live API failures now return a structured diagnostic receipt with endpoint, model, request id, token estimate, failure class, auth hint, and next command instead of surfacing a raw HTTP error.

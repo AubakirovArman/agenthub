@@ -12,6 +12,8 @@ agenthub
 
 Запуск `agenthub` без subcommand — рекомендованный daily entry. В неинициализированной папке он стартует Chat Mode без создания Git или `.agent`; project bootstrap откладывается до момента, когда реально нужна project transaction. Shell восстанавливает latest chat, показывает provider readiness и даёт сразу написать обычную задачу. Задачи, которые меняют файлы, по-прежнему создают draft plan, спрашивают inline approval, запускают transaction и подсказывают `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
 
+AgentHub записывает и показывает решения Chat/Ops/Project mode. Обычный разговор остаётся Chat Mode, серверные/операционные формулировки без project runtime помечаются как Ops Mode, а initialized `.agent` workspaces считаются Project Mode. Prompt chips, `/context`, `/status` и headless `exec --jsonl` показывают выбранный mode.
+
 Используй `/` для commands, `/cd <folder>` для смены project без перезапуска, `@path` для context, `!command` для policy-checked shell commands и `# note` для memory. В Chat/Ops Mode память хранится в user data directory AgentHub; initialized projects продолжают использовать `.agent/memory`.
 
 Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху.
