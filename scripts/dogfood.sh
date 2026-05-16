@@ -9,6 +9,8 @@ STRESS_STATUS_LINES=0
 STRESS_DURATION_SECS=0
 STRESS_INDEX_EXISTS=false
 STRESS_PROJECT_PATH=""
+PROVIDER_DOGFOOD_STATUS="skipped"
+PROVIDER_DOGFOOD_REPORT=""
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -102,6 +104,22 @@ YAML
 
 run_step "stress transactions" run_stress
 
+run_provider_dogfood() {
+  if [[ -z "${AGENTHUB_DOGFOOD_PROVIDER:-}" ]]; then
+    printf 'skip provider dogfood; set AGENTHUB_DOGFOOD_PROVIDER=codex|kimi|gemini and AGENTHUB_PROVIDER_DOGFOOD_LIVE=1\n'
+    return
+  fi
+  PROVIDER_DOGFOOD_REPORT="${AGENTHUB_PROVIDER_DOGFOOD_REPORT:-$ROOT/target/dogfood/provider-dogfood-report.json}"
+  "$ROOT/scripts/provider-dogfood.sh"
+  if [[ -f "$PROVIDER_DOGFOOD_REPORT" ]]; then
+    PROVIDER_DOGFOOD_STATUS="$(sed -n 's/.*"status": "\(.*\)",/\1/p' "$PROVIDER_DOGFOOD_REPORT" | head -n1)"
+  else
+    PROVIDER_DOGFOOD_STATUS="ran"
+  fi
+}
+
+run_step "provider live dogfood" run_provider_dogfood
+
 if [[ "${AGENTHUB_DOGFOOD_FULL:-0}" == "1" ]]; then
   run_step "fixture smoke" "$ROOT/scripts/test-fixtures.sh"
 else
@@ -123,6 +141,11 @@ write_report() {
     "duration_secs": $STRESS_DURATION_SECS,
     "sqlite_index_exists": $STRESS_INDEX_EXISTS,
     "kept_project": "$(json_escape "$STRESS_PROJECT_PATH")"
+  },
+  "provider": {
+    "requested_provider": "$(json_escape "${AGENTHUB_DOGFOOD_PROVIDER:-}")",
+    "status": "$(json_escape "$PROVIDER_DOGFOOD_STATUS")",
+    "report": "$(json_escape "$PROVIDER_DOGFOOD_REPORT")"
   }
 }
 JSON

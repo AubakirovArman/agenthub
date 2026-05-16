@@ -69,13 +69,17 @@ agenthub providers diagnose kimi
 agenthub providers diagnose gemini
 ```
 
-然后先运行一个小的安全任务：
+只有在明确要执行 live model call 时才运行 scripted provider dogfood：
 
 ```bash
-agenthub run "create docs/dogfood-check.md with a one-line AgentHub check"
-agenthub tx explain latest
-agenthub tx effects latest
+AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
+scripts/dogfood.sh
 ```
+
+也可以直接运行 `scripts/provider-dogfood.sh`，并设置 `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini`。它会创建临时 Git project、初始化 AgentHub、运行 `providers diagnose`、运行 `providers test`、调用一次选定 provider adapter、写入 no-commit transaction、验证 main 保持 clean，并写入 `target/dogfood/provider-dogfood-report.json`。
+
+Provider report 会记录 provider、transaction id、final status、持久化的 report path、artifact directory 和 token-observation note。Artifact directory 会在临时项目清理后保留 `report.md`、provider diagnostics、provider test output、AgentSpec、命令 stdout/stderr 和 adapter invocation metadata。只有需要手动检查临时项目时才设置 `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1`。AgentHub 会捕获 provider CLI transcripts，但权威 token usage 取决于 provider CLI 是否输出该信息。
 
 ## Failure 规则
 

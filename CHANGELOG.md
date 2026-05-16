@@ -10,6 +10,7 @@ All notable AgentHub changes are tracked here.
 - Add `agenthub aal format`, line-snippet diagnostics, and stronger AAL semantic line numbers.
 - Add TUI summary counts and next-action suggestions.
 - Add Homebrew, Scoop, and winget manifest templates plus manifest rendering checks.
+- Add opt-in live provider dogfood automation and provider evidence reports.
 
 ## 0.2.0-local-preview - 2026-05-15
 

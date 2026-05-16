@@ -69,13 +69,17 @@ agenthub providers diagnose kimi
 agenthub providers diagnose gemini
 ```
 
-Потом запусти маленькую безопасную задачу:
+Запускай scripted provider dogfood только когда намеренно хочешь сделать live model call:
 
 ```bash
-agenthub run "create docs/dogfood-check.md with a one-line AgentHub check"
-agenthub tx explain latest
-agenthub tx effects latest
+AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
+scripts/dogfood.sh
 ```
+
+`scripts/provider-dogfood.sh` можно запускать напрямую с `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini`. Он создаёт временный Git project, инициализирует AgentHub, запускает `providers diagnose`, запускает `providers test`, один раз вызывает выбранный provider adapter, пишет no-commit transaction, проверяет что main остался clean, и сохраняет `target/dogfood/provider-dogfood-report.json`.
+
+Provider report содержит provider, transaction id, final status, сохранённый report path, artifact directory и token-observation note. Artifact directory оставляет `report.md`, provider diagnostics, provider test output, AgentSpec, stdout/stderr команды и adapter invocation metadata после удаления временного проекта. Ставь `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` только если нужно руками посмотреть сам временный проект. AgentHub сохраняет provider CLI transcripts, но authoritative token usage зависит от того, выводит ли его сам provider CLI.
 
 ## Правило failure
 

@@ -69,13 +69,17 @@ agenthub providers diagnose kimi
 agenthub providers diagnose gemini
 ```
 
-Содан кейін шағын қауіпсіз task іске қос:
+Scripted provider dogfood тек live model call әдейі керек болғанда іске қос:
 
 ```bash
-agenthub run "create docs/dogfood-check.md with a one-line AgentHub check"
-agenthub tx explain latest
-agenthub tx effects latest
+AGENTHUB_DOGFOOD_PROVIDER=codex \
+AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 \
+scripts/dogfood.sh
 ```
+
+`scripts/provider-dogfood.sh` тікелей `AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=codex|kimi|gemini` арқылы да іске қосылады. Ол temporary Git project жасайды, AgentHub init орындайды, `providers diagnose` іске қосады, `providers test` іске қосады, selected provider adapter бір рет шақырады, no-commit transaction жазады, main clean қалғанын тексереді және `target/dogfood/provider-dogfood-report.json` жазады.
+
+Provider report ішінде provider, transaction id, final status, сақталған report path, artifact directory және token-observation note болады. Artifact directory temporary project тазаланғаннан кейін де `report.md`, provider diagnostics, provider test output, AgentSpec, command stdout/stderr және adapter invocation metadata сақтайды. Temporary project-тің өзін қолмен тексеру керек болса ғана `AGENTHUB_PROVIDER_DOGFOOD_KEEP=1` қой. AgentHub provider CLI transcripts сақтайды, бірақ authoritative token usage provider CLI оны шығара ма, соған байланысты.
 
 ## Failure Ережесі
 
