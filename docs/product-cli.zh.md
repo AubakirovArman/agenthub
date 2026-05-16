@@ -38,6 +38,8 @@ agenthub tx explain tx-20260515123000-abcd1234
 
 `tx explain` 会概括 transaction 为什么失败或成功、发生了什么、下一步做什么，以及应该查看哪些 artifacts。
 
+面向单个 transaction 的 commands 可以接收显式 id，也可以接收 `latest`/`last`。这适用于 `tx report`、`tx effects`、`tx explain`、`tx watch`、`tx cancel`、`tx resolve`、`tx resume` 和 `tx retry`。
+
 ## Undo
 
 ```bash

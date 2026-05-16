@@ -38,6 +38,8 @@ agenthub tx explain tx-20260515123000-abcd1234
 
 `tx explain` summarizes why a transaction failed or succeeded, what happened, what to do next, and which artifacts to inspect.
 
+Transaction commands that target one transaction accept either an explicit id or `latest`/`last`. This applies to `tx report`, `tx effects`, `tx explain`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume`, and `tx retry`.
+
 ## Undo
 
 ```bash

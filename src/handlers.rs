@@ -3,9 +3,9 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
-use agenthub::{agent_dir, enterprise, tx_control, tx_explain, tx_watch};
+use agenthub::enterprise;
 
-use crate::cli::{EnterpriseCommands, TxCommands};
+use crate::cli::EnterpriseCommands;
 
 mod aal_commands;
 mod memory_commands;
@@ -13,6 +13,7 @@ mod plugin_commands;
 mod product_commands;
 mod run_commands;
 mod run_summary;
+mod tx_commands;
 
 pub use aal_commands::handle_aal;
 pub use plugin_commands::handle_plugins;
@@ -20,72 +21,7 @@ pub use product_commands::{
     handle_config, handle_doctor, handle_open, handle_providers, handle_version,
 };
 pub use run_commands::{handle_ask, handle_plan, handle_run};
-
-pub fn handle_tx(project_root: &Path, command: TxCommands) -> Result<()> {
-    match command {
-        TxCommands::Status => {
-            enterprise::authorize(project_root, "transaction.read")?;
-            for row in agent_dir::list_transactions(project_root)? {
-                println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
-            }
-        }
-        TxCommands::Report { tx_id } => {
-            enterprise::authorize(project_root, "transaction.read")?;
-            print!("{}", agent_dir::read_report(project_root, &tx_id)?);
-        }
-        TxCommands::Effects { tx_id } => {
-            enterprise::authorize(project_root, "transaction.read")?;
-            print!("{}", agent_dir::read_effects(project_root, &tx_id)?);
-        }
-        TxCommands::Explain { tx_id } => {
-            enterprise::authorize(project_root, "transaction.read")?;
-            print!(
-                "{}",
-                tx_explain::explain(project_root, &tx_id)?.render_text()
-            );
-        }
-        TxCommands::Watch {
-            tx_id,
-            interval_ms,
-            once,
-        } => {
-            enterprise::authorize(project_root, "transaction.read")?;
-            tx_watch::watch(
-                project_root,
-                &tx_id,
-                tx_watch::WatchOptions { interval_ms, once },
-            )?;
-        }
-        TxCommands::Cancel { tx_id, reason } => {
-            enterprise::authorize(project_root, "transaction.run")?;
-            let actor = std::env::var("AGENTHUB_ACTOR").unwrap_or_else(|_| "local".to_string());
-            let report = tx_control::cancel(project_root, &tx_id, &actor, &reason)?;
-            println!(
-                "cancel_requested\t{}\t{}\t{}",
-                report.tx_id, report.requested_by, report.reason
-            );
-        }
-        TxCommands::Resolve { tx_id, note } => {
-            enterprise::authorize(project_root, "transaction.run")?;
-            let record = tx_control::resolve(project_root, &tx_id, &note)?;
-            println!("resolved\t{}\t{}", record.tx_id, record.ts);
-        }
-        TxCommands::Resume { tx_id } => {
-            enterprise::authorize(project_root, "transaction.run")?;
-            let report = tx_control::resume(project_root, &tx_id)?;
-            println!(
-                "resumed\t{}\t{}\t{}",
-                report.tx_id, report.resumed_tx_id, report.status
-            );
-        }
-        TxCommands::Retry { tx_id, from_state } => {
-            enterprise::authorize(project_root, "transaction.run")?;
-            let plan = tx_control::retry(project_root, &tx_id, &from_state)?;
-            println!("{}", plan.retry_plan.display());
-        }
-    }
-    Ok(())
-}
+pub use tx_commands::handle_tx;
 
 pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Result<()> {
     match command {

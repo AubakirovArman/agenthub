@@ -38,6 +38,8 @@ agenthub tx explain tx-20260515123000-abcd1234
 
 `tx explain` transaction неге failed немесе succeeded болғанын, не болғанын, келесі қадамды және қандай artifacts қарау керегін қысқаша түсіндіреді.
 
+Бір transaction-ға бағытталған transaction commands explicit id немесе `latest`/`last` қабылдайды. Бұл `tx report`, `tx effects`, `tx explain`, `tx watch`, `tx cancel`, `tx resolve`, `tx resume` және `tx retry` үшін қолданылады.
+
 ## Undo
 
 ```bash
