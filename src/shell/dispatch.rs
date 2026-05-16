@@ -9,7 +9,8 @@ use super::{
     chat::{self, ChatSession},
     chat_display, chat_meta,
     commands::{ShellCommand, ShellMode},
-    context_preview, control, flow, help, memory_note, product, system, task_dispatch,
+    context_preview, control, flow, help, memory_note, product, session_browser, system,
+    task_dispatch,
 };
 
 pub(super) fn handle(
@@ -42,6 +43,15 @@ pub(super) fn handle(
         ShellCommand::Messages => chat_display::print_messages(current_chat)?,
         ShellCommand::Context => context_preview::print(root, current_chat, current_tx.as_deref())?,
         ShellCommand::Sessions => actions::list_sessions(root)?,
+        ShellCommand::Rewind => session_browser::show_rewind(root)?,
+        ShellCommand::SaveCheckpoint(name) => session_browser::save_checkpoint(
+            root,
+            &name,
+            current_tx.as_deref(),
+            Some(&current_chat.id),
+        )?,
+        ShellCommand::RestoreCheckpoint(name) => session_browser::restore_checkpoint(root, &name)?,
+        ShellCommand::Approvals => actions::print_approvals(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,

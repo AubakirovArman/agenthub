@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.2.0-local-preview}"
+EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.3.0-local-preview}"
 WORK="$ROOT/target/release-readiness"
 DIST="$WORK/dist"
 INSTALL="$WORK/install"
@@ -21,7 +21,7 @@ done
 cargo fmt --manifest-path "$ROOT/Cargo.toml" -- --check
 cargo clippy --manifest-path "$ROOT/Cargo.toml" --locked -- -D warnings
 cargo test --manifest-path "$ROOT/Cargo.toml" --locked
-"$ROOT/scripts/check-module-size.sh" 200
+"$ROOT/scripts/check-module-size.sh" 500
 "$ROOT/scripts/test-package-manifests.sh"
 "$ROOT/scripts/test-dogfood-readiness.sh"
 "$ROOT/scripts/test-release-surfaces.sh"

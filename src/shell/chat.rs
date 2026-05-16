@@ -6,6 +6,7 @@ use chrono::Utc;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
+use crate::chat_index;
 use crate::observability::write_jsonl;
 
 #[derive(Debug, Clone)]
@@ -43,6 +44,20 @@ pub(super) fn create(root: &Path) -> Result<ChatSession> {
 }
 
 pub(super) fn list(root: &Path) -> Result<Vec<ChatSummary>> {
+    if let Ok(mut indexed) = chat_index::list(root, 100_000) {
+        let mut rows = indexed
+            .drain(..)
+            .map(|row| ChatSummary {
+                id: row.id,
+                updated_at: row.updated_at,
+                messages: row.messages,
+                txs: row.txs,
+                path: row.path,
+            })
+            .collect::<Vec<_>>();
+        rows.sort_by(|a, b| a.updated_at.cmp(&b.updated_at));
+        return Ok(rows);
+    }
     let dir = chats_dir(root);
     if !dir.exists() {
         return Ok(Vec::new());

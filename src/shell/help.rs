@@ -8,6 +8,9 @@ pub(super) fn print(mode: ShellMode) {
     println!("Work:");
     println!("  just type          plan, approve, and run a task");
     println!("  @file or @folder   include explicit context in the task");
+    println!("  @tx:latest         include transaction context");
+    println!("  @chat:<id>         include chat context");
+    println!("  @memory:<query>    include memory search context");
     println!("  !command           run a shell command through AgentHub logging");
     println!("  # rule             save a project memory note");
     println!();
@@ -20,11 +23,15 @@ pub(super) fn print(mode: ShellMode) {
     println!();
     println!("Transactions:");
     println!("  /transactions      transaction history");
+    println!("  /approvals         pending approval specs and blocked transactions");
     println!("  /diff              show latest or selected transaction diff");
     println!("  /logs              show latest or selected transaction logs");
     println!("  /report            print report");
     println!("  /explain           explain result and next action");
     println!("  /undo              revert the last committed AgentHub transaction");
+    println!("  /rewind            browse recent sessions before manual rewind");
+    println!("  /save <name>       save current git/chat/tx checkpoint");
+    println!("  /restore <name>    restore a saved checkpoint");
     println!();
     println!("Chats:");
     println!("  /chats             list chats; filter with status:, provider:, date:");

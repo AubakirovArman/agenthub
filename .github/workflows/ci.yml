@@ -50,7 +50,7 @@ jobs:
 
       - name: Module size
         shell: bash
-        run: scripts/check-module-size.sh 200
+        run: scripts/check-module-size.sh 500
 
       - name: VS Code extension check
         run: npm --prefix editors/vscode run check

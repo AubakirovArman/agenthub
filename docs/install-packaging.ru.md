@@ -2,7 +2,7 @@
 
 Языки: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub уже можно ставить из source checkout. Первый целевой release artifact — `v0.2.0-local-preview`.
+AgentHub уже можно ставить из source checkout. Первый целевой release artifact — `v0.3.0-local-preview`.
 
 ## Из source
 
@@ -20,7 +20,7 @@ cargo install --git https://github.com/AubakirovArman/agenthub.git
 
 ## POSIX installer
 
-После появления assets для `v0.2.0-local-preview`:
+После появления assets для `v0.3.0-local-preview`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/script
 Установка конкретного preview release:
 
 ```bash
-AGENTHUB_VERSION=v0.2.0-local-preview \
+AGENTHUB_VERSION=v0.3.0-local-preview \
   curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
 ```
 
@@ -50,7 +50,7 @@ AGENTHUB_ARTIFACT=dist/agenthub-x86_64-unknown-linux-gnu.tar.gz scripts/install.
 
 ## Windows installer
 
-После появления assets для `v0.2.0-local-preview`:
+После появления assets для `v0.3.0-local-preview`:
 
 ```powershell
 irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
@@ -59,7 +59,7 @@ irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/insta
 Установка конкретного preview release:
 
 ```powershell
-$env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
+$env:AGENTHUB_VERSION="v0.3.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
 ```
 
 Проверка на local artifact:

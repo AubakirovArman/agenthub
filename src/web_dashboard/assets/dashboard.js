@@ -186,15 +186,27 @@ function renderAll() {
 async function refreshLiveData() {
   if (!window.AGENTHUB_LIVE) return;
   try {
-    const response = await fetch(`data.json?ts=${Date.now()}`, { cache: "no-store" });
+    const response = await fetch(`/api/project?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`api status ${response.status}`);
     data = await response.json();
     renderAll();
   } catch (error) {
-    console.warn("AgentHub dashboard refresh failed", error);
+    try {
+      const response = await fetch(`data.json?ts=${Date.now()}`, { cache: "no-store" });
+      data = await response.json();
+      renderAll();
+    } catch (fallbackError) {
+      console.warn("AgentHub dashboard refresh failed", error, fallbackError);
+    }
   }
 }
 
 renderAll();
 if (window.AGENTHUB_LIVE) {
+  if ("EventSource" in window) {
+    const events = new EventSource("/api/events");
+    events.addEventListener("snapshot", refreshLiveData);
+    events.onerror = () => events.close();
+  }
   window.setInterval(refreshLiveData, window.AGENTHUB_REFRESH_MS || 3000);
 }

@@ -51,6 +51,6 @@ pub(super) fn run_target(
 
 fn record_tx(root: &Path, current_chat: &ChatSession, text: &str, tx_id: &str) -> Result<()> {
     chat::append_tx(current_chat, text, tx_id, &flow::report_path(root, tx_id))?;
-    flow::print_next_actions(tx_id);
+    flow::print_next_actions(root, tx_id, text)?;
     Ok(())
 }

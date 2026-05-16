@@ -4,7 +4,7 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::Value;
 
-use crate::{agent_dir, memory};
+use crate::{agent_dir, chat_index, memory};
 
 use super::{actions, context_input};
 
@@ -19,6 +19,12 @@ pub(super) fn resolve(root: &Path, raw: &str, request: &str) -> Result<String> {
     if let Some(selector) = raw.strip_prefix("tx:").or_else(|| raw.strip_prefix("tx=")) {
         return summarize_tx(root, selector);
     }
+    if let Some(selector) = raw
+        .strip_prefix("chat:")
+        .or_else(|| raw.strip_prefix("chat="))
+    {
+        return summarize_chat(root, selector);
+    }
     if raw == "memory" {
         return summarize_memory(root, request);
     }
@@ -29,6 +35,32 @@ pub(super) fn resolve(root: &Path, raw: &str, request: &str) -> Result<String> {
         return summarize_memory(root, query);
     }
     context_input::summarize_path(root, raw)
+}
+
+fn summarize_chat(root: &Path, selector: &str) -> Result<String> {
+    let selector = selector.trim();
+    let label = if selector.is_empty() {
+        "latest"
+    } else {
+        selector
+    };
+    let Some(row) = chat_index::open(root, label)? else {
+        return Ok(format!("- @chat `{label}` <none>"));
+    };
+    let events = chat_index::read_chat(root, &row.id)?.unwrap_or_default();
+    let recent = events
+        .iter()
+        .rev()
+        .filter(|event| event.kind == "user_message")
+        .take(3)
+        .map(|event| format!("  - {}", shorten(&event.text.replace('\n', " "), 120)))
+        .collect::<Vec<_>>();
+    let mut lines = vec![format!(
+        "- @chat `{}` title `{}` messages {} tx {}",
+        row.id, row.title, row.messages, row.txs
+    )];
+    lines.extend(recent);
+    Ok(lines.join("\n"))
 }
 
 fn summarize_tx(root: &Path, selector: &str) -> Result<String> {

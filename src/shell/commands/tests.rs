@@ -42,6 +42,16 @@ fn parses_shell_commands_and_plain_text() {
         ShellCommand::Open("latest".into())
     );
     assert_eq!(parse_line("/sessions"), ShellCommand::Sessions);
+    assert_eq!(parse_line("/rewind"), ShellCommand::Rewind);
+    assert_eq!(
+        parse_line("/save before-refactor"),
+        ShellCommand::SaveCheckpoint("before-refactor".into())
+    );
+    assert_eq!(
+        parse_line("/restore before-refactor"),
+        ShellCommand::RestoreCheckpoint("before-refactor".into())
+    );
+    assert_eq!(parse_line("/approvals"), ShellCommand::Approvals);
     assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
     assert_eq!(
         parse_line("/cd /tmp/demo"),

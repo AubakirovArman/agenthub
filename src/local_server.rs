@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
@@ -5,6 +6,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 
+use crate::dashboard_api;
 use crate::web_dashboard;
 
 pub struct ServerOptions {
@@ -40,7 +42,13 @@ fn handle_stream(
     options: &ServerOptions,
     mut stream: TcpStream,
 ) -> Result<()> {
-    let path = request_path(&stream)?;
+    let request = request_line(&stream)?;
+    if let Some(response) =
+        dashboard_api::handle(project_root, &request.method, &request.path, &request.query)?
+    {
+        return respond_response(&mut stream, response);
+    }
+    let path = request.path;
     if path == "/health" {
         return respond_text(&mut stream, "ok\n", "text/plain; charset=utf-8");
     }
@@ -56,18 +64,25 @@ fn handle_stream(
     respond_bytes(&mut stream, &body, content_type(&file))
 }
 
-fn request_path(stream: &TcpStream) -> Result<String> {
+#[derive(Debug, Clone)]
+struct RequestLine {
+    method: String,
+    path: String,
+    query: BTreeMap<String, String>,
+}
+
+fn request_line(stream: &TcpStream) -> Result<RequestLine> {
     let mut reader = BufReader::new(stream.try_clone()?);
     let mut first = String::new();
     reader.read_line(&mut first)?;
-    let path = first
-        .split_whitespace()
-        .nth(1)
-        .unwrap_or("/")
-        .split('?')
-        .next()
-        .unwrap_or("/");
-    Ok(percent_decode(path))
+    let method = first.split_whitespace().next().unwrap_or("GET").to_string();
+    let target = first.split_whitespace().nth(1).unwrap_or("/");
+    let (path, query) = target.split_once('?').unwrap_or((target, ""));
+    Ok(RequestLine {
+        method,
+        path: percent_decode(path),
+        query: parse_query(query),
+    })
 }
 
 fn file_for_path(root: &Path, request_path: &str) -> PathBuf {
@@ -89,9 +104,34 @@ fn respond_text(stream: &mut TcpStream, body: &str, content_type: &str) -> Resul
 }
 
 fn respond_bytes(stream: &mut TcpStream, body: &[u8], content_type: &str) -> Result<()> {
+    respond_status(stream, 200, body, content_type)
+}
+
+fn respond_response(stream: &mut TcpStream, response: dashboard_api::ApiResponse) -> Result<()> {
+    respond_status(
+        stream,
+        response.status,
+        &response.body,
+        response.content_type,
+    )
+}
+
+fn respond_status(
+    stream: &mut TcpStream,
+    status: u16,
+    body: &[u8],
+    content_type: &str,
+) -> Result<()> {
+    let reason = match status {
+        200 => "OK",
+        404 => "Not Found",
+        405 => "Method Not Allowed",
+        500 => "Internal Server Error",
+        _ => "OK",
+    };
     write!(
         stream,
-        "HTTP/1.1 200 OK\r\ncontent-type: {content_type}\r\ncontent-length: {}\r\ncache-control: no-store\r\nconnection: close\r\n\r\n",
+        "HTTP/1.1 {status} {reason}\r\ncontent-type: {content_type}\r\ncontent-length: {}\r\ncache-control: no-store\r\nconnection: close\r\n\r\n",
         body.len()
     )?;
     stream.write_all(body)?;
@@ -136,6 +176,18 @@ fn percent_decode(value: &str) -> String {
     out
 }
 
+fn parse_query(value: &str) -> BTreeMap<String, String> {
+    let mut query = BTreeMap::new();
+    for pair in value.split('&').filter(|item| !item.is_empty()) {
+        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
+        query.insert(
+            percent_decode(key),
+            percent_decode(&value.replace('+', " ")),
+        );
+    }
+    query
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -156,5 +208,12 @@ mod tests {
         let output = inject_live_options(html, 1500);
         assert!(output.contains("AGENTHUB_LIVE=true"));
         assert!(output.contains("AGENTHUB_REFRESH_MS=1500"));
+    }
+
+    #[test]
+    fn parses_query_params() {
+        let query = parse_query("q=hello+world&note=needs%20review");
+        assert_eq!(query.get("q").map(String::as_str), Some("hello world"));
+        assert_eq!(query.get("note").map(String::as_str), Some("needs review"));
     }
 }

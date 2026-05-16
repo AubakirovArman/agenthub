@@ -2,7 +2,7 @@
 
 Тілдер: [English](install-packaging.en.md), [Русский](install-packaging.ru.md), [中文](install-packaging.zh.md), [Қазақша](install-packaging.kk.md)
 
-AgentHub қазір source checkout арқылы орнатылады. Бірінші release artifact target — `v0.2.0-local-preview`.
+AgentHub қазір source checkout арқылы орнатылады. Бірінші release artifact target — `v0.3.0-local-preview`.
 
 ## Source арқылы
 
@@ -20,7 +20,7 @@ cargo install --git https://github.com/AubakirovArman/agenthub.git
 
 ## POSIX installer
 
-`v0.2.0-local-preview` assets шыққаннан кейін:
+`v0.3.0-local-preview` assets шыққаннан кейін:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/script
 Preview release нақты бекітіп орнату:
 
 ```bash
-AGENTHUB_VERSION=v0.2.0-local-preview \
+AGENTHUB_VERSION=v0.3.0-local-preview \
   curl -fsSL https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.sh | sh
 ```
 
@@ -50,7 +50,7 @@ Optional environment variables:
 
 ## Windows installer
 
-`v0.2.0-local-preview` assets шыққаннан кейін:
+`v0.3.0-local-preview` assets шыққаннан кейін:
 
 ```powershell
 irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
@@ -59,7 +59,7 @@ irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/insta
 Preview release нақты бекітіп орнату:
 
 ```powershell
-$env:AGENTHUB_VERSION="v0.2.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
+$env:AGENTHUB_VERSION="v0.3.0-local-preview"; irm https://raw.githubusercontent.com/AubakirovArman/agenthub/main/scripts/install.ps1 | iex
 ```
 
 Local artifact арқылы тексеру:

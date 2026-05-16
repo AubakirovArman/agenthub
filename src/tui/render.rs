@@ -8,6 +8,10 @@ pub fn render_dashboard(dashboard: &Dashboard) -> String {
     let mut out = String::new();
     push_line(&mut out, "AgentHub TUI Dashboard");
     push_line(&mut out, &format!("Project: {}", dashboard.project));
+    push_line(
+        &mut out,
+        "Tabs: Run | Transactions | Diff | Logs | Effects | Approvals | Memory | Chats | Providers",
+    );
     push_line(&mut out, "");
     render_summary(&mut out, &dashboard.summary);
     render_transactions(&mut out, &dashboard.transactions);

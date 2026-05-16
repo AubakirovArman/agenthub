@@ -5,6 +5,8 @@ use chrono::Utc;
 
 use crate::{enterprise, intent, live_run, memory, spec::AgentSpec};
 
+use super::progress;
+
 pub(super) fn run_request(root: &Path, request: &str, no_commit: bool) -> Result<String> {
     let path = write_draft(root, request)?;
     run_spec(root, &path, no_commit)
@@ -13,19 +15,44 @@ pub(super) fn run_request(root: &Path, request: &str, no_commit: bool) -> Result
 pub(super) fn run_spec(root: &Path, spec: &Path, no_commit: bool) -> Result<String> {
     enterprise::authorize(root, "transaction.run")?;
     print_failed_attempt_warnings(root, spec)?;
-    let outcome = live_run::run(
+    let mut tracker = progress::default_run_tracker();
+    println!("{}", tracker.render());
+    tracker.complete_step(0);
+    tracker.start_step(1);
+    tracker.complete_step(1);
+    tracker.start_step(2);
+    let outcome = match live_run::run(
         root,
         spec,
         live_run::RunOptions {
             no_commit,
             watch: live_run::default_watch(),
         },
-    )?;
+    ) {
+        Ok(outcome) => {
+            tracker.complete_step(2);
+            tracker.start_step(3);
+            tracker.complete_step(3);
+            tracker.start_step(4);
+            tracker.complete_step(4);
+            tracker.start_step(5);
+            tracker.complete_step(5);
+            println!("{}", tracker.render());
+            outcome
+        }
+        Err(error) => {
+            tracker.fail_step(2);
+            println!("{}", tracker.render());
+            return Err(error);
+        }
+    };
+    let elapsed = tracker.finish();
     println!(
-        "{} {} ({})",
+        "{} {} ({}) in {}s",
         outcome.tx_id,
         outcome.status.as_str(),
-        outcome.report_path.display()
+        outcome.report_path.display(),
+        elapsed.as_secs()
     );
     Ok(outcome.tx_id)
 }

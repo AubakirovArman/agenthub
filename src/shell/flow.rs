@@ -9,6 +9,7 @@ use super::chat_meta;
 use super::commands::ShellMode;
 use super::context_input;
 use super::run;
+use super::suggestions;
 
 pub(super) fn handle_message(
     root: &Path,
@@ -42,7 +43,7 @@ pub(super) fn handle_message(
             }
             let tx_id = run::run_spec(root, &path, false)?;
             chat::append_tx(current_chat, request, &tx_id, &report_path(root, &tx_id))?;
-            print_next_actions(&tx_id);
+            print_next_actions(root, &tx_id, request)?;
             *current_tx = Some(tx_id);
         }
     }
@@ -79,11 +80,14 @@ pub(super) fn report_path(root: &Path, tx_id: &str) -> PathBuf {
     root.join(".agent").join("tx").join(tx_id).join("report.md")
 }
 
-pub(super) fn print_next_actions(tx_id: &str) {
+pub(super) fn print_next_actions(root: &Path, tx_id: &str, request: &str) -> Result<()> {
     println!("Next:");
     println!("- /diff {tx_id}");
     println!("- /logs {tx_id}");
     println!("- /report {tx_id}");
     println!("- /explain {tx_id}");
     println!("- /undo");
+    let items = suggestions::after_transaction(root, tx_id, request)?;
+    suggestions::print(&items);
+    Ok(())
 }

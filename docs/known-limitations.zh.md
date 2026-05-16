@@ -2,7 +2,7 @@
 
 语言: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.2.0-local-preview` 是可安装的 local developer preview，不是稳定的 public 或 enterprise product。
+AgentHub `0.3.0-local-preview` 是可安装的 local developer preview，不是稳定的 public 或 enterprise product。
 
 ## 许可证
 

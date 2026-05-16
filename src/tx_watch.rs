@@ -12,6 +12,7 @@ use anyhow::{Context, Result};
 
 use crate::agent_dir::AgentPaths;
 use crate::journal::JournalEvent;
+use crate::ui::{event_bus, model};
 
 #[derive(Debug, Clone, Copy)]
 pub struct WatchOptions {
@@ -46,7 +47,11 @@ fn watch_inner(
             println!("{line}");
         }
         seen = events.len();
-        if options.once || events.last().is_some_and(|event| is_final(&event.state)) {
+        if options.once
+            || events
+                .last()
+                .is_some_and(|event| model::is_final_state(&event.state))
+        {
             break;
         }
         if cancel
@@ -82,7 +87,9 @@ fn read_events(path: &Path) -> Result<Vec<JournalEvent>> {
 }
 
 fn render_new(events: &[JournalEvent], seen: usize) -> Vec<String> {
-    let latest_is_final = events.last().is_some_and(|event| is_final(&event.state));
+    let latest_is_final = events
+        .last()
+        .is_some_and(|event| model::is_final_state(&event.state));
     events
         .iter()
         .enumerate()
@@ -92,21 +99,8 @@ fn render_new(events: &[JournalEvent], seen: usize) -> Vec<String> {
 }
 
 fn format_event(event: &JournalEvent, latest: bool, latest_is_final: bool) -> String {
-    let tag = if is_final(&event.state) {
-        "done"
-    } else if latest && !latest_is_final {
-        "running"
-    } else {
-        "ok"
-    };
-    format!("[{tag}] {} {}", event.state, event.message)
-}
-
-fn is_final(state: &str) -> bool {
-    matches!(
-        state,
-        "COMMITTED" | "ROLLED_BACK" | "BLOCKED_ON_HUMAN" | "CANCELED" | "CLOSED"
-    )
+    let ui_event = event_bus::UiEvent::from_journal(event.clone());
+    event_bus::format_console_event(&ui_event, latest && !latest_is_final)
 }
 
 #[cfg(test)]
@@ -123,15 +117,18 @@ mod tests {
             event("EXECUTING", "running execution commands"),
         ];
         let lines = render_new(&events, 0);
-        assert_eq!(lines[0], "[ok] CREATED created");
-        assert_eq!(lines[1], "[running] EXECUTING running execution commands");
+        assert_eq!(lines[0], "[ok] prepare    CREATED          created");
+        assert_eq!(
+            lines[1],
+            "[run] execute    EXECUTING        running execution commands"
+        );
     }
 
     #[test]
     fn renders_final_event_as_done() {
         let events = vec![event("CREATED", "created"), event("COMMITTED", "done")];
         let lines = render_new(&events, 0);
-        assert_eq!(lines[1], "[done] COMMITTED done");
+        assert_eq!(lines[1], "[done] commit     COMMITTED        done");
     }
 
     fn event(state: &str, message: &str) -> JournalEvent {

@@ -47,7 +47,13 @@ pub fn handle_plan(
     Ok(())
 }
 
-pub fn handle_run(root: &Path, target: &str, no_commit: bool, no_watch: bool) -> Result<()> {
+pub fn handle_run(
+    root: &Path,
+    target: &str,
+    no_commit: bool,
+    no_watch: bool,
+    json: bool,
+) -> Result<()> {
     print_bootstrap(bootstrap::ensure_transaction_ready(root)?);
     let spec = resolve_run_spec(root, target)?;
     print_failed_attempt_warnings(root, &spec)?;
@@ -83,7 +89,11 @@ pub fn handle_run(root: &Path, target: &str, no_commit: bool, no_watch: bool) ->
         Some(spec.display().to_string()),
         json!({ "tx_id": outcome.tx_id }),
     )?;
-    run_summary::print(root, &spec, &outcome)
+    if json {
+        run_summary::print_json(root, &spec, &outcome)
+    } else {
+        run_summary::print(root, &spec, &outcome)
+    }
 }
 
 fn print_bootstrap(report: bootstrap::BootstrapReport) {

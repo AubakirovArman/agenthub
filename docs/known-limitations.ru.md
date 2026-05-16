@@ -2,7 +2,7 @@
 
 Языки: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.2.0-local-preview` — устанавливаемый local developer preview, а не стабильный публичный или enterprise product.
+AgentHub `0.3.0-local-preview` — устанавливаемый local developer preview, а не стабильный публичный или enterprise product.
 
 ## Лицензия
 

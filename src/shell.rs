@@ -5,12 +5,16 @@ mod chat_display;
 mod chat_filters;
 mod chat_meta;
 mod commands;
+mod completion;
 mod context_input;
 mod context_preview;
 mod control;
 mod dispatch;
 mod flow;
+mod format;
 mod help;
+mod inline_approval;
+mod input_grammar;
 mod line_editor;
 mod memory_note;
 mod mention_summary;
@@ -18,13 +22,17 @@ mod mention_summary;
 mod mention_summary_tests;
 mod onboarding;
 mod product;
+mod progress;
 mod project;
 mod prompt;
 mod provider_args;
 mod run;
+mod session_browser;
 mod status;
+mod suggestions;
 mod system;
 mod task_dispatch;
+mod welcome;
 
 use std::path::{Path, PathBuf};
 
@@ -35,6 +43,7 @@ use commands::{parse_line, ShellMode};
 pub fn run(project_root: &Path) -> Result<()> {
     let mut root = project_root.to_path_buf();
     onboarding::prepare(&root)?;
+    welcome::print(&root)?;
     let mut current_tx: Option<String> = None;
     let mut current_chat = chat::latest(&root).or_else(|_| chat::create(&root))?;
     let mut mode = ShellMode::Run;
@@ -77,6 +86,7 @@ fn switch_project(
 ) -> Result<()> {
     let next = project::resolve(root, target)?;
     onboarding::prepare(&next)?;
+    welcome::print(&next)?;
     *current_tx = None;
     *current_chat = chat::latest(&next).or_else(|_| chat::create(&next))?;
     *input = line_editor::ShellInput::new(&next)?;

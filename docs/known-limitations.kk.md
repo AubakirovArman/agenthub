@@ -2,7 +2,7 @@
 
 Тілдер: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.2.0-local-preview` — installable local developer preview, stable public немесе enterprise product емес.
+AgentHub `0.3.0-local-preview` — installable local developer preview, stable public немесе enterprise product емес.
 
 ## License
 

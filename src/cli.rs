@@ -56,6 +56,9 @@ pub enum Commands {
 
         #[arg(long)]
         no_watch: bool,
+
+        #[arg(long)]
+        json: bool,
     },
     Undo {
         #[arg(default_value = "last")]

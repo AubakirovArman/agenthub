@@ -1,20 +1,27 @@
+use std::fs;
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 
 use crate::{
     agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_inspect, tx_undo,
     tx_watch,
 };
 
-use super::status;
+use super::{format, status};
 
 pub(super) fn list_sessions(root: &Path) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
     let mut rows = agent_dir::list_transactions(root)?;
     rows.reverse();
+    format::section("Transactions");
     for row in rows.into_iter().take(25) {
-        println!("{}\t{}\t{}", row.id, row.status, row.report_path.display());
+        println!(
+            "  {}\t{}\t{}",
+            row.id,
+            format::status_label(&row.status),
+            row.report_path.display()
+        );
     }
     Ok(())
 }
@@ -56,7 +63,7 @@ pub(super) fn print_explain(root: &Path, tx_id: &str) -> Result<()> {
 
 pub(super) fn print_diff(root: &Path, tx_id: &str) -> Result<()> {
     enterprise::authorize(root, "transaction.read")?;
-    print!("{}", tx_inspect::diff(root, tx_id)?);
+    print!("{}", format::diff_from_str(&tx_inspect::diff(root, tx_id)?));
     Ok(())
 }
 
@@ -116,6 +123,27 @@ pub(super) fn print_skills(root: &Path, mode: Option<&str>) -> Result<()> {
             "{}\t{}\t{}",
             manifest.skill.id, manifest.skill.version, manifest.skill.description
         );
+    }
+    Ok(())
+}
+
+pub(super) fn print_approvals(root: &Path) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    format::section("Approvals");
+    let mut printed = false;
+    for spec in approval_specs(root)? {
+        println!("  {} {}", format::status_label("approval_required"), spec);
+        printed = true;
+    }
+    for row in agent_dir::list_transactions(root)?
+        .into_iter()
+        .filter(|row| row.status == "BLOCKED_ON_HUMAN")
+    {
+        println!("  {} {}", format::status_label(&row.status), row.id);
+        printed = true;
+    }
+    if !printed {
+        format::success("no pending approvals");
     }
     Ok(())
 }
@@ -185,4 +213,32 @@ fn print_section(title: &str, items: &[String]) {
     for item in items {
         println!("- {item}");
     }
+}
+
+fn approval_specs(root: &Path) -> Result<Vec<String>> {
+    let specs = root.join(".agent/specs");
+    if !specs.exists() {
+        return Ok(Vec::new());
+    }
+    let mut items = Vec::new();
+    for entry in fs::read_dir(&specs).with_context(|| format!("read {}", specs.display()))? {
+        let entry = entry?;
+        let path = entry.path();
+        if !entry.file_type()?.is_file() || !is_yaml(&path) {
+            continue;
+        }
+        let text = fs::read_to_string(&path).with_context(|| format!("read {}", path.display()))?;
+        if text.contains("approval_required: true") {
+            items.push(path.display().to_string());
+        }
+    }
+    items.sort();
+    Ok(items)
+}
+
+fn is_yaml(path: &Path) -> bool {
+    matches!(
+        path.extension().and_then(|value| value.to_str()),
+        Some("yaml" | "yml")
+    )
 }

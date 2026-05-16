@@ -4,7 +4,14 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.3.0-local-preview - 2026-05-16
+
 - Make `agenthub` open a chat-first shell by default with first-run project setup, latest-chat restore, provider hints, persistent history, and slash completion.
+- Add rich chat-first shell presentation: contextual prompt, welcome screen, ANSI formatter, status labels, syntax/diff highlighting, and formatted chat/session output.
+- Add shell run progress indicators, contextual next-step suggestions, inline approval cards, approval inbox, and checkpoint/session rewind commands.
+- Add `@` path/transaction/chat/memory completion plus multi-line input support for richer natural-language tasks.
+- Add shared UI event/model/state surfaces so terminal, TUI, transaction watch, and dashboard views use consistent transaction labels and progress state.
+- Add dashboard project/chat/event APIs with tests for live dashboard data access.
 - Add chat input prefixes for `/` commands, `@` file/folder context, `!` policy-checked shell commands, and `#` typed memory notes.
 - Change plain shell text into the main flow: draft plan, inline approval, transaction run, then `/diff`, `/logs`, `/report`, `/explain`, and `/undo` next actions.
 - Add `agenthub tx diff` and `agenthub tx logs` plus matching `/diff` and `/logs` shell commands.

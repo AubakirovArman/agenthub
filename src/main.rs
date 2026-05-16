@@ -50,7 +50,8 @@ fn run() -> Result<()> {
             target,
             no_commit,
             no_watch,
-        } => handlers::handle_run(&project_root, &target, no_commit, no_watch)?,
+            json,
+        } => handlers::handle_run(&project_root, &target, no_commit, no_watch, json)?,
         Commands::Undo { target } => {
             enterprise::authorize(&project_root, "transaction.run")?;
             let report = tx_undo::undo(&project_root, &target)?;

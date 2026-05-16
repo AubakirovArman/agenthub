@@ -46,7 +46,17 @@ impl Watcher {
     fn start(root: PathBuf, tx_id: String) -> Self {
         let cancel = Arc::new(AtomicBool::new(false));
         let thread_cancel = Arc::clone(&cancel);
-        println!("tx {tx_id} started");
+        println!("AgentHub Run  {tx_id}  EXECUTING");
+        println!("DAG");
+        println!("  * prepare");
+        println!("  * context");
+        println!("  * execute");
+        println!("  * diff_guard");
+        println!("  * verify");
+        println!("Artifacts");
+        println!("  report  diff  logs  effects  explain  cancel");
+        println!("Hint");
+        println!("  Ctrl-C requests process interruption; use `agenthub tx cancel {tx_id}` from another terminal");
         let handle = thread::spawn(move || {
             let _ = tx_watch::watch_with_cancel(
                 &root,

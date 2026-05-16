@@ -3,6 +3,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
+use super::input_grammar;
 use super::mention_summary;
 
 #[derive(Debug, Clone)]
@@ -12,21 +13,17 @@ pub(super) struct EnrichedRequest {
 }
 
 pub(super) fn enrich(root: &Path, request: &str) -> Result<EnrichedRequest> {
+    let parsed = input_grammar::parse(request);
     let mut mentions = Vec::new();
-    let mut clean = Vec::new();
-    for token in request.split_whitespace() {
-        if let Some(raw) = token.strip_prefix('@') {
-            mentions.push(mention_summary::resolve(root, raw, request)?);
-        } else {
-            clean.push(token);
-        }
+    for token in &parsed.mentions {
+        mentions.push(mention_summary::resolve(root, &token.raw, request)?);
     }
     let text = if mentions.is_empty() {
         request.to_string()
     } else {
         format!(
             "{}\n\nExplicit context:\n{}",
-            clean.join(" "),
+            parsed.clean_text,
             mentions.join("\n")
         )
     };

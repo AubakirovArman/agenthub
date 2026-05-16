@@ -3,6 +3,8 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 use serde_json::Value;
 
+use crate::chat_index;
+
 use super::chat::{self, ChatSession};
 
 pub(super) struct SearchHit {
@@ -13,6 +15,12 @@ pub(super) struct SearchHit {
 }
 
 pub(super) fn open(root: &Path, target: &str) -> Result<ChatSession> {
+    if let Some(row) = chat_index::open(root, target)? {
+        return Ok(ChatSession {
+            id: row.id,
+            path: row.path,
+        });
+    }
     if let Ok(session) = chat::open(root, target) {
         return Ok(session);
     }
@@ -61,6 +69,18 @@ pub(super) fn set_pin(
 }
 
 pub(super) fn search(root: &Path, query: &str) -> Result<Vec<SearchHit>> {
+    let indexed = chat_index::search(root, query, 50)?;
+    if !indexed.is_empty() {
+        return Ok(indexed
+            .into_iter()
+            .map(|hit| SearchHit {
+                id: hit.id,
+                title: hit.title,
+                kind: hit.kind,
+                text: hit.text,
+            })
+            .collect());
+    }
     let query = query.trim().to_ascii_lowercase();
     if query.is_empty() {
         return Ok(Vec::new());

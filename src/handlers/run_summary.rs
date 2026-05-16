@@ -1,10 +1,25 @@
 use std::path::Path;
 
 use anyhow::{Context, Result};
+use serde::Serialize;
 
 use agenthub::diff_guard::DiffGuardResult;
 use agenthub::spec::AgentSpec;
 use agenthub::transaction::{self, TransactionStatus};
+
+#[derive(Debug, Serialize)]
+struct RunSummary {
+    tx_id: String,
+    status: String,
+    report_path: String,
+    task: Option<String>,
+    provider: Option<String>,
+    topology: Option<String>,
+    verifier: Option<String>,
+    memory_promoted: Option<bool>,
+    files_changed: Option<usize>,
+    next_actions: Vec<String>,
+}
 
 pub fn print(
     root: &Path,
@@ -40,6 +55,48 @@ pub fn print(
         root.join(".agent/reports/dashboard/index.html").display()
     );
     Ok(())
+}
+
+pub fn print_json(
+    root: &Path,
+    spec_path: &Path,
+    outcome: &transaction::TransactionOutcome,
+) -> Result<()> {
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&summary(root, spec_path, outcome)?)?
+    );
+    Ok(())
+}
+
+fn summary(
+    root: &Path,
+    spec_path: &Path,
+    outcome: &transaction::TransactionOutcome,
+) -> Result<RunSummary> {
+    let spec = AgentSpec::load(spec_path).ok();
+    Ok(RunSummary {
+        tx_id: outcome.tx_id.clone(),
+        status: outcome.status.as_str().to_string(),
+        report_path: outcome.report_path.display().to_string(),
+        task: spec.as_ref().map(task_label),
+        provider: spec.as_ref().map(provider_label),
+        topology: spec.as_ref().map(|spec| spec.topology.kind.clone()),
+        verifier: spec.as_ref().map(verifier_label),
+        memory_promoted: spec.as_ref().map(|spec| {
+            matches!(outcome.status, TransactionStatus::Committed)
+                && spec.transaction.memory_promotion == "on_success"
+        }),
+        files_changed: changed_files(&outcome.report_path)?,
+        next_actions: vec![
+            format!("agenthub tx explain {}", outcome.tx_id),
+            format!("agenthub tx watch {}", outcome.tx_id),
+            format!(
+                "agenthub dashboard --output {}",
+                root.join(".agent/reports/dashboard").display()
+            ),
+        ],
+    })
 }
 
 fn human_status(status: TransactionStatus) -> &'static str {
