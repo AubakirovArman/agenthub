@@ -1,6 +1,6 @@
 [package]
 name = "agenthub"
-version = "0.4.20-local-preview"
+version = "0.4.21-local-preview"
 edition = "2021"
 description = "Transactional runtime foundation for AI-agent workflows."
 license = "Apache-2.0"

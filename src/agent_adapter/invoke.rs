@@ -8,11 +8,15 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+use crate::agent_adapter::api_tool_loop::{
+    api_execution_plan_tool, build_api_tool_loop_receipt, classify_plan_commands,
+    parse_api_execution_plan_from_response, write_api_tool_loop_receipt, ApiExecutionPlan,
+};
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
 use crate::command_runner::{run_shell_with_sandbox_logged, CommandSandbox, RemoteRunner};
-use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPolicy};
-use crate::observability::redact_text;
+use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPolicy, ToolChoice};
+use crate::observability::{redact_text, redact_value};
 use crate::product_cli::providers;
 use crate::spec::AgentSpec;
 
@@ -122,24 +126,6 @@ pub fn invoke_adapter(
     Ok(Some(run))
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct ApiExecutionPlan {
-    #[serde(default)]
-    summary: Option<String>,
-    #[serde(default)]
-    commands: Vec<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct RawApiExecutionPlan {
-    #[serde(default)]
-    summary: Option<String>,
-    #[serde(default)]
-    commands: Option<Vec<String>>,
-    #[serde(default)]
-    shell_commands: Option<Vec<String>>,
-}
-
 fn invoke_api_provider(
     spec: &AgentSpec,
     tx_dir: &Path,
@@ -197,7 +183,9 @@ fn invoke_api_provider(
         context_pack_hash: "transaction".to_string(),
         prompt_hash: route.role.clone(),
         prompt_tokens,
-        response_format: Some("json_object".to_string()),
+        response_format: None,
+        tools: vec![api_execution_plan_tool()],
+        tool_choice: Some(ToolChoice::Auto),
     };
     let response = complete_with_retry(
         &provider,
@@ -208,11 +196,20 @@ fn invoke_api_provider(
         },
         None,
     )?;
-    let content = response
-        .content
-        .clone()
-        .ok_or_else(|| anyhow!("API executor returned an empty response"))?;
-    let plan = parse_api_execution_plan(&content)?;
+    let (plan, plan_source, content) = parse_api_execution_plan_from_response(&response)?;
+    let command_permissions = classify_plan_commands(&plan);
+    let tool_loop =
+        build_api_tool_loop_receipt(route, &response, &plan_source, &command_permissions);
+    write_api_tool_loop_receipt(tx_dir, route, &tool_loop)?;
+    if tool_loop.blocked {
+        return Err(anyhow!(
+            "{}",
+            tool_loop
+                .blocked_reason
+                .as_deref()
+                .unwrap_or("API tool loop command blocked")
+        ));
+    }
     let command_results = run_api_commands(spec, tx_dir, worktree, route, remote_runner, &plan)?;
     let success = command_results.iter().all(|result| result.success);
     let exit_code = if success {
@@ -272,73 +269,6 @@ fn provider_status(worktree: &Path, route: &AgentRoute) -> Result<providers::Pro
         })
 }
 
-fn parse_api_execution_plan(content: &str) -> Result<ApiExecutionPlan> {
-    let json_text = extract_json_object(content)
-        .ok_or_else(|| anyhow!("API executor did not return a JSON object"))?;
-    let raw: RawApiExecutionPlan =
-        serde_json::from_str(json_text).context("parse API executor JSON plan")?;
-    let commands = raw
-        .commands
-        .or(raw.shell_commands)
-        .unwrap_or_default()
-        .into_iter()
-        .map(|command| command.trim().to_string())
-        .filter(|command| !command.is_empty())
-        .collect::<Vec<_>>();
-    if commands.is_empty() {
-        return Err(anyhow!("API executor JSON plan did not include commands"));
-    }
-    if commands.len() > 20 {
-        return Err(anyhow!(
-            "API executor returned too many commands: {} (max 20)",
-            commands.len()
-        ));
-    }
-    for command in &commands {
-        validate_api_command(command)?;
-    }
-    Ok(ApiExecutionPlan {
-        summary: raw.summary,
-        commands,
-    })
-}
-
-fn extract_json_object(content: &str) -> Option<&str> {
-    let trimmed = content.trim();
-    if trimmed.starts_with('{') && trimmed.ends_with('}') {
-        return Some(trimmed);
-    }
-    let fenced = trimmed
-        .strip_prefix("```json")
-        .or_else(|| trimmed.strip_prefix("```"))
-        .and_then(|value| value.strip_suffix("```"))
-        .map(str::trim);
-    if let Some(value) = fenced {
-        if value.starts_with('{') && value.ends_with('}') {
-            return Some(value);
-        }
-    }
-    let start = trimmed.find('{')?;
-    let end = trimmed.rfind('}')?;
-    (start < end).then_some(&trimmed[start..=end])
-}
-
-fn validate_api_command(command: &str) -> Result<()> {
-    let lower = command.to_ascii_lowercase();
-    let denied = [
-        "sudo ", "su ", "rm -rf /", "mkfs", "shutdown", "reboot", "dd if=", ":(){",
-    ];
-    if command.contains('\0') || command.lines().count() > 200 {
-        return Err(anyhow!("API executor returned an unsafe shell command"));
-    }
-    if denied.iter().any(|pattern| lower.contains(pattern)) {
-        return Err(anyhow!(
-            "API executor returned a denied shell command pattern"
-        ));
-    }
-    Ok(())
-}
-
 fn run_api_commands(
     spec: &AgentSpec,
     tx_dir: &Path,
@@ -384,18 +314,16 @@ fn write_api_execution_record(
     command_results: &[crate::command_runner::CommandResult],
 ) -> Result<()> {
     let path = tx_dir.join(format!("api_execution_{}.json", route.role));
-    fs::write(
-        &path,
-        serde_json::to_string_pretty(&json!({
-            "created_at": Utc::now(),
-            "adapter": route.selected_adapter,
-            "role": route.role,
-            "response": response,
-            "plan": plan,
-            "command_results": command_results,
-        }))?,
-    )
-    .with_context(|| format!("write {}", path.display()))
+    let record = redact_value(&json!({
+        "created_at": Utc::now(),
+        "adapter": route.selected_adapter,
+        "role": route.role,
+        "response": response,
+        "plan": plan,
+        "command_results": command_results,
+    }))?;
+    fs::write(&path, serde_json::to_string_pretty(&record)?)
+        .with_context(|| format!("write {}", path.display()))
 }
 
 fn adapter_sandbox(level: u8, remote_runner: Option<&RemoteRunner>) -> CommandSandbox {
@@ -414,7 +342,7 @@ fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<P
 
 fn render_prompt(spec: &AgentSpec, route: &AgentRoute) -> String {
     format!(
-        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n- If you are an API provider, return only a JSON object with this shape: {{\"summary\":\"short summary\",\"commands\":[\"shell command 1\",\"shell command 2\"]}}.\n- API commands must be non-interactive, deterministic, and must create or edit files using shell-safe commands such as mkdir, printf, cat <<'EOF', npm, cargo, or test runners.\n- Do not include sudo, reboot, destructive disk commands, or commands that touch denied paths.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands after adapter step:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
+        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n- If you are an API provider with tools, call `agenthub_command_plan` with {{\"summary\":\"short summary\",\"commands\":[\"shell command 1\",\"shell command 2\"]}}.\n- If tools are unavailable, return only that JSON object as plain content.\n- API commands must be non-interactive, deterministic, and must create or edit files using shell-safe commands such as mkdir, printf, cat <<'EOF', npm, cargo, or test runners.\n- Do not include sudo, reboot, destructive disk commands, or commands that touch denied paths.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands after adapter step:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
         route.role,
         route.selected_adapter,
         route.model.as_deref().unwrap_or("<default>"),

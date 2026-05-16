@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.20-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.21-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -172,7 +172,7 @@ These are the next concrete engineering steps from the current `0.4.20-local-pre
 | `0.4.18` | Transactions v2: inline approval cards, diff preview, verifiers, rollback receipts | Done: approval cards now show action scope, patch preview, verifier plan, protected-path warnings, rollback receipts, and approval controls before project transaction execution |
 | `0.4.19` | Headless parity for `agenthub exec` | Done: initialized project `exec --jsonl` now creates approval-required drafts, emits `approval_required` plus final `turn_finished` receipts, and exits with code `2`; Chat/Ops exec keeps provider JSONL receipts |
 | `0.4.20` | Resume/rewind/session durability | Done: corrupt chat JSONL lines recover as `session_recovery` events across shell transcript reads, chat index/search, and TUI event rail without losing valid transcript events |
-| `0.4.21` | Provider tool-loop v2 for DeepSeek/Kimi | Native tool calls, tool result injection, retries, fallback receipts, and permission gates run fully inside AgentHub without external CLIs |
+| `0.4.21` | Provider tool-loop v2 for DeepSeek/Kimi | Done: DeepSeek/Kimi requests can carry native `tools/tool_choice`, responses preserve parsed `tool_calls`, API project execution requests `agenthub_command_plan`, records redacted `tool_loop_<role>.json` receipts, and permission-checks provider-proposed commands before execution |
 | `0.4.22` | Dashboard/observability v2 | Browser dashboard shows live chat events, context receipts, tool approvals, costs, diffs, reports, and session recovery state |
 | `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
 
@@ -188,10 +188,10 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.20` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, and recoverable session reads rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.21` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, and native DeepSeek/Kimi command-plan tool-call receipts rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 
-1. `0.4.21`: complete the DeepSeek/Kimi-native tool loop. Tool calls should be normalized, permission-checked, executed, logged, redacted, and reinjected by AgentHub itself.
-2. `0.4.22`: promote observability into the dashboard. The dashboard should show live context receipts, cost receipts, pending approvals, tool outputs, diffs, reports, and recovery status without requiring log hunting.
+1. `0.4.22`: promote observability into the dashboard. The dashboard should show live context receipts, cost receipts, pending approvals, tool outputs, diffs, reports, tool-loop receipts, and recovery status without requiring log hunting.
+2. `0.4.23`: complete multi-step tool result reinjection. Provider-requested read/search/shell/file tools should run through one registry, append redacted tool results, and continue the same turn without external CLIs.
 3. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.

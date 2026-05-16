@@ -37,6 +37,8 @@ agenthub exec "answer with one word: ok" --jsonl
 
 In an initialized project, `exec` treats a file-changing request like the interactive shell: it writes an approval-required draft, emits `draft_created`, `approval_required`, and `turn_finished status=approval_required` JSONL events, and exits with code `2` instead of running without approval.
 
+DeepSeek/Kimi project execution requests a native `agenthub_command_plan` tool call when the provider supports tools, falls back to JSON content otherwise, records a redacted `tool_loop_<role>.json` receipt, and permission-checks proposed commands before execution.
+
 ## Chat Usage Stats
 
 ```bash

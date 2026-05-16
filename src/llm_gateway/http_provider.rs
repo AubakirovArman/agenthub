@@ -6,7 +6,7 @@ use serde_json::{json, Value};
 
 use crate::llm_gateway::provider::{metadata_for_adapter, LlmProvider};
 use crate::llm_gateway::sse_parser;
-use crate::llm_gateway::types::{LlmRequest, LlmResponse, ProviderMetadata, TokenCount};
+use crate::llm_gateway::types::{LlmRequest, LlmResponse, ProviderMetadata, TokenCount, ToolCall};
 
 #[derive(Debug, Clone)]
 pub struct HttpProvider {
@@ -93,6 +93,7 @@ impl HttpProvider {
             } else {
                 Some(content)
             },
+            tool_calls: Vec::new(),
             error: None,
         })
     }
@@ -116,11 +117,13 @@ impl LlmProvider for HttpProvider {
             .and_then(Value::as_u64)
             .unwrap_or_else(|| content.as_deref().map(estimate_tokens).unwrap_or(0) as u64)
             as usize;
+        let tool_calls = tool_calls_from_response(&response);
         Ok(LlmResponse {
             request_id: request.id,
             status: "ok".to_string(),
             content,
             completion_tokens,
+            tool_calls,
             error: None,
         })
     }
@@ -174,7 +177,77 @@ fn completion_body(request: &LlmRequest, provider_model: Option<String>, stream:
             );
         }
     }
+    if !request.tools.is_empty() {
+        if let Some(object) = body.as_object_mut() {
+            object.insert(
+                "tools".to_string(),
+                Value::Array(
+                    request
+                        .tools
+                        .iter()
+                        .map(|tool| {
+                            json!({
+                                "type": "function",
+                                "function": {
+                                    "name": &tool.name,
+                                    "description": &tool.description,
+                                    "parameters": &tool.parameters,
+                                }
+                            })
+                        })
+                        .collect(),
+                ),
+            );
+        }
+    }
+    if let Some(tool_choice) = request.tool_choice {
+        if let Some(object) = body.as_object_mut() {
+            object.insert(
+                "tool_choice".to_string(),
+                json!(tool_choice.as_openai_value()),
+            );
+        }
+    }
     body
+}
+
+fn tool_calls_from_response(response: &Value) -> Vec<ToolCall> {
+    response
+        .pointer("/choices/0/message/tool_calls")
+        .and_then(Value::as_array)
+        .map(|calls| calls.iter().filter_map(parse_tool_call).collect())
+        .unwrap_or_default()
+}
+
+fn parse_tool_call(value: &Value) -> Option<ToolCall> {
+    let function = value.get("function").unwrap_or(value);
+    let name = function.get("name").and_then(Value::as_str)?.to_string();
+    let id = value
+        .get("id")
+        .and_then(Value::as_str)
+        .map(str::to_string)
+        .unwrap_or_else(|| format!("call-{name}"));
+    let (arguments, raw_arguments) = parse_tool_arguments(function.get("arguments"));
+    Some(ToolCall {
+        id,
+        name,
+        arguments,
+        raw_arguments,
+    })
+}
+
+fn parse_tool_arguments(value: Option<&Value>) -> (Value, String) {
+    match value {
+        Some(Value::String(raw)) => {
+            let parsed = serde_json::from_str(raw).unwrap_or_else(|_| Value::String(raw.clone()));
+            (parsed, raw.clone())
+        }
+        Some(value) => {
+            let raw = serde_json::to_string(value).unwrap_or_default();
+            (value.clone(), raw)
+        }
+        None => (json!({}), "{}".to_string()),
+    }
 }
 
 fn is_kimi_thinking_model(model: &str) -> bool {
@@ -299,6 +372,7 @@ fn estimate_tokens(value: &str) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::llm_gateway::types::{ToolChoice, ToolDefinition};
 
     fn request(model: Option<&str>) -> LlmRequest {
         LlmRequest {
@@ -311,6 +385,8 @@ mod tests {
             prompt_hash: "prompt".to_string(),
             prompt_tokens: 1,
             response_format: None,
+            tools: Vec::new(),
+            tool_choice: None,
         }
     }
 
@@ -342,6 +418,8 @@ mod tests {
                 prompt_hash: "prompt".to_string(),
                 prompt_tokens: 1,
                 response_format: Some("json_object".to_string()),
+                tools: Vec::new(),
+                tool_choice: None,
             },
             Some("deepseek-test".to_string()),
             false,
@@ -351,6 +429,71 @@ mod tests {
             body.pointer("/response_format/type")
                 .and_then(Value::as_str),
             Some("json_object")
+        );
+    }
+
+    #[test]
+    fn completion_body_includes_openai_compatible_tools() {
+        let mut request = request(Some("deepseek-chat"));
+        request.tools = vec![ToolDefinition {
+            name: "agenthub_command_plan".to_string(),
+            description: "Return a command plan".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "commands": { "type": "array", "items": { "type": "string" } }
+                },
+                "required": ["commands"]
+            }),
+        }];
+        request.tool_choice = Some(ToolChoice::Auto);
+
+        let body = completion_body(&request, None, false);
+
+        assert_eq!(
+            body.pointer("/tool_choice").and_then(Value::as_str),
+            Some("auto")
+        );
+        assert_eq!(
+            body.pointer("/tools/0/type").and_then(Value::as_str),
+            Some("function")
+        );
+        assert_eq!(
+            body.pointer("/tools/0/function/name")
+                .and_then(Value::as_str),
+            Some("agenthub_command_plan")
+        );
+    }
+
+    #[test]
+    fn parses_openai_compatible_tool_calls() {
+        let response = json!({
+            "choices": [{
+                "message": {
+                    "content": null,
+                    "tool_calls": [{
+                        "id": "call-1",
+                        "type": "function",
+                        "function": {
+                            "name": "agenthub_command_plan",
+                            "arguments": "{\"summary\":\"ok\",\"commands\":[\"cargo test --lib\"]}"
+                        }
+                    }]
+                }
+            }]
+        });
+
+        let calls = tool_calls_from_response(&response);
+
+        assert_eq!(calls.len(), 1);
+        assert_eq!(calls[0].id, "call-1");
+        assert_eq!(calls[0].name, "agenthub_command_plan");
+        assert_eq!(
+            calls[0]
+                .arguments
+                .pointer("/commands/0")
+                .and_then(Value::as_str),
+            Some("cargo test --lib")
         );
     }
 }

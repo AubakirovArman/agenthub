@@ -91,6 +91,8 @@ fn request(id: &str, prompt: &str) -> LlmRequest {
         prompt_hash: "prompt".to_string(),
         prompt_tokens: 1,
         response_format: None,
+        tools: Vec::new(),
+        tool_choice: None,
     }
 }
 
@@ -215,6 +217,7 @@ impl LlmProvider for FlakyProvider {
             status: "ok".to_string(),
             content: Some("ok".to_string()),
             completion_tokens: 1,
+            tool_calls: Vec::new(),
             error: None,
         })
     }

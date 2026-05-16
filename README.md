@@ -74,6 +74,7 @@ Inside the shell:
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 - Corrupt chat JSONL lines are recovered as `session_recovery` events so valid transcript messages, search hits, and TUI event rail state remain available.
 - Direct API chat includes budgeted relevant committed memory in the provider prompt, writes a context compaction receipt, and leaves pending inbox candidates out until approval.
+- DeepSeek/Kimi project execution now requests native `agenthub_command_plan` tool calls when supported, falls back to JSON content when needed, records redacted `tool_loop_<role>.json` receipts, and permission-checks proposed commands before running them.
 - In initialized projects, `agenthub exec "<request>" --jsonl` creates an approval-required draft for project edits, emits `approval_required` and `turn_finished` JSONL receipts, and exits with code `2` so CI can stop for human approval.
 - `agenthub tui` renders an event-backed terminal surface with status line, composer hints, slash palette, context mentions, chat transcript, and live event rail.
 
@@ -122,7 +123,7 @@ agenthub exec "answer with one word: ok" --jsonl
 
 For server installs, AgentHub also discovers `.deepseek` and `.kimi` key files in the current project directory, current shell directory, or their parent directories. The key contents stay out of AgentHub config and git.
 
-Plain `agenthub` opens chat mode without requiring Git or `.agent`. Project transactions still use the existing transaction kernel; API-native project execution is being wired in behind the same DeepSeek/Kimi provider surface.
+Plain `agenthub` opens chat mode without requiring Git or `.agent`. Project transactions use the existing transaction kernel, while DeepSeek/Kimi project execution now asks for native AgentHub command-plan tool calls and records permission/redaction receipts before running provider-proposed commands.
 
 Provider details:
 

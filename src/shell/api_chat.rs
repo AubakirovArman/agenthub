@@ -161,6 +161,8 @@ fn request_provider(
             prompt_hash: "chat".to_string(),
             prompt_tokens,
             response_format: None,
+            tools: Vec::new(),
+            tool_choice: None,
         },
         |delta| {
             if print_terminal {

@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.21-local-preview - 2026-05-16
+
+- Add normalized API-native tool call support to the DeepSeek/Kimi HTTP gateway: requests can carry OpenAI-compatible `tools` and `tool_choice`, and non-streaming responses now preserve parsed `tool_calls`.
+- Move API project execution toward the native tool loop by exposing an `agenthub_command_plan` function, accepting command plans from tool calls or JSON fallback content, writing redacted `tool_loop_<role>.json` receipts, and permission-checking each proposed command before execution.
+- Harden global memory JSONL reads against concurrent test/session cleanup so missing files recover as empty memory instead of failing Chat/Ops turns.
+
 ## 0.4.20-local-preview - 2026-05-16
 
 - Harden chat/session durability by making shell transcript reads tolerant of corrupt JSONL lines: valid events are preserved and malformed lines become `session_recovery` events instead of failing the whole transcript.

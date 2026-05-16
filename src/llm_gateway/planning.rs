@@ -19,6 +19,8 @@ fn plan_for_call(call: &ModelCallMetadata) -> ProviderCallPlan {
         prompt_hash: call.prompt_hash.clone(),
         prompt_tokens: call.prompt_tokens,
         response_format: None,
+        tools: Vec::new(),
+        tool_choice: None,
     };
     ProviderCallPlan {
         call_id: call.id.clone(),

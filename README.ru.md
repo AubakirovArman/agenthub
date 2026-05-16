@@ -108,7 +108,7 @@ agenthub providers test kimi
 
 Для серверной установки AgentHub также ищет key files `.deepseek` и `.kimi` в текущей project directory, текущей shell directory и родительских директориях. Содержимое ключей не пишется в config и git.
 
-Обычный запуск `agenthub` открывает chat mode без обязательной инициализации Git или `.agent`. Project transactions пока остаются на существующем transaction kernel; API-native project executor подключается за тем же интерфейсом DeepSeek/Kimi.
+Обычный запуск `agenthub` открывает chat mode без обязательной инициализации Git или `.agent`. Project transactions остаются на существующем transaction kernel, а DeepSeek/Kimi project execution теперь запрашивает native AgentHub command-plan tool calls и пишет permission/redaction receipts перед запуском provider-proposed commands.
 
 Документы по providers:
 

@@ -21,7 +21,7 @@ agent:
 - `model`: optional model label recorded in traces and API requests.
 - `dry_run`: writes adapter artifacts without making a provider request.
 
-`command_template` is no longer a user-facing provider field. AgentHub owns API requests, logs, retries, and future tool calls directly.
+`command_template` is no longer a user-facing provider field. AgentHub owns API requests, logs, retries, and native command-plan tool calls directly.
 
 Role-specific adapters can be set under `agents`:
 
@@ -37,6 +37,6 @@ agents:
 
 ## Current Project Executor Status
 
-Non-project chat mode can call DeepSeek/Kimi directly with streaming output. Project transaction routes for `deepseek` and `kimi` use AgentHub-owned API requests: the provider returns a JSON command plan, AgentHub validates and runs those commands inside the isolated worktree, then the normal diff guard, verifier, rollback, commit, and memory promotion flow continues.
+Non-project chat mode can call DeepSeek/Kimi directly with streaming output. Project transaction routes for `deepseek` and `kimi` use AgentHub-owned API requests: the provider calls the native `agenthub_command_plan` tool or returns a JSON command-plan fallback, AgentHub validates and permission-checks those commands inside the isolated worktree, then the normal diff guard, verifier, rollback, commit, and memory promotion flow continues.
 
-Every transaction records selected routes in `.agent/tx/<tx-id>/agent_trace.json`. Adapter prompt artifacts are written as `.agent/tx/<tx-id>/agent_prompt_<role>.md`, and API executor plans/results are written as `.agent/tx/<tx-id>/api_execution_<role>.json`.
+Every transaction records selected routes in `.agent/tx/<tx-id>/agent_trace.json`. Adapter prompt artifacts are written as `.agent/tx/<tx-id>/agent_prompt_<role>.md`, native tool-loop receipts are written as `.agent/tx/<tx-id>/tool_loop_<role>.json`, and API executor plans/results are written as `.agent/tx/<tx-id>/api_execution_<role>.json`.

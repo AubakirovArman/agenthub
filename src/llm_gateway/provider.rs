@@ -67,6 +67,7 @@ impl LlmProvider for CliProvider {
             status: status.to_string(),
             content: None,
             completion_tokens: 0,
+            tool_calls: Vec::new(),
             error: None,
         })
     }
@@ -112,6 +113,7 @@ impl CliProvider {
             status: if result.success { "ok" } else { "error" }.to_string(),
             content,
             completion_tokens: estimate_tokens(&result.stdout),
+            tool_calls: Vec::new(),
             error,
         };
         if let Some(path) = &self.transcript_path {

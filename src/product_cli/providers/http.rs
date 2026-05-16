@@ -41,6 +41,8 @@ fn test_request(status: &ProviderStatus) -> LlmRequest {
         prompt_hash: "provider-test".to_string(),
         prompt_tokens: 5,
         response_format: None,
+        tools: Vec::new(),
+        tool_choice: None,
     }
 }
 
