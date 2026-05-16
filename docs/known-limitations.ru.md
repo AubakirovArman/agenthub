@@ -2,7 +2,7 @@
 
 Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.4.22-local-preview` is an installable local developer preview, not a stable public or enterprise product.
+AgentHub `0.4.23-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
 ## License
 
@@ -16,7 +16,7 @@ AgentHub provides transactional isolation, Git worktrees, command policy checks,
 
 DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, structured provider-test receipts, streaming chat, budgeted memory-aware chat context, and API-native project command execution. Shell actions уже имеют explainable tool permission profiles, project transactions показывают richer inline approval receipts, headless project `exec --jsonl` останавливается на approval-required drafts с exit code `2`, corrupt chat JSONL lines восстанавливаются как `session_recovery` events, `agenthub tui` показывает event-backed terminal surface, project API execution пишет native command-plan tool-call receipts, а dashboard показывает context/tool-loop/session-recovery observability. Full multi-step tool result reinjection и automatic memory extraction всё ещё в работе.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, structured provider-test receipts, streaming chat, budgeted memory-aware chat context, and API-native project command execution. Shell actions уже имеют explainable tool permission profiles, project transactions показывают richer inline approval receipts, headless project `exec --jsonl` останавливается на approval-required drafts с exit code `2`, corrupt chat JSONL lines восстанавливаются как `session_recovery` events, `agenthub tui` показывает event-backed terminal surface, project API execution пишет native command-plan tool-call receipts, dashboard показывает context/tool-loop/session-recovery observability, а bounded builtin read/search/read-only-shell tool results теперь reinjectятся в тот же API project turn. Automatic memory extraction всё ещё в работе.
 
 ## Team And Enterprise
 

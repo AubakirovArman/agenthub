@@ -273,6 +273,79 @@ transaction:
 }
 
 #[test]
+fn api_adapter_reinjects_builtin_tool_results_before_command_plan() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    fs::write(
+        repo.path().join("instructions.txt"),
+        "create api tool output\n",
+    )?;
+    repo.commit_all("agenthub baseline")?;
+    let tool_response = r#"{"choices":[{"message":{"content":null,"tool_calls":[{"id":"call-read","type":"function","function":{"name":"read_file","arguments":"{\"path\":\"instructions.txt\"}"}}]}}],"usage":{"completion_tokens":7}}"#;
+    let plan_response = OpenAiStub::content_body(
+        r#"{"summary":"create generated file after reading","commands":["mkdir -p generated","printf 'tool reinjected\n' > generated/tool-loop.txt"]}"#,
+    );
+    let stub = OpenAiStub::start_bodies(vec![tool_response.to_string(), plan_response])?;
+
+    let spec = repo.write_spec(
+        "api_tool_reinject.yaml",
+        r#"
+task:
+  id: api_tool_reinject
+  type: code.command
+agent:
+  adapter: deepseek
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands: []
+scope:
+  allow:
+    - generated/**
+verify:
+  profile: code_build
+  commands:
+    - test -f generated/tool-loop.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    with_deepseek_stub_env(&stub.endpoint, || {
+        let outcome = transaction::run(repo.path(), &spec, false)?;
+
+        assert!(matches!(outcome.status, TransactionStatus::Committed));
+        assert_eq!(
+            normalize_newlines(&fs::read_to_string(
+                repo.path().join("generated/tool-loop.txt")
+            )?),
+            "tool reinjected\n"
+        );
+        let receipt = fs::read_to_string(
+            outcome
+                .report_path
+                .with_file_name("tool_results_executor.json"),
+        )?;
+        assert!(receipt.contains("call-read"));
+        assert!(receipt.contains("create api tool output"));
+        let first_request = stub.received_request()?;
+        let second_request = stub.received_request()?;
+        assert!(first_request.contains("read_file"), "{first_request}");
+        assert!(
+            second_request.contains("AgentHub builtin tool results"),
+            "{second_request}"
+        );
+        Ok(())
+    })
+}
+
+#[test]
 fn failed_transaction_rolls_back_and_records_failed_attempt() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;
@@ -1456,28 +1529,37 @@ struct OpenAiStub {
 
 impl OpenAiStub {
     fn start(content: &str) -> Result<Self> {
+        Self::start_bodies(vec![Self::content_body(content)])
+    }
+
+    fn content_body(content: &str) -> String {
+        let escaped_content = serde_json::to_string(content).expect("serialize content");
+        format!(
+            r#"{{"choices":[{{"message":{{"content":{escaped_content}}}}}],"usage":{{"completion_tokens":12}}}}"#
+        )
+    }
+
+    fn start_bodies(bodies: Vec<String>) -> Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:0")?;
         let endpoint = format!("http://{}", listener.local_addr()?);
-        let escaped_content = serde_json::to_string(content)?;
-        let completion_body = format!(
-            r#"{{"choices":[{{"message":{{"content":{escaped_content}}}}}],"usage":{{"completion_tokens":12}}}}"#
-        );
         let (requests_tx, requests_rx) = std::sync::mpsc::channel();
         std::thread::spawn(move || {
-            let Ok((mut stream, _)) = listener.accept() else {
-                return;
-            };
-            let request = read_http_request(&mut stream).unwrap_or_default();
-            let _ = requests_tx.send(request);
-            let response = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-                completion_body.len(),
-                completion_body
-            );
-            let _ = stream.write_all(response.as_bytes());
-            let _ = stream.flush();
-            let _ = stream.shutdown(Shutdown::Write);
-            drain_client_close(&mut stream);
+            for completion_body in bodies {
+                let Ok((mut stream, _)) = listener.accept() else {
+                    return;
+                };
+                let request = read_http_request(&mut stream).unwrap_or_default();
+                let _ = requests_tx.send(request);
+                let response = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                    completion_body.len(),
+                    completion_body
+                );
+                let _ = stream.write_all(response.as_bytes());
+                let _ = stream.flush();
+                let _ = stream.shutdown(Shutdown::Write);
+                drain_client_close(&mut stream);
+            }
         });
         Ok(Self {
             endpoint,
@@ -1491,6 +1573,11 @@ impl OpenAiStub {
 }
 
 fn with_deepseek_stub_env<T>(endpoint: &str, run: impl FnOnce() -> Result<T>) -> Result<T> {
+    static ENV_LOCK: std::sync::OnceLock<std::sync::Mutex<()>> = std::sync::OnceLock::new();
+    let _guard = ENV_LOCK
+        .get_or_init(|| std::sync::Mutex::new(()))
+        .lock()
+        .expect("deepseek stub env mutex");
     let previous_base = std::env::var_os("DEEPSEEK_API_BASE_URL");
     let previous_base_short = std::env::var_os("DEEPSEEK_BASE_URL");
     let previous_key = std::env::var_os("DEEPSEEK_API_KEY");
@@ -1537,9 +1624,12 @@ fn read_http_request(stream: &mut std::net::TcpStream) -> std::io::Result<String
             let headers = String::from_utf8_lossy(&buffer[..header_end]);
             let content_length = headers
                 .lines()
-                .find_map(|line| line.split_once(':'))
-                .filter(|(key, _)| key.eq_ignore_ascii_case("content-length"))
-                .and_then(|(_, value)| value.trim().parse::<usize>().ok())
+                .find_map(|line| {
+                    let (key, value) = line.split_once(':')?;
+                    key.eq_ignore_ascii_case("content-length")
+                        .then(|| value.trim().parse::<usize>().ok())
+                        .flatten()
+                })
                 .unwrap_or(0);
             let body_start = header_end + 4;
             while buffer.len().saturating_sub(body_start) < content_length {

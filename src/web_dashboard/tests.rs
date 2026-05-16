@@ -45,6 +45,14 @@ fn writes_static_browser_dashboard() -> Result<()> {
           "command_permissions":[{"tool":"shell","action":"printf ok","profile":"workspace-write","approval_required":false,"risk":"medium","reason":"test"}]
         }"#,
     )?;
+    fs::write(
+        tx.join("tool_results_executor.json"),
+        r#"{
+          "status":"ready",
+          "blocked":false,
+          "rounds":[{"round":1,"response_request_id":"req-1","tool_calls":[{"id":"call-read","name":"read_file","arguments":{"path":"README.md"},"raw_arguments":"{}"}],"results":[{"call_id":"call-read","name":"read_file","status":"ok","permission":{"tool":"read_file","action":"README.md","profile":"read-only","approval_required":false,"risk":"low","reason":"native tool call is read-only"},"content":{"path":"README.md","text":"ok"},"error":null}]}]
+        }"#,
+    )?;
     fs::create_dir_all(tx.join("logs"))?;
     fs::write(tx.join("logs/api-executor-0.stdout"), "tool log output\n")?;
     fs::write(tx.join("report.md"), "# report\n\ntransaction viewer\n")?;
@@ -93,6 +101,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"observability\""));
     assert!(data.contains("\"context_receipt\""));
     assert!(data.contains("\"tool_loop_receipts\""));
+    assert!(data.contains("\"tool_result_receipts\""));
     assert!(data.contains("\"tool_logs\""));
     assert!(data.contains("session_recovery"));
     assert!(data.contains("native_tool_call:call-1"));

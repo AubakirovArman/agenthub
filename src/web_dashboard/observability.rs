@@ -10,6 +10,7 @@ use crate::chat_index;
 use crate::web_dashboard::read::{file_href, read_json};
 
 const MAX_TOOL_LOOPS: usize = 20;
+const MAX_TOOL_RESULTS: usize = 20;
 const MAX_TOOL_LOGS: usize = 24;
 const MAX_LOG_CHARS: usize = 1_600;
 
@@ -20,6 +21,7 @@ pub struct ObservabilityPanel {
     pub session_recovery: Vec<ChatEventItem>,
     pub tool_permissions: Vec<ToolPermissionItem>,
     pub tool_loop_receipts: Vec<ToolLoopReceiptItem>,
+    pub tool_result_receipts: Vec<ToolResultReceiptItem>,
     pub tool_logs: Vec<ToolLogItem>,
 }
 
@@ -62,6 +64,18 @@ pub struct ToolLoopReceiptItem {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct ToolResultReceiptItem {
+    pub tx_id: String,
+    pub role: String,
+    pub status: String,
+    pub blocked: bool,
+    pub blocked_reason: Option<String>,
+    pub rounds: usize,
+    pub results: usize,
+    pub href: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct ToolLogItem {
     pub tx_id: String,
     pub name: String,
@@ -81,6 +95,7 @@ pub fn collect_observability(
         .collect::<Vec<_>>();
     let tool_permissions = collect_chat_tool_permissions(root)?;
     let tool_loop_receipts = collect_tool_loop_receipts(root, rows)?;
+    let tool_result_receipts = collect_tool_result_receipts(root, rows)?;
     let tool_logs = collect_tool_logs(root, rows)?;
     Ok(ObservabilityPanel {
         context_receipt: read_context_receipt(root),
@@ -88,6 +103,7 @@ pub fn collect_observability(
         session_recovery,
         tool_permissions,
         tool_loop_receipts,
+        tool_result_receipts,
         tool_logs,
     })
 }
@@ -174,6 +190,64 @@ fn collect_tool_loop_receipts(
     Ok(receipts)
 }
 
+fn collect_tool_result_receipts(
+    root: &Path,
+    rows: &[agent_dir::TransactionRow],
+) -> Result<Vec<ToolResultReceiptItem>> {
+    let paths = AgentPaths::new(root);
+    let mut receipts = Vec::new();
+    for row in rows.iter().rev().take(30) {
+        let tx_dir = paths.tx_dir(&row.id);
+        if !tx_dir.exists() {
+            continue;
+        }
+        for entry in fs::read_dir(&tx_dir).with_context(|| format!("read {}", tx_dir.display()))? {
+            let entry = entry?;
+            let path = entry.path();
+            if !entry.file_type()?.is_file() || !is_tool_result_receipt(&path) {
+                continue;
+            }
+            let value = read_json(&path)?;
+            let role = path
+                .file_stem()
+                .and_then(|stem| stem.to_str())
+                .and_then(|stem| stem.strip_prefix("tool_results_"))
+                .unwrap_or("executor")
+                .to_string();
+            let rounds = value
+                .get("rounds")
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let results = rounds
+                .iter()
+                .map(|round| {
+                    round
+                        .get("results")
+                        .and_then(Value::as_array)
+                        .map(Vec::len)
+                        .unwrap_or(0)
+                })
+                .sum();
+            receipts.push(ToolResultReceiptItem {
+                tx_id: row.id.clone(),
+                role,
+                status: text_field(&value, "status").unwrap_or_else(|| "unknown".to_string()),
+                blocked: value
+                    .get("blocked")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false),
+                blocked_reason: text_field(&value, "blocked_reason"),
+                rounds: rounds.len(),
+                results,
+                href: file_href(&path),
+            });
+        }
+    }
+    receipts.truncate(MAX_TOOL_RESULTS);
+    Ok(receipts)
+}
+
 fn collect_tool_logs(root: &Path, rows: &[agent_dir::TransactionRow]) -> Result<Vec<ToolLogItem>> {
     let paths = AgentPaths::new(root);
     let mut logs = Vec::new();
@@ -245,6 +319,12 @@ fn is_tool_loop_receipt(path: &Path) -> bool {
     path.file_name()
         .and_then(|name| name.to_str())
         .is_some_and(|name| name.starts_with("tool_loop_") && name.ends_with(".json"))
+}
+
+fn is_tool_result_receipt(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.starts_with("tool_results_") && name.ends_with(".json"))
 }
 
 fn text_field(value: &Value, key: &str) -> Option<String> {

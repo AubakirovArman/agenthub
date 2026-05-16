@@ -10,6 +10,7 @@ use crate::agent_adapter::AgentRoute;
 use crate::llm_gateway::{classify_tool_call, ToolCall, ToolDefinition};
 use crate::observability::redact_value;
 use crate::tool_permissions::{classify_shell_command, ToolPermissionDecision};
+use crate::tool_registry::{builtin_tool_definitions, result_needs_approval, ToolExecutionResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ApiExecutionPlan {
@@ -42,6 +43,25 @@ pub(super) struct ApiToolLoopReceipt {
     pub(super) blocked_reason: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(super) struct ApiToolResultRound {
+    round: usize,
+    response_request_id: String,
+    tool_calls: Vec<ToolCall>,
+    results: Vec<ToolExecutionResult>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(super) struct ApiToolResultsReceipt {
+    created_at: chrono::DateTime<Utc>,
+    adapter: String,
+    role: String,
+    status: String,
+    rounds: Vec<ApiToolResultRound>,
+    pub(super) blocked: bool,
+    pub(super) blocked_reason: Option<String>,
+}
+
 pub(super) fn api_execution_plan_tool() -> ToolDefinition {
     ToolDefinition {
         name: "agenthub_command_plan".to_string(),
@@ -67,6 +87,12 @@ pub(super) fn api_execution_plan_tool() -> ToolDefinition {
     }
 }
 
+pub(super) fn api_project_tools() -> Vec<ToolDefinition> {
+    let mut tools = vec![api_execution_plan_tool()];
+    tools.extend(builtin_tool_definitions());
+    tools
+}
+
 pub(super) fn parse_api_execution_plan_from_response(
     response: &crate::llm_gateway::LlmResponse,
 ) -> Result<(ApiExecutionPlan, String, String)> {
@@ -85,6 +111,17 @@ pub(super) fn parse_api_execution_plan_from_response(
     })?;
     let plan = parse_api_execution_plan(&content)?;
     Ok((plan, "content_json_fallback".to_string(), content))
+}
+
+pub(super) fn pending_builtin_tool_calls(
+    response: &crate::llm_gateway::LlmResponse,
+) -> Vec<ToolCall> {
+    response
+        .tool_calls
+        .iter()
+        .filter(|call| call.name != "agenthub_command_plan")
+        .cloned()
+        .collect()
 }
 
 pub(super) fn classify_plan_commands(plan: &ApiExecutionPlan) -> Vec<ToolPermissionDecision> {
@@ -139,6 +176,60 @@ pub(super) fn write_api_tool_loop_receipt(
     receipt: &ApiToolLoopReceipt,
 ) -> Result<()> {
     let path = tx_dir.join(format!("tool_loop_{}.json", route.role));
+    let record = redact_value(&serde_json::to_value(receipt)?)?;
+    fs::write(&path, serde_json::to_string_pretty(&record)?)
+        .with_context(|| format!("write {}", path.display()))
+}
+
+pub(super) fn build_api_tool_results_receipt(
+    route: &AgentRoute,
+    rounds: &[ApiToolResultRound],
+) -> ApiToolResultsReceipt {
+    let blocked_result = rounds
+        .iter()
+        .flat_map(|round| round.results.iter())
+        .find(|result| result_needs_approval(result));
+    let blocked_reason = blocked_result.map(|result| {
+        format!(
+            "API builtin tool `{}` blocked `{}`: {}",
+            result.name, result.permission.action, result.permission.reason
+        )
+    });
+    ApiToolResultsReceipt {
+        created_at: Utc::now(),
+        adapter: route.selected_adapter.clone(),
+        role: route.role.clone(),
+        status: if blocked_reason.is_some() {
+            "blocked".to_string()
+        } else {
+            "ready".to_string()
+        },
+        rounds: rounds.to_vec(),
+        blocked: blocked_reason.is_some(),
+        blocked_reason,
+    }
+}
+
+pub(super) fn api_tool_result_round(
+    round: usize,
+    response: &crate::llm_gateway::LlmResponse,
+    tool_calls: Vec<ToolCall>,
+    results: Vec<ToolExecutionResult>,
+) -> ApiToolResultRound {
+    ApiToolResultRound {
+        round,
+        response_request_id: response.request_id.clone(),
+        tool_calls,
+        results,
+    }
+}
+
+pub(super) fn write_api_tool_results_receipt(
+    tx_dir: &Path,
+    route: &AgentRoute,
+    receipt: &ApiToolResultsReceipt,
+) -> Result<()> {
+    let path = tx_dir.join(format!("tool_results_{}.json", route.role));
     let record = redact_value(&serde_json::to_value(receipt)?)?;
     fs::write(&path, serde_json::to_string_pretty(&record)?)
         .with_context(|| format!("write {}", path.display()))

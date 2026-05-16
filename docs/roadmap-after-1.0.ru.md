@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.22-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.23-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -174,7 +174,9 @@ These are the next concrete engineering steps from the current `0.4.22-local-pre
 | `0.4.20` | Resume/rewind/session durability | Done: corrupt chat JSONL lines recover as `session_recovery` events across shell transcript reads, chat index/search, and TUI event rail without losing valid transcript events |
 | `0.4.21` | Provider tool-loop v2 for DeepSeek/Kimi | Done: DeepSeek/Kimi requests can carry native `tools/tool_choice`, responses preserve parsed `tool_calls`, API project execution requests `agenthub_command_plan`, records redacted `tool_loop_<role>.json` receipts, and permission-checks provider-proposed commands before execution |
 | `0.4.22` | Dashboard/observability v2 | Done: browser dashboard and `/api/observability` now show context receipts, recent chat/provider events, tool approvals, native tool-loop receipts, tool log excerpts, costs, diffs, reports, and session recovery state |
-| `0.4.23` | Multi-step tool result reinjection | Provider-requested read/search/shell/file tools run through one registry, append redacted tool results, and continue the same turn without external CLIs |
+| `0.4.23` | Multi-step tool result reinjection | Done: provider-requested `read_file`, `list_dir`, `search`, and read-only `shell` tools run through one AgentHub-owned registry, write redacted `tool_results_<role>.json`, reinject results into the same API project turn, and stop unsafe tools as approval-required |
+| `0.4.24` | Tool registry policy hardening | Add per-tool path/output/time limits to receipts, protected-path explanations, binary-file handling, symlink coverage, and dashboard policy summaries |
+| `0.4.25` | Automatic memory extraction v1 | Extract candidate learnings from completed Chat/Ops/Project turns into the memory inbox only, with source, scope, confidence, diff, and explicit approve/reject flow |
 | `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
 
 ## Current 0.4.x Bridge
@@ -189,10 +191,10 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.22` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, and dashboard observability rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.23` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, and API-native tool-result reinjection rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 
-1. `0.4.23`: complete multi-step tool result reinjection. Provider-requested read/search/shell/file tools should run through one registry, append redacted tool results, and continue the same turn without external CLIs.
-2. `0.4.24`: add bounded tool execution policies for the new registry: max loop count, max output bytes, protected paths, network policy, and per-tool approval thresholds.
+1. `0.4.24`: harden the builtin tool registry policies. Receipts should show path/output/time limits, protected path decisions, binary-file decisions, symlink handling, and dashboard summaries.
+2. `0.4.25`: implement automatic memory extraction behind the existing memory inbox. Nothing should enter active memory without review.
 3. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.

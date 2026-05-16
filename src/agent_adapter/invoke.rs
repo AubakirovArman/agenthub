@@ -9,8 +9,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::agent_adapter::api_tool_loop::{
-    api_execution_plan_tool, build_api_tool_loop_receipt, classify_plan_commands,
-    parse_api_execution_plan_from_response, write_api_tool_loop_receipt, ApiExecutionPlan,
+    api_project_tools, api_tool_result_round, build_api_tool_loop_receipt,
+    build_api_tool_results_receipt, classify_plan_commands, parse_api_execution_plan_from_response,
+    pending_builtin_tool_calls, write_api_tool_loop_receipt, write_api_tool_results_receipt,
+    ApiExecutionPlan,
 };
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
@@ -19,6 +21,9 @@ use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPol
 use crate::observability::{redact_text, redact_value};
 use crate::product_cli::providers;
 use crate::spec::AgentSpec;
+use crate::tool_registry::{execute_tool_call, results_prompt};
+
+const MAX_API_TOOL_ROUNDS: usize = 3;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AdapterRun {
@@ -156,9 +161,8 @@ fn invoke_api_provider(
     }
 
     let started = Instant::now();
-    let prompt = fs::read_to_string(&prompt_path)
+    let base_prompt = fs::read_to_string(&prompt_path)
         .with_context(|| format!("read {}", prompt_path.display()))?;
-    let prompt_tokens = estimate_tokens(&prompt);
     let status = provider_status(worktree, route)?;
     let endpoint = status
         .endpoint
@@ -170,33 +174,86 @@ fn invoke_api_provider(
         providers::api_key_for_status(&status),
         model.clone(),
     );
-    let request = LlmRequest {
-        id: format!(
-            "api-executor-{}-{}",
-            route.role,
-            Utc::now().timestamp_millis()
-        ),
-        role: route.role.clone(),
-        provider: route.selected_adapter.clone(),
-        model,
-        prompt: Some(prompt),
-        context_pack_hash: "transaction".to_string(),
-        prompt_hash: route.role.clone(),
-        prompt_tokens,
-        response_format: None,
-        tools: vec![api_execution_plan_tool()],
-        tool_choice: Some(ToolChoice::Auto),
-    };
-    let response = complete_with_retry(
-        &provider,
-        request,
-        &RetryPolicy {
-            max_attempts: 2,
-            backoff_ms: vec![500],
-        },
-        None,
-    )?;
-    let (plan, plan_source, content) = parse_api_execution_plan_from_response(&response)?;
+    let mut prompt = base_prompt.clone();
+    let mut tool_rounds = Vec::new();
+    let mut final_response = None;
+    let mut final_plan = None;
+    let mut final_plan_source = None;
+    let mut final_content = None;
+    for round in 0..=MAX_API_TOOL_ROUNDS {
+        let request = LlmRequest {
+            id: format!(
+                "api-executor-{}-{}-{}",
+                route.role,
+                round,
+                Utc::now().timestamp_millis()
+            ),
+            role: route.role.clone(),
+            provider: route.selected_adapter.clone(),
+            model: model.clone(),
+            prompt: Some(prompt.clone()),
+            context_pack_hash: "transaction".to_string(),
+            prompt_hash: format!("{}-round-{}", route.role, round),
+            prompt_tokens: estimate_tokens(&prompt),
+            response_format: None,
+            tools: api_project_tools(),
+            tool_choice: Some(ToolChoice::Auto),
+        };
+        let response = complete_with_retry(
+            &provider,
+            request,
+            &RetryPolicy {
+                max_attempts: 2,
+                backoff_ms: vec![500],
+            },
+            None,
+        )?;
+        let builtin_calls = pending_builtin_tool_calls(&response);
+        if !builtin_calls.is_empty() {
+            let results = builtin_calls
+                .iter()
+                .map(|call| execute_tool_call(worktree, call))
+                .collect::<Vec<_>>();
+            tool_rounds.push(api_tool_result_round(
+                round + 1,
+                &response,
+                builtin_calls,
+                results.clone(),
+            ));
+            let tool_results_receipt = build_api_tool_results_receipt(route, &tool_rounds);
+            write_api_tool_results_receipt(tx_dir, route, &tool_results_receipt)?;
+            if tool_results_receipt.blocked {
+                return Err(anyhow!(
+                    "{}",
+                    tool_results_receipt
+                        .blocked_reason
+                        .as_deref()
+                        .unwrap_or("API builtin tool call blocked")
+                ));
+            }
+            if round == MAX_API_TOOL_ROUNDS {
+                return Err(anyhow!(
+                    "API provider exceeded {} builtin tool result rounds without returning agenthub_command_plan",
+                    MAX_API_TOOL_ROUNDS
+                ));
+            }
+            prompt.push_str(&results_prompt(round + 1, &results)?);
+            continue;
+        }
+
+        let (plan, plan_source, content) = parse_api_execution_plan_from_response(&response)?;
+        final_response = Some(response);
+        final_plan = Some(plan);
+        final_plan_source = Some(plan_source);
+        final_content = Some(content);
+        break;
+    }
+    let response =
+        final_response.ok_or_else(|| anyhow!("API provider did not return an execution plan"))?;
+    let plan = final_plan.ok_or_else(|| anyhow!("API execution plan missing after tool loop"))?;
+    let plan_source =
+        final_plan_source.ok_or_else(|| anyhow!("API execution plan source missing"))?;
+    let content = final_content.ok_or_else(|| anyhow!("API execution content missing"))?;
     let command_permissions = classify_plan_commands(&plan);
     let tool_loop =
         build_api_tool_loop_receipt(route, &response, &plan_source, &command_permissions);
@@ -342,7 +399,7 @@ fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<P
 
 fn render_prompt(spec: &AgentSpec, route: &AgentRoute) -> String {
     format!(
-        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n- If you are an API provider with tools, call `agenthub_command_plan` with {{\"summary\":\"short summary\",\"commands\":[\"shell command 1\",\"shell command 2\"]}}.\n- If tools are unavailable, return only that JSON object as plain content.\n- API commands must be non-interactive, deterministic, and must create or edit files using shell-safe commands such as mkdir, printf, cat <<'EOF', npm, cargo, or test runners.\n- Do not include sudo, reboot, destructive disk commands, or commands that touch denied paths.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands after adapter step:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
+        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n- If you need workspace context first, call bounded read-only tools: `read_file`, `list_dir`, `search`, or read-only `shell`.\n- AgentHub will append redacted tool results back into this same turn; after enough context, call `agenthub_command_plan` with {{\"summary\":\"short summary\",\"commands\":[\"shell command 1\",\"shell command 2\"]}}.\n- If tools are unavailable, return only that JSON object as plain content.\n- API commands must be non-interactive, deterministic, and must create or edit files using shell-safe commands such as mkdir, printf, cat <<'EOF', npm, cargo, or test runners.\n- Do not include sudo, reboot, destructive disk commands, or commands that touch denied paths.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands after adapter step:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
         route.role,
         route.selected_adapter,
         route.model.as_deref().unwrap_or("<default>"),

@@ -37,7 +37,7 @@ agenthub exec "ответь одним словом: ok" --jsonl
 
 В initialized project `exec` обрабатывает file-changing request как interactive shell: пишет approval-required draft, emits `draft_created`, `approval_required` и `turn_finished status=approval_required` JSONL events, затем выходит с кодом `2`, а не запускает изменение без approval.
 
-DeepSeek/Kimi project execution запрашивает native `agenthub_command_plan` tool call, если provider поддерживает tools, иначе откатывается к JSON content, пишет redacted `tool_loop_<role>.json` receipt и permission-checks proposed commands перед execution.
+DeepSeek/Kimi project execution теперь может сначала выполнить bounded AgentHub-owned `read_file`, `list_dir`, `search` и read-only `shell` tools, записать redacted `tool_results_<role>.json` receipts, reinject эти results в тот же provider turn, затем запросить native `agenthub_command_plan` tool call или JSON fallback и permission-checks proposed commands перед execution.
 
 ## Chat Usage Stats
 

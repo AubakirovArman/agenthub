@@ -52,6 +52,7 @@ function renderObservability({ el, badge }) {
   renderContextReceipt(el);
   renderChatEvents(el, badge);
   renderToolLoopReceipts(el, badge);
+  renderToolResultReceipts(el, badge);
   renderToolLogs(el);
 }
 
@@ -129,6 +130,22 @@ function renderToolLoopReceipts(el, badge) {
     el("p", { text: item.action || item.reason || "" }),
   ]));
   panel.replaceChildren(...receiptNodes, ...permissionNodes);
+}
+
+function renderToolResultReceipts(el, badge) {
+  const panel = document.querySelector("#toolResultReceipts");
+  if (!panel) return;
+  const receipts = (data.observability && data.observability.tool_result_receipts) || [];
+  if (receipts.length === 0) {
+    panel.replaceChildren(el("div", { class: "item muted", text: "No tool result receipts yet" }));
+    return;
+  }
+  panel.replaceChildren(...receipts.slice(0, 8).map((receipt) => el("div", { class: "item" }, [
+    el("a", { href: receipt.href, text: `${receipt.tx_id} ${receipt.role}` }),
+    el("div", {}, [badge(receipt.blocked ? "blocked" : receipt.status)]),
+    el("small", { text: `${receipt.rounds} rounds | ${receipt.results} results` }),
+    receipt.blocked_reason ? el("p", { class: "bad-text", text: receipt.blocked_reason }) : el("p", { text: "redacted builtin tool results recorded" }),
+  ])));
 }
 
 function toolPermissionSummary(items) {

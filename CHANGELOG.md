@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.23-local-preview - 2026-05-16
+
+- Add an AgentHub-owned builtin tool registry for API project execution with bounded `read_file`, `list_dir`, `search`, and read-only `shell` tools.
+- Continue DeepSeek/Kimi project turns after provider-requested builtin tool calls by appending redacted `tool_results_<role>.json` receipts back into the prompt before requesting the final `agenthub_command_plan`.
+- Extend dashboard observability and transaction coverage so builtin tool-result receipts are visible alongside tool-loop receipts and unsafe tool calls stop as approval-required instead of executing silently.
+
 ## 0.4.22-local-preview - 2026-05-16
 
 - Add a dashboard observability panel that surfaces context receipts, recent live chat/provider events, session recovery events, tool permission entries, native tool-loop receipts, and recent tool log excerpts from the AgentHub-owned event store.
