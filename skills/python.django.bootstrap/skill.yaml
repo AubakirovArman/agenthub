@@ -1,0 +1,25 @@
+skill:
+  id: python.django.bootstrap
+  version: 1.0.0
+  description: Creates a scoped Django starter web application without installing packages.
+requires:
+  workspace: code.git
+  runtime_pack: python.web
+provides:
+  actions: [create_django_project, create_app, create_template, create_static_asset]
+policies:
+  require_scope: true
+  allow_package_change: false
+verifiers: [python_compileall, file_presence, scope_guard]
+common_errors: [missing_manage_py, missing_settings_module, out_of_scope_file]
+examples:
+  agent_spec: docs/natural-language.en.md#built-in-django-scaffold
+fixtures:
+  project: fixture:empty-git-project
+tests:
+  success: scaffold files compile and required files exist
+  failure: write outside allowed Django scaffold scope and expect rollback
+prompt_fragments:
+  - Create only the scaffold files declared in scope.allow.
+  - Do not run pip install during scaffold transactions.
+  - Put runtime setup instructions in docs/django-quickstart.md.

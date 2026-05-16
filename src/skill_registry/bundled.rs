@@ -17,6 +17,7 @@ const BUNDLED: &[&str] = &[
     include_str!("../../skills/design.reuse_existing_style/skill.yaml"),
     include_str!("../../skills/infra.terraform_plan/skill.yaml"),
     include_str!("../../skills/python.data_artifact/skill.yaml"),
+    include_str!("../../skills/python.django.bootstrap/skill.yaml"),
     include_str!("../../skills/verifier.web_runtime_smoke/skill.yaml"),
     include_str!("../../skills/web.add_page/skill.yaml"),
     include_str!("../../skills/web.reuse_component/skill.yaml"),

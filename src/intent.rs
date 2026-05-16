@@ -1,5 +1,9 @@
 mod clarify;
 mod defaults;
+mod django;
+mod django_assets;
+mod django_files;
+mod django_python;
 mod file_request;
 mod normalize;
 mod render;

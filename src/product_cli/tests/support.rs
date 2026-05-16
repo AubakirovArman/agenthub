@@ -37,6 +37,29 @@ pub(super) fn with_openai_env_model<T>(
     result
 }
 
+pub(super) fn with_kimi_env<T>(
+    base_url: Option<&str>,
+    api_key: Option<&str>,
+    run: impl FnOnce() -> Result<T>,
+) -> Result<T> {
+    let lock = ENV_LOCK.get_or_init(|| Mutex::new(()));
+    let _guard = lock.lock().expect("env lock poisoned");
+    let previous_base = std::env::var_os("KIMI_API_BASE_URL");
+    let previous_key = std::env::var_os("KIMI_API_KEY");
+    let previous_moonshot = std::env::var_os("MOONSHOT_API_KEY");
+    let previous_model = std::env::var_os("KIMI_MODEL");
+    set_optional_env("KIMI_API_BASE_URL", base_url);
+    set_optional_env("KIMI_API_KEY", api_key);
+    set_optional_env("MOONSHOT_API_KEY", None);
+    set_optional_env("KIMI_MODEL", Some("moonshot-test"));
+    let result = run();
+    restore_env("KIMI_API_BASE_URL", previous_base);
+    restore_env("KIMI_API_KEY", previous_key);
+    restore_env("MOONSHOT_API_KEY", previous_moonshot);
+    restore_env("KIMI_MODEL", previous_model);
+    result
+}
+
 pub(super) fn openai_stub_server(content: &str, tokens: usize) -> Result<OpenAiStub> {
     let listener = TcpListener::bind("127.0.0.1:0")?;
     let endpoint = format!("http://{}", listener.local_addr()?);

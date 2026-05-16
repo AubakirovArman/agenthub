@@ -75,8 +75,10 @@ agenthub providers list
 agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
+agenthub providers setup kimi-api
 agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers test codex
+KIMI_API_KEY=... agenthub providers test kimi-api
 agenthub providers diagnose codex
 agenthub providers set executor codex
 agenthub providers fallback reviewer gemini kimi openai-http
@@ -96,6 +98,7 @@ AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagn
 - `codex`: wrapper для внешнего Codex CLI.
 - `gemini`: wrapper для внешнего Gemini CLI.
 - `kimi`: wrapper для внешнего Kimi CLI.
+- `kimi-api`: Kimi OpenAI-compatible API profile, по умолчанию `https://api.moonshot.cn/v1`.
 - `openai-http`: OpenAI-compatible HTTP или HTTPS endpoint.
 
 `setup` настраивает provider только если он доступен. При успехе он записывает `default_provider`, сохраняет command template для CLI providers, печатает binary или endpoint, показывает dry-run mode и следующую команду `agenthub ask`.
@@ -111,7 +114,7 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` печатает binary или endpoint location, version если доступна, rendered command template, auth hint, status hint, install hint и provider-specific details. Для CLI providers он также проверяет известные credential markers без печати secret values: Codex проверяет `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` и `$HOME/.codex/auth.json`; Gemini проверяет `GEMINI_API_KEY`, `GOOGLE_API_KEY` и `$HOME/.gemini`; Kimi проверяет `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` и `$HOME/.config/kimi`. Если markers не найдены, статус будет `cli_managed_unknown`, потому что provider CLI всё ещё может быть залогинен другим способом. Для `openai-http` diagnose показывает scheme, model, API-key presence и отправляет к `providers test` для live request.
+`providers diagnose <id>` печатает binary или endpoint location, version если доступна, rendered command template, auth hint, status hint, install hint и provider-specific details. Для CLI providers он также проверяет известные credential markers без печати secret values: Codex проверяет `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` и `$HOME/.codex/auth.json`; Gemini проверяет `GEMINI_API_KEY`, `GOOGLE_API_KEY` и `$HOME/.gemini`; Kimi проверяет `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` и `$HOME/.config/kimi`. Если markers не найдены, статус будет `cli_managed_unknown`, потому что provider CLI всё ещё может быть залогинен другим способом. `kimi-api` diagnose показывает endpoint, model и готовность API-key env через `KIMI_API_KEY` или `MOONSHOT_API_KEY`. Для `openai-http` diagnose показывает scheme, model, API-key presence и отправляет к `providers test` для live request.
 
 `providers set <role> <provider>` сохраняет `provider.role.<role>` в `.agent/config.yaml`. `providers fallback <role> ...` сохраняет comma-separated fallback chain в `provider.fallback.<role>`. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager и worker.
 

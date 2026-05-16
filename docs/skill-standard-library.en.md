@@ -14,7 +14,9 @@ Web: `web.add_page`, `web.runtime_smoke`, `web.reuse_component`.
 
 Next.js and helper skills: `code.nextjs.add_page`, `design.reuse_existing_style`, `verifier.web_runtime_smoke`.
 
-Domain: `python.data_artifact`, `infra.terraform_plan`, `content.article_outline`.
+Domain: `python.data_artifact`, `python.django.bootstrap`, `infra.terraform_plan`, `content.article_outline`.
+
+`python.django.bootstrap` is used by the natural-language request `create a Django web application`. It creates a scoped Django starter project and verifies Python syntax without running dependency installation inside the transaction.
 
 ## Quality Gates
 

@@ -54,9 +54,10 @@ agenthub
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> создай Django веб приложение
 ```
 
-AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope, commands и risk, спрашивает inline approval с вариантами `diff`, `details` и `edit`, затем запускает transaction с live journal progress в interactive terminal. Standard skills встроены в binary, поэтому новый initialized project может запускать built-in file/page workflows без копирования repository `skills/` directory. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
+AgentHub превращает сообщение в draft plan, показывает target files, provider, verifier profile, scope, commands и risk, спрашивает inline approval с вариантами `diff`, `details` и `edit`, затем запускает transaction с live journal progress в interactive terminal. Standard skills встроены в binary, поэтому новый initialized project может запускать built-in file, page и Django scaffold workflows без копирования repository `skills/` directory. После выполнения он подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
 
 Внутри shell:
 
@@ -71,6 +72,7 @@ Scriptable commands остаются для automation:
 
 ```bash
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub run "создай Django веб приложение" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
 agenthub tx diff latest
 agenthub tx logs latest
@@ -91,12 +93,13 @@ agenthub providers set executor codex
 agenthub run "add a small health-check page" --no-commit
 ```
 
-Аналогичные команды есть для `gemini`, `kimi`, `command` и `openai-http`. OpenAI-compatible endpoints используют `AGENTHUB_OPENAI_COMPAT_BASE_URL` и optional bearer-token configuration.
+Аналогичные команды есть для `gemini`, `kimi`, `kimi-api`, `command` и `openai-http`. `kimi-api` по умолчанию использует `https://api.moonshot.cn/v1` и берёт ключ из `KIMI_API_KEY` или `MOONSHOT_API_KEY`; generic OpenAI-compatible endpoints используют `AGENTHUB_OPENAI_COMPAT_BASE_URL` и optional bearer-token configuration.
 Reusable HTTP profiles можно сохранить по имени:
 
 ```bash
 agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers setup local-vllm
+KIMI_API_KEY=... agenthub providers test kimi-api
 ```
 
 Документы по providers:

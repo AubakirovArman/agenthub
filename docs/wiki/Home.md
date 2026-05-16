@@ -15,6 +15,7 @@ Then type a normal task:
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> create a Django web application
 ```
 
 ## Daily Workflow
@@ -27,7 +28,9 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Use `agenthub tui --live` for a terminal dashboard with transactions, providers, memory, approvals, and next actions.
 - The dashboard includes provider status, approval inbox, memory browser, history browser, and transaction viewer panes for report, diff, and logs.
 - Use `agenthub aal check <file.aal>` for structured language diagnostics, supported workspace/topology hints, and golden AgentIR/DAG checks.
+- Natural language can create bounded files, Next.js pages, and a Django starter scaffold with verifier checks.
 - Save reusable local model endpoints with `agenthub providers add openai-http --name local-vllm --url ...`.
+- Check Kimi API directly with `KIMI_API_KEY=... agenthub providers test kimi-api`.
 - Use `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` to manage chat sessions with auto titles; filter with `/chats status:COMMITTED provider:codex date:today`.
 - Use `/context` to preview current chat, recent messages, memory, and selected transaction context.
 - Approval prompts show risk and support `diff`, `details`, and `edit`.

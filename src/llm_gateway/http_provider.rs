@@ -95,6 +95,8 @@ fn completion_url(endpoint: &str) -> String {
     let endpoint = endpoint.trim_end_matches('/');
     if endpoint.ends_with("/v1/chat/completions") {
         endpoint.to_string()
+    } else if endpoint.ends_with("/v1") {
+        format!("{endpoint}/chat/completions")
     } else {
         format!("{endpoint}/v1/chat/completions")
     }

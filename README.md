@@ -54,9 +54,10 @@ The default product surface is now chat-first. On first launch AgentHub can crea
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> create a Django web application
 ```
 
-AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. Standard skills are bundled into the binary, so a newly initialized project can run the built-in file/page workflows without copying the repository `skills/` directory. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
+AgentHub turns the message into a draft plan, shows the target files, provider, verifier profile, scope, commands, and risk, asks for inline approval with `diff`, `details`, and `edit` options, then runs the transaction with live journal progress in interactive terminals. Standard skills are bundled into the binary, so a newly initialized project can run the built-in file, page, and Django scaffold workflows without copying the repository `skills/` directory. After execution it suggests `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
 Inside the shell:
 
@@ -71,6 +72,7 @@ Scriptable commands still exist for automation:
 
 ```bash
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
 agenthub tx diff latest
 agenthub tx logs latest
@@ -91,13 +93,14 @@ agenthub providers set executor codex
 agenthub run "add a small health-check page" --no-commit
 ```
 
-Equivalent setup commands exist for `gemini`, `kimi`, `command`, and `openai-http`. OpenAI-compatible endpoints use `AGENTHUB_OPENAI_COMPAT_BASE_URL` and optional bearer-token configuration.
+Equivalent setup commands exist for `gemini`, `kimi`, `kimi-api`, `command`, and `openai-http`. `kimi-api` defaults to `https://api.moonshot.cn/v1` and uses `KIMI_API_KEY` or `MOONSHOT_API_KEY`; generic OpenAI-compatible endpoints use `AGENTHUB_OPENAI_COMPAT_BASE_URL` and optional bearer-token configuration.
 Inside the chat shell, `/providers` opens a wizard with provider readiness, default markers, role/fallback setup, named profiles, and copy-ready next actions.
 Reusable HTTP profiles can be saved by name:
 
 ```bash
 agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers setup local-vllm
+KIMI_API_KEY=... agenthub providers test kimi-api
 ```
 
 Provider details:

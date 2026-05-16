@@ -73,6 +73,18 @@ pub fn supported() -> Vec<ProviderInfo> {
             note: "install the Kimi CLI and make `kimi` available on PATH",
         },
         ProviderInfo {
+            id: "kimi-api".to_string(),
+            binary: None,
+            endpoint_env: Some("KIMI_API_BASE_URL"),
+            template: None,
+            credential_env: &["KIMI_API_KEY", "MOONSHOT_API_KEY"],
+            credential_paths: &[],
+            auth_hint: "set KIMI_API_KEY or MOONSHOT_API_KEY for the Kimi OpenAI-compatible API",
+            status_hint:
+                "providers test performs a live Kimi API completion request and optional model probe",
+            note: "OpenAI-compatible Kimi API endpoint, defaulting to https://api.moonshot.cn/v1",
+        },
+        ProviderInfo {
             id: "openai-http".to_string(),
             binary: None,
             endpoint_env: Some("AGENTHUB_OPENAI_COMPAT_BASE_URL"),

@@ -34,6 +34,22 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
     let mut statuses = supported()
         .into_iter()
         .map(|info| {
+            if info.id == "kimi-api" {
+                let api_key_env = kimi_api_key_env();
+                return ProviderStatus {
+                    info,
+                    available: api_key_env
+                        .as_deref()
+                        .and_then(|key| std::env::var(key).ok())
+                        .is_some(),
+                    path: None,
+                    endpoint: Some(kimi_api_base_url()),
+                    model: Some(kimi_api_model()),
+                    api_key_env,
+                    profile_kind: Some("openai-http".to_string()),
+                    is_default: "kimi-api" == default,
+                };
+            }
             let path = info.binary.and_then(find_executable);
             let endpoint = info
                 .endpoint_env
@@ -81,6 +97,33 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
         });
     }
     Ok(statuses)
+}
+
+fn kimi_api_base_url() -> String {
+    std::env::var("KIMI_API_BASE_URL")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "https://api.moonshot.cn/v1".to_string())
+}
+
+fn kimi_api_model() -> String {
+    std::env::var("KIMI_MODEL")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "moonshot-v1-8k".to_string())
+}
+
+fn kimi_api_key_env() -> Option<String> {
+    ["KIMI_API_KEY", "MOONSHOT_API_KEY"]
+        .into_iter()
+        .find(|key| {
+            std::env::var(key)
+                .ok()
+                .filter(|value| !value.is_empty())
+                .is_some()
+        })
+        .or(Some("KIMI_API_KEY"))
+        .map(str::to_string)
 }
 
 pub fn render_status(project_root: &Path) -> Result<String> {

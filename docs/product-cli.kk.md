@@ -75,8 +75,10 @@ agenthub providers list
 agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
+agenthub providers setup kimi-api
 agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers test codex
+KIMI_API_KEY=... agenthub providers test kimi-api
 agenthub providers diagnose codex
 agenthub providers set executor codex
 agenthub providers fallback reviewer gemini kimi openai-http
@@ -96,6 +98,7 @@ Supported providers:
 - `codex`: external Codex CLI wrapper.
 - `gemini`: external Gemini CLI wrapper.
 - `kimi`: external Kimi CLI wrapper.
+- `kimi-api`: Kimi OpenAI-compatible API profile, default `https://api.moonshot.cn/v1`.
 - `openai-http`: OpenAI-compatible HTTP немесе HTTPS endpoint.
 
 `setup` provider қолжетімді болса ғана config жазады. Сәтті болса `default_provider` жазады, CLI providers үшін command template сақтайды, binary немесе endpoint көрсетеді, dry-run mode шығарады және келесі `agenthub ask` command ұсынады.
@@ -111,7 +114,7 @@ dry_run	built-in deterministic runner ready
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
-`providers diagnose <id>` binary немесе endpoint location, version available болса, rendered command template, auth hint, status hint, install hint және provider-specific details шығарады. CLI providers үшін ол белгілі credential markers тексереді, бірақ secret values шығармайды: Codex `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` және `$HOME/.codex/auth.json` тексереді; Gemini `GEMINI_API_KEY`, `GOOGLE_API_KEY` және `$HOME/.gemini` тексереді; Kimi `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` және `$HOME/.config/kimi` тексереді. Markers табылмаса, статус `cli_managed_unknown` болады, себебі provider CLI басқа mechanism арқылы logged in болуы мүмкін. `openai-http` diagnose scheme, model, API-key presence көрсетіп, live request үшін `providers test` ұсынады.
+`providers diagnose <id>` binary немесе endpoint location, version available болса, rendered command template, auth hint, status hint, install hint және provider-specific details шығарады. CLI providers үшін ол белгілі credential markers тексереді, бірақ secret values шығармайды: Codex `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` және `$HOME/.codex/auth.json` тексереді; Gemini `GEMINI_API_KEY`, `GOOGLE_API_KEY` және `$HOME/.gemini` тексереді; Kimi `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` және `$HOME/.config/kimi` тексереді. Markers табылмаса, статус `cli_managed_unknown` болады, себебі provider CLI басқа mechanism арқылы logged in болуы мүмкін. `kimi-api` diagnose endpoint, model және `KIMI_API_KEY` немесе `MOONSHOT_API_KEY` арқылы API-key env readiness көрсетеді. `openai-http` diagnose scheme, model, API-key presence көрсетіп, live request үшін `providers test` ұсынады.
 
 `providers set <role> <provider>` `.agent/config.yaml` ішіне `provider.role.<role>` сақтайды. `providers fallback <role> ...` comma-separated fallback chain мәнін `provider.fallback.<role>` ішіне жазады. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager және worker.
 

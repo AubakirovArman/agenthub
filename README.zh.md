@@ -54,9 +54,10 @@ agenthub
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> create a Django web application
 ```
 
-AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。Standard skills 已内置进 binary，因此 newly initialized project 不需要复制 repository `skills/` directory 就能运行 built-in file/page workflows。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
+AgentHub 会把消息转换成 draft plan，显示 target files、provider、verifier profile、scope、commands 和 risk，询问带 `diff`、`details`、`edit` 选项的 inline approval，然后在 interactive terminal 中用 live journal progress 运行 transaction。Standard skills 已内置进 binary，因此 newly initialized project 不需要复制 repository `skills/` directory 就能运行 built-in file、page 和 Django scaffold workflows。执行后会提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
 
 Shell 内：
 
@@ -71,6 +72,7 @@ Scriptable commands 仍然保留给 automation：
 
 ```bash
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
 agenthub tx diff latest
 agenthub tx logs latest
@@ -91,12 +93,13 @@ agenthub providers set executor codex
 agenthub run "add a small health-check page" --no-commit
 ```
 
-`gemini`、`kimi`、`command` 和 `openai-http` 也有等价命令。OpenAI-compatible endpoints 使用 `AGENTHUB_OPENAI_COMPAT_BASE_URL` 和 optional bearer-token configuration。
+`gemini`、`kimi`、`kimi-api`、`command` 和 `openai-http` 也有等价命令。`kimi-api` 默认使用 `https://api.moonshot.cn/v1`，并从 `KIMI_API_KEY` 或 `MOONSHOT_API_KEY` 读取密钥；generic OpenAI-compatible endpoints 使用 `AGENTHUB_OPENAI_COMPAT_BASE_URL` 和 optional bearer-token configuration。
 Reusable HTTP profiles 可以按名称保存：
 
 ```bash
 agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers setup local-vllm
+KIMI_API_KEY=... agenthub providers test kimi-api
 ```
 
 Provider 文档：

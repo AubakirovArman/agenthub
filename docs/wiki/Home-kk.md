@@ -15,6 +15,7 @@ agenthub
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> create a Django web application
 ```
 
 ## Күнделікті workflow
@@ -27,7 +28,9 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Transactions, providers, memory, approvals және next actions бар terminal dashboard үшін `agenthub tui --live` қолдан.
 - Dashboard provider status, approval inbox, memory browser, history browser және report, diff, logs үшін transaction viewer panes береді.
 - Structured language diagnostics, supported workspace/topology hints және golden AgentIR/DAG checks үшін `agenthub aal check <file.aal>` қолдан.
+- Natural language bounded files, Next.js pages және verifier checks бар Django starter scaffold жасай алады.
 - Reusable local model endpoints сақтау үшін `agenthub providers add openai-http --name local-vllm --url ...` қолдан.
+- Kimi API тікелей тексеру: `KIMI_API_KEY=... agenthub providers test kimi-api`.
 - Auto titles бар chat sessions басқару үшін `/chats`, `/search`, `/rename`, `/pin` және `/unpin` қолдан; filter: `/chats status:COMMITTED provider:codex date:today`.
 - `/context` current chat, recent messages, memory және selected transaction context preview көрсетеді.
 - Approval prompts risk көрсетеді және `diff`, `details`, `edit` қолдайды.

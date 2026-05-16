@@ -177,7 +177,7 @@ fn append_http_details(out: &mut String, status: &ProviderStatus) {
 fn dry_run_message(provider: &str) -> &'static str {
     match provider {
         "command" => "built-in deterministic runner ready",
-        "openai-http" => "HTTP request test is performed by providers test",
+        "openai-http" | "kimi-api" => "HTTP request test is performed by providers test",
         _ => "command template ready; live auth is provider-managed",
     }
 }

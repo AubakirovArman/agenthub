@@ -15,6 +15,7 @@ agenthub
 
 ```text
 agenthub> create docs/agenthub-check.md with a one-line AgentHub check
+agenthub> create a Django web application
 ```
 
 ## 日常工作流
@@ -27,7 +28,9 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - 使用 `agenthub tui --live` 打开包含 transactions、providers、memory、approvals 和 next actions 的 terminal dashboard。
 - Dashboard 包含 provider status、approval inbox、memory browser、history browser，以及用于 report、diff 和 logs 的 transaction viewer panes。
 - 使用 `agenthub aal check <file.aal>` 获取 structured language diagnostics、supported workspace/topology hints，以及 golden AgentIR/DAG checks。
+- Natural language 可以创建 bounded files、Next.js pages，以及带 verifier checks 的 Django starter scaffold。
 - 使用 `agenthub providers add openai-http --name local-vllm --url ...` 保存 reusable local model endpoints。
+- 可直接检查 Kimi API：`KIMI_API_KEY=... agenthub providers test kimi-api`。
 - 使用 `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 管理带 auto titles 的 chat sessions；可用 `/chats status:COMMITTED provider:codex date:today` 过滤。
 - `/context` 可预览 current chat、recent messages、memory 和 selected transaction context。
 - Approval prompts 会显示 risk，并支持 `diff`、`details` 和 `edit`。

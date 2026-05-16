@@ -6,6 +6,7 @@ use super::{config, doctor, providers};
 
 mod bootstrap_tests;
 mod open_tests;
+mod provider_kimi_tests;
 mod provider_profile_tests;
 mod support;
 use support::{openai_stub_server, with_openai_env};

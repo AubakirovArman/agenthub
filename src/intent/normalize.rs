@@ -1,5 +1,6 @@
 use super::clarify;
 use super::defaults;
+use super::django;
 use super::file_request;
 use super::render;
 use super::{IntentOptions, IntentPreview};
@@ -22,6 +23,17 @@ pub(super) fn to_preview(request: &str, options: IntentOptions) -> IntentPreview
                 &defaults,
                 options.approval_required,
             ),
+        };
+    }
+    if let Some(django) = django::detect(request) {
+        return IntentPreview {
+            request: request.to_string(),
+            inferred_intent: "code.django_scaffold".to_string(),
+            unknowns: Vec::new(),
+            questions: Vec::new(),
+            defaults: defaults.clone(),
+            approval_required: options.approval_required,
+            agent_spec_yaml: django::spec_yaml(&django, &defaults, options.approval_required),
         };
     }
     let route = infer_route(request);

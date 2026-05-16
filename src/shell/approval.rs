@@ -173,7 +173,21 @@ fn is_dependency_change(command: &str) -> bool {
         "pip install",
     ]
     .iter()
-    .any(|needle| command.contains(needle))
+    .any(|needle| {
+        command
+            .lines()
+            .map(str::trim_start)
+            .any(|line| command_starts_with(line, needle))
+    })
+}
+
+fn command_starts_with(line: &str, needle: &str) -> bool {
+    line == needle
+        || line
+            .strip_prefix(needle)
+            .is_some_and(|rest| rest.starts_with(' '))
+        || line.contains(&format!("&& {needle}"))
+        || line.contains(&format!("; {needle}"))
 }
 
 fn list_or_none(items: &[String]) -> String {

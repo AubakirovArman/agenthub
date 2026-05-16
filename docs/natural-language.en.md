@@ -30,6 +30,16 @@ Mark the preview as requiring approval:
 agenthub ask --approval-required "Add /pricing page"
 ```
 
+## Built-In Django Scaffold
+
+AgentHub can turn a plain Django request into a scoped scaffold transaction:
+
+```bash
+agenthub run "create a Django web application"
+```
+
+The generated AgentSpec uses `python.django.bootstrap`, writes `manage.py`, `requirements.txt`, `agenthub_site/**`, `web/**`, `templates/**`, `static/**`, and `docs/django-quickstart.md`, then verifies the scaffold with `python -m compileall` and file-presence checks. It does not run `pip install`; the quickstart doc tells the user how to create a virtual environment and install dependencies after the transaction.
+
 ## Clarification Questions
 
 If AgentHub cannot infer a blocking field, it still emits a safe preview and prints questions on stderr:

@@ -30,6 +30,16 @@ agenthub ask "Add /pricing page" --output .agent/plans/pricing.yaml
 agenthub ask --approval-required "Add /pricing page"
 ```
 
+## Built-In Django Scaffold
+
+AgentHub 可以把普通 Django request 转成 scoped scaffold transaction：
+
+```bash
+agenthub run "create a Django web application"
+```
+
+生成的 AgentSpec 使用 `python.django.bootstrap`，写入 `manage.py`、`requirements.txt`、`agenthub_site/**`、`web/**`、`templates/**`、`static/**` 和 `docs/django-quickstart.md`，然后用 `python -m compileall` 和 file-presence checks 验证 scaffold。它不会运行 `pip install`；quickstart doc 会说明 transaction 之后如何创建 virtual environment 并安装 dependencies。
+
 ## Clarification Questions
 
 如果 AgentHub 无法推断 blocking field，它仍会输出 safe preview，并在 stderr 打印 questions：

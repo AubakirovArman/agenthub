@@ -58,3 +58,22 @@ fn file_create_request_generates_runnable_spec() {
     let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
     assert!(spec.validate().is_ok());
 }
+
+#[test]
+fn django_request_generates_scaffold_spec() {
+    let preview = normalize_to_spec("создай Django веб приложение");
+
+    assert_eq!(preview.inferred_intent, "code.django_scaffold");
+    assert!(preview.unknowns.is_empty());
+    assert!(preview
+        .agent_spec_yaml
+        .contains("- python.django.bootstrap"));
+    assert!(preview.agent_spec_yaml.contains("target: agenthub_site"));
+    assert!(preview.agent_spec_yaml.contains("manage.py"));
+    assert!(preview.agent_spec_yaml.contains("python -m compileall"));
+    assert!(preview
+        .agent_spec_yaml
+        .contains("docs/django-quickstart.md"));
+    let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
+    assert!(spec.validate().is_ok());
+}
