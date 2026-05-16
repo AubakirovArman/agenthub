@@ -109,9 +109,11 @@ agenthub tui --live
 
 ```bash
 scripts/dogfood.sh
+scripts/dogfood-readiness.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
 scripts/release-readiness.sh
+scripts/prepare-1.0-release.sh
 ```
 
 Representative fixtures лежат в `fixtures/`; reference web fixture проверяет добавление `/courses` через build, runtime smoke, scope rollback, report, memory и WAL evidence.
@@ -135,6 +137,7 @@ AgentHub сейчас installable local developer preview, а не hosted team p
 - [Testing Strategy](docs/testing-strategy.ru.md)
 - [Dogfooding](docs/dogfooding.ru.md)
 - [Performance Profiling](docs/performance-profiling.ru.md)
+- [Release Surfaces](docs/release-surfaces.ru.md)
 - [Analytics History](docs/analytics-history.ru.md)
 - [Interactive Shell](docs/interactive-shell.ru.md)
 - [Natural Language](docs/natural-language.ru.md)

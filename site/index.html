@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AgentHub</title>
+    <meta name="description" content="Local transactional runtime for AI coding agents.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap">
+        <div class="brand">AgentHub</div>
+        <nav class="links" aria-label="Primary">
+          <a href="https://github.com/AubakirovArman/agenthub">GitHub</a>
+          <a href="https://github.com/AubakirovArman/agenthub/wiki">Wiki</a>
+          <a href="https://github.com/AubakirovArman/agenthub/releases">Releases</a>
+          <a href="https://github.com/AubakirovArman/agenthub/tree/main/docs">Docs</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <h1>AgentHub</h1>
+            <p class="lead">
+              Local transactional runtime for AI coding agents. Use Codex, Gemini,
+              Kimi, command adapters, or OpenAI-compatible endpoints with isolated
+              worktrees, verifier checks, rollback, memory, reports, and dashboards.
+            </p>
+            <div class="actions">
+              <a class="button primary" href="https://github.com/AubakirovArman/agenthub#install">Install</a>
+              <a class="button" href="https://github.com/AubakirovArman/agenthub/wiki">Open Wiki</a>
+            </div>
+          </div>
+          <img class="terminal" src="assets/terminal.svg" alt="AgentHub terminal transaction output">
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap grid">
+          <article class="tile">
+            <h2>Transactional</h2>
+            <p>Every run produces journal, effects, verifier output, report, and rollback-aware artifacts.</p>
+          </article>
+          <article class="tile">
+            <h2>Provider Neutral</h2>
+            <p>Wrap existing AI tools instead of replacing them: Codex, Gemini, Kimi, CLI, or HTTP providers.</p>
+          </article>
+          <article class="tile">
+            <h2>Local First</h2>
+            <p>Install the CLI, initialize a project, run a task, inspect the result, and keep working.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <h2>Quick Start</h2>
+          <pre><code>cargo install --git https://github.com/AubakirovArman/agenthub
+agenthub init
+agenthub doctor
+agenthub providers setup command
+agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
+agenthub tx report latest</code></pre>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap grid">
+          <article class="tile">
+            <h3>Readme</h3>
+            <p><a href="https://github.com/AubakirovArman/agenthub/blob/main/README.md">English</a> · <a href="https://github.com/AubakirovArman/agenthub/blob/main/README.ru.md">Русский</a> · <a href="https://github.com/AubakirovArman/agenthub/blob/main/README.zh.md">中文</a> · <a href="https://github.com/AubakirovArman/agenthub/blob/main/README.kk.md">Қазақша</a></p>
+          </article>
+          <article class="tile">
+            <h3>Release Evidence</h3>
+            <p>Use dogfood history and readiness gates before tagging a final release.</p>
+          </article>
+          <article class="tile">
+            <h3>License</h3>
+            <p>Apache-2.0 open source, with attribution in NOTICE.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">AgentHub is an installable local developer preview moving toward 1.0.</div>
+    </footer>
+  </body>
+</html>

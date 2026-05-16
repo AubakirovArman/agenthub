@@ -13,6 +13,7 @@ All notable AgentHub changes are tracked here.
 - Add opt-in live provider dogfood automation and provider evidence reports.
 - Add dogfood evidence history archives for multi-run 1.0 readiness tracking.
 - Add dogfood readiness summary/check tooling for 1.0 evidence gates.
+- Add GitHub Pages site, wiki seed publishing, and 1.0 release preparation tooling.
 
 ## 0.2.0-local-preview - 2026-05-15
 

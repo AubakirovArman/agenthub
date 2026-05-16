@@ -113,6 +113,7 @@ scripts/dogfood-readiness.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
 scripts/release-readiness.sh
+scripts/prepare-1.0-release.sh
 ```
 
 Representative fixtures live under `fixtures/`; the reference web fixture exercises adding `/courses` with build, runtime smoke, scope rollback, report, memory, and WAL evidence.
@@ -136,6 +137,7 @@ Start here:
 - [Testing Strategy](docs/testing-strategy.en.md)
 - [Dogfooding](docs/dogfooding.en.md)
 - [Performance Profiling](docs/performance-profiling.en.md)
+- [Release Surfaces](docs/release-surfaces.en.md)
 - [Analytics History](docs/analytics-history.en.md)
 - [Interactive Shell](docs/interactive-shell.en.md)
 - [Natural Language](docs/natural-language.en.md)

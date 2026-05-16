@@ -109,9 +109,11 @@ Product checks іске қосу:
 
 ```bash
 scripts/dogfood.sh
+scripts/dogfood-readiness.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
 scripts/release-readiness.sh
+scripts/prepare-1.0-release.sh
 ```
 
 Representative fixtures `fixtures/` ішінде; reference web fixture `/courses` қосуды build, runtime smoke, scope rollback, report, memory және WAL evidence арқылы тексереді.
@@ -135,6 +137,7 @@ AgentHub қазір installable local developer preview, hosted team product е�
 - [Testing Strategy](docs/testing-strategy.kk.md)
 - [Dogfooding](docs/dogfooding.kk.md)
 - [Performance Profiling](docs/performance-profiling.kk.md)
+- [Release Surfaces](docs/release-surfaces.kk.md)
 - [Analytics History](docs/analytics-history.kk.md)
 - [Interactive Shell](docs/interactive-shell.kk.md)
 - [Natural Language](docs/natural-language.kk.md)
