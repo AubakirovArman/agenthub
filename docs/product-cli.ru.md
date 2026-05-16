@@ -125,6 +125,15 @@ agenthub open report tx-20260515123000-abcd1234
 
 `open dashboard` обновляет static dashboard и открывает `.agent/reports/dashboard/index.html`, если на host есть desktop opener. `open report` открывает `report.md` указанной transaction. В CI или с `AGENTHUB_OPEN_DRY_RUN=1` AgentHub печатает path без запуска external process.
 
+## Serve
+
+```bash
+agenthub serve
+agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
+```
+
+`serve` запускает browser dashboard как local auto-refresh UI на `http://127.0.0.1:4317` по умолчанию. Он регенерирует dashboard data на requests и удобен, пока transaction выполняется.
+
 ## Memory
 
 ```bash

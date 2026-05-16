@@ -56,6 +56,7 @@ History is stored in `.agent/shell/history.txt`. Chat transcripts are stored und
 /report           show selected/latest report
 /explain          explain selected/latest transaction
 /dashboard        open the dashboard
+/serve            serve the live local dashboard
 /config           inspect configuration
 /clear            clear the terminal
 /exit             exit

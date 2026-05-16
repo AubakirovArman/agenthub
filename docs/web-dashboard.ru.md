@@ -3,6 +3,7 @@
 Языки: [English](web-dashboard.en.md), [Русский](web-dashboard.ru.md), [中文](web-dashboard.zh.md), [Қазақша](web-dashboard.kk.md)
 
 `agenthub dashboard` создаёт статический browser dashboard для проекта AgentHub. Для него не нужен Node build и не нужен запущенный server.
+`agenthub serve` запускает тот же dashboard через local auto-refresh server.
 
 ## Генерация
 
@@ -27,6 +28,34 @@ agenthub dashboard --output tmp/agenthub-dashboard
 ```
 
 После команды открой напечатанный путь `index.html` в браузере.
+
+## Локальный live server
+
+```bash
+agenthub serve
+```
+
+Default URL:
+
+```text
+http://127.0.0.1:4317
+```
+
+Server регенерирует dashboard data на requests и добавляет live refresh options в HTML. Его удобно держать открытым во время transaction, чтобы timeline, latest status, metrics, memory graph, skills, policies и report links обновлялись.
+
+Options:
+
+```bash
+agenthub serve --addr 127.0.0.1:4318
+agenthub serve --refresh-ms 1000
+agenthub serve --output tmp/live-dashboard
+```
+
+Для scripts и smoke tests есть `--once`: server отдаёт один request и выходит.
+
+```bash
+agenthub serve --addr 127.0.0.1:4318 --once
+```
 
 ## Что показывает
 

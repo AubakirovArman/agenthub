@@ -119,6 +119,7 @@ pub(super) const SLASH_COMMANDS: &[&str] = &[
     "/skills",
     "/transactions",
     "/dashboard",
+    "/serve",
     "/config",
     "/clear",
     "/new",

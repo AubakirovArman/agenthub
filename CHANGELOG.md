@@ -10,6 +10,7 @@ All notable AgentHub changes are tracked here.
 - Add `agenthub tx diff` and `agenthub tx logs` plus matching `/diff` and `/logs` shell commands.
 - Make natural requests containing routes such as `/courses` parse as requests rather than filesystem paths.
 - Let natural-request planning use the configured project default provider when it is a file-editing adapter.
+- Add `agenthub serve` and `/serve` for a local auto-refresh dashboard server backed by the existing dashboard payload.
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
 - Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.

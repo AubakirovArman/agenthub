@@ -18,6 +18,10 @@ fn parses_shell_commands_and_plain_text() {
     assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
     assert_eq!(parse_line("dashboard"), ShellCommand::Dashboard);
     assert_eq!(
+        parse_line("/serve 127.0.0.1:0"),
+        ShellCommand::Serve(Some("127.0.0.1:0".into()))
+    );
+    assert_eq!(
         parse_line("providers diagnose codex"),
         ShellCommand::Providers(Some("diagnose codex".into()))
     );

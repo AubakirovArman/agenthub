@@ -72,6 +72,7 @@ agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no
 agenthub tx diff latest
 agenthub tx logs latest
 agenthub open dashboard
+agenthub serve
 ```
 
 ## Codex, Gemini, Kimi бірге қолдану

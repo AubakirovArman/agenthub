@@ -6,8 +6,8 @@ use anyhow::Result;
 use clap::Parser;
 
 use agenthub::{
-    agent_adapter, agent_dir, code_maps, enterprise, shell, skill_registry, team, tui, tx_undo,
-    web_dashboard, workspace,
+    agent_adapter, agent_dir, code_maps, enterprise, local_server, shell, skill_registry, team,
+    tui, tx_undo, web_dashboard, workspace,
 };
 
 use crate::cli::{AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands};
@@ -84,6 +84,26 @@ fn run() -> Result<()> {
                 &project_root.join(".agent/reports/team"),
             )?;
             println!("{}", result.index_path.display());
+        }
+        Commands::Serve {
+            addr,
+            output,
+            refresh_ms,
+            once,
+        } => {
+            enterprise::authorize(&project_root, "transaction.read")?;
+            enterprise::authorize(&project_root, "memory.read")?;
+            enterprise::authorize(&project_root, "skills.read")?;
+            enterprise::authorize(&project_root, "enterprise.policy.read")?;
+            local_server::serve(
+                &project_root,
+                local_server::ServerOptions {
+                    addr,
+                    output_dir: resolve_output(&project_root, &output),
+                    refresh_ms,
+                    once,
+                },
+            )?;
         }
         Commands::Aal { command } => handlers::handle_aal(command)?,
         Commands::Tx { command } => handlers::handle_tx(&project_root, command)?,

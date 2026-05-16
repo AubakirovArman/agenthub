@@ -56,6 +56,7 @@ History 存在 `.agent/shell/history.txt`。Chat transcripts 存在 `.agent/shel
 /report           report selected/latest transaction
 /explain          explain selected/latest transaction
 /dashboard        打开 dashboard
+/serve            启动 live local dashboard
 /config           configuration
 /clear            清空 terminal
 /exit             退出

@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 
 use crate::{
-    enterprise,
+    enterprise, local_server,
     product_cli::{
         config, doctor, open,
         providers::{self},
@@ -92,6 +92,27 @@ pub(super) fn open_dashboard(root: &Path) -> Result<()> {
     let result = open::dashboard(root)?;
     println!("{}", result.path.display());
     Ok(())
+}
+
+pub(super) fn serve_dashboard(root: &Path, args: Option<&str>) -> Result<()> {
+    enterprise::authorize(root, "transaction.read")?;
+    enterprise::authorize(root, "memory.read")?;
+    enterprise::authorize(root, "skills.read")?;
+    enterprise::authorize(root, "enterprise.policy.read")?;
+    let addr = args
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("127.0.0.1:4317")
+        .to_string();
+    local_server::serve(
+        root,
+        local_server::ServerOptions {
+            addr,
+            output_dir: root.join(".agent/reports/dashboard"),
+            refresh_ms: 3000,
+            once: false,
+        },
+    )
 }
 
 fn split_args(value: &str) -> Vec<&str> {

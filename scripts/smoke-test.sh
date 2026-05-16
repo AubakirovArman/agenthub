@@ -103,4 +103,28 @@ test -s "$TMP/tx-status.txt"
 run_agenthub dashboard --output "$TMP/dashboard" > "$TMP/dashboard-path.txt"
 test -f "$TMP/dashboard/index.html"
 
+if command -v curl >/dev/null 2>&1; then
+  port="$((43170 + RANDOM % 200))"
+  run_agenthub serve --addr "127.0.0.1:$port" --output "$TMP/live-dashboard" --once > "$TMP/serve.txt" 2>&1 &
+  serve_pid="$!"
+  served=0
+  for _ in {1..30}; do
+    if curl -fsS "http://127.0.0.1:$port/health" > "$TMP/serve-health.txt" 2>/dev/null; then
+      served=1
+      break
+    fi
+    sleep 0.2
+  done
+  if [[ "$served" != "1" ]]; then
+    kill "$serve_pid" >/dev/null 2>&1 || true
+    cat "$TMP/serve.txt" >&2 || true
+    printf 'agenthub serve smoke did not answer /health\n' >&2
+    exit 1
+  fi
+  wait "$serve_pid"
+  grep -q ok "$TMP/serve-health.txt"
+else
+  printf 'skip serve smoke; curl not found\n'
+fi
+
 printf 'agenthub smoke test passed\n'

@@ -1,4 +1,4 @@
-const data = window.AGENTHUB_DATA;
+let data = window.AGENTHUB_DATA;
 const $ = (selector) => document.querySelector(selector);
 
 function el(name, attrs = {}, children = []) {
@@ -175,14 +175,24 @@ function renderReports() {
   ));
 }
 
-renderHeader();
-renderMetrics();
-renderTransactions();
-renderCost();
-renderMetricsDashboard();
-renderTimeline();
-renderTrace();
-renderGraph();
-renderSkills();
-renderPolicies();
-renderReports();
+function renderAll() {
+  [renderHeader, renderMetrics, renderTransactions, renderCost, renderMetricsDashboard,
+    renderTimeline, renderTrace, renderGraph, renderSkills, renderPolicies, renderReports]
+    .forEach((render) => render());
+}
+
+async function refreshLiveData() {
+  if (!window.AGENTHUB_LIVE) return;
+  try {
+    const response = await fetch(`data.json?ts=${Date.now()}`, { cache: "no-store" });
+    data = await response.json();
+    renderAll();
+  } catch (error) {
+    console.warn("AgentHub dashboard refresh failed", error);
+  }
+}
+
+renderAll();
+if (window.AGENTHUB_LIVE) {
+  window.setInterval(refreshLiveData, window.AGENTHUB_REFRESH_MS || 3000);
+}

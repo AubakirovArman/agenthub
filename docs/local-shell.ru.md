@@ -27,6 +27,7 @@ Shell создаёт draft plan, показывает что будет выпо
 /logs [tx|stage]      transaction logs
 /report [tx]          report
 /explain [tx]         result explanation
+/serve [addr]         local live dashboard
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context

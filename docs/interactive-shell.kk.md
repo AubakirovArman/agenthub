@@ -56,6 +56,7 @@ History `.agent/shell/history.txt` ішінде сақталады. Chat transcr
 /report           selected/latest transaction report
 /explain          selected/latest transaction explain
 /dashboard        dashboard ашу
+/serve            live local dashboard іске қосу
 /config           configuration
 /clear            terminal тазалау
 /exit             exit

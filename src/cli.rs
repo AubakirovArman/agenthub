@@ -76,6 +76,19 @@ pub enum Commands {
         #[arg(short, long, default_value = ".agent/reports/dashboard")]
         output: PathBuf,
     },
+    Serve {
+        #[arg(long, default_value = "127.0.0.1:4317")]
+        addr: String,
+
+        #[arg(short, long, default_value = ".agent/reports/dashboard")]
+        output: PathBuf,
+
+        #[arg(long, default_value_t = 3000)]
+        refresh_ms: u64,
+
+        #[arg(long)]
+        once: bool,
+    },
     Aal {
         #[command(subcommand)]
         command: AalCommands,

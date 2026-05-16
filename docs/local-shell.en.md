@@ -27,6 +27,7 @@ The shell creates a draft plan, shows what will run, asks for approval, executes
 /logs [tx|stage]      transaction logs
 /report [tx]          report
 /explain [tx]         result explanation
+/serve [addr]         local live dashboard
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context

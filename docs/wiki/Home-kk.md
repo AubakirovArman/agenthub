@@ -21,6 +21,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 
 - `agenthub` subcommand жоқ іске қосылса chat-first local shell ашылады.
 - Shell ішінде `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.
+- Local auto-refresh dashboard үшін `/serve` немесе `agenthub serve` қолдан.
 - `@path` context қосады, `!command` policy-checked shell command іске қосады, `# note` project memory сақтайды.
 - `agenthub run`, `agenthub tx diff latest` және `agenthub tx logs latest` сияқты scriptable commands қолжетімді.
 - Release work алдында `scripts/dogfood.sh` және `scripts/dogfood-readiness.sh` іске қос.

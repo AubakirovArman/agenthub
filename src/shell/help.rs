@@ -27,6 +27,7 @@ pub(super) fn print(mode: ShellMode) {
     println!();
     println!("UI:");
     println!("  /dashboard         open local dashboard");
+    println!("  /serve             serve live dashboard locally");
     println!("  /clear             clear terminal");
     println!("  /new               start a new chat");
     println!("  /exit              quit");

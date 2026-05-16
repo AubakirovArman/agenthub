@@ -3,6 +3,7 @@
 语言: [English](web-dashboard.en.md), [Русский](web-dashboard.ru.md), [中文](web-dashboard.zh.md), [Қазақша](web-dashboard.kk.md)
 
 `agenthub dashboard` 为 AgentHub project 生成静态 browser dashboard。不需要 Node build，也不需要运行 server。
+`agenthub serve` 会通过 local auto-refresh server 运行同一个 dashboard。
 
 ## 生成
 
@@ -27,6 +28,34 @@ agenthub dashboard --output tmp/agenthub-dashboard
 ```
 
 命令结束后，在浏览器中打开打印出的 `index.html` 路径。
+
+## 本地 Live Server
+
+```bash
+agenthub serve
+```
+
+Default URL：
+
+```text
+http://127.0.0.1:4317
+```
+
+Server 会在请求时重新生成 dashboard data，并向 HTML 注入 live refresh options。Transaction 运行时保持页面打开，即可持续更新 timeline、latest status、metrics、memory graph、skills、policies 和 report links。
+
+Options：
+
+```bash
+agenthub serve --addr 127.0.0.1:4318
+agenthub serve --refresh-ms 1000
+agenthub serve --output tmp/live-dashboard
+```
+
+Scripts 和 smoke tests 可用 `--once`，server 处理一个 request 后退出：
+
+```bash
+agenthub serve --addr 127.0.0.1:4318 --once
+```
 
 ## 展示内容
 

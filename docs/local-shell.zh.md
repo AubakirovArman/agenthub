@@ -27,6 +27,7 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 /logs [tx|stage]      transaction logs
 /report [tx]          report
 /explain [tx]         result explanation
+/serve [addr]         local live dashboard
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context

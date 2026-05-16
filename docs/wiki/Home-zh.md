@@ -21,6 +21,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 
 - 不带 subcommand 运行 `agenthub` 会打开 chat-first local shell。
 - 在 shell 内使用 `/providers`、`/status`、`/diff`、`/logs`、`/report`、`/explain` 和 `/dashboard`。
+- 使用 `/serve` 或 `agenthub serve` 打开 local auto-refresh dashboard。
 - `@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 保存 project memory。
 - `agenthub run`、`agenthub tx diff latest` 和 `agenthub tx logs latest` 等 scriptable commands 仍然可用。
 - Release work 前运行 `scripts/dogfood.sh` 和 `scripts/dogfood-readiness.sh`。

@@ -17,6 +17,7 @@ pub mod hardening;
 pub mod intent;
 pub mod journal;
 pub mod llm_gateway;
+pub mod local_server;
 pub mod memory;
 pub mod observability;
 pub mod plugin_registry;

@@ -82,6 +82,7 @@ fn handle(
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,
+        ShellCommand::Serve(args) => product::serve_dashboard(root, args.as_deref())?,
         ShellCommand::Shell(command) => system::run(root, &command)?,
         ShellCommand::MemoryAdd(note) => memory_note::add(root, &note)?,
         ShellCommand::Open(tx_id) => {
