@@ -3,28 +3,25 @@ change AddCoursesPage {
   goal "Add /courses page"
   use skill code.nextjs.add_page
   use skill code.ui.reuse_existing_style
-
   allow edit:
     - "src/app/courses/**"
     - "src/components/courses/**"
   deny edit:
     - "src/auth/**"
     - "prisma/schema.prisma"
-
   rules:
-    - R_MOD_200
-    - R_REUSE_FIRST
-    - R_SCOPE_ONLY
-
+    - "R_MOD_200"
+    - "R_REUSE_FIRST"
+    - "R_SCOPE_ONLY"
   verify:
     - command "npm run build"
     - runtime_start "npm run dev -- --host 127.0.0.1 --port 3000"
     - runtime_base_url "http://127.0.0.1:3000"
     - runtime_timeout_secs 30
     - runtime_smoke route "/courses" expect 200
-
   transaction:
     max_repair_attempts 3
+    approval_required false
     on_failure rollback
     on_success commit_code promote_memory
 }

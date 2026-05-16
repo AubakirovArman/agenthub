@@ -7,9 +7,17 @@ use agenthub::{aal, compiler};
 
 use crate::cli::AalCommands;
 
+#[cfg(test)]
+mod tests;
+
 pub fn handle_aal(command: AalCommands) -> Result<()> {
     match command {
         AalCommands::Parse { input, output } => parse(&input, output.as_deref()),
+        AalCommands::Format {
+            input,
+            output,
+            check,
+        } => format(&input, output.as_deref(), check),
         AalCommands::Check {
             input,
             expected_dir,
@@ -20,7 +28,7 @@ pub fn handle_aal(command: AalCommands) -> Result<()> {
 
 fn parse(input: &Path, output: Option<&Path>) -> Result<()> {
     let parsed = aal::parse_aal_file(input)?;
-    print_diagnostics(&parsed);
+    print_diagnostics(input, &parsed);
     if parsed.has_errors() {
         bail!("AAL semantic validation failed");
     }
@@ -30,6 +38,25 @@ fn parse(input: &Path, output: Option<&Path>) -> Result<()> {
         println!("{}", output.display());
     } else {
         print!("{yaml}");
+    }
+    Ok(())
+}
+
+fn format(input: &Path, output: Option<&Path>, check: bool) -> Result<()> {
+    let source = fs::read_to_string(input).with_context(|| format!("read {}", input.display()))?;
+    let formatted = aal::format_aal(&source)?;
+    if check {
+        if normalize_newlines(&source) != normalize_newlines(&formatted) {
+            bail!("AAL format mismatch: {}", input.display());
+        }
+        println!("ok\t{}", input.display());
+        return Ok(());
+    }
+    if let Some(output) = output {
+        write_output(output, &formatted)?;
+        println!("{}", output.display());
+    } else {
+        print!("{formatted}");
     }
     Ok(())
 }
@@ -59,7 +86,7 @@ fn check_artifacts(
     write_expected: bool,
 ) -> Result<CheckResult> {
     let parsed = aal::parse_aal_file(input)?;
-    print_diagnostics(&parsed);
+    print_diagnostics(input, &parsed);
     if parsed.has_errors() {
         bail!("AAL semantic validation failed");
     }
@@ -144,56 +171,18 @@ fn write_output(path: &Path, content: &str) -> Result<()> {
     Ok(())
 }
 
-fn print_diagnostics(parsed: &aal::AalParseOutput) {
+fn print_diagnostics(input: &Path, parsed: &aal::AalParseOutput) {
+    let source = fs::read_to_string(input).unwrap_or_default();
+    let lines = source.lines().collect::<Vec<_>>();
     for diagnostic in &parsed.diagnostics {
         eprintln!("{}", diagnostic.render());
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn aal_check_matches_expected_artifacts() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let input = dir.path().join("demo.aal");
-        fs::write(
-            &input,
-            r#"
-change Demo {
-  workspace code.git
-  goal "Demo"
-  allow edit:
-    - "src/**"
-}
-"#,
-        )?;
-        let expected = dir.path().join("expected");
-        fs::create_dir_all(&expected)?;
-        let parsed = aal::parse_aal_file(&input)?;
-        let dag = compiler::compile(&parsed.spec)?;
-        fs::write(
-            expected.join("demo.yaml"),
-            serde_yaml::to_string(&parsed.spec)?,
-        )?;
-        fs::write(expected.join("demo.ir"), parsed.spec.to_agent_ir())?;
-        fs::write(
-            expected.join("demo.dag.json"),
-            serde_json::to_string_pretty(&dag)?,
-        )?;
-
-        let result = check_artifacts(&input, Some(&expected), false)?;
-        assert_eq!(result.task_id, "demo");
-        assert_eq!(result.expected_dir.as_deref(), Some(expected.as_path()));
-        Ok(())
-    }
-
-    #[test]
-    fn aal_check_accepts_crlf_golden_files() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let path = dir.path().join("golden.txt");
-        fs::write(&path, "a\r\nb\r\n")?;
-        compare_file(&path, "a\nb\n")?;
-        Ok(())
+        if diagnostic.line > 0 {
+            if let Some(line) = lines.get(diagnostic.line - 1) {
+                eprintln!("  {}", line.trim_end());
+            }
+        }
+        if let Some(help) = &diagnostic.help {
+            eprintln!("  help: {help}");
+        }
     }
 }

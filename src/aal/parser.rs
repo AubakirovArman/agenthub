@@ -92,7 +92,8 @@ impl AalParser {
             Some("use")
                 if tokens.get(1).map(String::as_str) == Some("skill") && tokens.len() == 3 =>
             {
-                self.draft.skills.push(tokens[2].clone())
+                self.draft.skills.push(tokens[2].clone());
+                self.draft.skill_lines.push(line_number);
             }
             Some(other) => return self.unknown(line_number, other),
             None => {}
@@ -102,8 +103,14 @@ impl AalParser {
 
     fn section_item(&mut self, line_number: usize, tokens: &[String]) -> Result<()> {
         match self.section {
-            Section::Allow => self.draft.allow.push(join(tokens)),
-            Section::Deny => self.draft.deny.push(join(tokens)),
+            Section::Allow => {
+                self.draft.allow.push(join(tokens));
+                self.draft.allow_lines.push(line_number);
+            }
+            Section::Deny => {
+                self.draft.deny.push(join(tokens));
+                self.draft.deny_lines.push(line_number);
+            }
             Section::Rules => self.draft.rules.push(join(tokens)),
             Section::Execute => self.draft.execution_commands.push(join(tokens)),
             Section::Verify => {

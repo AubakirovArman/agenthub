@@ -11,7 +11,9 @@ use crate::tui::read::{
     array_len, count_lines, latest_output_tail, provider_label, read_json, read_jsonl,
     read_latest_jsonl, tail_lines,
 };
-use crate::tui::{ApprovalPanel, Dashboard, LatestTransaction, MemoryPanel, TransactionSummary};
+use crate::tui::{
+    ApprovalPanel, Dashboard, DashboardSummary, LatestTransaction, MemoryPanel, TransactionSummary,
+};
 
 pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
     let rows = agent_dir::list_transactions(project_root)?;
@@ -20,9 +22,11 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
         .last()
         .map(|row| collect_latest(project_root, &row.id, &row.status))
         .transpose()?;
+    let next_actions = next_actions(&latest, &rows);
 
     Ok(Dashboard {
         project: project_root.display().to_string(),
+        summary: summarize_transactions(&rows),
         transactions: rows
             .iter()
             .rev()
@@ -39,7 +43,48 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
             recent_changes: recent_change_count(project_root)?,
         },
         approvals: collect_approvals(project_root, &rows)?,
+        next_actions,
     })
+}
+
+fn summarize_transactions(rows: &[agent_dir::TransactionRow]) -> DashboardSummary {
+    let mut summary = DashboardSummary {
+        total: rows.len(),
+        ..DashboardSummary::default()
+    };
+    for row in rows {
+        match row.status.as_str() {
+            "COMMITTED" => summary.committed += 1,
+            "ROLLED_BACK" => summary.rolled_back += 1,
+            "BLOCKED_ON_HUMAN" => summary.blocked += 1,
+            "RUNNING" | "CREATED" | "EXECUTING" | "VERIFYING" => summary.running += 1,
+            _ => {}
+        }
+    }
+    summary
+}
+
+fn next_actions(
+    latest: &Option<LatestTransaction>,
+    rows: &[agent_dir::TransactionRow],
+) -> Vec<String> {
+    let mut actions = Vec::new();
+    if rows.is_empty() {
+        actions.push("agenthub run \"describe the change\" --no-commit".to_string());
+        return actions;
+    }
+    if let Some(latest) = latest {
+        match latest.status.as_str() {
+            "BLOCKED_ON_HUMAN" => actions.push(format!("agenthub tx explain {}", latest.id)),
+            "ROLLED_BACK" | "FAILED" => actions.push(format!("agenthub tx retry {}", latest.id)),
+            "COMMITTED" => actions.push(format!("agenthub tx report {}", latest.id)),
+            _ => actions.push(format!("agenthub tx watch {}", latest.id)),
+        }
+    }
+    if rows.iter().any(|row| row.status == "BLOCKED_ON_HUMAN") {
+        actions.push("agenthub tx status".to_string());
+    }
+    actions
 }
 
 fn collect_latest(project_root: &Path, tx_id: &str, status: &str) -> Result<LatestTransaction> {

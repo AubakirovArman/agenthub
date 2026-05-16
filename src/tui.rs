@@ -16,10 +16,21 @@ pub use render::render_dashboard;
 #[derive(Debug, Clone, Default)]
 pub struct Dashboard {
     pub project: String,
+    pub summary: DashboardSummary,
     pub transactions: Vec<TransactionSummary>,
     pub latest: Option<LatestTransaction>,
     pub memory: MemoryPanel,
     pub approvals: ApprovalPanel,
+    pub next_actions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DashboardSummary {
+    pub total: usize,
+    pub committed: usize,
+    pub rolled_back: usize,
+    pub blocked: usize,
+    pub running: usize,
 }
 
 #[derive(Debug, Clone)]

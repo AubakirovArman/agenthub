@@ -56,17 +56,18 @@ fn validate_imports(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
 
 fn validate_skills(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
     let workspace = workspace_domain(draft);
-    for skill in &draft.skills {
+    for (index, skill) in draft.skills.iter().enumerate() {
+        let line = draft.skill_lines.get(index).copied().unwrap_or(0);
         let Some(domain) = skill.split('.').next() else {
             continue;
         };
-        if !validate_skill_namespace(skill, 0, diagnostics) {
+        if !validate_skill_namespace(skill, line, diagnostics) {
             continue;
         }
         if domain != "core" && domain != workspace {
             diagnostics.push(error(
                 "aal.skill.workspace_mismatch",
-                0,
+                line,
                 format!("skill `{skill}` is not compatible with `{workspace}.git`"),
             ));
         }
@@ -99,7 +100,7 @@ fn validate_verify_profile(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) 
     if !VERIFY_PROFILES.contains(&profile) {
         diagnostics.push(error(
             "aal.verify.unknown_profile",
-            0,
+            draft.verify_profile_line.unwrap_or(0),
             format!("unknown verifier profile `{profile}`"),
         ));
     }
@@ -107,11 +108,11 @@ fn validate_verify_profile(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) 
 
 fn validate_policy(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
     let allow: HashSet<_> = draft.allow.iter().collect();
-    for denied in &draft.deny {
+    for (index, denied) in draft.deny.iter().enumerate() {
         if allow.contains(denied) {
             diagnostics.push(error(
                 "aal.policy.allow_deny_overlap",
-                0,
+                draft.deny_lines.get(index).copied().unwrap_or(0),
                 format!("scope entry `{denied}` appears in both allow and deny"),
             ));
         }
@@ -122,7 +123,7 @@ fn validate_runtime(draft: &Draft, diagnostics: &mut Vec<AalDiagnostic>) {
     if !draft.routes.is_empty() && draft.runtime.start_command.is_none() {
         diagnostics.push(warning(
             "aal.runtime.start_missing",
-            0,
+            draft.route_lines.first().copied().unwrap_or(0),
             "runtime_smoke routes are recorded but not executed until runtime_start is set",
         ));
     }

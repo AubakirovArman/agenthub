@@ -13,6 +13,16 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 
 Команда diagnostics мәндерін stderr ішіне шығарады және AgentSpec YAML мәнін stdout немесе `--output` файлына жазады.
 
+## Format
+
+```bash
+agenthub aal format examples/add-courses.aal
+agenthub aal format examples/add-courses.aal --output tmp/add-courses.aal
+agenthub aal format examples/add-courses.aal --check
+```
+
+`format` `parse` және `check` қолданатын parser арқылы canonical AAL form шығарады. `--check` файл әлі format жасалмаған болса error қайтарады, сондықтан CI үшін ыңғайлы.
+
 ## Check
 
 ```bash
@@ -116,6 +126,8 @@ Semantic diagnostics енді structured format береді: тұрақты `co
 
 `agenthub aal parse` diagnostics мәндерін stderr ішіне шығарады және semantic errors болса YAML output алдында тоқтайды. Warnings, мысалы `runtime_start` жоқ route smoke check, YAML output-ты бұғаттамайды.
 
+CLI diagnostics енді semantic diagnostic line number берсе source line snippet қосады. Осылай workspace/skill mismatches, unknown verifier profiles, policy overlaps және runtime-smoke warnings terminal output арқылы тез түзетіледі.
+
 Library ретінде қолдану:
 
 ```rust
@@ -124,4 +136,4 @@ let diagnostics_json = serde_json::to_string_pretty(&parsed.diagnostics)?;
 let normalized_aal = parsed.normalized;
 ```
 
-`normalized` canonical AAL form шығарады. Бұл editor/LSP integration, review және болашақ formatter command үшін керек.
+`normalized` canonical AAL form шығарады. Оны `agenthub aal format`, editor/LSP integration және review қолданады.

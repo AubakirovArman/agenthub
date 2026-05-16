@@ -1,15 +1,32 @@
-use crate::tui::{ApprovalPanel, Dashboard, LatestTransaction, MemoryPanel, TransactionSummary};
+use crate::tui::{
+    ApprovalPanel, Dashboard, DashboardSummary, LatestTransaction, MemoryPanel, TransactionSummary,
+};
 
 pub fn render_dashboard(dashboard: &Dashboard) -> String {
     let mut out = String::new();
     push_line(&mut out, "AgentHub TUI Dashboard");
     push_line(&mut out, &format!("Project: {}", dashboard.project));
     push_line(&mut out, "");
+    render_summary(&mut out, &dashboard.summary);
     render_transactions(&mut out, &dashboard.transactions);
     render_latest(&mut out, dashboard.latest.as_ref());
     render_memory(&mut out, &dashboard.memory);
     render_approvals(&mut out, &dashboard.approvals);
+    render_next_actions(&mut out, &dashboard.next_actions);
     out
+}
+
+fn render_summary(out: &mut String, summary: &DashboardSummary) {
+    push_line(out, "[Summary]");
+    push_line(out, &format!("- total transactions: {}", summary.total));
+    push_line(
+        out,
+        &format!(
+            "- committed: {} | rolled back: {} | blocked: {} | running: {}",
+            summary.committed, summary.rolled_back, summary.blocked, summary.running
+        ),
+    );
+    push_line(out, "");
 }
 
 fn render_transactions(out: &mut String, rows: &[TransactionSummary]) {
@@ -138,6 +155,18 @@ fn render_approvals(out: &mut String, approvals: &ApprovalPanel) {
     );
     for tx in &approvals.blocked_transactions {
         push_line(out, &format!("  - {tx}"));
+    }
+    push_line(out, "");
+}
+
+fn render_next_actions(out: &mut String, actions: &[String]) {
+    push_line(out, "[Next Actions]");
+    if actions.is_empty() {
+        push_line(out, "- none");
+        return;
+    }
+    for action in actions {
+        push_line(out, &format!("- {action}"));
     }
 }
 

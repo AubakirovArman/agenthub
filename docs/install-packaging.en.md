@@ -103,3 +103,21 @@ agenthub-x86_64-pc-windows-msvc.zip
 ```
 
 Intel macOS release assets are not published for the local preview.
+
+## Package Manager Manifests
+
+AgentHub ships maintainer templates for package managers:
+
+```text
+packaging/homebrew/agenthub.rb.template
+packaging/scoop/agenthub.json.template
+packaging/winget/AubakirovArman.AgentHub*.yaml.template
+```
+
+After release archives and `.sha256` files exist, render manifests:
+
+```bash
+AGENTHUB_PACKAGE_DIST=dist scripts/render-package-manifests.sh
+```
+
+`scripts/test-package-manifests.sh` validates placeholder replacement and is part of release-readiness. Publishing the Homebrew tap, Scoop bucket, or winget submission remains a maintainer step after the release assets are verified.

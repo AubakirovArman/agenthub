@@ -6,5 +6,5 @@
 
 ## Remaining Tasks
 
-- Add Homebrew/Scoop/winget packaging after checksum-verified preview installers are stable.
 - Add real 1.0 dogfood evidence from long-running local usage with real providers.
+- Publish Homebrew tap, Scoop bucket, and winget submission after 1.0 release assets are final.

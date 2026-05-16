@@ -115,6 +115,13 @@ change BadSemantics {
         .diagnostics
         .iter()
         .any(|diagnostic| diagnostic.severity == AalSeverity::Error));
+    assert!(parsed
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "aal.verify.unknown_profile" && diagnostic.line > 0));
+    assert!(parsed.diagnostics.iter().any(|diagnostic| diagnostic.code
+        == "aal.policy.allow_deny_overlap"
+        && diagnostic.line > 0));
     let json = serde_json::to_value(&parsed.diagnostics)?;
     assert_eq!(json[0]["code"], "aal.version.unsupported");
     Ok(())

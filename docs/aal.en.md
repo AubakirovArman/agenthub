@@ -13,6 +13,16 @@ agenthub aal parse examples/add-courses.aal --output tmp/add-courses.yaml
 
 The command prints diagnostics to stderr and writes AgentSpec YAML to stdout or `--output`.
 
+## Format
+
+```bash
+agenthub aal format examples/add-courses.aal
+agenthub aal format examples/add-courses.aal --output tmp/add-courses.aal
+agenthub aal format examples/add-courses.aal --check
+```
+
+`format` prints the canonical AAL form from the same parser used by `parse` and `check`. `--check` exits with an error when the file is not already formatted, which makes it suitable for CI.
+
 ## Check
 
 ```bash
@@ -116,6 +126,8 @@ Semantic diagnostics are structured and carry stable `code`, `severity`, `line`,
 
 `agenthub aal parse` prints diagnostics to stderr and stops before YAML output when semantic errors are present. Warnings, such as a route smoke check without `runtime_start`, still allow YAML output.
 
+CLI diagnostics now include the source line snippet when a semantic diagnostic has a line number. This makes workspace/skill mismatches, unknown verifier profiles, policy overlaps, and runtime-smoke warnings easier to fix directly from terminal output.
+
 Library usage:
 
 ```rust
@@ -124,4 +136,4 @@ let diagnostics_json = serde_json::to_string_pretty(&parsed.diagnostics)?;
 let normalized_aal = parsed.normalized;
 ```
 
-`normalized` renders a canonical AAL form. It is intended for editor/LSP integration, reviews, and future formatter commands.
+`normalized` renders a canonical AAL form. It is used by `agenthub aal format`, editor/LSP integration, and reviews.

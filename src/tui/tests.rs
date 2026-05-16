@@ -54,6 +54,9 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     let dashboard = dashboard_text(dir.path())?;
 
     assert!(dashboard.contains("AgentHub TUI Dashboard"));
+    assert!(dashboard.contains("[Summary]"));
+    assert!(dashboard.contains("- total transactions: 1"));
+    assert!(dashboard.contains("- committed: 1 | rolled back: 0 | blocked: 0 | running: 0"));
     assert!(dashboard.contains("[Transactions]"));
     assert!(dashboard.contains("tx-20260101000000-demo COMMITTED"));
     assert!(dashboard.contains("- stage: COMMITTED"));
@@ -63,5 +66,7 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("line two"));
     assert!(dashboard.contains("- DAG: 1 nodes, 0 edges"));
     assert!(dashboard.contains("- pending specs: 1"));
+    assert!(dashboard.contains("[Next Actions]"));
+    assert!(dashboard.contains("agenthub tx report tx-20260101000000-demo"));
     Ok(())
 }

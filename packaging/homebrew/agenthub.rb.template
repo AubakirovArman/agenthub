@@ -1,0 +1,32 @@
+class Agenthub < Formula
+  desc "Transactional runtime for AI-agent workflows"
+  homepage "https://github.com/AubakirovArman/agenthub"
+  license "Apache-2.0"
+  version "__VERSION__"
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/AubakirovArman/agenthub/releases/download/v__VERSION__/agenthub-aarch64-apple-darwin.tar.gz"
+      sha256 "__MACOS_ARM_SHA256__"
+    else
+      odie "AgentHub does not publish Intel macOS release assets"
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.intel?
+      url "https://github.com/AubakirovArman/agenthub/releases/download/v__VERSION__/agenthub-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "__LINUX_X64_SHA256__"
+    else
+      odie "AgentHub local preview supports Linux x86_64 release assets"
+    end
+  end
+
+  def install
+    bin.install "agenthub"
+  end
+
+  test do
+    assert_match "agenthub", shell_output("#{bin}/agenthub version")
+  end
+end

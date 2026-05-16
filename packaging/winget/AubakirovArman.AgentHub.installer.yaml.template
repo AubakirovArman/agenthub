@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: AubakirovArman.AgentHub
+PackageVersion: __VERSION__
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: agenthub-x86_64-pc-windows-msvc/agenthub.exe
+    PortableCommandAlias: agenthub
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/AubakirovArman/agenthub/releases/download/v__VERSION__/agenthub-x86_64-pc-windows-msvc.zip
+    InstallerSha256: __WINDOWS_X64_SHA256__
+ManifestType: installer
+ManifestVersion: 1.6.0

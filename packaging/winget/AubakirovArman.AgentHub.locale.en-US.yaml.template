@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: AubakirovArman.AgentHub
+PackageVersion: __VERSION__
+PackageLocale: en-US
+Publisher: AubakirovArman
+PackageName: AgentHub
+License: Apache-2.0
+ShortDescription: Transactional runtime for AI-agent workflows.
+PackageUrl: https://github.com/AubakirovArman/agenthub
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

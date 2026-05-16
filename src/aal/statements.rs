@@ -6,7 +6,10 @@ use crate::spec::RouteCheckSpec;
 
 pub(crate) fn verify(draft: &mut Draft, line_number: usize, tokens: &[String]) -> Result<bool> {
     match tokens.first().map(String::as_str) {
-        Some("profile") if tokens.len() == 2 => draft.verify_profile = Some(tokens[1].clone()),
+        Some("profile") if tokens.len() == 2 => {
+            draft.verify_profile = Some(tokens[1].clone());
+            draft.verify_profile_line = Some(line_number);
+        }
         Some("command") if tokens.len() >= 2 => draft.verify_commands.push(join(&tokens[1..])),
         Some("runtime_start") if tokens.len() >= 2 => {
             draft.runtime.start_command = Some(join(&tokens[1..]))
@@ -53,6 +56,7 @@ fn runtime_route(draft: &mut Draft, line_number: usize, tokens: &[String]) -> Re
             path: tokens[2].clone(),
             expect: parse_u16(line_number, &tokens[4])?,
         });
+        draft.route_lines.push(line_number);
         return Ok(true);
     }
     Ok(false)

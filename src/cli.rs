@@ -126,6 +126,15 @@ pub enum AalCommands {
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
+    Format {
+        input: PathBuf,
+
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+
+        #[arg(long)]
+        check: bool,
+    },
     Check {
         input: PathBuf,
 

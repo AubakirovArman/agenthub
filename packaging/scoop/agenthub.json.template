@@ -1,0 +1,23 @@
+{
+  "version": "__VERSION__",
+  "description": "Transactional runtime for AI-agent workflows.",
+  "homepage": "https://github.com/AubakirovArman/agenthub",
+  "license": "Apache-2.0",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/AubakirovArman/agenthub/releases/download/v__VERSION__/agenthub-x86_64-pc-windows-msvc.zip",
+      "hash": "__WINDOWS_X64_SHA256__"
+    }
+  },
+  "bin": "agenthub.exe",
+  "checkver": {
+    "github": "https://github.com/AubakirovArman/agenthub"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/AubakirovArman/agenthub/releases/download/v$version/agenthub-x86_64-pc-windows-msvc.zip"
+      }
+    }
+  }
+}

@@ -103,3 +103,21 @@ agenthub-x86_64-pc-windows-msvc.zip
 ```
 
 local preview 不发布 Intel macOS release assets。
+
+## Package manager manifests
+
+AgentHub 提供给维护者使用的 package manager templates：
+
+```text
+packaging/homebrew/agenthub.rb.template
+packaging/scoop/agenthub.json.template
+packaging/winget/AubakirovArman.AgentHub*.yaml.template
+```
+
+release archives 和 `.sha256` 文件存在后，可以生成 manifests：
+
+```bash
+AGENTHUB_PACKAGE_DIST=dist scripts/render-package-manifests.sh
+```
+
+`scripts/test-package-manifests.sh` 会验证 placeholder replacement，并且包含在 release-readiness 中。Homebrew tap、Scoop bucket 或 winget submission 的发布仍是 release assets 验证后的 maintainer step。
