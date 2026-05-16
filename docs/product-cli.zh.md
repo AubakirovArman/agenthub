@@ -20,7 +20,7 @@ Explicit `!command` shell actions now receive an AgentHub-owned tool permission 
 
 Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
-Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
+Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top. If a chat JSONL transcript contains a corrupt line, AgentHub keeps the valid events and exposes a `session_recovery` event instead of dropping the whole transcript.
 
 Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
 

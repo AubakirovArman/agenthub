@@ -2,7 +2,7 @@
 
 Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.4.19-local-preview` is an installable local developer preview, not a stable public or enterprise product.
+AgentHub `0.4.20-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
 ## License
 
@@ -16,7 +16,7 @@ AgentHub provides transactional isolation, Git worktrees, command policy checks,
 
 DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, structured provider-test receipts, streaming chat, budgeted memory-aware chat context, and API-native project command execution. Shell actions now have explainable tool permission profiles, project transactions show richer inline approval receipts, headless project `exec --jsonl` stops on approval-required drafts with exit code `2`, and `agenthub tui` has an event-backed terminal surface for transcript/status/event visibility, but the broader structured tool loop and automatic memory extraction are still in progress.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, structured provider-test receipts, streaming chat, budgeted memory-aware chat context, and API-native project command execution. Shell actions now have explainable tool permission profiles, project transactions show richer inline approval receipts, headless project `exec --jsonl` stops on approval-required drafts with exit code `2`, corrupt chat JSONL lines recover as `session_recovery` events, and `agenthub tui` has an event-backed terminal surface for transcript/status/event visibility, but the broader structured tool loop and automatic memory extraction are still in progress.
 
 ## Team And Enterprise
 

@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.20-local-preview - 2026-05-16
+
+- Harden chat/session durability by making shell transcript reads tolerant of corrupt JSONL lines: valid events are preserved and malformed lines become `session_recovery` events instead of failing the whole transcript.
+- Make the chat index and search path recover from corrupt chat session lines, preserving message counts, transaction references, and searchable valid messages.
+- Surface session recovery in the TUI event rail and update roadmap/docs toward the next DeepSeek/Kimi-native tool-loop step.
+
 ## 0.4.19-local-preview - 2026-05-16
 
 - Add headless parity for initialized project requests: `agenthub exec` now creates an approval-required project draft instead of silently treating project edits as chat.

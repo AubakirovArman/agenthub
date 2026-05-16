@@ -394,12 +394,16 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<Value>> {
     if !path.exists() {
         return Ok(Vec::new());
     }
-    fs::read_to_string(path)
-        .with_context(|| format!("read {}", path.display()))?
+    let text = fs::read_to_string(path).with_context(|| format!("read {}", path.display()))?;
+    Ok(text
         .lines()
-        .filter(|line| !line.trim().is_empty())
-        .map(|line| serde_json::from_str(line).map_err(Into::into))
-        .collect()
+        .enumerate()
+        .filter(|(_, line)| !line.trim().is_empty())
+        .map(|(index, line)| {
+            serde_json::from_str(line)
+                .unwrap_or_else(|error| recovery_event(path, index + 1, &error.to_string()))
+        })
+        .collect())
 }
 
 pub(super) fn latest_intent_mode(session: &ChatSession) -> Result<Option<String>> {
@@ -411,6 +415,18 @@ pub(super) fn latest_intent_mode(session: &ChatSession) -> Result<Option<String>
                 .then(|| event["mode"].as_str().map(str::to_string))
                 .flatten()
         }))
+}
+
+fn recovery_event(path: &Path, line: usize, reason: &str) -> Value {
+    json!({
+        "at": Utc::now().to_rfc3339(),
+        "kind": "session_recovery",
+        "status": "recovered",
+        "text": "recovered corrupt chat event line",
+        "path": path.display().to_string(),
+        "line": line,
+        "reason": format!("skipped corrupt JSONL line {line}: {reason}")
+    })
 }
 
 fn chats_dir(root: &Path) -> PathBuf {

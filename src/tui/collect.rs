@@ -255,6 +255,7 @@ fn event_rail_item(event: ChatEventView) -> EventRailItem {
             ("error", "provider finished")
         }
         "provider_finished" => ("done", "provider finished"),
+        "session_recovery" => ("recovery", "session recovery"),
         "turn_finished" if event.status.as_deref() == Some("failed") => ("error", "turn finished"),
         "turn_finished" => ("done", "turn finished"),
         "intent_classified" => ("ready", "intent"),
@@ -295,6 +296,12 @@ fn event_detail(event: &ChatEventView) -> String {
         )
         .trim()
         .to_string();
+    }
+    if event.kind == "session_recovery" {
+        return event
+            .reason
+            .clone()
+            .unwrap_or_else(|| "recovered session event".to_string());
     }
     if let Some(provider) = &event.provider {
         let status = event.status.as_deref().unwrap_or("");

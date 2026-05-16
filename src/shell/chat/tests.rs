@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
@@ -68,6 +69,42 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
             && event["profile"].as_str() == Some("ops-host")
             && event["approval_required"].as_bool() == Some(true)
             && event["risk"].as_str() == Some("high")
+    }));
+    Ok(())
+}
+
+#[test]
+fn recovers_corrupt_chat_jsonl_without_losing_valid_events() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    let chats = dir.path().join(".agent/shell/chats");
+    fs::create_dir_all(&chats)?;
+    let path = chats.join("chat-corrupt.jsonl");
+    fs::write(
+        &path,
+        "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"created\"}\n\
+         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"user_message\",\"text\":\"keep me\"}\n\
+         {not-json\n\
+         {\"at\":\"2026-01-01T00:00:02Z\",\"kind\":\"assistant_message\",\"text\":\"still here\"}\n",
+    )?;
+
+    let events = read_events(&path)?;
+    let summary = summarize(&path)?;
+
+    assert_eq!(summary.messages, 1);
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("user_message") && event["text"].as_str() == Some("keep me")
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("session_recovery")
+            && event["status"].as_str() == Some("recovered")
+            && event["reason"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("line 3")
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("assistant_message")
+            && event["text"].as_str() == Some("still here")
     }));
     Ok(())
 }
