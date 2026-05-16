@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.3-local-preview - 2026-05-16
+
 - Add provider lifecycle events for API chat turns: `provider_requested`, `provider_finished`, and `turn_finished` now persist request ids, provider ids, status, and token receipts into the chat/session event stream and `/api/events`.
 - Add headless API chat execution: `agenthub exec "<request>" --jsonl` runs a non-project chat turn without Git or `.agent` bootstrap and emits the session event stream as live JSONL.
 
