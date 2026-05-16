@@ -4,6 +4,28 @@ use super::{parse_line, ShellCommand, ShellMode};
 fn parses_shell_commands_and_plain_text() {
     assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
     assert_eq!(parse_line("chats"), ShellCommand::Chats);
+    assert_eq!(
+        parse_line("/search dashboard"),
+        ShellCommand::Search("dashboard".into())
+    );
+    assert_eq!(
+        parse_line("/rename auth refactor"),
+        ShellCommand::Rename("auth refactor".into())
+    );
+    assert_eq!(
+        parse_line("/pin"),
+        ShellCommand::Pin {
+            target: None,
+            pinned: true
+        }
+    );
+    assert_eq!(
+        parse_line("/unpin chat-1"),
+        ShellCommand::Pin {
+            target: Some("chat-1".into()),
+            pinned: false
+        }
+    );
     assert_eq!(parse_line("messages"), ShellCommand::Messages);
     assert_eq!(
         parse_line("chat latest"),

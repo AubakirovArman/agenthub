@@ -14,6 +14,8 @@ agenthub
 
 Используй `/` для commands, `@path` для context, `!command` для policy-checked shell commands и `# note` для project memory.
 
+Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху.
+
 ## Doctor
 
 ```bash

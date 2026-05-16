@@ -2,6 +2,7 @@ mod actions;
 mod approval;
 mod chat;
 mod chat_display;
+mod chat_meta;
 mod commands;
 mod context_input;
 mod control;
@@ -76,6 +77,19 @@ fn handle(
         ShellCommand::Mode(next) => flow::update_mode(next, mode, current_chat)?,
         ShellCommand::Chats => chat_display::print_chats(root)?,
         ShellCommand::Chat(target) => flow::update_chat(root, target.as_deref(), current_chat)?,
+        ShellCommand::Search(query) => chat_display::print_search(root, &query)?,
+        ShellCommand::Rename(title) => {
+            chat_meta::rename(current_chat, &title)?;
+            chat_display::print_summary(current_chat)?;
+        }
+        ShellCommand::Pin { target, pinned } => {
+            let updated = chat_meta::set_pin(root, current_chat, target.as_deref(), pinned)?;
+            println!(
+                "chat {} {}",
+                updated.id,
+                if pinned { "pinned" } else { "unpinned" }
+            );
+        }
         ShellCommand::Messages => chat_display::print_messages(current_chat)?,
         ShellCommand::Sessions => actions::list_sessions(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,

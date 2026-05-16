@@ -14,6 +14,8 @@ agenthub
 
 `/` commands үшін, `@path` context үшін, `!command` policy-checked shell command үшін, `# note` project memory үшін қолданылады.
 
+Chat sessions автоматты түрде қалпына келеді. `/chats` auto titles және pin state бар sessions көрсетеді, `/search <text>` titles/messages бойынша іздейді, `/rename <title>` current chat атын өзгертеді, ал `/pin` немесе `/unpin` маңызды жұмысты жоғарыда ұстайды немесе босатады.
+
 ## Doctor
 
 ```bash

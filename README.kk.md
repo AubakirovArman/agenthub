@@ -64,6 +64,8 @@ Shell ішінде:
 - `@README.md` немесе `@src` келесі request үшін нақты file/folder context қосады.
 - `!git status --short` shell command-ты AgentHub policy арқылы іске қосып, log жазады.
 - `# use fetch only, no axios` future tasks үшін typed memory note жазады.
+- `/chats`, `/search`, `/rename`, `/pin` және `/unpin` chat sessions басқаруын shell ішінде береді.
+- `/chats`, `/search`, `/rename`, `/pin` және `/unpin` chat sessions басқаруын shell ішінде береді.
 
 Scriptable commands automation үшін қала береді:
 

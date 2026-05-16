@@ -64,6 +64,8 @@ Shell 内：
 - `@README.md` 或 `@src` 给下一条请求添加明确的 file/folder context。
 - `!git status --short` 通过 AgentHub policy 运行 shell command 并记录日志。
 - `# use fetch only, no axios` 写入 typed memory note，供后续任务使用。
+- `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 可在 shell 内管理 chat sessions。
+- `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 可在 shell 内管理 chat sessions。
 
 Scriptable commands 仍然保留给 automation：
 

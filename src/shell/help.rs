@@ -25,6 +25,12 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /explain           explain result and next action");
     println!("  /undo              revert the last committed AgentHub transaction");
     println!();
+    println!("Chats:");
+    println!("  /chats             list recent chats with titles and pins");
+    println!("  /search <text>     search chat titles and messages");
+    println!("  /rename <title>    rename the current chat");
+    println!("  /pin, /unpin       keep or release the current chat");
+    println!();
     println!("UI:");
     println!("  /dashboard         open local dashboard");
     println!("  /serve             serve live dashboard locally");

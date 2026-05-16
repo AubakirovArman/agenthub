@@ -23,6 +23,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Shell ішінде `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.
 - Local auto-refresh dashboard үшін `/serve` немесе `agenthub serve` қолдан.
 - Reusable local model endpoints сақтау үшін `agenthub providers add openai-http --name local-vllm --url ...` қолдан.
+- Auto titles бар chat sessions басқару үшін `/chats`, `/search`, `/rename`, `/pin` және `/unpin` қолдан.
 - `@path` context қосады, `!command` policy-checked shell command іске қосады, `# note` project memory сақтайды.
 - `agenthub run`, `agenthub tx diff latest` және `agenthub tx logs latest` сияқты scriptable commands қолжетімді.
 - Release work алдында `scripts/dogfood.sh` және `scripts/dogfood-readiness.sh` іске қос.

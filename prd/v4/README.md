@@ -23,6 +23,7 @@ Success criteria:
 9. Running `agenthub` opens a chat-first shell where plain text is the main task flow.
 10. `agenthub serve` provides a local auto-refresh dashboard server for daily work.
 11. Named provider profiles make local and proxy model endpoints reusable.
+12. Chat sessions have auto titles, search, rename, pin, and unpin flows.
 
 ## Rules
 

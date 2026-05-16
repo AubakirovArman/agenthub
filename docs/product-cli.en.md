@@ -14,6 +14,8 @@ Running `agenthub` without a subcommand is the recommended daily entry. It can p
 
 Use `/` for commands, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
 
+Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
+
 ## Doctor
 
 ```bash

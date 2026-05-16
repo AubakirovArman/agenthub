@@ -12,6 +12,12 @@ pub(super) enum ShellCommand {
     Mode(Option<ShellMode>),
     Chats,
     Chat(Option<String>),
+    Search(String),
+    Rename(String),
+    Pin {
+        target: Option<String>,
+        pinned: bool,
+    },
     Messages,
     Sessions,
     Doctor,
@@ -36,7 +42,10 @@ pub(super) enum ShellCommand {
     MemoryAdd(String),
     Ask(String),
     Do(String),
-    Run { target: String, no_commit: bool },
+    Run {
+        target: String,
+        no_commit: bool,
+    },
     Message(String),
 }
 
@@ -86,6 +95,10 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "chats" | "threads" => ShellCommand::Chats,
         "chat" | "thread" => ShellCommand::Chat(optional(rest)),
         "new" => ShellCommand::Chat(Some("new".to_string())),
+        "search" => ShellCommand::Search(rest.trim().to_string()),
+        "rename" => ShellCommand::Rename(rest.trim().to_string()),
+        "pin" => parse_pin(rest, true),
+        "unpin" => parse_pin(rest, false),
         "messages" | "transcript" => ShellCommand::Messages,
         "sessions" | "history" | "tx" | "list" => ShellCommand::Sessions,
         "transactions" => ShellCommand::Sessions,
@@ -139,6 +152,17 @@ fn parse_session(rest: &str) -> ShellCommand {
         Some(tx_id) => ShellCommand::Open(tx_id),
         None => ShellCommand::Sessions,
     }
+}
+
+fn parse_pin(rest: &str, default: bool) -> ShellCommand {
+    let rest = rest.trim();
+    let (target, pinned) = match rest {
+        "off" | "false" | "no" => (None, false),
+        "on" | "true" | "yes" => (None, true),
+        "" => (None, default),
+        value => (Some(value.to_string()), default),
+    };
+    ShellCommand::Pin { target, pinned }
 }
 
 #[cfg(test)]

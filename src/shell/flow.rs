@@ -5,6 +5,7 @@ use anyhow::Result;
 use super::approval::{self, Decision};
 use super::chat::{self, ChatSession};
 use super::chat_display;
+use super::chat_meta;
 use super::commands::ShellMode;
 use super::context_input;
 use super::run;
@@ -68,7 +69,7 @@ pub(super) fn update_chat(
 ) -> Result<()> {
     match target.map(str::trim).filter(|value| !value.is_empty()) {
         Some("new") => *current_chat = chat::create(root)?,
-        Some(target) => *current_chat = chat::open(root, target)?,
+        Some(target) => *current_chat = chat_meta::open(root, target)?,
         None => {}
     }
     chat_display::print_summary(current_chat)

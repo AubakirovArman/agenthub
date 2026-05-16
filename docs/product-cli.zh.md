@@ -14,6 +14,8 @@ agenthub
 
 使用 `/` 输入 commands，`@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 写入 project memory。
 
+Chat sessions 会自动恢复。使用 `/chats` 查看带 auto titles 和 pin state 的 sessions，`/search <text>` 搜索 titles/messages，`/rename <title>` 命名当前 chat，`/pin` 或 `/unpin` 把重要工作固定在顶部或取消固定。
+
 ## Doctor
 
 ```bash
