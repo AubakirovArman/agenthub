@@ -1,6 +1,9 @@
 use std::fs;
+use std::io::{Read, Write};
+use std::net::{Shutdown, TcpListener};
 use std::path::Path;
 use std::process::Command;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use tempfile::TempDir;
@@ -145,7 +148,7 @@ transaction:
 }
 
 #[test]
-fn api_adapter_fallback_writes_prompt_without_cli_invocation() -> Result<()> {
+fn api_adapter_dry_run_writes_prompt_and_invocation_without_provider_call() -> Result<()> {
     let repo = TestRepo::new()?;
     agent_dir::init_project(repo.path(), false)?;
     repo.commit_all("agenthub baseline")?;
@@ -192,19 +195,81 @@ transaction:
         .report_path
         .with_file_name("agent_prompt_executor.md")
         .exists());
-    assert!(!outcome
+    assert!(outcome
         .report_path
         .with_file_name("adapter_invocation_executor.json")
         .exists());
 
     let agent_trace = fs::read_to_string(outcome.report_path.with_file_name("agent_trace.json"))?;
     assert!(agent_trace.contains("deepseek"));
-    assert!(agent_trace.contains("API-native project executor"));
+    assert!(agent_trace.contains("\"selected_adapter\": \"deepseek\""));
     let provider_plan =
         fs::read_to_string(outcome.report_path.with_file_name("llm_provider_plan.json"))?;
     assert!(provider_plan.contains("deepseek"));
-    assert!(provider_plan.contains("local_command"));
+    assert!(provider_plan.contains("api_provider"));
     Ok(())
+}
+
+#[test]
+fn api_adapter_executes_provider_generated_commands_inside_transaction() -> Result<()> {
+    let repo = TestRepo::new()?;
+    agent_dir::init_project(repo.path(), false)?;
+    repo.commit_all("agenthub baseline")?;
+    let response = r#"{"summary":"create generated file","commands":["mkdir -p generated","printf 'api native\n' > generated/api.txt"]}"#;
+    let stub = OpenAiStub::start(response)?;
+
+    let spec = repo.write_spec(
+        "api_native_executor.yaml",
+        r#"
+task:
+  id: api_native_executor
+  type: code.command
+agent:
+  adapter: deepseek
+workspace:
+  type: code.git
+  isolation: git_worktree
+execution:
+  commands: []
+scope:
+  allow:
+    - generated/**
+verify:
+  profile: code_build
+  commands:
+    - test -f generated/api.txt
+transaction:
+  commit_on_success: true
+  memory_promotion: on_success
+  diff_limits:
+    max_files_changed: 2
+    max_lines_added: 5
+    max_lines_deleted: 0
+"#,
+    )?;
+
+    with_deepseek_stub_env(&stub.endpoint, || {
+        let outcome = transaction::run(repo.path(), &spec, false)?;
+
+        assert!(matches!(outcome.status, TransactionStatus::Committed));
+        assert_eq!(
+            normalize_newlines(&fs::read_to_string(repo.path().join("generated/api.txt"))?),
+            "api native\n"
+        );
+        assert!(outcome
+            .report_path
+            .with_file_name("api_execution_executor.json")
+            .exists());
+        let adapter = fs::read_to_string(
+            outcome
+                .report_path
+                .with_file_name("adapter_invocation_executor.json"),
+        )?;
+        assert!(adapter.contains("api://deepseek"));
+        let request = stub.received_request()?;
+        assert!(request.contains("POST /v1/chat/completions"));
+        Ok(())
+    })
 }
 
 #[test]
@@ -1382,6 +1447,134 @@ transaction:
     max_lines_added: 20
     max_lines_deleted: 0
 "#
+}
+
+struct OpenAiStub {
+    endpoint: String,
+    requests: std::sync::mpsc::Receiver<String>,
+}
+
+impl OpenAiStub {
+    fn start(content: &str) -> Result<Self> {
+        let listener = TcpListener::bind("127.0.0.1:0")?;
+        let endpoint = format!("http://{}", listener.local_addr()?);
+        let escaped_content = serde_json::to_string(content)?;
+        let completion_body = format!(
+            r#"{{"choices":[{{"message":{{"content":{escaped_content}}}}}],"usage":{{"completion_tokens":12}}}}"#
+        );
+        let (requests_tx, requests_rx) = std::sync::mpsc::channel();
+        std::thread::spawn(move || {
+            let Ok((mut stream, _)) = listener.accept() else {
+                return;
+            };
+            let request = read_http_request(&mut stream).unwrap_or_default();
+            let _ = requests_tx.send(request);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                completion_body.len(),
+                completion_body
+            );
+            let _ = stream.write_all(response.as_bytes());
+            let _ = stream.flush();
+            let _ = stream.shutdown(Shutdown::Write);
+            drain_client_close(&mut stream);
+        });
+        Ok(Self {
+            endpoint,
+            requests: requests_rx,
+        })
+    }
+
+    fn received_request(&self) -> Result<String> {
+        Ok(self.requests.recv_timeout(Duration::from_secs(2))?)
+    }
+}
+
+fn with_deepseek_stub_env<T>(endpoint: &str, run: impl FnOnce() -> Result<T>) -> Result<T> {
+    let previous_base = std::env::var_os("DEEPSEEK_API_BASE_URL");
+    let previous_base_short = std::env::var_os("DEEPSEEK_BASE_URL");
+    let previous_key = std::env::var_os("DEEPSEEK_API_KEY");
+    let previous_key_file = std::env::var_os("DEEPSEEK_API_KEY_FILE");
+    let previous_anthropic = std::env::var_os("ANTHROPIC_AUTH_TOKEN");
+    let previous_anthropic_file = std::env::var_os("ANTHROPIC_AUTH_TOKEN_FILE");
+    let previous_model = std::env::var_os("DEEPSEEK_MODEL");
+    std::env::set_var("DEEPSEEK_API_BASE_URL", endpoint);
+    std::env::remove_var("DEEPSEEK_BASE_URL");
+    std::env::set_var("DEEPSEEK_API_KEY", "test-key");
+    std::env::remove_var("DEEPSEEK_API_KEY_FILE");
+    std::env::remove_var("ANTHROPIC_AUTH_TOKEN");
+    std::env::remove_var("ANTHROPIC_AUTH_TOKEN_FILE");
+    std::env::set_var("DEEPSEEK_MODEL", "deepseek-test");
+    let result = run();
+    restore_env("DEEPSEEK_API_BASE_URL", previous_base);
+    restore_env("DEEPSEEK_BASE_URL", previous_base_short);
+    restore_env("DEEPSEEK_API_KEY", previous_key);
+    restore_env("DEEPSEEK_API_KEY_FILE", previous_key_file);
+    restore_env("ANTHROPIC_AUTH_TOKEN", previous_anthropic);
+    restore_env("ANTHROPIC_AUTH_TOKEN_FILE", previous_anthropic_file);
+    restore_env("DEEPSEEK_MODEL", previous_model);
+    result
+}
+
+fn restore_env(key: &str, value: Option<std::ffi::OsString>) {
+    match value {
+        Some(value) => std::env::set_var(key, value),
+        None => std::env::remove_var(key),
+    }
+}
+
+fn read_http_request(stream: &mut std::net::TcpStream) -> std::io::Result<String> {
+    stream.set_read_timeout(Some(Duration::from_millis(250)))?;
+    let mut buffer = Vec::new();
+    let mut chunk = [0_u8; 512];
+    loop {
+        let read = stream.read(&mut chunk)?;
+        if read == 0 {
+            return Ok(String::from_utf8_lossy(&buffer).to_string());
+        }
+        buffer.extend_from_slice(&chunk[..read]);
+        if let Some(header_end) = find_header_end(&buffer) {
+            let headers = String::from_utf8_lossy(&buffer[..header_end]);
+            let content_length = headers
+                .lines()
+                .find_map(|line| line.split_once(':'))
+                .filter(|(key, _)| key.eq_ignore_ascii_case("content-length"))
+                .and_then(|(_, value)| value.trim().parse::<usize>().ok())
+                .unwrap_or(0);
+            let body_start = header_end + 4;
+            while buffer.len().saturating_sub(body_start) < content_length {
+                let read = stream.read(&mut chunk)?;
+                if read == 0 {
+                    break;
+                }
+                buffer.extend_from_slice(&chunk[..read]);
+            }
+            return Ok(String::from_utf8_lossy(&buffer).to_string());
+        }
+    }
+}
+
+fn find_header_end(buffer: &[u8]) -> Option<usize> {
+    buffer.windows(4).position(|window| window == b"\r\n\r\n")
+}
+
+fn drain_client_close(stream: &mut impl Read) {
+    let mut chunk = [0_u8; 128];
+    loop {
+        match stream.read(&mut chunk) {
+            Ok(0) => return,
+            Ok(_) => {}
+            Err(error)
+                if matches!(
+                    error.kind(),
+                    std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
+                ) =>
+            {
+                return;
+            }
+            Err(_) => return,
+        }
+    }
 }
 
 struct TestRepo {

@@ -1,10 +1,11 @@
+use std::io::{self, Write};
 use std::path::Path;
 
 use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::Value;
 
-use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPolicy};
+use crate::llm_gateway::{HttpProvider, LlmRequest};
 use crate::product_cli::{config, providers};
 
 use super::chat::{self, ChatSession};
@@ -24,8 +25,7 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         provider.model.clone(),
     );
     let prompt = prompt_for(session, request)?;
-    let response = complete_with_retry(
-        &api,
+    let response = api.complete_streaming(
         LlmRequest {
             id: format!("chat-{}", Utc::now().timestamp_millis()),
             role: "chat".to_string(),
@@ -37,17 +37,16 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
             prompt_tokens: estimate_tokens(request),
             response_format: None,
         },
-        &RetryPolicy {
-            max_attempts: 2,
-            backoff_ms: vec![500],
+        |delta| {
+            print!("{delta}");
+            let _ = io::stdout().flush();
         },
-        None,
     )?;
     let content = response
         .content
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| "<empty response>".to_string());
-    println!("{content}");
+    println!();
     chat::append_assistant(session, &provider.info.id, &content)?;
     Ok(())
 }

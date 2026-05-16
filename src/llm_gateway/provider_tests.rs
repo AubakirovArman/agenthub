@@ -39,6 +39,23 @@ fn http_provider_calls_openai_compatible_stub() -> Result<()> {
 }
 
 #[test]
+fn http_provider_streams_openai_compatible_sse_stub() -> Result<()> {
+    let endpoint = stub_sse_server();
+    let provider = HttpProvider::new(endpoint, Some("test-key".to_string()), None);
+    let mut chunks = Vec::new();
+
+    let response = provider.complete_streaming(request("stream", "hello stream"), |delta| {
+        chunks.push(delta.to_string());
+    })?;
+
+    assert_eq!(chunks, vec!["hello", " stream"]);
+    assert_eq!(response.status, "ok");
+    assert_eq!(response.content.as_deref(), Some("hello stream"));
+    assert_eq!(response.completion_tokens, 2);
+    Ok(())
+}
+
+#[test]
 fn http_provider_accepts_only_http_or_https_urls() {
     let provider = HttpProvider::new("ftp://127.0.0.1", None, None);
 
@@ -90,6 +107,33 @@ fn stub_server() -> String {
             r#"{"choices":[{"message":{"content":"stub ok"}}],"usage":{"completion_tokens":2}}"#;
         let response = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        stream.write_all(response.as_bytes()).expect("write stub");
+        stream.flush().expect("flush stub");
+        let _ = stream.shutdown(Shutdown::Write);
+        drain_client_close(&mut stream);
+    });
+    format!("http://{addr}")
+}
+
+fn stub_sse_server() -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub");
+    let addr = listener.local_addr().expect("stub addr");
+    thread::spawn(move || {
+        let (mut stream, _) = listener.accept().expect("accept stub");
+        stream
+            .set_read_timeout(Some(Duration::from_millis(250)))
+            .expect("set read timeout");
+        read_http_request(&mut stream).expect("read request");
+        let body = concat!(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n",
+            "data: {\"choices\":[{\"delta\":{\"content\":\" stream\"}}],\"usage\":{\"completion_tokens\":2}}\n\n",
+            "data: [DONE]\n\n",
+        );
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
             body.len(),
             body
         );

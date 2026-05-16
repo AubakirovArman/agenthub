@@ -28,7 +28,7 @@ write_report() {
   "project": "$(json_escape "$project")",
   "tx_report": "$(json_escape "$report")",
   "artifact_dir": "$(json_escape "$ARTIFACT_DIR")",
-  "token_observation": "API provider test captured HTTP usage; project transaction currently falls back to deterministic command execution"
+  "token_observation": "API provider test captured HTTP usage; project transaction uses the API-native JSON command executor"
 }
 JSON
 }

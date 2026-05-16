@@ -59,8 +59,25 @@ impl AgentRoute {
         }
     }
 
+    pub fn api(adapter: String, role: String, model: Option<String>, dry_run: bool) -> Self {
+        Self {
+            requested_adapter: adapter.clone(),
+            selected_adapter: adapter,
+            role,
+            model,
+            command_template: None,
+            dry_run,
+            routing_policy: routing_policy(),
+            fallback_reason: None,
+        }
+    }
+
+    pub fn uses_api_provider(&self) -> bool {
+        matches!(self.selected_adapter.as_str(), "deepseek" | "kimi")
+    }
+
     pub fn uses_external_cli(&self) -> bool {
-        self.selected_adapter != "command"
+        self.selected_adapter != "command" && !self.uses_api_provider()
     }
 }
 
@@ -69,6 +86,5 @@ fn routing_policy() -> Vec<String> {
         "user_preference".to_string(),
         "private_mode".to_string(),
         "api_native".to_string(),
-        "transaction_kernel_fallback".to_string(),
     ]
 }

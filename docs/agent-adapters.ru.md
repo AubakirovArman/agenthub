@@ -37,6 +37,6 @@ agents:
 
 ## Текущий статус project executor
 
-Non-project chat mode уже может вызывать DeepSeek/Kimi напрямую. Project transaction routes для `deepseek` и `kimi` сейчас явно записывают fallback в deterministic kernel, пока подключается API-native project executor и tool loop.
+Non-project chat mode уже вызывает DeepSeek/Kimi напрямую со streaming output. Project transaction routes для `deepseek` и `kimi` используют AgentHub-owned API requests: provider возвращает JSON command plan, AgentHub валидирует и запускает эти команды внутри isolated worktree, затем продолжается обычный diff guard, verifier, rollback, commit и memory promotion flow.
 
-Каждая transaction пишет выбранные routes в `.agent/tx/<tx-id>/agent_trace.json`. Adapter prompt artifacts пишутся как `.agent/tx/<tx-id>/agent_prompt_<role>.md`.
+Каждая transaction пишет выбранные routes в `.agent/tx/<tx-id>/agent_trace.json`. Adapter prompt artifacts пишутся как `.agent/tx/<tx-id>/agent_prompt_<role>.md`, а API executor plans/results пишутся как `.agent/tx/<tx-id>/api_execution_<role>.json`.

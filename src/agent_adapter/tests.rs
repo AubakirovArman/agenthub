@@ -16,7 +16,7 @@ fn defaults_to_command_adapter() -> Result<()> {
 }
 
 #[test]
-fn api_adapter_falls_back_to_command_until_project_executor_is_ready() -> Result<()> {
+fn api_adapter_routes_to_native_provider() -> Result<()> {
     let route = route(&AgentConfig {
         adapter: Some("deepseek".to_string()),
         dry_run: true,
@@ -24,18 +24,15 @@ fn api_adapter_falls_back_to_command_until_project_executor_is_ready() -> Result
     })?;
 
     assert_eq!(route.requested_adapter, "deepseek");
-    assert_eq!(route.selected_adapter, "command");
-    assert!(route
-        .fallback_reason
-        .as_deref()
-        .unwrap_or_default()
-        .contains("API-native project executor"));
+    assert_eq!(route.selected_adapter, "deepseek");
+    assert!(route.fallback_reason.is_none());
+    assert!(route.uses_api_provider());
     assert!(route.dry_run);
     Ok(())
 }
 
 #[test]
-fn api_adapter_invocation_writes_prompt_without_external_cli() -> Result<()> {
+fn api_adapter_dry_run_writes_prompt_without_provider_call() -> Result<()> {
     let dir = tempfile::tempdir()?;
     let spec = AgentSpec {
         agent: AgentConfig {
@@ -49,10 +46,12 @@ fn api_adapter_invocation_writes_prompt_without_external_cli() -> Result<()> {
 
     let run = invoke_adapter(&spec, dir.path(), dir.path(), &route, None)?;
 
-    assert!(run.is_none());
+    let run = run.expect("api dry-run adapter run");
+    assert!(run.dry_run);
+    assert_eq!(run.adapter, "deepseek");
     assert!(dir.path().join("agent_prompt_executor.md").exists());
-    assert!(!dir.path().join("adapter_invocation_executor.json").exists());
-    assert!(!dir.path().join("agent_transcript.jsonl").exists());
+    assert!(dir.path().join("adapter_invocation_executor.json").exists());
+    assert!(dir.path().join("agent_transcript.jsonl").exists());
     Ok(())
 }
 
@@ -154,7 +153,7 @@ fn repair_agent_can_differ_from_executor() -> Result<()> {
     let routes = routes_for_spec(&spec)?;
 
     assert_eq!(routes.executor.requested_adapter, "deepseek");
-    assert_eq!(routes.executor.selected_adapter, "command");
+    assert_eq!(routes.executor.selected_adapter, "deepseek");
     assert_eq!(
         routes
             .repair

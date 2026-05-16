@@ -1,9 +1,11 @@
+use std::io::{BufRead, BufReader};
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use serde_json::{json, Value};
 
 use crate::llm_gateway::provider::{metadata_for_adapter, LlmProvider};
+use crate::llm_gateway::sse_parser;
 use crate::llm_gateway::types::{LlmRequest, LlmResponse, ProviderMetadata, TokenCount};
 
 #[derive(Debug, Clone)]
@@ -43,15 +45,62 @@ impl HttpProvider {
             .unwrap_or_default();
         Ok(models)
     }
+
+    pub fn complete_streaming(
+        &self,
+        request: LlmRequest,
+        mut on_delta: impl FnMut(&str),
+    ) -> Result<LlmResponse> {
+        let body = completion_body(&request, self.model.clone(), true);
+        let response = post_stream(
+            &completion_url(&self.endpoint),
+            self.api_key.as_deref(),
+            &body,
+        )?;
+        let mut reader = BufReader::new(response.into_reader());
+        let mut line = String::new();
+        let mut content = String::new();
+        let mut completion_tokens = None;
+        loop {
+            line.clear();
+            if reader
+                .read_line(&mut line)
+                .context("read OpenAI-compatible SSE line")?
+                == 0
+            {
+                break;
+            }
+            let Some(event) = sse_parser::parse_event_line(&line)? else {
+                continue;
+            };
+            if let Some(delta) = event.content_delta {
+                content.push_str(&delta);
+                on_delta(&delta);
+            }
+            if let Some(tokens) = event.completion_tokens {
+                completion_tokens = Some(tokens);
+            }
+            if event.done {
+                break;
+            }
+        }
+        Ok(LlmResponse {
+            request_id: request.id,
+            status: "ok".to_string(),
+            completion_tokens: completion_tokens.unwrap_or_else(|| estimate_tokens(&content)),
+            content: if content.is_empty() {
+                None
+            } else {
+                Some(content)
+            },
+            error: None,
+        })
+    }
 }
 
 impl LlmProvider for HttpProvider {
     fn complete(&self, request: LlmRequest) -> Result<LlmResponse> {
-        let body = json!({
-            "model": request.model.clone().or_else(|| self.model.clone()).unwrap_or_else(|| "default".to_string()),
-            "messages": [{ "role": "user", "content": request.prompt.clone().unwrap_or_default() }],
-            "stream": false
-        });
+        let body = completion_body(&request, self.model.clone(), false);
         let response = post_json(
             &completion_url(&self.endpoint),
             self.api_key.as_deref(),
@@ -91,6 +140,26 @@ impl LlmProvider for HttpProvider {
     }
 }
 
+fn completion_body(request: &LlmRequest, provider_model: Option<String>, stream: bool) -> Value {
+    let mut body = json!({
+        "model": request.model.clone().or(provider_model).unwrap_or_else(|| "default".to_string()),
+        "messages": [{ "role": "user", "content": request.prompt.clone().unwrap_or_default() }],
+        "stream": stream
+    });
+    if matches!(
+        request.response_format.as_deref(),
+        Some("json" | "json_object")
+    ) {
+        if let Some(object) = body.as_object_mut() {
+            object.insert(
+                "response_format".to_string(),
+                json!({ "type": "json_object" }),
+            );
+        }
+    }
+    body
+}
+
 fn completion_url(endpoint: &str) -> String {
     let endpoint = endpoint.trim_end_matches('/');
     if endpoint.ends_with("/v1/chat/completions") {
@@ -128,6 +197,21 @@ fn post_json(url: &str, api_key: Option<&str>, body: &Value) -> Result<Value> {
         .into_string()
         .context("read OpenAI-compatible response body")?;
     serde_json::from_str(response.trim()).context("parse OpenAI-compatible response JSON")
+}
+
+fn post_stream(url: &str, api_key: Option<&str>, body: &Value) -> Result<ureq::Response> {
+    ensure_supported_scheme(url)?;
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(120))
+        .build();
+    let mut request = agent
+        .post(url)
+        .set("Content-Type", "application/json")
+        .set("Accept", "text/event-stream");
+    if let Some(api_key) = api_key.filter(|key| !key.is_empty()) {
+        request = request.set("Authorization", &format!("Bearer {api_key}"));
+    }
+    request.send_json(body.clone()).map_err(provider_error)
 }
 
 fn get_json(url: &str, api_key: Option<&str>) -> Result<Value> {
@@ -178,4 +262,34 @@ fn trim_body(body: &str) -> String {
 
 fn estimate_tokens(value: &str) -> usize {
     (value.len() / 4).max(1)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn completion_body_includes_json_response_format() {
+        let body = completion_body(
+            &LlmRequest {
+                id: "json".to_string(),
+                role: "test".to_string(),
+                provider: "deepseek".to_string(),
+                model: None,
+                prompt: Some("return json".to_string()),
+                context_pack_hash: "context".to_string(),
+                prompt_hash: "prompt".to_string(),
+                prompt_tokens: 1,
+                response_format: Some("json_object".to_string()),
+            },
+            Some("deepseek-test".to_string()),
+            false,
+        );
+
+        assert_eq!(
+            body.pointer("/response_format/type")
+                .and_then(Value::as_str),
+            Some("json_object")
+        );
+    }
 }

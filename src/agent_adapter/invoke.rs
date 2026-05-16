@@ -1,15 +1,19 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
+use std::time::Instant;
 
 use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 use crate::agent_adapter::transcript::write_adapter_run;
 use crate::agent_adapter::AgentRoute;
 use crate::command_runner::{run_shell_with_sandbox_logged, CommandSandbox, RemoteRunner};
+use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPolicy};
 use crate::observability::redact_text;
+use crate::product_cli::providers;
 use crate::spec::AgentSpec;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,6 +44,19 @@ pub fn invoke_adapter(
     remote_runner: Option<&RemoteRunner>,
 ) -> Result<Option<AdapterRun>> {
     let prompt_path = write_prompt(spec, tx_dir, route)?;
+    if route.uses_api_provider() {
+        let run = invoke_api_provider(spec, tx_dir, worktree, route, remote_runner, prompt_path)?;
+        write_invocation(tx_dir, &run)?;
+        write_adapter_run(tx_dir, route, &run)?;
+        if !run.success {
+            return Err(anyhow!(
+                "agent adapter `{}` failed for role `{}`",
+                run.adapter,
+                run.role
+            ));
+        }
+        return Ok(Some(run));
+    }
     if !route.uses_external_cli() {
         return Ok(None);
     }
@@ -105,6 +122,282 @@ pub fn invoke_adapter(
     Ok(Some(run))
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ApiExecutionPlan {
+    #[serde(default)]
+    summary: Option<String>,
+    #[serde(default)]
+    commands: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct RawApiExecutionPlan {
+    #[serde(default)]
+    summary: Option<String>,
+    #[serde(default)]
+    commands: Option<Vec<String>>,
+    #[serde(default)]
+    shell_commands: Option<Vec<String>>,
+}
+
+fn invoke_api_provider(
+    spec: &AgentSpec,
+    tx_dir: &Path,
+    worktree: &Path,
+    route: &AgentRoute,
+    remote_runner: Option<&RemoteRunner>,
+    prompt_path: PathBuf,
+) -> Result<AdapterRun> {
+    if route.dry_run {
+        return Ok(AdapterRun {
+            adapter: route.selected_adapter.clone(),
+            role: route.role.clone(),
+            command: Some(format!("api://{}", route.selected_adapter)),
+            prompt_path,
+            success: true,
+            exit_code: Some(0),
+            stdout: "api adapter dry-run enabled; provider was not called".to_string(),
+            stderr: String::new(),
+            stdout_path: None,
+            stderr_path: None,
+            stdout_truncated: false,
+            stderr_truncated: false,
+            duration_ms: 0,
+            dry_run: true,
+            remote: false,
+            runner: None,
+        });
+    }
+
+    let started = Instant::now();
+    let prompt = fs::read_to_string(&prompt_path)
+        .with_context(|| format!("read {}", prompt_path.display()))?;
+    let prompt_tokens = estimate_tokens(&prompt);
+    let status = provider_status(worktree, route)?;
+    let endpoint = status
+        .endpoint
+        .clone()
+        .ok_or_else(|| anyhow!("provider `{}` has no API endpoint", route.selected_adapter))?;
+    let model = route.model.clone().or_else(|| status.model.clone());
+    let provider = HttpProvider::new(
+        endpoint,
+        providers::api_key_for_status(&status),
+        model.clone(),
+    );
+    let request = LlmRequest {
+        id: format!(
+            "api-executor-{}-{}",
+            route.role,
+            Utc::now().timestamp_millis()
+        ),
+        role: route.role.clone(),
+        provider: route.selected_adapter.clone(),
+        model,
+        prompt: Some(prompt),
+        context_pack_hash: "transaction".to_string(),
+        prompt_hash: route.role.clone(),
+        prompt_tokens,
+        response_format: Some("json_object".to_string()),
+    };
+    let response = complete_with_retry(
+        &provider,
+        request,
+        &RetryPolicy {
+            max_attempts: 2,
+            backoff_ms: vec![500],
+        },
+        None,
+    )?;
+    let content = response
+        .content
+        .clone()
+        .ok_or_else(|| anyhow!("API executor returned an empty response"))?;
+    let plan = parse_api_execution_plan(&content)?;
+    let command_results = run_api_commands(spec, tx_dir, worktree, route, remote_runner, &plan)?;
+    let success = command_results.iter().all(|result| result.success);
+    let exit_code = if success {
+        Some(0)
+    } else {
+        command_results
+            .iter()
+            .find(|result| !result.success)
+            .and_then(|result| result.exit_code)
+    };
+    write_api_execution_record(tx_dir, route, &response, &plan, &command_results)?;
+    Ok(AdapterRun {
+        adapter: route.selected_adapter.clone(),
+        role: route.role.clone(),
+        command: Some(format!("api://{}", route.selected_adapter)),
+        prompt_path,
+        success,
+        exit_code,
+        stdout: redact_text(&content)?,
+        stderr: if success {
+            String::new()
+        } else {
+            command_results
+                .iter()
+                .find(|result| !result.success)
+                .map(|result| result.stderr_tail.clone())
+                .unwrap_or_else(|| "API executor command failed".to_string())
+        },
+        stdout_path: None,
+        stderr_path: None,
+        stdout_truncated: false,
+        stderr_truncated: false,
+        duration_ms: started.elapsed().as_millis(),
+        dry_run: false,
+        remote: command_results.iter().any(|result| result.remote),
+        runner: command_results
+            .iter()
+            .find_map(|result| result.runner.clone()),
+    })
+}
+
+fn provider_status(worktree: &Path, route: &AgentRoute) -> Result<providers::ProviderStatus> {
+    providers::statuses(worktree)?
+        .into_iter()
+        .find(|status| status.info.id == route.selected_adapter)
+        .ok_or_else(|| anyhow!("unknown API provider `{}`", route.selected_adapter))
+        .and_then(|status| {
+            if status.available {
+                Ok(status)
+            } else {
+                Err(anyhow!(
+                    "API provider `{}` is not configured; {}",
+                    status.info.id,
+                    status.info.auth_hint
+                ))
+            }
+        })
+}
+
+fn parse_api_execution_plan(content: &str) -> Result<ApiExecutionPlan> {
+    let json_text = extract_json_object(content)
+        .ok_or_else(|| anyhow!("API executor did not return a JSON object"))?;
+    let raw: RawApiExecutionPlan =
+        serde_json::from_str(json_text).context("parse API executor JSON plan")?;
+    let commands = raw
+        .commands
+        .or(raw.shell_commands)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|command| command.trim().to_string())
+        .filter(|command| !command.is_empty())
+        .collect::<Vec<_>>();
+    if commands.is_empty() {
+        return Err(anyhow!("API executor JSON plan did not include commands"));
+    }
+    if commands.len() > 20 {
+        return Err(anyhow!(
+            "API executor returned too many commands: {} (max 20)",
+            commands.len()
+        ));
+    }
+    for command in &commands {
+        validate_api_command(command)?;
+    }
+    Ok(ApiExecutionPlan {
+        summary: raw.summary,
+        commands,
+    })
+}
+
+fn extract_json_object(content: &str) -> Option<&str> {
+    let trimmed = content.trim();
+    if trimmed.starts_with('{') && trimmed.ends_with('}') {
+        return Some(trimmed);
+    }
+    let fenced = trimmed
+        .strip_prefix("```json")
+        .or_else(|| trimmed.strip_prefix("```"))
+        .and_then(|value| value.strip_suffix("```"))
+        .map(str::trim);
+    if let Some(value) = fenced {
+        if value.starts_with('{') && value.ends_with('}') {
+            return Some(value);
+        }
+    }
+    let start = trimmed.find('{')?;
+    let end = trimmed.rfind('}')?;
+    (start < end).then_some(&trimmed[start..=end])
+}
+
+fn validate_api_command(command: &str) -> Result<()> {
+    let lower = command.to_ascii_lowercase();
+    let denied = [
+        "sudo ", "su ", "rm -rf /", "mkfs", "shutdown", "reboot", "dd if=", ":(){",
+    ];
+    if command.contains('\0') || command.lines().count() > 200 {
+        return Err(anyhow!("API executor returned an unsafe shell command"));
+    }
+    if denied.iter().any(|pattern| lower.contains(pattern)) {
+        return Err(anyhow!(
+            "API executor returned a denied shell command pattern"
+        ));
+    }
+    Ok(())
+}
+
+fn run_api_commands(
+    spec: &AgentSpec,
+    tx_dir: &Path,
+    worktree: &Path,
+    route: &AgentRoute,
+    remote_runner: Option<&RemoteRunner>,
+    plan: &ApiExecutionPlan,
+) -> Result<Vec<crate::command_runner::CommandResult>> {
+    let mut results = Vec::new();
+    for (index, command) in plan.commands.iter().enumerate() {
+        if let Some(cancel) = crate::command_runner::read_cancel_request(tx_dir)? {
+            crate::command_runner::write_cancel_status(
+                tx_dir,
+                &crate::command_runner::CancelStatus {
+                    cancelled: true,
+                    reason: Some(cancel.reason.clone()),
+                },
+            )?;
+            return Err(anyhow!("transaction cancelled: {}", cancel.reason));
+        }
+        let result = run_shell_with_sandbox_logged(
+            command,
+            worktree,
+            Duration::from_secs(900),
+            adapter_sandbox(spec.execution.sandbox.level, remote_runner),
+            &tx_dir.join("logs"),
+            &format!("api-{}-{index}", route.role),
+        )?;
+        let success = result.success;
+        results.push(result);
+        if !success {
+            break;
+        }
+    }
+    Ok(results)
+}
+
+fn write_api_execution_record(
+    tx_dir: &Path,
+    route: &AgentRoute,
+    response: &crate::llm_gateway::LlmResponse,
+    plan: &ApiExecutionPlan,
+    command_results: &[crate::command_runner::CommandResult],
+) -> Result<()> {
+    let path = tx_dir.join(format!("api_execution_{}.json", route.role));
+    fs::write(
+        &path,
+        serde_json::to_string_pretty(&json!({
+            "created_at": Utc::now(),
+            "adapter": route.selected_adapter,
+            "role": route.role,
+            "response": response,
+            "plan": plan,
+            "command_results": command_results,
+        }))?,
+    )
+    .with_context(|| format!("write {}", path.display()))
+}
+
 fn adapter_sandbox(level: u8, remote_runner: Option<&RemoteRunner>) -> CommandSandbox {
     CommandSandbox {
         level,
@@ -121,7 +414,7 @@ fn write_prompt(spec: &AgentSpec, tx_dir: &Path, route: &AgentRoute) -> Result<P
 
 fn render_prompt(spec: &AgentSpec, route: &AgentRoute) -> String {
     format!(
-        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
+        "# AgentHub Adapter Prompt\n\nRole: {}\nAdapter: {}\nModel: {}\nTask: {} ({})\nTitle: {}\nTarget: {}\nWorkspace: {}\n\nInstructions:\n- Edit files directly in the current AgentHub worktree.\n- Stay inside the allowed scope and avoid denied paths.\n- Keep changes focused on this task.\n- If you are an API provider, return only a JSON object with this shape: {{\"summary\":\"short summary\",\"commands\":[\"shell command 1\",\"shell command 2\"]}}.\n- API commands must be non-interactive, deterministic, and must create or edit files using shell-safe commands such as mkdir, printf, cat <<'EOF', npm, cargo, or test runners.\n- Do not include sudo, reboot, destructive disk commands, or commands that touch denied paths.\n\nSkills:\n{}\n\nRules:\n{}\n\nAllowed paths:\n{}\n\nDenied paths:\n{}\n\nExecution commands after adapter step:\n{}\n\nReview commands:\n{}\n\nRepair commands:\n{}\n\nVerifier commands:\n{}\n",
         route.role,
         route.selected_adapter,
         route.model.as_deref().unwrap_or("<default>"),
@@ -181,6 +474,10 @@ fn render_command(route: &AgentRoute, prompt_path: &Path) -> Result<String> {
 
 fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
+}
+
+fn estimate_tokens(value: &str) -> usize {
+    (value.len() / 4).max(1)
 }
 
 fn write_invocation(tx_dir: &Path, run: &AdapterRun) -> Result<()> {

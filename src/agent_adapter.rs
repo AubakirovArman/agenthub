@@ -65,13 +65,7 @@ fn route_api_adapter(
     model: Option<String>,
     dry_run: bool,
 ) -> Result<AgentRoute> {
-    Ok(AgentRoute::selected(
-        requested.to_string(),
-        role,
-        model,
-        Some("API-native project executor is not wired into the transaction kernel yet; using deterministic command runner".to_string()),
-        dry_run,
-    ))
+    Ok(AgentRoute::api(requested.to_string(), role, model, dry_run))
 }
 
 fn command_config() -> AgentConfig {

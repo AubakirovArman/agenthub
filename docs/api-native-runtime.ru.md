@@ -24,13 +24,13 @@ DeepSeek API, Kimi API, legacy aliases и generic custom profiles больше �
 
 - Non-project shell уже не инициализирует Git и `.agent` автоматически.
 - Chat/history/index/command logs получают global home fallback.
-- Non-project plain messages идут напрямую в DeepSeek/Kimi API, если ключ настроен.
-- Project transaction routes для `deepseek`/`kimi` пока явно fallback-ятся в deterministic kernel и записывают reason в trace; следующий этап - API-native project executor с tool loop.
+- Non-project plain messages идут напрямую в DeepSeek/Kimi API, если ключ настроен, и печатают streaming SSE output.
+- Project transaction routes для `deepseek`/`kimi` используют API-native JSON command executor: provider возвращает command plan, AgentHub валидирует команды, запускает их в isolated worktree и пишет `.agent/tx/<tx-id>/api_execution_<role>.json`.
 
 ## Следующие этапы
 
-1. Streaming SSE для chat и dashboard.
-2. Tool-calling loop: shell commands, file reads/writes, diff preview, verifier invocation.
+1. Streaming SSE events для dashboard, не только terminal chat.
+2. Tool-calling loop: structured shell/file/read/diff/verifier tools вместо одноразового JSON command plan.
 3. Sub-agent manager/worker orchestration внутри AgentHub, без внешних CLI.
 4. Memory policy: global user memory, project memory, failed-attempt warnings, promotion rules.
 5. UI rewrite: отдельные Chat, DevOps и Project transaction screens.

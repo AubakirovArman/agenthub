@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.1-local-preview - 2026-05-16
+
+- Wire the API-native project executor for `deepseek` and `kimi`: AgentHub now asks the API provider for a JSON command plan, runs those commands inside the existing sandbox/worktree transaction, records `api_execution_<role>.json`, and keeps diff guard, verifier, rollback, commit, and memory promotion on the AgentHub side.
+- Add OpenAI-compatible SSE parsing and streaming chat output for direct DeepSeek/Kimi shell conversations.
+
 ## 0.4.0-local-preview - 2026-05-16
 
 - Start the API-native provider runtime: DeepSeek and Kimi are now first-class HTTP providers, and Codex/Gemini/Kimi CLI wrappers plus generic `openai-http` profiles are removed from the user-facing provider catalog.
