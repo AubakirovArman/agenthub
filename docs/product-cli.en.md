@@ -14,6 +14,8 @@ Running `agenthub` without a subcommand is the recommended daily entry. In an un
 
 AgentHub records and displays Chat/Ops/Project mode decisions. Plain chat stays in Chat Mode, server or operations wording without a project runtime is marked as Ops Mode, and initialized `.agent` workspaces are Project Mode. Prompt chips, `/context`, `/status`, and headless `exec --jsonl` expose the selected mode.
 
+Draft-only flows stay lazy too: `plan`, `ask`, and shell draft creation store drafts under the AgentHub user data directory until a project runtime exists. Git initialization, `.agent` creation, and baseline commit are planned and confirmed only when a transaction is about to run; non-interactive automation keeps the existing auto-bootstrap behavior.
+
 Explicit `!command` shell actions now receive an AgentHub-owned tool permission decision before execution. The transcript records `tool_permission` events with profile (`chat`, `read-only`, `workspace-write`, `ops-host`), risk, `approval_required`, and reason; high-risk local destructive commands, package changes, mutating HTTP calls, and mutating Ops host/container/cluster commands ask for approval before running.
 
 Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for memory. In Chat/Ops Mode, memory is stored under the AgentHub user data directory; initialized projects keep project memory under `.agent/memory`.

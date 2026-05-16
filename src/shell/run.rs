@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use chrono::Utc;
 
-use crate::{enterprise, intent, live_run, memory, spec::AgentSpec};
+use crate::{enterprise, home, intent, live_run, memory, product_cli::bootstrap, spec::AgentSpec};
 
 use super::progress;
 
@@ -14,6 +14,7 @@ pub(super) fn run_request(root: &Path, request: &str, no_commit: bool) -> Result
 
 pub(super) fn run_spec(root: &Path, spec: &Path, no_commit: bool) -> Result<String> {
     enterprise::authorize(root, "transaction.run")?;
+    print_bootstrap(bootstrap::ensure_transaction_ready(root)?);
     print_failed_attempt_warnings(root, spec)?;
     let mut tracker = progress::default_run_tracker();
     println!("{}", tracker.render());
@@ -102,7 +103,25 @@ pub(super) fn resolve_run_target(root: &Path, target: &str) -> Result<PathBuf> {
 }
 
 fn draft_path(root: &Path) -> PathBuf {
-    root.join(".agent")
-        .join("drafts")
-        .join(format!("shell-{}.yaml", Utc::now().format("%Y%m%d%H%M%S")))
+    let dir = if home::project_has_runtime(root) {
+        root.join(".agent").join("drafts")
+    } else {
+        home::global_drafts_dir(root)
+    };
+    dir.join(format!("shell-{}.yaml", Utc::now().format("%Y%m%d%H%M%S")))
+}
+
+fn print_bootstrap(report: bootstrap::BootstrapReport) {
+    if report.plan.needs_bootstrap() {
+        println!("bootstrap: approved {}", report.plan.summary());
+    }
+    if report.git_initialized {
+        println!("bootstrap: initialized git repository");
+    }
+    if report.agent_initialized {
+        println!("bootstrap: initialized .agent project");
+    }
+    if report.baseline_committed {
+        println!("bootstrap: committed initial AgentHub baseline");
+    }
 }

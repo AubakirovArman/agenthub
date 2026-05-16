@@ -14,6 +14,8 @@ agenthub
 
 AgentHub записывает и показывает решения Chat/Ops/Project mode. Обычный разговор остаётся Chat Mode, серверные/операционные формулировки без project runtime помечаются как Ops Mode, а initialized `.agent` workspaces считаются Project Mode. Prompt chips, `/context`, `/status` и headless `exec --jsonl` показывают выбранный mode.
 
+Draft-only flows тоже остаются lazy: `plan`, `ask` и shell draft creation сохраняют drafts в user data directory AgentHub, пока project runtime ещё не создан. Git initialization, `.agent` creation и baseline commit планируются и подтверждаются только перед запуском transaction; non-interactive automation сохраняет прежнее auto-bootstrap поведение.
+
 Explicit `!command` shell actions теперь получают AgentHub-owned tool permission decision до выполнения. Transcript записывает `tool_permission` events с profile (`chat`, `read-only`, `workspace-write`, `ops-host`), risk, `approval_required` и reason; high-risk destructive local commands, package changes, mutating HTTP calls и mutating Ops host/container/cluster commands спрашивают approval перед запуском.
 
 Используй `/` для commands, `/cd <folder>` для смены project без перезапуска, `@path` для context, `!command` для policy-checked shell commands и `# note` для memory. В Chat/Ops Mode память хранится в user data directory AgentHub; initialized projects продолжают использовать `.agent/memory`.

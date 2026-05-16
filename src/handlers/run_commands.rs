@@ -4,7 +4,9 @@ use anyhow::{anyhow, Result};
 use chrono::Utc;
 use serde_json::json;
 
-use agenthub::{enterprise, intent, live_run, memory, product_cli::bootstrap, spec::AgentSpec};
+use agenthub::{
+    enterprise, home, intent, live_run, memory, product_cli::bootstrap, spec::AgentSpec,
+};
 
 use super::run_summary;
 
@@ -60,8 +62,8 @@ pub fn handle_run(
     no_watch: bool,
     json: bool,
 ) -> Result<()> {
-    print_bootstrap(bootstrap::ensure_transaction_ready(root)?);
     let spec = resolve_run_spec(root, target)?;
+    print_bootstrap(bootstrap::ensure_transaction_ready(root)?);
     print_failed_attempt_warnings(root, &spec)?;
     let actor = enterprise::authorize(root, "transaction.run")?;
     let outcome = match live_run::run(
@@ -103,6 +105,9 @@ pub fn handle_run(
 }
 
 fn print_bootstrap(report: bootstrap::BootstrapReport) {
+    if report.plan.needs_bootstrap() {
+        eprintln!("bootstrap: approved {}", report.plan.summary());
+    }
     if report.git_initialized {
         eprintln!("bootstrap: initialized git repository");
     }
@@ -167,10 +172,18 @@ fn print_questions(preview: &intent::IntentPreview) {
 }
 
 fn draft_path(root: &Path, prefix: &str) -> PathBuf {
-    root.join(".agent").join("drafts").join(format!(
+    draft_dir(root).join(format!(
         "{prefix}-{}.yaml",
         Utc::now().format("%Y%m%d%H%M%S")
     ))
+}
+
+fn draft_dir(root: &Path) -> PathBuf {
+    if home::project_has_runtime(root) {
+        root.join(".agent").join("drafts")
+    } else {
+        home::global_drafts_dir(root)
+    }
 }
 
 fn looks_like_path(target: &str) -> bool {
@@ -186,7 +199,10 @@ fn looks_like_path(target: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::looks_like_path;
+    use agenthub::agent_dir;
+    use anyhow::Result;
+
+    use super::{draft_path, looks_like_path};
 
     #[test]
     fn separates_paths_from_natural_requests() {
@@ -197,5 +213,18 @@ mod tests {
         assert!(!looks_like_path("add /courses page"));
         assert!(!looks_like_path("/courses"));
         assert!(!looks_like_path("создай страницу /courses"));
+    }
+
+    #[test]
+    fn draft_path_is_global_until_project_runtime_exists() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+
+        let chat_draft = draft_path(dir.path(), "plan");
+        assert!(!chat_draft.starts_with(dir.path().join(".agent")));
+
+        agent_dir::init_project(dir.path(), false)?;
+        let project_draft = draft_path(dir.path(), "plan");
+        assert!(project_draft.starts_with(dir.path().join(".agent/drafts")));
+        Ok(())
     }
 }

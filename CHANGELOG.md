@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.15-local-preview - 2026-05-16
+
+- Make project bootstrap lazier: planning/draft generation in an uninitialized folder now stores draft AgentSpecs under the AgentHub user data directory instead of creating `.agent/drafts`.
+- Move CLI `run` bootstrap until after the run target or natural-language draft is resolved, so Git/`.agent`/baseline setup happens only at transaction execution time.
+- Add an explicit bootstrap plan with no side effects and interactive confirmation for first project transaction setup; non-TTY automation keeps the existing auto-bootstrap behavior.
+
 ## 0.4.14-local-preview - 2026-05-16
 
 - Add API-native tool permission profiles for shell actions: `chat`, `read-only`, `workspace-write`, and `ops-host`, with risk level, approval requirement, and human-readable reason.

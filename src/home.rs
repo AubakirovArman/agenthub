@@ -53,6 +53,13 @@ pub fn global_shell_commands_dir(project_root: &Path) -> PathBuf {
         .join("commands")
 }
 
+pub fn global_drafts_dir(project_root: &Path) -> PathBuf {
+    base_dir()
+        .join("sessions")
+        .join(project_scope(project_root))
+        .join("drafts")
+}
+
 pub fn global_memory_dir() -> PathBuf {
     base_dir().join("memory")
 }
