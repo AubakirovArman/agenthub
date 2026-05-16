@@ -35,8 +35,15 @@ pub struct ChatEventView {
     pub at: String,
     pub kind: String,
     pub text: String,
+    pub provider: Option<String>,
     pub tx_id: Option<String>,
     pub path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatEventRow {
+    pub chat_id: String,
+    pub event: ChatEventView,
 }
 
 #[derive(Debug, Clone)]
@@ -130,6 +137,23 @@ pub fn read_chat(root: &Path, selector: &str) -> Result<Option<Vec<ChatEventView
         return Ok(None);
     };
     read_events(&row.path).map(Some)
+}
+
+pub fn recent_events(root: &Path, limit: usize) -> Result<Vec<ChatEventRow>> {
+    sync(root)?;
+    let rows = list(root, limit.max(1))?;
+    let mut events = Vec::new();
+    for row in rows {
+        for event in read_events(&row.path)? {
+            events.push(ChatEventRow {
+                chat_id: row.id.clone(),
+                event,
+            });
+        }
+    }
+    events.sort_by(|a, b| b.event.at.cmp(&a.event.at));
+    events.truncate(limit);
+    Ok(events)
 }
 
 pub fn sync(root: &Path) -> Result<()> {
@@ -320,6 +344,10 @@ fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
                 at: event["at"].as_str().unwrap_or("").to_string(),
                 kind: event["kind"].as_str().unwrap_or("event").to_string(),
                 text: event["text"].as_str().unwrap_or("").to_string(),
+                provider: event
+                    .get("provider")
+                    .and_then(Value::as_str)
+                    .map(str::to_string),
                 tx_id: event
                     .get("tx_id")
                     .and_then(Value::as_str)

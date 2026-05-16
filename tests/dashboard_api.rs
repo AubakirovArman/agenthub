@@ -18,7 +18,8 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     fs::create_dir_all(&chat_dir)?;
     fs::write(
         chat_dir.join("chat-api.jsonl"),
-        "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"user_message\",\"text\":\"review api dashboard\"}\n",
+        "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"user_message\",\"text\":\"review api dashboard\"}\n\
+         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n",
     )?;
 
     let empty = BTreeMap::new();
@@ -31,6 +32,10 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     assert_eq!(transactions.status, 200);
     assert!(String::from_utf8(transactions.body)?.contains("tx-20260101000000-api"));
     assert!(String::from_utf8(chats.body)?.contains("chat-api"));
-    assert!(String::from_utf8(events.body)?.starts_with("event: snapshot"));
+    let events = String::from_utf8(events.body)?;
+    assert!(events.starts_with("event: snapshot"));
+    assert!(events.contains("\"source\":\"chat\""));
+    assert!(events.contains("assistant_delta"));
+    assert!(events.contains("stream chunk"));
     Ok(())
 }

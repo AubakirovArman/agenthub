@@ -150,6 +150,18 @@ pub(super) fn append_assistant(session: &ChatSession, provider: &str, message: &
     )
 }
 
+pub(super) fn append_assistant_delta(
+    session: &ChatSession,
+    provider: &str,
+    delta: &str,
+) -> Result<()> {
+    append_event(
+        session,
+        "assistant_delta",
+        json!({ "provider": provider, "text": delta }),
+    )
+}
+
 fn append_event(session: &ChatSession, kind: &str, mut data: Value) -> Result<()> {
     let object = data
         .as_object_mut()

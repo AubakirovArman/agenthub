@@ -2,7 +2,7 @@
 
 Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.3.0-local-preview` is an installable local developer preview, not a stable public or enterprise product.
+AgentHub `0.4.1-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
 ## License
 
@@ -16,7 +16,7 @@ AgentHub provides transactional isolation, Git worktrees, command policy checks,
 
 DeepSeek and Kimi are API-native providers. AgentHub checks configured endpoints, model labels, and API-key environment markers without printing secret values.
 
-`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, and structured error bodies. Streaming chat and the project tool loop are still being wired in.
+`deepseek` and `kimi` support OpenAI-compatible HTTP and HTTPS endpoints with bearer-token auth, timeouts, structured error bodies, streaming chat, and API-native project command execution. The broader structured tool loop, full-screen TUI, and memory inbox are still in progress.
 
 ## Team And Enterprise
 

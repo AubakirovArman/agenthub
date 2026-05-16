@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Add chat stream events to the dashboard event bus: API chat deltas are now persisted as `assistant_delta` events and exposed through `/api/events` alongside transaction journal events.
+
 ## 0.4.1-local-preview - 2026-05-16
 
 - Wire the API-native project executor for `deepseek` and `kimi`: AgentHub now asks the API provider for a JSON command plan, runs those commands inside the existing sandbox/worktree transaction, records `api_execution_<role>.json`, and keeps diff guard, verifier, rollback, commit, and memory promotion on the AgentHub side.

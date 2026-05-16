@@ -165,7 +165,7 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
 - DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
-- Streaming chat and API-native project tool execution are still being wired in.
+- Streaming chat and API-native project command execution are available; the broader structured tool loop, full-screen TUI, and memory inbox are still in progress.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 

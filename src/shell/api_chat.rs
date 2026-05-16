@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use serde_json::Value;
 
@@ -25,6 +25,7 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         provider.model.clone(),
     );
     let prompt = prompt_for(session, request)?;
+    let mut stream_event_error = None;
     let response = api.complete_streaming(
         LlmRequest {
             id: format!("chat-{}", Utc::now().timestamp_millis()),
@@ -40,8 +41,17 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         |delta| {
             print!("{delta}");
             let _ = io::stdout().flush();
+            if stream_event_error.is_none() {
+                if let Err(error) = chat::append_assistant_delta(session, &provider.info.id, delta)
+                {
+                    stream_event_error = Some(error);
+                }
+            }
         },
     )?;
+    if let Some(error) = stream_event_error {
+        return Err(error).context("write assistant stream event");
+    }
     let content = response
         .content
         .filter(|value| !value.trim().is_empty())

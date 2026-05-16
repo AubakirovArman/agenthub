@@ -5,9 +5,11 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use crate::agent_dir::AgentPaths;
+use crate::chat_index;
+use crate::chat_index::ChatEventRow;
 use crate::journal::JournalEvent;
 use crate::ui::model::{stage_for_journal_state, status_badge, ui_state_for_journal_state};
 
@@ -41,6 +43,40 @@ impl UiEvent {
             data: event.data,
         }
     }
+
+    pub fn from_chat(row: ChatEventRow) -> Option<Self> {
+        let ts = DateTime::parse_from_rfc3339(&row.event.at)
+            .ok()?
+            .with_timezone(&Utc);
+        let state = row.event.kind.clone();
+        let ui_state = match state.as_str() {
+            "assistant_delta" => "running",
+            "assistant_message" => "succeeded",
+            "user_message" => "pending",
+            _ => "info",
+        };
+        Some(Self {
+            ts,
+            source: "chat".to_string(),
+            tx_id: row.event.tx_id.clone(),
+            state: state.clone(),
+            ui_state: ui_state.to_string(),
+            stage: "chat".to_string(),
+            badge: if state == "assistant_delta" {
+                "run".to_string()
+            } else {
+                "ok".to_string()
+            },
+            message: row.event.text.clone(),
+            data: json!({
+                "chat_id": row.chat_id,
+                "kind": row.event.kind,
+                "text": row.event.text,
+                "provider": row.event.provider,
+                "path": row.event.path,
+            }),
+        })
+    }
 }
 
 pub fn read_tx_events(root: &Path, tx_id: &str) -> Result<Vec<UiEvent>> {
@@ -50,16 +86,22 @@ pub fn read_tx_events(root: &Path, tx_id: &str) -> Result<Vec<UiEvent>> {
 
 pub fn read_recent_events(root: &Path, limit: usize) -> Result<Vec<UiEvent>> {
     let tx_root = AgentPaths::new(root).tx;
-    if !tx_root.exists() {
-        return Ok(Vec::new());
-    }
     let mut events = Vec::new();
-    for entry in fs::read_dir(&tx_root).with_context(|| format!("read {}", tx_root.display()))? {
-        let entry = entry?;
-        if entry.file_type()?.is_dir() {
-            events.extend(read_journal_file(&entry.path().join("journal.jsonl"))?);
+    if tx_root.exists() {
+        for entry in
+            fs::read_dir(&tx_root).with_context(|| format!("read {}", tx_root.display()))?
+        {
+            let entry = entry?;
+            if entry.file_type()?.is_dir() {
+                events.extend(read_journal_file(&entry.path().join("journal.jsonl"))?);
+            }
         }
     }
+    events.extend(
+        chat_index::recent_events(root, limit)?
+            .into_iter()
+            .filter_map(UiEvent::from_chat),
+    );
     events.sort_by_key(|event| std::cmp::Reverse(event.ts));
     events.truncate(limit);
     Ok(events)
