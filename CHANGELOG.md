@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.10-local-preview - 2026-05-16
+
+- Add memory-aware API chat context: direct DeepSeek/Kimi chat turns now include relevant committed memory records in the prompt and emit a `context_built` event with prompt token estimates.
+- Keep review gating intact by excluding pending memory inbox candidates from chat prompts until they are approved into committed memory.
+
 ## 0.4.9-local-preview - 2026-05-16
 
 - Add a review-gated memory inbox: `agenthub memory inbox`, `agenthub memory inbox add`, `approve`, and `reject` store candidates under the same global/project memory store and only promote approved items into committed memory.

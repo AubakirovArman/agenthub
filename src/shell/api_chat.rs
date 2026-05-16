@@ -5,7 +5,9 @@ use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use serde_json::Value;
 
+use crate::home;
 use crate::llm_gateway::{HttpProvider, LlmRequest};
+use crate::memory;
 use crate::product_cli::{config, providers};
 
 use super::chat::{self, ChatSession};
@@ -25,7 +27,7 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         println!("Set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi, then run `/providers test deepseek` or `/providers test kimi`.");
         return Ok(());
     }
-    let _ = answer_with_providers(session, request, providers, true, None)?;
+    let _ = answer_with_providers(root, session, request, providers, true, None)?;
     Ok(())
 }
 
@@ -49,18 +51,22 @@ pub(super) fn answer_silent_with_events(
             "API provider is not configured; set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi"
         ));
     }
-    answer_with_providers(session, request, providers, false, emit_event)
+    answer_with_providers(root, session, request, providers, false, emit_event)
 }
 
 fn answer_with_providers(
+    root: &Path,
     session: &ChatSession,
     request: &str,
     providers: Vec<providers::ProviderStatus>,
     print_terminal: bool,
     mut emit_event: EventEmitter<'_>,
 ) -> Result<AnswerOutcome> {
-    let prompt = prompt_for(session, request)?;
-    let prompt_tokens = estimate_tokens(request);
+    let prompt = prompt_for(root, session, request)?;
+    let prompt_tokens = estimate_tokens(&prompt);
+    let memory_records = memory_context(root)?.len();
+    let event = chat::append_context_built(session, memory_records, prompt_tokens)?;
+    emit(&mut emit_event, &event)?;
     let mut last_error = None;
     let mut last_provider = None;
 
@@ -270,7 +276,7 @@ fn is_api_provider(status: &providers::ProviderStatus) -> bool {
     matches!(status.info.id.as_str(), "deepseek" | "kimi")
 }
 
-fn prompt_for(session: &ChatSession, request: &str) -> Result<String> {
+fn prompt_for(root: &Path, session: &ChatSession, request: &str) -> Result<String> {
     let recent = chat::read_events(&session.path)?
         .into_iter()
         .rev()
@@ -281,9 +287,36 @@ fn prompt_for(session: &ChatSession, request: &str) -> Result<String> {
         .rev()
         .collect::<Vec<_>>()
         .join("\n");
+    let memory = memory_context(root)?;
     Ok(format!(
-        "You are AgentHub, an API-native terminal assistant. Answer directly unless the user explicitly asks to modify files or run commands.\n\nRecent conversation:\n{recent}\n\nUser:\n{request}"
+        "You are AgentHub, an API-native terminal assistant. Answer directly unless the user explicitly asks to modify files or run commands.\n\nRelevant committed memory:\n{memory}\n\nRecent conversation:\n{recent}\n\nUser:\n{request}"
     ))
+}
+
+fn memory_context(root: &Path) -> Result<String> {
+    let domain = if home::project_has_runtime(root) {
+        "code"
+    } else {
+        "core"
+    };
+    let records = memory::retrieve_relevant(root, domain, 6)?;
+    if records.is_empty() {
+        return Ok("- none".to_string());
+    }
+    Ok(records
+        .into_iter()
+        .map(|record| format!("- {}: {}", record.kind, memory_summary(&record.content)))
+        .collect::<Vec<_>>()
+        .join("\n"))
+}
+
+fn memory_summary(value: &Value) -> String {
+    for key in ["note", "decision", "rule", "summary", "policy", "path"] {
+        if let Some(text) = value.get(key).and_then(Value::as_str) {
+            return text.replace('\n', " ");
+        }
+    }
+    value.to_string()
 }
 
 fn event_text(event: Value) -> Option<String> {

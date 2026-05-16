@@ -4,9 +4,12 @@ use std::thread;
 use std::time::Duration;
 
 use anyhow::Result;
+use serde_json::json;
 use serde_json::Value;
 
 use super::*;
+use crate::agent_dir;
+use crate::memory::{self, MemoryInboxInput, TypedMemoryInput};
 
 #[test]
 fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
@@ -21,6 +24,7 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     };
 
     let outcome = answer_with_providers(
+        dir.path(),
         &session,
         "ping",
         vec![test_provider("deepseek", stub_sse_server())],
@@ -32,6 +36,7 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     assert_eq!(
         emitted,
         vec![
+            "context_built",
             "provider_requested",
             "assistant_delta",
             "provider_finished",
@@ -62,6 +67,7 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     };
 
     let outcome = answer_with_providers(
+        dir.path(),
         &session,
         "ping",
         vec![
@@ -76,6 +82,7 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     assert_eq!(
         emitted,
         vec![
+            "context_built",
             "provider_requested",
             "provider_finished",
             "provider_fallback",
@@ -99,6 +106,40 @@ fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     assert_eq!(turns.len(), 1);
     assert_eq!(turns[0]["provider"].as_str(), Some("kimi"));
     assert_eq!(turns[0]["status"].as_str(), Some("succeeded"));
+    Ok(())
+}
+
+#[test]
+fn prompt_uses_only_committed_memory() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    agent_dir::init_project(dir.path(), false)?;
+    let session = chat::create(dir.path())?;
+    memory::write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "style_rule".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "note": "Prefer concise terminal answers" }),
+            task_id: Some("test".to_string()),
+            supersedes: None,
+            confidence: Some(0.9),
+        },
+    )?;
+    memory::add_inbox_candidate(
+        dir.path(),
+        MemoryInboxInput {
+            kind: "style_rule".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "note": "Pending memory must stay out" }),
+            source: "test".to_string(),
+            reason: Some("candidate".to_string()),
+        },
+    )?;
+
+    let prompt = prompt_for(dir.path(), &session, "how should you answer?")?;
+
+    assert!(prompt.contains("Prefer concise terminal answers"));
+    assert!(!prompt.contains("Pending memory must stay out"));
     Ok(())
 }
 

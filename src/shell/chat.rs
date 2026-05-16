@@ -163,6 +163,22 @@ pub(super) fn append_intent(
     )
 }
 
+pub(super) fn append_context_built(
+    session: &ChatSession,
+    memory_records: usize,
+    prompt_tokens: usize,
+) -> Result<Value> {
+    append_event(
+        session,
+        "context_built",
+        json!({
+            "memory_records": memory_records,
+            "prompt_tokens": prompt_tokens,
+            "text": format!("context built with {memory_records} memory record(s)")
+        }),
+    )
+}
+
 pub(super) fn append_assistant(
     session: &ChatSession,
     provider: &str,
