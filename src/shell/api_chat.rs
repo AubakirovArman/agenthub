@@ -62,9 +62,9 @@ fn answer_with_providers(
     print_terminal: bool,
     mut emit_event: EventEmitter<'_>,
 ) -> Result<AnswerOutcome> {
-    let prompt = prompt_for(root, session, request)?;
+    let (memory, memory_records) = memory_context(root)?;
+    let prompt = prompt_for(session, request, &memory)?;
     let prompt_tokens = estimate_tokens(&prompt);
-    let memory_records = memory_context(root)?.len();
     let event = chat::append_context_built(session, memory_records, prompt_tokens)?;
     emit(&mut emit_event, &event)?;
     let mut last_error = None;
@@ -276,7 +276,7 @@ fn is_api_provider(status: &providers::ProviderStatus) -> bool {
     matches!(status.info.id.as_str(), "deepseek" | "kimi")
 }
 
-fn prompt_for(root: &Path, session: &ChatSession, request: &str) -> Result<String> {
+fn prompt_for(session: &ChatSession, request: &str, memory: &str) -> Result<String> {
     let recent = chat::read_events(&session.path)?
         .into_iter()
         .rev()
@@ -287,13 +287,12 @@ fn prompt_for(root: &Path, session: &ChatSession, request: &str) -> Result<Strin
         .rev()
         .collect::<Vec<_>>()
         .join("\n");
-    let memory = memory_context(root)?;
     Ok(format!(
         "You are AgentHub, an API-native terminal assistant. Answer directly unless the user explicitly asks to modify files or run commands.\n\nRelevant committed memory:\n{memory}\n\nRecent conversation:\n{recent}\n\nUser:\n{request}"
     ))
 }
 
-fn memory_context(root: &Path) -> Result<String> {
+fn memory_context(root: &Path) -> Result<(String, usize)> {
     let domain = if home::project_has_runtime(root) {
         "code"
     } else {
@@ -301,13 +300,15 @@ fn memory_context(root: &Path) -> Result<String> {
     };
     let records = memory::retrieve_relevant(root, domain, 6)?;
     if records.is_empty() {
-        return Ok("- none".to_string());
+        return Ok(("- none".to_string(), 0));
     }
-    Ok(records
+    let count = records.len();
+    let context = records
         .into_iter()
         .map(|record| format!("- {}: {}", record.kind, memory_summary(&record.content)))
         .collect::<Vec<_>>()
-        .join("\n"))
+        .join("\n");
+    Ok((context, count))
 }
 
 fn memory_summary(value: &Value) -> String {

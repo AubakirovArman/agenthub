@@ -157,6 +157,22 @@ Acceptance:
 6. Add multimodal attachments after provider capability flags are reliable.
 7. Add team collaboration and marketplace once memory scope, audit and policy models are stable.
 
+## Near-Term Implementation Steps
+
+These are the next concrete engineering steps from the current `0.4.11-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+
+| Release | Focus | Acceptance |
+|---|---|---|
+| `0.4.12` | Provider hardening for DeepSeek/Kimi API, clearer 401/429/timeout diagnostics, usage/request receipts | A new user can configure only an API key and immediately understand provider failures |
+| `0.4.13` | Intent router and Chat/Ops/Project mode status | Chat and Ops turns from an empty folder do not create `.agent` or git state |
+| `0.4.14` | Tool permission profiles: `chat`, `read-only`, `workspace-write`, `ops-host` | Risky shell/file/git/http calls produce explainable approval events |
+| `0.4.15` | Lazy project bootstrap | Git init, `.agent`, and baseline commit are offered only at first approved project edit |
+| `0.4.16` | Context budget, compaction receipts, memory TTL/conflict handling | Pending memory remains out of prompts and compressed context is visible to the user |
+| `0.4.17` | TUI foundation: transcript, composer, status line, event rail, slash palette, `@` context | Long streaming turns remain visibly alive and controllable |
+| `0.4.18` | Transactions v2: inline approval cards, diff preview, verifiers, rollback receipts | Project edits flow through plan, approval, diff, verify, and commit without log hunting |
+| `0.4.19` | Headless parity for `agenthub exec` | Interactive and non-interactive runs produce comparable JSONL traces |
+| `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
+
 ## Current 0.4.x Bridge
 
 The immediate bridge from 0.4.x to 1.0 is:
@@ -169,4 +185,4 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.10` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, and memory-aware chat context rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.11` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, and memory-aware chat context rather than starting MCP/A2A early.

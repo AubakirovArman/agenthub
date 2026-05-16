@@ -14,7 +14,7 @@ use crate::memory::{self, MemoryInboxInput, TypedMemoryInput};
 #[test]
 fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     let dir = tempfile::tempdir()?;
-    std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
+    agent_dir::init_project(dir.path(), false)?;
     let session = chat::create(dir.path())?;
     chat::append_user(&session, "exec", "ping")?;
     let mut emitted = Vec::new();
@@ -46,6 +46,10 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     );
     let events = chat::read_events(&session.path)?;
     assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("context_built")
+            && event["memory_records"].as_u64() == Some(0)
+    }));
+    assert!(events.iter().any(|event| {
         event["kind"].as_str() == Some("turn_finished")
             && event["status"].as_str() == Some("succeeded")
             && event["estimated_cost_usd"].as_f64().unwrap_or_default() > 0.0
@@ -57,7 +61,7 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
 #[test]
 fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     let dir = tempfile::tempdir()?;
-    std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
+    agent_dir::init_project(dir.path(), false)?;
     let session = chat::create(dir.path())?;
     chat::append_user(&session, "exec", "ping")?;
     let mut emitted = Vec::new();
@@ -136,8 +140,10 @@ fn prompt_uses_only_committed_memory() -> Result<()> {
         },
     )?;
 
-    let prompt = prompt_for(dir.path(), &session, "how should you answer?")?;
+    let (memory, records) = memory_context(dir.path())?;
+    let prompt = prompt_for(&session, "how should you answer?", &memory)?;
 
+    assert_eq!(records, 1);
     assert!(prompt.contains("Prefer concise terminal answers"));
     assert!(!prompt.contains("Pending memory must stay out"));
     Ok(())

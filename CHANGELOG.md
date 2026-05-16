@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.11-local-preview - 2026-05-16
+
+- Fix `context_built.memory_records` so it reports the number of committed memory records injected into the chat prompt instead of the rendered context string length.
+
 ## 0.4.10-local-preview - 2026-05-16
 
 - Add memory-aware API chat context: direct DeepSeek/Kimi chat turns now include relevant committed memory records in the prompt and emit a `context_built` event with prompt token estimates.
