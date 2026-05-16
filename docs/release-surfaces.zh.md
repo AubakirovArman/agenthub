@@ -27,7 +27,9 @@ Wiki seed pages 位于 `docs/wiki/`。
 scripts/publish-wiki.sh
 ```
 
-脚本会把 Markdown pages 复制到单独的 `agenthub.wiki.git` repository 并 push。需要普通 GitHub git authentication 或 `GH_TOKEN`。
+脚本会把 Markdown pages 复制到单独的 `agenthub.wiki.git` repository 并 push。需要普通 GitHub git authentication。Token-based git 可设置 `AGENTHUB_WIKI_USE_GH_TOKEN=1` 和 git-compatible `GH_TOKEN`。
+
+First-time note: GitHub 可能要等第一篇 wiki page 在 browser 中保存后才会创建 `agenthub.wiki.git`。如果 publish 显示 `Repository not found`，先在 `https://github.com/AubakirovArman/agenthub/wiki` 创建第一页，然后重新运行脚本。
 
 ## 1.0 准备
 

@@ -27,7 +27,9 @@ Publish them with:
 scripts/publish-wiki.sh
 ```
 
-The script copies Markdown pages into the separate `agenthub.wiki.git` repository and pushes them. It expects normal GitHub git authentication or `GH_TOKEN`.
+The script copies Markdown pages into the separate `agenthub.wiki.git` repository and pushes them. It expects normal GitHub git authentication. For token-based git, set `AGENTHUB_WIKI_USE_GH_TOKEN=1` with a git-compatible `GH_TOKEN`.
+
+First-time note: GitHub may not create `agenthub.wiki.git` until the first wiki page is saved in the browser. If publishing reports `Repository not found`, create the first page at `https://github.com/AubakirovArman/agenthub/wiki`, then rerun the script.
 
 ## 1.0 Preparation
 

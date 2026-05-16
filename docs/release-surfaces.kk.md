@@ -27,7 +27,9 @@ Wiki seed pages `docs/wiki/` ішінде.
 scripts/publish-wiki.sh
 ```
 
-Скрипт Markdown pages файлдарын бөлек `agenthub.wiki.git` repository ішіне көшіріп, push жасайды. Қалыпты GitHub git authentication немесе `GH_TOKEN` керек.
+Скрипт Markdown pages файлдарын бөлек `agenthub.wiki.git` repository ішіне көшіріп, push жасайды. Қалыпты GitHub git authentication керек. Token-based git үшін `AGENTHUB_WIKI_USE_GH_TOKEN=1` және git-compatible `GH_TOKEN` қой.
+
+First-time note: GitHub бірінші wiki page browser ішінде сақталғанға дейін `agenthub.wiki.git` жасамауы мүмкін. Publish `Repository not found` десе, алдымен `https://github.com/AubakirovArman/agenthub/wiki` ішінде бірінші page жаса, содан кейін script қайта іске қос.
 
 ## 1.0 Дайындау
 

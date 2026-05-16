@@ -10,7 +10,7 @@ REMOTE="https://github.com/${REPO}.wiki.git"
 BRANCH="${AGENTHUB_WIKI_BRANCH:-master}"
 
 git_auth_args=()
-if [[ -n "${GH_TOKEN:-}" ]]; then
+if [[ "${AGENTHUB_WIKI_USE_GH_TOKEN:-0}" == "1" && -n "${GH_TOKEN:-}" ]]; then
   auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
   git_auth_args=(-c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth")
 fi
@@ -44,5 +44,19 @@ if git -C "$WORK" diff --cached --quiet; then
 fi
 
 git -C "$WORK" commit -q -m "${AGENTHUB_WIKI_COMMIT_MESSAGE:-Update AgentHub wiki}"
-git -C "$WORK" "${git_auth_args[@]}" push origin "HEAD:$BRANCH"
+if ! git -C "$WORK" "${git_auth_args[@]}" push origin "HEAD:$BRANCH"; then
+  cat >&2 <<TEXT
+agenthub wiki publish failed.
+
+If GitHub says "Repository not found", open:
+  https://github.com/${REPO}/wiki
+
+Create and save the first wiki page once, then rerun:
+  scripts/publish-wiki.sh
+
+If authentication failed, run gh auth setup-git or set a git-compatible token with:
+  AGENTHUB_WIKI_USE_GH_TOKEN=1 GH_TOKEN=... scripts/publish-wiki.sh
+TEXT
+  exit 1
+fi
 printf 'agenthub wiki published to %s\n' "$REMOTE"
