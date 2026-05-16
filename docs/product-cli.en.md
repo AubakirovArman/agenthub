@@ -100,6 +100,8 @@ agenthub config set default_provider codex
 
 Configuration is stored in `.agent/config.yaml` as simple key/value settings. `default_provider` falls back to `command` when no config file exists.
 
+`config set` accepts only product-supported keys: `default_provider`, `provider.<id>.template`, `provider.role.<role>`, and `provider.fallback.<role>`. Unknown keys are rejected so typos do not silently change runtime behavior.
+
 ## Open
 
 ```bash

@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 
 use crate::agent_dir;
 
@@ -23,6 +23,7 @@ pub fn load(project_root: &Path) -> Result<ProductConfig> {
 }
 
 pub fn set_value(project_root: &Path, key: &str, value: &str) -> Result<PathBuf> {
+    validate_key(key)?;
     let paths = agent_dir::ensure_runtime_dirs(project_root)?;
     let mut config = load(project_root)?;
     config.insert(key.to_string(), value.to_string());
@@ -50,4 +51,35 @@ pub fn render_show(project_root: &Path) -> Result<String> {
         out.push_str(&format!("{key}\t{value}\n"));
     }
     Ok(out)
+}
+
+fn validate_key(key: &str) -> Result<()> {
+    let key = key.trim();
+    if key == "default_provider"
+        || has_suffix(key, "provider.", ".template")
+        || has_role_suffix(key, "provider.role.")
+        || has_role_suffix(key, "provider.fallback.")
+    {
+        return Ok(());
+    }
+    Err(anyhow!(
+        "unsupported config key `{key}`; supported keys: default_provider, provider.<id>.template, provider.role.<role>, provider.fallback.<role>"
+    ))
+}
+
+fn has_suffix(key: &str, prefix: &str, suffix: &str) -> bool {
+    key.strip_prefix(prefix)
+        .and_then(|value| value.strip_suffix(suffix))
+        .is_some_and(valid_segment)
+}
+
+fn has_role_suffix(key: &str, prefix: &str) -> bool {
+    key.strip_prefix(prefix).is_some_and(valid_segment)
+}
+
+fn valid_segment(value: &str) -> bool {
+    !value.is_empty()
+        && value
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_'))
 }

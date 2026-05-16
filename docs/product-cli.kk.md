@@ -100,6 +100,8 @@ agenthub config set default_provider codex
 
 Configuration `.agent/config.yaml` ішінде simple key/value settings ретінде сақталады. Config file жоқ болса, `default_provider` мәні `command` болып есептеледі.
 
+`config set` тек product-supported keys қабылдайды: `default_provider`, `provider.<id>.template`, `provider.role.<role>` және `provider.fallback.<role>`. Белгісіз key қабылданбайды, сондықтан typo runtime behavior-ды үнсіз өзгертпейді.
+
 ## Open
 
 ```bash

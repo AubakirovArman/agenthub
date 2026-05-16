@@ -100,6 +100,8 @@ agenthub config set default_provider codex
 
 配置以简单 key/value settings 形式保存在 `.agent/config.yaml`。没有 config file 时，`default_provider` 默认为 `command`。
 
+`config set` 只接受产品支持的 keys：`default_provider`、`provider.<id>.template`、`provider.role.<role>` 和 `provider.fallback.<role>`。未知 key 会被拒绝，避免拼写错误静默改变 runtime behavior。
+
 ## Open
 
 ```bash
