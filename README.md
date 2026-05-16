@@ -110,6 +110,7 @@ Run product checks:
 ```bash
 scripts/dogfood.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
+scripts/perf-profile.sh
 scripts/release-readiness.sh
 ```
 
@@ -133,6 +134,7 @@ Start here:
 - [How it works](docs/how-it-works.en.md)
 - [Testing Strategy](docs/testing-strategy.en.md)
 - [Dogfooding](docs/dogfooding.en.md)
+- [Performance Profiling](docs/performance-profiling.en.md)
 - [Analytics History](docs/analytics-history.en.md)
 - [Interactive Shell](docs/interactive-shell.en.md)
 - [Natural Language](docs/natural-language.en.md)

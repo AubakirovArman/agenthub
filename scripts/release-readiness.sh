@@ -24,6 +24,11 @@ cargo test --manifest-path "$ROOT/Cargo.toml" --locked
 "$ROOT/scripts/check-module-size.sh" 200
 
 AGENTHUB_DOGFOOD_FULL="${AGENTHUB_DOGFOOD_FULL:-0}" "$ROOT/scripts/dogfood.sh"
+if [[ "${AGENTHUB_RELEASE_PERF:-0}" == "1" ]]; then
+  AGENTHUB_PERF_TX_COUNT="${AGENTHUB_PERF_TX_COUNT:-25}" "$ROOT/scripts/perf-profile.sh"
+else
+  printf 'skip performance profile; set AGENTHUB_RELEASE_PERF=1 to include it\n'
+fi
 
 rm -rf "$WORK"
 mkdir -p "$DIST" "$INSTALL"

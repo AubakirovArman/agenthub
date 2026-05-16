@@ -110,6 +110,7 @@ Product checks іске қосу:
 ```bash
 scripts/dogfood.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
+scripts/perf-profile.sh
 scripts/release-readiness.sh
 ```
 
@@ -133,6 +134,7 @@ AgentHub қазір installable local developer preview, hosted team product е�
 - [How it works](docs/how-it-works.kk.md)
 - [Testing Strategy](docs/testing-strategy.kk.md)
 - [Dogfooding](docs/dogfooding.kk.md)
+- [Performance Profiling](docs/performance-profiling.kk.md)
 - [Analytics History](docs/analytics-history.kk.md)
 - [Interactive Shell](docs/interactive-shell.kk.md)
 - [Natural Language](docs/natural-language.kk.md)

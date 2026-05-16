@@ -110,6 +110,7 @@ agenthub tui --live
 ```bash
 scripts/dogfood.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
+scripts/perf-profile.sh
 scripts/release-readiness.sh
 ```
 
@@ -133,6 +134,7 @@ AgentHub сейчас installable local developer preview, а не hosted team p
 - [How it works](docs/how-it-works.ru.md)
 - [Testing Strategy](docs/testing-strategy.ru.md)
 - [Dogfooding](docs/dogfooding.ru.md)
+- [Performance Profiling](docs/performance-profiling.ru.md)
 - [Analytics History](docs/analytics-history.ru.md)
 - [Interactive Shell](docs/interactive-shell.ru.md)
 - [Natural Language](docs/natural-language.ru.md)
