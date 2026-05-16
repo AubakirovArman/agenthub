@@ -27,6 +27,24 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             "{}",
             providers::setup_provider(root, required(&args, 1, "provider")?)?
         ),
+        "add" => {
+            let provider = required(&args, 1, "provider")?;
+            if provider != "openai-http" {
+                return Err(anyhow!(
+                    "only `openai-http` provider profiles are supported"
+                ));
+            }
+            print!(
+                "{}",
+                providers::add_openai_http(
+                    root,
+                    required(&args, 2, "name")?,
+                    required(&args, 3, "url")?,
+                    args.get(4).copied(),
+                    args.get(5).copied()
+                )?
+            );
+        }
         "test" => print!(
             "{}",
             providers::test_provider(root, required(&args, 1, "provider")?)?
@@ -62,6 +80,7 @@ fn provider_wizard(root: &Path) -> Result<()> {
     print!("{}", providers::render_status(root)?);
     println!("Actions:");
     println!("  /providers setup codex|kimi|gemini|command|openai-http");
+    println!("  /providers add openai-http <name> <url> [model] [api_key_env]");
     println!("  /providers diagnose <provider>");
     println!("  /providers test <provider>");
     println!("  /providers set executor <provider>");

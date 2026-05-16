@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct ProviderInfo {
-    pub id: &'static str,
+    pub id: String,
     pub binary: Option<&'static str>,
     pub endpoint_env: Option<&'static str>,
     pub template: Option<&'static str>,
@@ -19,13 +19,16 @@ pub struct ProviderStatus {
     pub available: bool,
     pub path: Option<PathBuf>,
     pub endpoint: Option<String>,
+    pub model: Option<String>,
+    pub api_key_env: Option<String>,
+    pub profile_kind: Option<String>,
     pub is_default: bool,
 }
 
 pub fn supported() -> Vec<ProviderInfo> {
     vec![
         ProviderInfo {
-            id: "command",
+            id: "command".to_string(),
             binary: None,
             endpoint_env: None,
             template: None,
@@ -36,7 +39,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             note: "built-in deterministic command runner",
         },
         ProviderInfo {
-            id: "codex",
+            id: "codex".to_string(),
             binary: Some("codex"),
             endpoint_env: None,
             template: Some("codex exec --sandbox workspace-write - < {prompt}"),
@@ -47,7 +50,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             note: "install the Codex CLI and make `codex` available on PATH",
         },
         ProviderInfo {
-            id: "gemini",
+            id: "gemini".to_string(),
             binary: Some("gemini"),
             endpoint_env: None,
             template: Some("gemini --prompt-file {prompt}"),
@@ -59,7 +62,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             note: "install the Gemini CLI and make `gemini` available on PATH",
         },
         ProviderInfo {
-            id: "kimi",
+            id: "kimi".to_string(),
             binary: Some("kimi"),
             endpoint_env: None,
             template: Some("kimi --print --afk --input-format text < {prompt}"),
@@ -70,7 +73,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             note: "install the Kimi CLI and make `kimi` available on PATH",
         },
         ProviderInfo {
-            id: "openai-http",
+            id: "openai-http".to_string(),
             binary: None,
             endpoint_env: Some("AGENTHUB_OPENAI_COMPAT_BASE_URL"),
             template: None,

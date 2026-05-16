@@ -22,6 +22,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - `agenthub` без subcommand открывает chat-first local shell.
 - Внутри shell используй `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` и `/dashboard`.
 - Для local auto-refresh dashboard используй `/serve` или `agenthub serve`.
+- Reusable local model endpoints сохраняются через `agenthub providers add openai-http --name local-vllm --url ...`.
 - `@path` добавляет context, `!command` запускает policy-checked shell command, `# note` сохраняет project memory.
 - Scriptable commands `agenthub run`, `agenthub tx diff latest` и `agenthub tx logs latest` остаются доступны.
 - Перед release work запускай `scripts/dogfood.sh` и `scripts/dogfood-readiness.sh`.

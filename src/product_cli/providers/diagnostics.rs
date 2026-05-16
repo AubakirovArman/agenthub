@@ -20,7 +20,7 @@ pub fn setup_success(status: &ProviderStatus) -> String {
     append_location(&mut out, status);
     append_template(&mut out, status);
     append_version(&mut out, status);
-    out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
+    out.push_str(&format!("dry_run\t{}\n", dry_run_message(&status.info.id)));
     out.push_str("next\tagenthub ask \"describe the change\" --output .agent/drafts/task.yaml\n");
     out
 }
@@ -29,7 +29,7 @@ pub fn test_success(status: &ProviderStatus) -> String {
     let mut out = format!("ok\t{}\t{}\n", status.info.id, status_detail(status));
     append_template(&mut out, status);
     append_version(&mut out, status);
-    out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
+    out.push_str(&format!("dry_run\t{}\n", dry_run_message(&status.info.id)));
     if status.info.binary.is_some() {
         append_auth_hint(&mut out, status);
     }
@@ -39,15 +39,16 @@ pub fn test_success(status: &ProviderStatus) -> String {
 pub fn diagnose(status: &ProviderStatus) -> String {
     let mut out = format!("provider\t{}\n", status.info.id);
     out.push_str(&format!("available\t{}\n", status.available));
+    append_profile(&mut out, status);
     append_location(&mut out, status);
     append_template(&mut out, status);
     append_template_render(&mut out, status);
     append_version(&mut out, status);
     append_auth_hint(&mut out, status);
     out.push_str(&format!("status_hint\t{}\n", status.info.status_hint));
-    out.push_str(&format!("dry_run\t{}\n", dry_run_message(status.info.id)));
+    out.push_str(&format!("dry_run\t{}\n", dry_run_message(&status.info.id)));
     out.push_str(&format!("install_hint\t{}\n", status.info.note));
-    if status.info.id == "openai-http" {
+    if status.info.id == "openai-http" || status.profile_kind.as_deref() == Some("openai-http") {
         append_http_details(&mut out, status);
     }
     out
@@ -62,6 +63,18 @@ fn append_location(out: &mut String, status: &ProviderStatus) {
     }
     if let Some(endpoint) = &status.endpoint {
         out.push_str(&format!("endpoint\t{endpoint}\n"));
+    }
+}
+
+fn append_profile(out: &mut String, status: &ProviderStatus) {
+    if let Some(kind) = &status.profile_kind {
+        out.push_str(&format!("profile_kind\t{kind}\n"));
+    }
+    if let Some(model) = &status.model {
+        out.push_str(&format!("model\t{model}\n"));
+    }
+    if let Some(api_key_env) = &status.api_key_env {
+        out.push_str(&format!("api_key_env\t{api_key_env}\n"));
     }
 }
 
@@ -94,7 +107,7 @@ fn append_template_render(out: &mut String, status: &ProviderStatus) {
 }
 
 fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
-    match status.info.id {
+    match status.info.id.as_str() {
         "command" => out.push_str("auth\tnot_required\n"),
         "openai-http" => {
             let probe = probes::credential_probe(&status.info);
@@ -111,6 +124,17 @@ fn append_auth_hint(out: &mut String, status: &ProviderStatus) {
                 "auth_markers\t{}\n",
                 probes::credential_marker_list(&status.info)
             ));
+            out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
+        }
+        _ if status.profile_kind.as_deref() == Some("openai-http") => {
+            let auth = status
+                .api_key_env
+                .as_deref()
+                .and_then(|key| std::env::var(key).ok())
+                .map(|_| "set")
+                .unwrap_or("missing_or_optional");
+            let marker = status.api_key_env.as_deref().unwrap_or("<none>");
+            out.push_str(&format!("auth\t{auth}\t{marker}\n"));
             out.push_str(&format!("auth_hint\t{}\n", status.info.auth_hint));
         }
         _ => {
@@ -139,8 +163,10 @@ fn append_http_details(out: &mut String, status: &ProviderStatus) {
         .split_once("://")
         .map(|(scheme, _)| scheme)
         .unwrap_or("unknown");
-    let model = std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL")
-        .ok()
+    let model = status
+        .model
+        .clone()
+        .or_else(|| std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL").ok())
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| "default".to_string());
     out.push_str(&format!("scheme\t{scheme}\n"));

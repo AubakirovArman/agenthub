@@ -27,6 +27,27 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Setup { provider } => {
             print!("{}", providers::setup_provider(project_root, &provider)?);
         }
+        ProviderCommands::Add {
+            provider,
+            name,
+            url,
+            model,
+            api_key_env,
+        } => {
+            if provider != "openai-http" {
+                anyhow::bail!("only `openai-http` provider profiles are supported");
+            }
+            print!(
+                "{}",
+                providers::add_openai_http(
+                    project_root,
+                    &name,
+                    &url,
+                    model.as_deref(),
+                    api_key_env.as_deref()
+                )?
+            );
+        }
         ProviderCommands::Test { provider } => {
             print!("{}", providers::test_provider(project_root, &provider)?);
         }

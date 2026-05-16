@@ -2,17 +2,18 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use crate::llm_gateway::{complete_with_retry, HttpProvider, LlmRequest, RetryPolicy};
-
 use super::config;
 use super::env::find_executable;
 
 mod catalog;
 mod diagnostics;
+mod http;
 mod probes;
+mod profiles;
 mod roles;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
+pub use profiles::{add_openai_http, list as list_profiles, ProviderProfile};
 pub use roles::{set_role_fallback, set_role_provider};
 
 pub fn supported() -> Vec<ProviderInfo> {
@@ -28,7 +29,7 @@ pub fn render_list() -> String {
 
 pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
     let default = config::default_provider(project_root)?;
-    Ok(supported()
+    let mut statuses = supported()
         .into_iter()
         .map(|info| {
             let path = info.binary.and_then(find_executable);
@@ -47,10 +48,37 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
                 available,
                 path,
                 endpoint,
+                model: None,
+                api_key_env: None,
+                profile_kind: None,
                 is_default,
             }
         })
-        .collect())
+        .collect::<Vec<_>>();
+    for profile in profiles::list(project_root)? {
+        let id = profile.name.clone();
+        statuses.push(ProviderStatus {
+            info: ProviderInfo {
+                id: id.clone(),
+                binary: None,
+                endpoint_env: None,
+                template: None,
+                credential_env: &[],
+                credential_paths: &[],
+                auth_hint: "profile auth uses the configured api_key_env when present",
+                status_hint: "providers test performs a live completion request",
+                note: "configured OpenAI-compatible provider profile",
+            },
+            available: true,
+            path: None,
+            endpoint: Some(profile.url),
+            model: profile.model,
+            api_key_env: profile.api_key_env,
+            profile_kind: Some(profile.kind),
+            is_default: id == default,
+        });
+    }
+    Ok(statuses)
 }
 
 pub fn render_status(project_root: &Path) -> Result<String> {
@@ -81,7 +109,7 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
             status.info.id, status.info.note
         ));
     }
-    config::set_value(project_root, "default_provider", status.info.id)?;
+    config::set_value(project_root, "default_provider", &status.info.id)?;
     if let Some(template) = status.info.template {
         config::set_value(
             project_root,
@@ -94,8 +122,8 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
 
 pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
-    if status.info.id == "openai-http" {
-        return test_http_provider(status);
+    if http::is_http_provider(&status) {
+        return http::test_provider(status);
     }
     if status.available {
         return Ok(diagnostics::test_success(&status));
@@ -109,61 +137,6 @@ pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
     Ok(diagnostics::diagnose(&status))
-}
-
-fn test_http_provider(status: ProviderStatus) -> Result<String> {
-    let Some(endpoint) = status.endpoint else {
-        return Ok(format!(
-            "missing\t{}\t{}\n",
-            status.info.id, status.info.note
-        ));
-    };
-    let provider = HttpProvider::new(
-        endpoint,
-        std::env::var("AGENTHUB_OPENAI_COMPAT_API_KEY").ok(),
-        std::env::var("AGENTHUB_OPENAI_COMPAT_MODEL").ok(),
-    );
-    let request = LlmRequest {
-        id: "provider-test".to_string(),
-        role: "provider_test".to_string(),
-        provider: status.info.id.to_string(),
-        model: None,
-        prompt: Some("AgentHub provider test".to_string()),
-        context_pack_hash: "provider-test".to_string(),
-        prompt_hash: "provider-test".to_string(),
-        prompt_tokens: 5,
-        response_format: None,
-    };
-    let policy = RetryPolicy {
-        max_attempts: 1,
-        backoff_ms: Vec::new(),
-    };
-    let response = complete_with_retry(&provider, request, &policy, None)?;
-    let mut out = format!(
-        "ok\t{}\tcompletion_tokens:{}\n",
-        status.info.id, response.completion_tokens
-    );
-    append_optional_models(&mut out, &provider);
-    Ok(out)
-}
-
-fn append_optional_models(out: &mut String, provider: &HttpProvider) {
-    match provider.list_models() {
-        Ok(models) if models.is_empty() => out.push_str("models\tempty\n"),
-        Ok(models) => out.push_str(&format!("models\t{}\n", models.join(","))),
-        Err(error) => out.push_str(&format!(
-            "models\tunavailable\t{}\n",
-            trim_error(&error.to_string())
-        )),
-    }
-}
-
-fn trim_error(error: &str) -> String {
-    if error.chars().count() > 160 {
-        format!("{}...", error.chars().take(160).collect::<String>())
-    } else {
-        error.to_string()
-    }
 }
 
 pub(super) fn status_for(project_root: &Path, provider: &str) -> Result<ProviderStatus> {

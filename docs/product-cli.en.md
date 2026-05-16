@@ -70,6 +70,7 @@ agenthub providers list
 agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
+agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers test codex
 agenthub providers diagnose codex
 agenthub providers set executor codex
@@ -102,6 +103,17 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 `providers diagnose <id>` prints binary or endpoint location, version when available, rendered command template, auth hint, status hint, install hint, and provider-specific details. For CLI providers it also checks known credential markers without printing secret values: Codex checks `OPENAI_API_KEY`, `$CODEX_HOME/auth.json`, and `$HOME/.codex/auth.json`; Gemini checks `GEMINI_API_KEY`, `GOOGLE_API_KEY`, and `$HOME/.gemini`; Kimi checks `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi`, and `$HOME/.config/kimi`. Missing markers are reported as `cli_managed_unknown` because the provider CLI may still be logged in through another mechanism. `openai-http` diagnosis reports scheme, model, API-key presence, and points to `providers test` for the live request.
 
 `providers set <role> <provider>` stores `provider.role.<role>` in `.agent/config.yaml`. `providers fallback <role> ...` stores a comma-separated fallback chain under `provider.fallback.<role>`. Valid roles are planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager, and worker.
+
+Named provider profiles store reusable OpenAI-compatible endpoints in `.agent/config.yaml`:
+
+```bash
+agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
+agenthub providers setup ollama
+agenthub providers test ollama
+agenthub providers set reviewer ollama
+```
+
+Profiles are useful for `local-vllm`, `ollama`, `lm-studio`, `openrouter`, and company proxy endpoints. Optional `--api-key-env NAME` tells AgentHub which environment variable contains the bearer token.
 
 `providers test command` validates the built-in runner. CLI providers validate binary discovery, version output when available, and template readiness; live authentication remains managed by the provider CLI. `providers test openai-http` performs a real OpenAI-compatible HTTP/HTTPS completion request and then tries optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test.
 

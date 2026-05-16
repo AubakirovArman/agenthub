@@ -70,6 +70,7 @@ agenthub providers list
 agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
+agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers test codex
 agenthub providers diagnose codex
 agenthub providers set executor codex
@@ -102,6 +103,17 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 `providers diagnose <id>` 输出 binary 或 endpoint location、可用时的 version、rendered command template、auth hint、status hint、install hint 和 provider-specific details。对 CLI providers，它还会检查已知 credential markers，但不会打印 secret values：Codex 检查 `OPENAI_API_KEY`、`$CODEX_HOME/auth.json` 和 `$HOME/.codex/auth.json`；Gemini 检查 `GEMINI_API_KEY`、`GOOGLE_API_KEY` 和 `$HOME/.gemini`；Kimi 检查 `KIMI_API_KEY`、`MOONSHOT_API_KEY`、`$HOME/.kimi` 和 `$HOME/.config/kimi`。如果没有找到 markers，会显示 `cli_managed_unknown`，因为 provider CLI 仍可能通过其他机制登录。`openai-http` diagnose 会显示 scheme、model、API-key presence，并提示用 `providers test` 做 live request。
 
 `providers set <role> <provider>` 会把 `provider.role.<role>` 保存到 `.agent/config.yaml`。`providers fallback <role> ...` 会把逗号分隔的 fallback chain 保存到 `provider.fallback.<role>`。Valid roles: planner、executor、reviewer、repair、generator、critic、researcher、aggregator、manager、worker。
+
+Named provider profiles 会把 reusable OpenAI-compatible endpoints 保存到 `.agent/config.yaml`：
+
+```bash
+agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
+agenthub providers setup ollama
+agenthub providers test ollama
+agenthub providers set reviewer ollama
+```
+
+Profiles 适合 `local-vllm`、`ollama`、`lm-studio`、`openrouter` 和 company proxy endpoints。可选的 `--api-key-env NAME` 用来告诉 AgentHub bearer token 存在哪个 environment variable。
 
 `providers test command` 验证内置 runner。CLI providers 会验证 binary discovery、可用时的 version output、以及 template readiness；live authentication 仍由 provider CLI 管理。`providers test openai-http` 会执行真实的 OpenAI-compatible HTTP/HTTPS completion request，然后 best-effort 检查 optional `/v1/models`；如果 models endpoint 缺失，会显示 `models unavailable`，不会让 provider test 失败。
 

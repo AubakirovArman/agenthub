@@ -87,6 +87,12 @@ agenthub run "add a small health-check page" --no-commit
 ```
 
 Аналогичные команды есть для `gemini`, `kimi`, `command` и `openai-http`. OpenAI-compatible endpoints используют `AGENTHUB_OPENAI_COMPAT_BASE_URL` и optional bearer-token configuration.
+Reusable HTTP profiles можно сохранить по имени:
+
+```bash
+agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
+agenthub providers setup local-vllm
+```
 
 Документы по providers:
 

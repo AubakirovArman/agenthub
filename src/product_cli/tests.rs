@@ -5,6 +5,7 @@ use crate::agent_dir;
 use super::{config, doctor, providers};
 
 mod open_tests;
+mod provider_profile_tests;
 mod support;
 use support::{openai_stub_server, with_openai_env};
 

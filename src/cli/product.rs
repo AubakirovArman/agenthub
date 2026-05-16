@@ -7,6 +7,21 @@ pub enum ProviderCommands {
     Setup {
         provider: String,
     },
+    Add {
+        provider: String,
+
+        #[arg(long)]
+        name: String,
+
+        #[arg(long)]
+        url: String,
+
+        #[arg(long)]
+        model: Option<String>,
+
+        #[arg(long = "api-key-env")]
+        api_key_env: Option<String>,
+    },
     Test {
         provider: String,
     },

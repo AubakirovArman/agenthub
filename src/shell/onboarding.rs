@@ -67,15 +67,15 @@ fn suggest_provider(root: &Path) -> Result<()> {
         println!("Provider: command");
         return Ok(());
     }
-    let preferred = providers::statuses(root)?
-        .into_iter()
-        .find(|status| status.available && matches!(status.info.id, "codex" | "kimi" | "gemini"));
+    let preferred = providers::statuses(root)?.into_iter().find(|status| {
+        status.available && matches!(status.info.id.as_str(), "codex" | "kimi" | "gemini")
+    });
     if let Some(status) = preferred {
         if confirm(
             &format!("Use {} as default provider?", status.info.id),
             true,
         )? {
-            print!("{}", providers::setup_provider(root, status.info.id)?);
+            print!("{}", providers::setup_provider(root, &status.info.id)?);
             return Ok(());
         }
     }

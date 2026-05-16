@@ -22,6 +22,7 @@ Success criteria:
 8. Installers verify release artifact checksums before extracting binaries.
 9. Running `agenthub` opens a chat-first shell where plain text is the main task flow.
 10. `agenthub serve` provides a local auto-refresh dashboard server for daily work.
+11. Named provider profiles make local and proxy model endpoints reusable.
 
 ## Rules
 

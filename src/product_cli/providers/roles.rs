@@ -10,7 +10,7 @@ pub fn set_role_provider(project_root: &Path, role: &str, provider: &str) -> Res
     config::set_value(
         project_root,
         &format!("provider.role.{role}"),
-        status.info.id,
+        &status.info.id,
     )?;
     Ok(format!(
         "role\t{}\t{}\tavailable:{}\n",
@@ -27,7 +27,7 @@ pub fn set_role_fallback(project_root: &Path, role: &str, providers: &[String]) 
     let mut availability = Vec::new();
     for provider in providers {
         let status = super::status_for(project_root, provider)?;
-        ids.push(status.info.id.to_string());
+        ids.push(status.info.id.clone());
         availability.push(format!("{}:{}", status.info.id, status.available));
     }
     config::set_value(

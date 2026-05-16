@@ -59,11 +59,12 @@ fn validate_key(key: &str) -> Result<()> {
         || has_suffix(key, "provider.", ".template")
         || has_role_suffix(key, "provider.role.")
         || has_role_suffix(key, "provider.fallback.")
+        || has_profile_key(key)
     {
         return Ok(());
     }
     Err(anyhow!(
-        "unsupported config key `{key}`; supported keys: default_provider, provider.<id>.template, provider.role.<role>, provider.fallback.<role>"
+        "unsupported config key `{key}`; supported keys: default_provider, provider.<id>.template, provider.role.<role>, provider.fallback.<role>, provider.profile.<name>.<kind|url|model|api_key_env>"
     ))
 }
 
@@ -75,6 +76,16 @@ fn has_suffix(key: &str, prefix: &str, suffix: &str) -> bool {
 
 fn has_role_suffix(key: &str, prefix: &str) -> bool {
     key.strip_prefix(prefix).is_some_and(valid_segment)
+}
+
+fn has_profile_key(key: &str) -> bool {
+    let Some(rest) = key.strip_prefix("provider.profile.") else {
+        return false;
+    };
+    let Some((name, field)) = rest.split_once('.') else {
+        return false;
+    };
+    valid_segment(name) && matches!(field, "kind" | "url" | "model" | "api_key_env")
 }
 
 fn valid_segment(value: &str) -> bool {

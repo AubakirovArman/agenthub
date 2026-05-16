@@ -70,6 +70,7 @@ agenthub providers list
 agenthub providers status
 agenthub providers setup command
 agenthub providers setup codex
+agenthub providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
 agenthub providers test codex
 agenthub providers diagnose codex
 agenthub providers set executor codex
@@ -102,6 +103,17 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 `providers diagnose <id>` печатает binary или endpoint location, version если доступна, rendered command template, auth hint, status hint, install hint и provider-specific details. Для CLI providers он также проверяет известные credential markers без печати secret values: Codex проверяет `OPENAI_API_KEY`, `$CODEX_HOME/auth.json` и `$HOME/.codex/auth.json`; Gemini проверяет `GEMINI_API_KEY`, `GOOGLE_API_KEY` и `$HOME/.gemini`; Kimi проверяет `KIMI_API_KEY`, `MOONSHOT_API_KEY`, `$HOME/.kimi` и `$HOME/.config/kimi`. Если markers не найдены, статус будет `cli_managed_unknown`, потому что provider CLI всё ещё может быть залогинен другим способом. Для `openai-http` diagnose показывает scheme, model, API-key presence и отправляет к `providers test` для live request.
 
 `providers set <role> <provider>` сохраняет `provider.role.<role>` в `.agent/config.yaml`. `providers fallback <role> ...` сохраняет comma-separated fallback chain в `provider.fallback.<role>`. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager и worker.
+
+Named provider profiles сохраняют reusable OpenAI-compatible endpoints в `.agent/config.yaml`:
+
+```bash
+agenthub providers add openai-http --name ollama --url http://127.0.0.1:11434 --model qwen3
+agenthub providers setup ollama
+agenthub providers test ollama
+agenthub providers set reviewer ollama
+```
+
+Profiles удобны для `local-vllm`, `ollama`, `lm-studio`, `openrouter` и company proxy endpoints. Optional `--api-key-env NAME` указывает, в какой environment variable лежит bearer token.
 
 `providers test command` проверяет встроенный runner. CLI providers проверяют наличие binary, version output если доступен, и готовность template; live authentication остаётся на стороне provider CLI. `providers test openai-http` выполняет реальный OpenAI-compatible HTTP/HTTPS completion request, затем best-effort проверяет optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test.
 
