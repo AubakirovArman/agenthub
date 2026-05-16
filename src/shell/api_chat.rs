@@ -225,3 +225,151 @@ fn event_text(event: Value) -> Option<String> {
 fn estimate_tokens(value: &str) -> usize {
     (value.len() / 4).max(1)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::io::{Read, Write};
+    use std::net::{Shutdown, TcpListener};
+    use std::thread;
+    use std::time::Duration;
+
+    use super::*;
+
+    #[test]
+    fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        let session = chat::create(dir.path())?;
+        chat::append_user(&session, "exec", "ping")?;
+        let mut emitted = Vec::new();
+        let mut sink = |event: &Value| -> Result<()> {
+            emitted.push(event["kind"].as_str().unwrap_or_default().to_string());
+            Ok(())
+        };
+
+        let outcome = answer_with_provider(
+            dir.path(),
+            &session,
+            "ping",
+            test_provider(stub_sse_server()),
+            false,
+            Some(&mut sink),
+        )?;
+
+        assert_eq!(outcome.content, "ok");
+        assert_eq!(
+            emitted,
+            vec![
+                "provider_requested",
+                "assistant_delta",
+                "provider_finished",
+                "assistant_message",
+                "turn_finished",
+            ]
+        );
+        let events = chat::read_events(&session.path)?;
+        assert!(events.iter().any(|event| {
+            event["kind"].as_str() == Some("turn_finished")
+                && event["status"].as_str() == Some("succeeded")
+        }));
+        Ok(())
+    }
+
+    fn test_provider(endpoint: String) -> providers::ProviderStatus {
+        providers::ProviderStatus {
+            info: providers::ProviderInfo {
+                id: "deepseek".to_string(),
+                binary: None,
+                endpoint_env: None,
+                template: None,
+                credential_env: &[],
+                credential_paths: &[],
+                auth_hint: "",
+                status_hint: "",
+                note: "test provider",
+            },
+            available: true,
+            path: None,
+            endpoint: Some(endpoint),
+            model: Some("stub-chat".to_string()),
+            api_key_env: None,
+            api_key_file: None,
+            profile_kind: Some("api".to_string()),
+            is_default: true,
+        }
+    }
+
+    fn stub_sse_server() -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub");
+        let addr = listener.local_addr().expect("stub addr");
+        thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept stub");
+            stream
+                .set_read_timeout(Some(Duration::from_millis(250)))
+                .expect("set read timeout");
+            read_http_request(&mut stream).expect("read request");
+            let body = concat!(
+                "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}],\"usage\":{\"completion_tokens\":1}}\n\n",
+                "data: [DONE]\n\n",
+            );
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                body.len(),
+                body
+            );
+            stream.write_all(response.as_bytes()).expect("write stub");
+            stream.flush().expect("flush stub");
+            let _ = stream.shutdown(Shutdown::Write);
+            drain_client_close(&mut stream);
+        });
+        format!("http://{addr}")
+    }
+
+    fn read_http_request(stream: &mut impl Read) -> std::io::Result<()> {
+        let mut buffer = Vec::new();
+        let mut chunk = [0_u8; 512];
+        loop {
+            let read = stream.read(&mut chunk)?;
+            if read == 0 {
+                return Ok(());
+            }
+            buffer.extend_from_slice(&chunk[..read]);
+            if let Some(header_end) = buffer.windows(4).position(|window| window == b"\r\n\r\n") {
+                let headers = String::from_utf8_lossy(&buffer[..header_end]);
+                let content_length = headers
+                    .lines()
+                    .find_map(|line| line.split_once(':'))
+                    .filter(|(key, _)| key.eq_ignore_ascii_case("content-length"))
+                    .and_then(|(_, value)| value.trim().parse::<usize>().ok())
+                    .unwrap_or(0);
+                let body_start = header_end + 4;
+                while buffer.len().saturating_sub(body_start) < content_length {
+                    let read = stream.read(&mut chunk)?;
+                    if read == 0 {
+                        break;
+                    }
+                    buffer.extend_from_slice(&chunk[..read]);
+                }
+                return Ok(());
+            }
+        }
+    }
+
+    fn drain_client_close(stream: &mut impl Read) {
+        let mut chunk = [0_u8; 128];
+        loop {
+            match stream.read(&mut chunk) {
+                Ok(0) => return,
+                Ok(_) => {}
+                Err(error)
+                    if matches!(
+                        error.kind(),
+                        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
+                    ) =>
+                {
+                    return;
+                }
+                Err(_) => return,
+            }
+        }
+    }
+}
