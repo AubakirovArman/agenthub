@@ -103,7 +103,14 @@ fn display_provider(root: &Path, mode: &str) -> Result<(String, bool)> {
         .into_iter()
         .find(|status| status.info.id == default_provider)
         .is_some_and(|status| status.available);
-    Ok((default_provider, provider_ready))
+    if matches!(default_provider.as_str(), "deepseek" | "kimi") {
+        Ok((default_provider, provider_ready))
+    } else {
+        Ok((
+            crate::product_cli::config::DEFAULT_PROVIDER.to_string(),
+            false,
+        ))
+    }
 }
 
 fn project_name(root: &Path) -> String {

@@ -71,8 +71,8 @@ fn parses_shell_commands_and_plain_text() {
         ShellCommand::Providers(Some("setup deepseek".into()))
     );
     assert_eq!(
-        parse_line("config set default_provider command"),
-        ShellCommand::Config(Some("set default_provider command".into()))
+        parse_line("config set default_provider deepseek"),
+        ShellCommand::Config(Some("set default_provider deepseek".into()))
     );
     assert_eq!(
         parse_line("mode run"),

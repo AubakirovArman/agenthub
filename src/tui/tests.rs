@@ -51,8 +51,9 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
         dir.path().join(".agent/specs/approval.yaml"),
         "transaction:\n  approval_required: true\n",
     )?;
-    config::set_value(dir.path(), "default_provider", "command")?;
-    providers::set_role_provider(dir.path(), "executor", "command")?;
+    fs::write(dir.path().join(".deepseek"), "test-key\n")?;
+    config::set_value(dir.path(), "default_provider", "deepseek")?;
+    providers::set_role_provider(dir.path(), "executor", "deepseek")?;
     providers::set_role_fallback(
         dir.path(),
         "reviewer",
@@ -73,9 +74,9 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("- heartbeat: executor, last output 4s ago"));
     assert!(dashboard.contains("line two"));
     assert!(dashboard.contains("[Providers]"));
-    assert!(dashboard.contains("- default: command"));
-    assert!(dashboard.contains("- executor -> command (ok)"));
-    assert!(dashboard.contains("- reviewer -> command (ok) fallback:deepseek,kimi"));
+    assert!(dashboard.contains("- default: deepseek"));
+    assert!(dashboard.contains("- executor -> deepseek (ok)"));
+    assert!(dashboard.contains("- reviewer -> deepseek (ok) fallback:deepseek,kimi"));
     assert!(dashboard.contains("- DAG: 1 nodes, 0 edges"));
     assert!(dashboard.contains("- pending specs: 1"));
     assert!(dashboard.contains("[Next Actions]"));

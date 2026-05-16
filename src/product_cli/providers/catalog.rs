@@ -29,17 +29,6 @@ pub struct ProviderStatus {
 pub fn supported() -> Vec<ProviderInfo> {
     vec![
         ProviderInfo {
-            id: "command".to_string(),
-            binary: None,
-            endpoint_env: None,
-            template: None,
-            credential_env: &[],
-            credential_paths: &[],
-            auth_hint: "no authentication required",
-            status_hint: "built-in runner is always available",
-            note: "built-in deterministic command runner",
-        },
-        ProviderInfo {
             id: "deepseek".to_string(),
             binary: None,
             endpoint_env: Some("DEEPSEEK_API_BASE_URL"),

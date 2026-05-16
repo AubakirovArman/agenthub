@@ -14,10 +14,10 @@ use support::{openai_stub_server, with_deepseek_env};
 fn config_set_and_show_round_trips() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
-    config::set_value(dir.path(), "default_provider", "command")?;
+    config::set_value(dir.path(), "default_provider", "deepseek")?;
     let rendered = config::render_show(dir.path())?;
 
-    assert!(rendered.contains("default_provider\tcommand"));
+    assert!(rendered.contains("default_provider\tdeepseek"));
     Ok(())
 }
 
@@ -27,7 +27,7 @@ fn config_show_defaults_without_file() -> Result<()> {
 
     let rendered = config::render_show(dir.path())?;
 
-    assert_eq!(rendered, "default_provider\tcommand\n");
+    assert_eq!(rendered, "default_provider\tdeepseek\n");
     Ok(())
 }
 
@@ -43,25 +43,25 @@ fn config_rejects_unknown_keys() -> Result<()> {
 }
 
 #[test]
-fn providers_list_and_command_test_are_user_facing() -> Result<()> {
+fn config_rejects_non_api_provider_values() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
+    let error = config::set_value(dir.path(), "default_provider", "command").unwrap_err();
+
+    assert!(error.to_string().contains("supports deepseek and kimi"));
+    assert!(!config::path(dir.path()).exists());
+    Ok(())
+}
+
+#[test]
+fn providers_list_is_api_native_only() -> Result<()> {
     let list = providers::render_list();
-    let setup = providers::setup_provider(dir.path(), "command")?;
-    let test = providers::test_provider(dir.path(), "command")?;
-    let diagnose = providers::diagnose_provider(dir.path(), "command")?;
 
     assert!(list.contains("deepseek"));
     assert!(list.contains("kimi"));
+    assert!(!list.contains("command"));
     assert!(!list.contains("codex"));
     assert!(!list.contains("gemini"));
-    assert!(setup.contains("default_provider\tcommand"));
-    assert!(setup.contains("dry_run\tbuilt-in deterministic runner ready"));
-    assert!(setup.contains("next\tagenthub ask"));
-    assert!(test.contains("ok\tcommand"));
-    assert!(test.contains("version\tagenthub"));
-    assert!(diagnose.contains("provider\tcommand"));
-    assert!(diagnose.contains("auth\tnot_required"));
     Ok(())
 }
 
@@ -160,7 +160,7 @@ fn providers_deepseek_test_calls_stub_server() -> Result<()> {
 fn providers_set_role_and_fallback_config() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
-    let role = providers::set_role_provider(dir.path(), "executor", "command")?;
+    let role = providers::set_role_provider(dir.path(), "executor", "deepseek")?;
     let fallback = providers::set_role_fallback(
         dir.path(),
         "reviewer",
@@ -168,39 +168,43 @@ fn providers_set_role_and_fallback_config() -> Result<()> {
     )?;
     let config = config::render_show(dir.path())?;
 
-    assert!(role.contains("role\texecutor\tcommand"));
+    assert!(role.contains("role\texecutor\tdeepseek"));
     assert!(fallback.contains("fallback\treviewer\tdeepseek,kimi"));
-    assert!(config.contains("provider.role.executor\tcommand"));
+    assert!(config.contains("provider.role.executor\tdeepseek"));
     assert!(config.contains("provider.fallback.reviewer\tdeepseek,kimi"));
     Ok(())
 }
 
 #[test]
 fn doctor_reports_missing_project_as_warning() -> Result<()> {
-    let dir = tempfile::tempdir()?;
+    with_deepseek_env(None, None, || {
+        let dir = tempfile::tempdir()?;
 
-    let report = doctor::inspect(dir.path())?;
-    let rendered = report.render();
+        let report = doctor::inspect(dir.path())?;
+        let rendered = report.render();
 
-    assert!(rendered.contains("AgentHub Doctor"));
-    assert!(rendered.contains("[ok] agenthub.version"));
-    assert!(rendered.contains("[ok] shell.sh"));
-    assert!(rendered.contains("[ok] provider.default"));
-    assert!(rendered.contains("[warn] project"));
-    Ok(())
+        assert!(rendered.contains("AgentHub Doctor"));
+        assert!(rendered.contains("[ok] agenthub.version"));
+        assert!(rendered.contains("[ok] shell.sh"));
+        assert!(rendered.contains("[warn] provider.default"));
+        assert!(rendered.contains("[warn] project"));
+        Ok(())
+    })
 }
 
 #[test]
 fn doctor_reports_initialized_project_and_policy_as_ok() -> Result<()> {
-    let dir = tempfile::tempdir()?;
-    agent_dir::init_project(dir.path(), false)?;
+    with_deepseek_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        agent_dir::init_project(dir.path(), false)?;
 
-    let rendered = doctor::inspect(dir.path())?.render();
+        let rendered = doctor::inspect(dir.path())?.render();
 
-    assert!(rendered.contains("[ok] project\t.agent project initialized"));
-    assert!(rendered.contains("[ok] policy\tpolicy files present"));
-    assert!(rendered.contains("[ok] provider.default\tcommand is ready"));
-    Ok(())
+        assert!(rendered.contains("[ok] project\t.agent project initialized"));
+        assert!(rendered.contains("[ok] policy\tpolicy files present"));
+        assert!(rendered.contains("[warn] provider.default\tdeepseek is configured but not ready"));
+        Ok(())
+    })
 }
 
 #[test]

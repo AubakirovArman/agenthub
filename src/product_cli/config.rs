@@ -7,6 +7,7 @@ use anyhow::{anyhow, Context, Result};
 use crate::{agent_dir, home};
 
 pub type ProductConfig = BTreeMap<String, String>;
+pub const DEFAULT_PROVIDER: &str = "deepseek";
 
 pub fn path(project_root: &Path) -> PathBuf {
     if cfg!(test) || home::project_has_runtime(project_root) {
@@ -28,6 +29,7 @@ pub fn load(project_root: &Path) -> Result<ProductConfig> {
 
 pub fn set_value(project_root: &Path, key: &str, value: &str) -> Result<PathBuf> {
     validate_key(key)?;
+    validate_value(key, value)?;
     let path = path(project_root);
     if home::project_has_runtime(project_root) || cfg!(test) {
         agent_dir::ensure_runtime_dirs(project_root)?;
@@ -46,13 +48,16 @@ pub fn get_value(project_root: &Path, key: &str) -> Result<Option<String>> {
 }
 
 pub fn default_provider(project_root: &Path) -> Result<String> {
-    Ok(get_value(project_root, "default_provider")?.unwrap_or_else(|| "command".to_string()))
+    Ok(
+        get_value(project_root, "default_provider")?
+            .unwrap_or_else(|| DEFAULT_PROVIDER.to_string()),
+    )
 }
 
 pub fn render_show(project_root: &Path) -> Result<String> {
     let config = load(project_root)?;
     if config.is_empty() {
-        return Ok("default_provider\tcommand\n".to_string());
+        return Ok(format!("default_provider\t{DEFAULT_PROVIDER}\n"));
     }
     let mut out = String::new();
     for (key, value) in config {
@@ -73,6 +78,31 @@ fn validate_key(key: &str) -> Result<()> {
     }
     Err(anyhow!(
         "unsupported config key `{key}`; supported keys: default_provider, provider.<id>.template, provider.role.<role>, provider.fallback.<role>, provider.profile.<name>.<kind|url|model|api_key_env>"
+    ))
+}
+
+fn validate_value(key: &str, value: &str) -> Result<()> {
+    if key == "default_provider" || has_role_suffix(key, "provider.role.") {
+        validate_provider_value(value)?;
+    }
+    if has_role_suffix(key, "provider.fallback.") {
+        for provider in value
+            .split(',')
+            .map(str::trim)
+            .filter(|item| !item.is_empty())
+        {
+            validate_provider_value(provider)?;
+        }
+    }
+    Ok(())
+}
+
+fn validate_provider_value(value: &str) -> Result<()> {
+    if matches!(value, "deepseek" | "kimi") {
+        return Ok(());
+    }
+    Err(anyhow!(
+        "unsupported provider `{value}`; API-native mode supports deepseek and kimi"
     ))
 }
 

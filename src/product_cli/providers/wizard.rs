@@ -80,14 +80,13 @@ fn append_next_actions(out: &mut String, statuses: &[ProviderStatus]) {
     out.push_str(&format!("  /providers diagnose {provider}\n"));
     out.push_str(&format!("  /providers test {provider}\n"));
     out.push_str(&format!("  /providers set executor {provider}\n"));
-    out.push_str("  /providers fallback reviewer deepseek kimi command\n");
+    out.push_str("  /providers fallback reviewer deepseek kimi\n");
 }
 
 fn recommended_provider(statuses: &[ProviderStatus]) -> String {
     statuses
         .iter()
         .find(|status| status.available && matches!(status.info.id.as_str(), "deepseek" | "kimi"))
-        .or_else(|| statuses.iter().find(|status| status.info.id == "command"))
         .map(|status| status.info.id.clone())
-        .unwrap_or_else(|| "command".to_string())
+        .unwrap_or_else(|| config::DEFAULT_PROVIDER.to_string())
 }

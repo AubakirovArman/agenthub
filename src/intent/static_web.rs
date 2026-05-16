@@ -10,7 +10,7 @@ pub(super) fn preview(request: &str, options: &IntentOptions) -> IntentPreview {
     let adapter = options
         .agent_adapter
         .as_deref()
-        .unwrap_or("command")
+        .unwrap_or(crate::product_cli::config::DEFAULT_PROVIDER)
         .to_string();
     let mut defaults = super::defaults::resolve();
     defaults.agent_adapter = adapter.clone();

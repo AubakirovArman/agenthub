@@ -4,7 +4,7 @@ pub(super) fn resolve() -> ResolvedDefaults {
     ResolvedDefaults {
         workspace_type: "code.git".to_string(),
         workspace_isolation: "git_worktree".to_string(),
-        agent_adapter: "command".to_string(),
+        agent_adapter: crate::product_cli::config::DEFAULT_PROVIDER.to_string(),
         agent_role: "executor".to_string(),
         verify_profile: "web_runtime_smoke".to_string(),
         max_repair_attempts: 1,

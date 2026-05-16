@@ -73,23 +73,23 @@ agenthub undo tx-20260515123000-abcd1234
 ```bash
 agenthub providers list
 agenthub providers status
-agenthub providers setup command
 agenthub providers setup deepseek
 agenthub providers setup kimi
 DEEPSEEK_API_KEY=... agenthub providers test deepseek
 KIMI_API_KEY=... agenthub providers test kimi
 agenthub providers diagnose deepseek
 agenthub providers set executor deepseek
-agenthub providers fallback reviewer kimi command
+agenthub providers fallback reviewer deepseek kimi
 ```
 
 В interactive shell команда `/providers` открывает wizard с API readiness, default markers, role assignments, fallbacks и следующими setup/diagnose/test командами.
 
 Поддерживаемые providers:
 
-- `command`: встроенный deterministic command runner.
 - `deepseek`: DeepSeek OpenAI-compatible API endpoint. По умолчанию `https://api.deepseek.com/v1`; использует `DEEPSEEK_API_KEY`, а `ANTHROPIC_AUTH_TOKEN` можно переиспользовать для DeepSeek-compatible deployments.
 - `kimi`: Kimi/Moonshot API endpoint. По умолчанию `https://api.moonshot.cn/v1`; использует `KIMI_API_KEY` или `MOONSHOT_API_KEY`.
+
+Локальный command runner остаётся внутренней частью transaction kernel; это не пользовательский AI provider.
 
 AgentHub также читает key files `.deepseek` и `.kimi` из project directory или любой parent directory. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE` и `MOONSHOT_API_KEY_FILE` могут указывать на explicit key files.
 
@@ -98,11 +98,10 @@ AgentHub также читает key files `.deepseek` и `.kimi` из project d
 Пример:
 
 ```text
-configured	command
-default_provider	command
-runner	built-in
-version	agenthub 0.1.0
-dry_run	built-in deterministic runner ready
+configured	deepseek
+default_provider	deepseek
+endpoint	https://api.deepseek.com/v1
+dry_run	API request test is performed by providers test
 next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 ```
 
@@ -112,7 +111,7 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 
 Named HTTP profiles намеренно отключены в API-native mode. Provider logs, retries, memory и будущий tool loop остаются внутри AgentHub для двух поддерживаемых API.
 
-`providers test command` проверяет встроенный runner. `providers test deepseek` и `providers test kimi` выполняют реальные OpenAI-compatible completion requests, затем best-effort проверяют optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test.
+`providers test deepseek` и `providers test kimi` выполняют реальные OpenAI-compatible completion requests, затем best-effort проверяют optional `/v1/models`; если models endpoint отсутствует, это выводится как `models unavailable`, а не как failed provider test.
 
 ## Config
 
@@ -121,7 +120,7 @@ agenthub config show
 agenthub config set default_provider deepseek
 ```
 
-Конфигурация хранится в `.agent/config.yaml` как простые key/value settings. Если config file отсутствует, `default_provider` считается `command`.
+Конфигурация хранится в `.agent/config.yaml` как простые key/value settings. Если config file отсутствует, `default_provider` считается `deepseek`.
 
 `config set` принимает только поддерживаемые продуктом ключи: `default_provider`, `provider.<id>.template`, `provider.role.<role>` и `provider.fallback.<role>`. Неизвестные ключи отклоняются, чтобы опечатки не меняли поведение runtime молча.
 

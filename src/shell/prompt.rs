@@ -57,7 +57,8 @@ pub(super) fn render(root: &Path, _chat: &ChatSession, tx: Option<&str>) -> Stri
 }
 
 fn display_provider(root: &Path, mode: &str) -> (String, bool) {
-    let default = product_cli::config::default_provider(root).unwrap_or_else(|_| "command".into());
+    let default = product_cli::config::default_provider(root)
+        .unwrap_or_else(|_| product_cli::config::DEFAULT_PROVIDER.to_string());
     let statuses = product_cli::providers::statuses(root).unwrap_or_default();
     if mode == "chat" {
         if let Some(status) = statuses.iter().find(|status| {
@@ -77,7 +78,11 @@ fn display_provider(root: &Path, mode: &str) -> (String, bool) {
         .into_iter()
         .find(|status| status.info.id == default)
         .is_some_and(|status| status.available);
-    (default, ready)
+    if matches!(default.as_str(), "deepseek" | "kimi") {
+        (default, ready)
+    } else {
+        (product_cli::config::DEFAULT_PROVIDER.to_string(), false)
+    }
 }
 
 fn short_tx(id: &str) -> String {
@@ -154,7 +159,7 @@ mod tests {
         let prompt = render(dir.path(), &chat, None);
 
         assert!(prompt.contains("agenthub"));
-        assert!(prompt.contains("command"));
+        assert!(prompt.contains("deepseek"));
         assert!(prompt.contains("git"));
         Ok(())
     }

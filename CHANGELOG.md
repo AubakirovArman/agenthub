@@ -5,6 +5,7 @@ All notable AgentHub changes are tracked here.
 ## Unreleased
 
 - Add chat stream events to the dashboard event bus: API chat deltas are now persisted as `assistant_delta` events and exposed through `/api/events` alongside transaction journal events.
+- Make the user-facing provider surface API-only: `deepseek` is now the default provider, `/providers` lists only DeepSeek/Kimi, and natural static-web project drafts inherit the API provider instead of falling back to the internal command runner.
 
 ## 0.4.1-local-preview - 2026-05-16
 

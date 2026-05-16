@@ -137,17 +137,15 @@ fn provider_exists(root: &Path, provider: &str) -> Result<bool> {
 mod tests {
     use anyhow::Result;
 
-    use crate::product_cli::config;
-
     use super::*;
 
     #[test]
-    fn providers_accepts_provider_name_as_setup_shorthand() -> Result<()> {
+    fn providers_rejects_internal_command_as_setup_shorthand() -> Result<()> {
         let dir = tempfile::tempdir()?;
 
-        handle_providers(dir.path(), Some("command"))?;
+        let error = handle_providers(dir.path(), Some("command")).unwrap_err();
 
-        assert_eq!(config::default_provider(dir.path())?, "command");
+        assert!(error.to_string().contains("unknown providers command"));
         Ok(())
     }
 }

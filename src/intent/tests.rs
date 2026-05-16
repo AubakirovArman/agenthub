@@ -101,7 +101,7 @@ fn empty_project_web_app_request_generates_static_app_spec() {
 }
 
 #[test]
-fn empty_project_web_app_request_uses_command_when_provider_is_only_project_default() {
+fn empty_project_web_app_request_uses_api_provider_from_project_default() {
     let dir = tempfile::tempdir().unwrap();
     crate::product_cli::config::set_value(dir.path(), "default_provider", "deepseek").unwrap();
 
@@ -112,6 +112,6 @@ fn empty_project_web_app_request_uses_command_when_provider_is_only_project_defa
     );
 
     assert_eq!(preview.inferred_intent, "code.static_web_app");
-    assert!(preview.agent_spec_yaml.contains("adapter: command"));
-    assert!(preview.agent_spec_yaml.contains("cat > index.html"));
+    assert!(preview.agent_spec_yaml.contains("adapter: deepseek"));
+    assert!(!preview.agent_spec_yaml.contains("cat > index.html"));
 }

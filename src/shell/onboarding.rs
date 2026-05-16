@@ -17,13 +17,18 @@ pub(super) fn prepare(root: &Path) -> Result<()> {
 
 fn suggest_provider(root: &Path) -> Result<()> {
     let current = config::default_provider(root)?;
-    if current != "command" || config::path(root).exists() {
-        println!("Provider: {current}  (change with /providers)");
+    let statuses = providers::statuses(root)?;
+    if let Some(status) = statuses
+        .iter()
+        .find(|status| status.info.id == current && status.available)
+    {
+        println!(
+            "Provider: {} ready  (change with /providers)",
+            status.info.id
+        );
         return Ok(());
     }
-    let preferred = providers::statuses(root)?
-        .into_iter()
-        .find(|status| status.available && matches!(status.info.id.as_str(), "deepseek" | "kimi"));
+    let preferred = statuses.into_iter().find(|status| status.available);
     if let Some(status) = preferred {
         println!(
             "Provider: {} ready  (change with /providers)",
@@ -31,7 +36,10 @@ fn suggest_provider(root: &Path) -> Result<()> {
         );
         return Ok(());
     }
-    println!("Provider: command  (configure DeepSeek/Kimi with /providers)");
+    println!(
+        "Provider: {} missing  (configure DeepSeek/Kimi with /providers)",
+        config::DEFAULT_PROVIDER
+    );
     Ok(())
 }
 

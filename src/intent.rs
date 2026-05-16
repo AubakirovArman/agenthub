@@ -32,13 +32,13 @@ pub fn normalize_to_spec_for_project(
     request: &str,
     mut options: IntentOptions,
 ) -> IntentPreview {
-    if static_web::should_use(root, request) {
-        return static_web::preview(request, &options);
-    }
     if options.agent_adapter.is_none() {
         options.agent_adapter = crate::product_cli::config::default_provider(root)
             .ok()
-            .filter(|provider| matches!(provider.as_str(), "command" | "deepseek" | "kimi"));
+            .filter(|provider| matches!(provider.as_str(), "deepseek" | "kimi"));
+    }
+    if static_web::should_use(root, request) {
+        return static_web::preview(request, &options);
     }
     normalize::to_preview(request, options)
 }

@@ -9,10 +9,7 @@ use crate::tui::{ProviderPanel, ProviderRoleLine, ProviderStatusLine};
 pub fn collect_provider_panel(root: &Path) -> Result<ProviderPanel> {
     let statuses = providers::statuses(root)?;
     let config = config::load(root)?;
-    let default_provider = config
-        .get("default_provider")
-        .cloned()
-        .unwrap_or_else(|| "command".to_string());
+    let default_provider = config::default_provider(root)?;
     let ready = statuses.iter().filter(|status| status.available).count();
     let profiles = statuses
         .iter()
