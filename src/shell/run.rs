@@ -78,8 +78,22 @@ fn print_failed_attempt_warnings(root: &Path, spec_path: &Path) -> Result<()> {
 }
 
 pub(super) fn write_draft(root: &Path, request: &str) -> Result<PathBuf> {
-    let preview =
-        intent::normalize_to_spec_for_project(root, request, intent::IntentOptions::default());
+    write_draft_with_approval(root, request, false)
+}
+
+pub(super) fn write_draft_with_approval(
+    root: &Path,
+    request: &str,
+    approval_required: bool,
+) -> Result<PathBuf> {
+    let preview = intent::normalize_to_spec_for_project(
+        root,
+        request,
+        intent::IntentOptions {
+            approval_required,
+            ..Default::default()
+        },
+    );
     let path = draft_path(root);
     intent::write_preview(&preview, &path)?;
     for question in preview.questions {

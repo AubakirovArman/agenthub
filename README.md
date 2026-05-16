@@ -73,6 +73,7 @@ Inside the shell:
 - `/memory inbox` lists review-gated memory candidates; `/memory inbox approve <id>` promotes a candidate into committed memory.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 - Direct API chat includes budgeted relevant committed memory in the provider prompt, writes a context compaction receipt, and leaves pending inbox candidates out until approval.
+- In initialized projects, `agenthub exec "<request>" --jsonl` creates an approval-required draft for project edits, emits `approval_required` and `turn_finished` JSONL receipts, and exits with code `2` so CI can stop for human approval.
 - `agenthub tui` renders an event-backed terminal surface with status line, composer hints, slash palette, context mentions, chat transcript, and live event rail.
 
 Scriptable commands still exist for automation:

@@ -35,6 +35,8 @@ agenthub exec "ответь одним словом: ok" --jsonl
 
 `exec` запускает один API-native chat turn через тот же выбор DeepSeek/Kimi provider и AgentHub-owned chat event store. Для обычного chat-запроса он не инициализирует Git или `.agent`. Provider prompt включает budgeted relevant committed memory, но pending memory inbox candidates не попадают в context до approval. С `--jsonl` команда печатает live session event stream, включая `intent_classified`, `context_built`, `provider_requested`, `assistant_delta`, `provider_finished` и `turn_finished`; `context_built` показывает memory token counts, prompt budget, expired/conflict/budget-dropped records, recent-message drops и признак context compression. Завершённые provider и turn events содержат token counts, estimated USD cost и pricing source.
 
+В initialized project `exec` обрабатывает file-changing request как interactive shell: пишет approval-required draft, emits `draft_created`, `approval_required` и `turn_finished status=approval_required` JSONL events, затем выходит с кодом `2`, а не запускает изменение без approval.
+
 ## Chat Usage Stats
 
 ```bash

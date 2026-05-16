@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.19-local-preview - 2026-05-16
+
+- Add headless parity for initialized project requests: `agenthub exec` now creates an approval-required project draft instead of silently treating project edits as chat.
+- Emit `approval_required` and final `turn_finished status=approval_required` JSONL events with draft path, next command, reason, and stable exit code `2` for CI-friendly automation.
+- Keep non-project Chat/Ops `exec --jsonl` on the existing provider event stream while adding regression coverage for project approval-required output.
+
 ## 0.4.18-local-preview - 2026-05-16
 
 - Expand inline approval cards for project transactions with scope, planned patch preview, verifier plan, rollback receipts, protected-path warnings, and clearer approve/edit/draft/scope/rollback/reject controls.

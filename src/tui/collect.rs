@@ -248,6 +248,7 @@ fn event_rail_item(event: ChatEventView) -> EventRailItem {
         "tool_permission" if event.approval_required == Some(true) => {
             ("approval", "tool permission")
         }
+        "approval_required" => ("approval", "approval required"),
         "tool_permission" => ("ready", "tool permission"),
         "provider_fallback" => ("fallback", "provider fallback"),
         "provider_finished" if event.status.as_deref() == Some("error") => {
@@ -285,6 +286,15 @@ fn event_detail(event: &ChatEventView) -> String {
             event.risk.as_deref().unwrap_or("unknown"),
             event.approval_required.unwrap_or(false)
         );
+    }
+    if event.kind == "approval_required" {
+        return format!(
+            "{} {}",
+            event.reason.as_deref().unwrap_or("approval required"),
+            event.path.as_deref().unwrap_or("")
+        )
+        .trim()
+        .to_string();
     }
     if let Some(provider) = &event.provider {
         let status = event.status.as_deref().unwrap_or("");

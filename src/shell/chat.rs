@@ -124,6 +124,27 @@ pub(super) fn append_draft(session: &ChatSession, request: &str, path: &Path) ->
     )
 }
 
+pub(super) fn append_approval_required(
+    session: &ChatSession,
+    request: &str,
+    path: &Path,
+    exit_code: i32,
+    reason: &str,
+) -> Result<Value> {
+    append_event(
+        session,
+        "approval_required",
+        json!({
+            "text": request,
+            "path": path.display().to_string(),
+            "approval_required": true,
+            "exit_code": exit_code,
+            "reason": reason,
+            "next": format!("agenthub run {}", path.display())
+        }),
+    )
+}
+
 pub(super) fn append_tx(
     session: &ChatSession,
     request: &str,

@@ -14,6 +14,10 @@ use crate::cli::{AgentCommands, Cli, Commands, SkillCommands, WorkspaceCommands}
 
 fn main() {
     if let Err(error) = run() {
+        if let Some(exit) = error.downcast_ref::<shell::ExecExit>() {
+            eprintln!("agenthub: {exit}");
+            std::process::exit(exit.code());
+        }
         eprintln!("agenthub: {error:#}");
         std::process::exit(1);
     }
