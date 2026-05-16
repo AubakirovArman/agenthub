@@ -1,9 +1,11 @@
 use anyhow::Result;
 
 use super::chat::{self, ChatSession};
+use super::chat_filters::ChatFilter;
 use super::chat_meta;
 
-pub(super) fn print_chats(root: &std::path::Path) -> Result<()> {
+pub(super) fn print_chats(root: &std::path::Path, filter: Option<&str>) -> Result<()> {
+    let filter = ChatFilter::parse(filter);
     let mut rows = chat::list(root)?;
     rows.sort_by(|a, b| {
         let left_pinned = chat_meta::is_pinned(&a.path).unwrap_or(false);
@@ -12,7 +14,11 @@ pub(super) fn print_chats(root: &std::path::Path) -> Result<()> {
             .cmp(&left_pinned)
             .then_with(|| b.updated_at.cmp(&a.updated_at))
     });
-    for row in rows.into_iter().take(25) {
+    for row in rows
+        .into_iter()
+        .filter(|row| filter.matches(root, row).unwrap_or(false))
+        .take(25)
+    {
         let marker = if chat_meta::is_pinned(&row.path)? {
             "*"
         } else {
@@ -20,8 +26,14 @@ pub(super) fn print_chats(root: &std::path::Path) -> Result<()> {
         };
         let title = chat_meta::title(&row.path)?.unwrap_or_else(|| row.id.clone());
         println!(
-            "{} {}\t{}\tmessages:{}\ttx:{}\t{}",
-            marker, row.id, title, row.messages, row.txs, row.updated_at
+            "{} {}\t{}\tmessages:{}\ttx:{}\t{}\t{}",
+            marker,
+            row.id,
+            title,
+            row.messages,
+            row.txs,
+            row.updated_at,
+            filter.describe(root, &row)?
         );
     }
     Ok(())

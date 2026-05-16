@@ -26,7 +26,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /undo              revert the last committed AgentHub transaction");
     println!();
     println!("Chats:");
-    println!("  /chats             list recent chats with titles and pins");
+    println!("  /chats             list chats; filter with status:, provider:, date:");
     println!("  /search <text>     search chat titles and messages");
     println!("  /context           preview current chat, memory, and tx context");
     println!("  /rename <title>    rename the current chat");

@@ -76,6 +76,15 @@ edit       открыть draft в $VISUAL или $EDITOR и затем пров
 /exit             выйти
 ```
 
+`/chats` можно фильтровать, не выходя из shell:
+
+```text
+/chats status:COMMITTED
+/chats provider:codex
+/chats date:today
+/chats status:BLOCKED_ON_HUMAN provider:kimi
+```
+
 Expert commands вроде `agenthub run`, `agenthub tx report`, `agenthub tx diff` и `agenthub tx logs` остаются для scripts и CI.
 
 ## Граница

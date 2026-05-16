@@ -76,6 +76,15 @@ edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 /exit             exit
 ```
 
+`/chats` shell ішінен filter жасай алады:
+
+```text
+/chats status:COMMITTED
+/chats provider:codex
+/chats date:today
+/chats status:BLOCKED_ON_HUMAN provider:kimi
+```
+
 `agenthub run`, `agenthub tx report`, `agenthub tx diff` және `agenthub tx logs` сияқты expert commands scripts және CI үшін қала береді.
 
 ## Boundary

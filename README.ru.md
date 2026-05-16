@@ -64,7 +64,7 @@ AgentHub превращает сообщение в draft plan, показыва
 - `@README.md`, `@src`, `@tx:latest` или `@memory:auth` добавляет явный file, folder, transaction или memory context к следующему запросу.
 - `!git status --short` запускает shell command через AgentHub policy и логирует результат.
 - `# use fetch only, no axios` записывает typed memory note для будущих задач.
-- `/chats`, `/search`, `/rename`, `/pin` и `/unpin` управляют chat sessions прямо внутри shell.
+- `/chats`, `/search`, `/rename`, `/pin` и `/unpin` управляют chat sessions прямо внутри shell; `/chats status:COMMITTED provider:codex date:today` фильтрует sessions.
 - `/context` показывает preview текущего chat, recent messages, memory summary, selected transaction и mention hints.
 
 Scriptable commands остаются для automation:

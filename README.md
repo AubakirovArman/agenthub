@@ -64,7 +64,7 @@ Inside the shell:
 - `@README.md`, `@src`, `@tx:latest`, or `@memory:auth` adds explicit file, folder, transaction, or memory context to the next request.
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
 - `# use fetch only, no axios` writes a typed memory note for future tasks.
-- `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell.
+- `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:codex date:today` filters sessions.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 
 Scriptable commands still exist for automation:

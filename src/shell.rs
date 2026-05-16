@@ -2,6 +2,7 @@ mod actions;
 mod approval;
 mod chat;
 mod chat_display;
+mod chat_filters;
 mod chat_meta;
 mod commands;
 mod context_input;

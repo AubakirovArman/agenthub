@@ -76,6 +76,15 @@ edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
 /exit             退出
 ```
 
+`/chats` 可以直接在 shell 中过滤：
+
+```text
+/chats status:COMMITTED
+/chats provider:codex
+/chats date:today
+/chats status:BLOCKED_ON_HUMAN provider:kimi
+```
+
 `agenthub run`、`agenthub tx report`、`agenthub tx diff` 和 `agenthub tx logs` 等 expert commands 仍然可用于 scripts 和 CI。
 
 ## 边界

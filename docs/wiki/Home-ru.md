@@ -25,7 +25,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Для local auto-refresh dashboard используй `/serve` или `agenthub serve`.
 - Dashboard содержит provider status, approval inbox, memory browser, history browser и transaction viewer panes для report, diff и logs.
 - Reusable local model endpoints сохраняются через `agenthub providers add openai-http --name local-vllm --url ...`.
-- Через `/chats`, `/search`, `/rename`, `/pin` и `/unpin` можно управлять chat sessions с auto titles.
+- Через `/chats`, `/search`, `/rename`, `/pin` и `/unpin` можно управлять chat sessions с auto titles; фильтр: `/chats status:COMMITTED provider:codex date:today`.
 - `/context` показывает current chat, recent messages, memory и selected transaction context.
 - Approval prompts показывают risk и поддерживают `diff`, `details` и `edit`.
 - `@path`, `@tx:<id>` и `@memory:<query>` добавляют context, `!command` запускает policy-checked shell command, `# note` сохраняет project memory.

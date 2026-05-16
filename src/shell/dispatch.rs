@@ -33,7 +33,7 @@ pub(super) fn handle(
         ShellCommand::Close => clear_current(current_tx),
         ShellCommand::Clear => print!("\x1b[2J\x1b[H"),
         ShellCommand::Mode(next) => flow::update_mode(next, mode, current_chat)?,
-        ShellCommand::Chats => chat_display::print_chats(root)?,
+        ShellCommand::Chats(args) => chat_display::print_chats(root, args.as_deref())?,
         ShellCommand::Chat(target) => flow::update_chat(root, target.as_deref(), current_chat)?,
         ShellCommand::Search(query) => chat_display::print_search(root, &query)?,
         ShellCommand::Rename(title) => rename_chat(current_chat, &title)?,

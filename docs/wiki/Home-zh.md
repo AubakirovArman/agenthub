@@ -25,7 +25,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - 使用 `/serve` 或 `agenthub serve` 打开 local auto-refresh dashboard。
 - Dashboard 包含 provider status、approval inbox、memory browser、history browser，以及用于 report、diff 和 logs 的 transaction viewer panes。
 - 使用 `agenthub providers add openai-http --name local-vllm --url ...` 保存 reusable local model endpoints。
-- 使用 `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 管理带 auto titles 的 chat sessions。
+- 使用 `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 管理带 auto titles 的 chat sessions；可用 `/chats status:COMMITTED provider:codex date:today` 过滤。
 - `/context` 可预览 current chat、recent messages、memory 和 selected transaction context。
 - Approval prompts 会显示 risk，并支持 `diff`、`details` 和 `edit`。
 - `@path`、`@tx:<id>` 和 `@memory:<query>` 添加 context，`!command` 运行 policy-checked shell command，`# note` 保存 project memory。

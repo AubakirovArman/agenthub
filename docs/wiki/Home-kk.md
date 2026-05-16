@@ -25,7 +25,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Local auto-refresh dashboard үшін `/serve` немесе `agenthub serve` қолдан.
 - Dashboard provider status, approval inbox, memory browser, history browser және report, diff, logs үшін transaction viewer panes береді.
 - Reusable local model endpoints сақтау үшін `agenthub providers add openai-http --name local-vllm --url ...` қолдан.
-- Auto titles бар chat sessions басқару үшін `/chats`, `/search`, `/rename`, `/pin` және `/unpin` қолдан.
+- Auto titles бар chat sessions басқару үшін `/chats`, `/search`, `/rename`, `/pin` және `/unpin` қолдан; filter: `/chats status:COMMITTED provider:codex date:today`.
 - `/context` current chat, recent messages, memory және selected transaction context preview көрсетеді.
 - Approval prompts risk көрсетеді және `diff`, `details`, `edit` қолдайды.
 - `@path`, `@tx:<id>` және `@memory:<query>` context қосады, `!command` policy-checked shell command іске қосады, `# note` project memory сақтайды.

@@ -64,7 +64,7 @@ Shell ішінде:
 - `@README.md`, `@src`, `@tx:latest` немесе `@memory:auth` келесі request үшін нақты file, folder, transaction немесе memory context қосады.
 - `!git status --short` shell command-ты AgentHub policy арқылы іске қосып, log жазады.
 - `# use fetch only, no axios` future tasks үшін typed memory note жазады.
-- `/chats`, `/search`, `/rename`, `/pin` және `/unpin` chat sessions басқаруын shell ішінде береді.
+- `/chats`, `/search`, `/rename`, `/pin` және `/unpin` chat sessions басқаруын shell ішінде береді; `/chats status:COMMITTED provider:codex date:today` sessions filter жасайды.
 - `/context` current chat, recent messages, memory summary, selected transaction және mention hints preview көрсетеді.
 
 Scriptable commands automation үшін қала береді:

@@ -3,7 +3,11 @@ use super::{parse_line, ShellCommand, ShellMode};
 #[test]
 fn parses_shell_commands_and_plain_text() {
     assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
-    assert_eq!(parse_line("chats"), ShellCommand::Chats);
+    assert_eq!(parse_line("chats"), ShellCommand::Chats(None));
+    assert_eq!(
+        parse_line("chats status:COMMITTED provider:codex"),
+        ShellCommand::Chats(Some("status:COMMITTED provider:codex".into()))
+    );
     assert_eq!(
         parse_line("/search dashboard"),
         ShellCommand::Search("dashboard".into())
