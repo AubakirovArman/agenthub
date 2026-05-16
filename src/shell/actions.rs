@@ -130,45 +130,73 @@ fn handle_memory_inbox(root: &Path, args: &str) -> Result<()> {
             Ok(())
         }
         "approve" => {
-            let item = memory::review_inbox(root, rest.trim(), memory::InboxDecision::Approve)?;
-            println!(
-                "approved {} {}",
-                item.id,
-                item.memory_id.unwrap_or_else(|| "<none>".to_string())
-            );
+            let ids = memory_inbox_ids(rest);
+            for item in memory::review_inbox_many(root, &ids, memory::InboxDecision::Approve)? {
+                println!(
+                    "approved {} {}",
+                    item.id,
+                    item.memory_id.unwrap_or_else(|| "<none>".to_string())
+                );
+            }
             Ok(())
         }
         "reject" => {
-            let item = memory::review_inbox(root, rest.trim(), memory::InboxDecision::Reject)?;
-            println!("rejected {}", item.id);
+            let ids = memory_inbox_ids(rest);
+            for item in memory::review_inbox_many(root, &ids, memory::InboxDecision::Reject)? {
+                println!("rejected {}", item.id);
+            }
             Ok(())
         }
         _ => {
-            println!("usage: /memory inbox [list|add <note>|approve <id>|reject <id>]");
+            println!("usage: /memory inbox [list|add <note>|approve <id...>|reject <id...>]");
             Ok(())
         }
     }
 }
 
 fn print_memory_inbox(root: &Path, all: bool) -> Result<()> {
-    let items = memory::list_inbox(root, all)?;
+    let view = memory::review_inbox_view(root, all)?;
     println!("Memory inbox:");
-    for item in items.iter().take(25) {
+    println!(
+        "- items {} pending {} reviewed {}",
+        view.total, view.pending, view.reviewed
+    );
+    for group in view.groups.iter().take(10) {
         println!(
-            "- {} {} {} {}",
-            item.id,
-            item.status,
-            item.kind,
-            item.content
-                .get("note")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
+            "- group {} {}/{} band {} pending {} reviewed {} duplicate_or_conflict {}",
+            group.key,
+            group.domain,
+            group.kind,
+            group.confidence_band,
+            group.pending,
+            group.reviewed,
+            group.duplicate_or_conflict
         );
+        for item in group.items.iter().take(5) {
+            let confidence = item
+                .confidence
+                .map(|value| format!("{value:.2}"))
+                .unwrap_or_else(|| "n/a".to_string());
+            println!(
+                "  - {} {} band {} confidence {} source {} {}",
+                item.id, item.status, item.confidence_band, confidence, item.source, item.summary
+            );
+            println!("    promotion {}", item.promotion_diff);
+        }
     }
-    if items.is_empty() {
+    if view.total == 0 {
         println!("- No pending memory candidates.");
     }
     Ok(())
+}
+
+fn memory_inbox_ids(input: &str) -> Vec<String> {
+    input
+        .split(|ch: char| ch == ',' || ch.is_whitespace())
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .collect()
 }
 
 pub(super) fn print_skills(root: &Path, mode: Option<&str>) -> Result<()> {

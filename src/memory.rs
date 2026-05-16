@@ -33,7 +33,9 @@ pub use context::{
     build_context, write_context_receipt, MemoryContext, MemoryContextBudget, MemoryContextReceipt,
 };
 pub use inbox::{
-    add_inbox_candidate, list_inbox, review_inbox, InboxDecision, MemoryInboxInput, MemoryInboxItem,
+    add_inbox_candidate, list_inbox, review_inbox, review_inbox_many, review_inbox_view,
+    InboxDecision, MemoryInboxGroup, MemoryInboxInput, MemoryInboxItem, MemoryInboxReview,
+    MemoryInboxReviewItem,
 };
 pub use retrieval::retrieve_relevant_scored;
 use storage::{append_jsonl, count_lines, read_records};

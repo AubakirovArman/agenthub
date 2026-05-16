@@ -7,8 +7,9 @@ use crate::test_support::with_agenthub_home;
 use super::{
     add_inbox_candidate, build_context, build_summary, extract_to_inbox, failed_attempt_warnings,
     inspect, list_inbox, record_failed_attempt, retrieve_relevant, retrieve_relevant_scored,
-    review_inbox, run_audit, write_context_receipt, write_typed_fact, AutoMemoryExtractionInput,
-    InboxDecision, MemoryContextBudget, MemoryInboxInput, TypedMemoryInput,
+    review_inbox, review_inbox_many, review_inbox_view, run_audit, write_context_receipt,
+    write_typed_fact, AutoMemoryExtractionInput, InboxDecision, MemoryContextBudget,
+    MemoryInboxInput, TypedMemoryInput,
 };
 
 #[test]
@@ -143,6 +144,94 @@ fn memory_inbox_requires_review_before_promotion() -> Result<()> {
         assert_eq!(list_inbox(root.path(), true)?.len(), 1);
         assert_eq!(inspect(root.path())?.committed, 1);
         assert!(!root.path().join(".agent").exists());
+        Ok(())
+    })
+}
+
+#[test]
+fn memory_inbox_review_view_groups_ranks_and_batches_items() -> Result<()> {
+    let root = tempfile::tempdir()?;
+    let home = tempfile::tempdir()?;
+
+    with_agenthub_home(home.path(), || {
+        let high = add_inbox_candidate(
+            root.path(),
+            MemoryInboxInput {
+                kind: "style_rule".to_string(),
+                domain: "core".to_string(),
+                content: json!({
+                    "summary": "Prefer reviewed memory facts",
+                    "confidence": 0.91
+                }),
+                source: "auto".to_string(),
+                reason: Some("candidate".to_string()),
+            },
+        )?;
+        let medium = add_inbox_candidate(
+            root.path(),
+            MemoryInboxInput {
+                kind: "style_rule".to_string(),
+                domain: "core".to_string(),
+                content: json!({
+                    "summary": "Prefer reviewed memory facts",
+                    "confidence": 0.62
+                }),
+                source: "auto".to_string(),
+                reason: Some("candidate".to_string()),
+            },
+        )?;
+        let low = add_inbox_candidate(
+            root.path(),
+            MemoryInboxInput {
+                kind: "runbook_step".to_string(),
+                domain: "ops".to_string(),
+                content: json!({
+                    "summary": "Check nginx with systemctl",
+                    "confidence": 0.33
+                }),
+                source: "auto".to_string(),
+                reason: Some("candidate".to_string()),
+            },
+        )?;
+
+        let view = review_inbox_view(root.path(), false)?;
+        assert_eq!(view.total, 3);
+        assert_eq!(view.pending, 3);
+        assert_eq!(view.reviewed, 0);
+        assert_eq!(view.groups.len(), 2);
+        let grouped = view
+            .groups
+            .iter()
+            .find(|group| group.kind == "style_rule")
+            .expect("style group");
+        assert!(grouped.duplicate_or_conflict);
+        assert_eq!(grouped.confidence_band, "high");
+        assert_eq!(grouped.items.len(), 2);
+        assert_eq!(grouped.items[0].id, high.id);
+        assert_eq!(grouped.items[0].confidence_band, "high");
+        assert_eq!(grouped.items[1].id, medium.id);
+        assert!(grouped.items[0]
+            .promotion_diff
+            .contains("pending -> committed core/style_rule"));
+
+        let reviewed = review_inbox_many(
+            root.path(),
+            &[high.id.clone(), low.id.clone()],
+            InboxDecision::Approve,
+        )?;
+        assert_eq!(reviewed.len(), 2);
+        assert_eq!(inspect(root.path())?.committed, 2);
+        assert_eq!(list_inbox(root.path(), false)?.len(), 1);
+
+        let all = review_inbox_view(root.path(), true)?;
+        assert_eq!(all.total, 3);
+        assert_eq!(all.pending, 1);
+        assert_eq!(all.reviewed, 2);
+        assert!(all
+            .groups
+            .iter()
+            .flat_map(|group| group.items.iter())
+            .any(|item| item.promotion_diff.contains("approved ->")));
         Ok(())
     })
 }

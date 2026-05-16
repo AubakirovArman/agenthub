@@ -70,13 +70,13 @@ Inside the shell:
 - `# use fetch only, no axios` writes a typed memory note for future tasks; in Chat/Ops Mode this uses the AgentHub user data directory instead of creating `.agent`.
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:deepseek date:today` filters sessions.
 - `/stats` shows chat turns, token totals, estimated cost, and provider-level usage from the AgentHub event store.
-- `/memory inbox` lists review-gated memory candidates; `/memory inbox approve <id>` promotes a candidate into committed memory.
+- `/memory inbox` lists grouped, ranked review-gated memory candidates with confidence bands and promotion previews; `/memory inbox approve <id...>` promotes one or more candidates into committed memory.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 - Corrupt chat JSONL lines are recovered as `session_recovery` events so valid transcript messages, search hits, and TUI event rail state remain available.
 - Direct API chat includes budgeted relevant committed memory in the provider prompt, writes a context compaction receipt, and leaves pending inbox candidates out until approval.
 - DeepSeek/Kimi project execution now requests native `agenthub_command_plan` tool calls when supported, falls back to JSON content when needed, records redacted `tool_loop_<role>.json` receipts, and permission-checks proposed commands before running them.
 - In initialized projects, `agenthub exec "<request>" --jsonl` creates an approval-required draft for project edits, emits `approval_required` and `turn_finished` JSONL receipts, and exits with code `2` so CI can stop for human approval.
-- `agenthub tui` renders an event-backed terminal surface with status line, composer hints, slash palette, context mentions, chat transcript, and live event rail.
+- `agenthub tui` renders an event-backed terminal surface with status line, composer hints, slash palette, context mentions, chat transcript, live event rail, and live tool cards.
 
 Scriptable commands still exist for automation:
 
@@ -183,7 +183,7 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
 - DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
-- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI foundation, and a basic review-gated memory inbox are available; the broader structured tool loop and automatic memory extraction are still in progress.
+- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI with live tool cards, automatic review-only memory extraction, and grouped/ranked memory inbox review are available; Ops host profiles and final dogfooding gates remain before 1.0.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 

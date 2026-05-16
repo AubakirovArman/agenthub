@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.27-local-preview - 2026-05-16
+
+- Add a shared memory inbox review view with duplicate/conflict grouping, confidence bands, ranked candidates, and per-item promotion diff previews.
+- Add batch approve/reject support to `agenthub memory inbox approve|reject` and `/memory inbox approve|reject`, with preflight validation so bad ids do not partially promote a batch.
+- Keep auto memory review explicit: pending inbox candidates still stay out of active chat/project context until reviewed into committed memory.
+
 ## 0.4.26-local-preview - 2026-05-16
 
 - Add live tool cards to `agenthub tui`, rendering chat tool permissions, approval-required stops, post-turn memory extraction, turn cost/tokens, native command-plan receipts, and builtin tool-result reinjection receipts in the terminal surface.

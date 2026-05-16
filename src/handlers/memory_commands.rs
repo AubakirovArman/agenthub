@@ -70,46 +70,59 @@ fn handle_inbox(project_root: &Path, command: Option<MemoryInboxCommands>) -> Re
             println!("status: {}", item.status);
             Ok(())
         }
-        MemoryInboxCommands::Approve { id } => {
-            let item = memory::review_inbox(project_root, &id, memory::InboxDecision::Approve)?;
-            println!("approved: {}", item.id);
-            if let Some(memory_id) = item.memory_id {
-                println!("memory: {memory_id}");
+        MemoryInboxCommands::Approve { ids } => {
+            for item in
+                memory::review_inbox_many(project_root, &ids, memory::InboxDecision::Approve)?
+            {
+                println!("approved: {}", item.id);
+                if let Some(memory_id) = item.memory_id {
+                    println!("memory: {memory_id}");
+                }
             }
             Ok(())
         }
-        MemoryInboxCommands::Reject { id } => {
-            let item = memory::review_inbox(project_root, &id, memory::InboxDecision::Reject)?;
-            println!("rejected: {}", item.id);
+        MemoryInboxCommands::Reject { ids } => {
+            for item in
+                memory::review_inbox_many(project_root, &ids, memory::InboxDecision::Reject)?
+            {
+                println!("rejected: {}", item.id);
+            }
             Ok(())
         }
     }
 }
 
 fn print_inbox(project_root: &Path, all: bool) -> Result<()> {
-    let items = memory::list_inbox(project_root, all)?;
+    let view = memory::review_inbox_view(project_root, all)?;
     println!("Memory Inbox");
-    println!("items: {}", items.len());
-    for item in items {
+    println!(
+        "items: {}\tpending: {}\treviewed: {}",
+        view.total, view.pending, view.reviewed
+    );
+    for group in view.groups {
         println!(
-            "{}\t{}\t{}\t{}\t{}",
-            item.id,
-            item.status,
-            item.domain,
-            item.kind,
-            inbox_note(&item.content)
+            "group\t{}\t{}/{}\tband:{}\tpending:{}\treviewed:{}\tduplicate_or_conflict:{}",
+            group.key,
+            group.domain,
+            group.kind,
+            group.confidence_band,
+            group.pending,
+            group.reviewed,
+            group.duplicate_or_conflict
         );
+        for item in group.items {
+            let confidence = item
+                .confidence
+                .map(|value| format!("{value:.2}"))
+                .unwrap_or_else(|| "n/a".to_string());
+            println!(
+                "{}\t{}\t{}\t{}\t{}\t{}",
+                item.id, item.status, item.confidence_band, confidence, item.source, item.summary
+            );
+            println!("promotion\t{}", item.promotion_diff);
+        }
     }
     Ok(())
-}
-
-fn inbox_note(content: &serde_json::Value) -> String {
-    content
-        .get("note")
-        .and_then(serde_json::Value::as_str)
-        .or_else(|| content.get("summary").and_then(serde_json::Value::as_str))
-        .unwrap_or("")
-        .replace('\n', " ")
 }
 
 fn print_named(name: &str, items: &[String]) {

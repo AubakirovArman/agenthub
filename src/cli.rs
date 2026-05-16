@@ -207,10 +207,12 @@ pub enum MemoryInboxCommands {
         kind: String,
     },
     Approve {
-        id: String,
+        #[arg(required = true)]
+        ids: Vec<String>,
     },
     Reject {
-        id: String,
+        #[arg(required = true)]
+        ids: Vec<String>,
     },
 }
 

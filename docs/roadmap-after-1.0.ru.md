@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.26-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.27-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -178,7 +178,7 @@ These are the next concrete engineering steps from the current `0.4.26-local-pre
 | `0.4.24` | Tool registry policy hardening | Done: tool results now carry policy receipts for max rounds/output/time limits, protected paths, binary/non-UTF-8 handling, symlink denial, network/remote shell denial, and dashboard policy summaries |
 | `0.4.25` | Automatic memory extraction v1 | Done: completed Chat/Ops turns and successful Project transactions now write review-only inbox candidates with source, mode/scope, confidence, evidence excerpts, diff metadata, receipts, and no active-context injection before approval |
 | `0.4.26` | TUI live tool cards | Done: `agenthub tui` now shows live cards for chat tool permissions, approval stops, memory extraction, turn cost/tokens, native command-plan receipts, builtin tool-result reinjection receipts, policy summaries, and artifact links |
-| `0.4.27` | Memory inbox UX and ranking | Add a richer inbox review view, duplicate/conflict grouping, confidence bands, batch approve/reject, and clearer promotion diffs |
+| `0.4.27` | Memory inbox UX and ranking | Done: `agenthub memory inbox` and `/memory inbox` now show grouped/ranked review views with duplicate/conflict groups, confidence bands, per-item promotion diffs, and batch approve/reject with preflight validation |
 | `0.4.28` | Ops host profiles and runbooks | Add host-scoped memory, trusted-host metadata, safer remote command receipts, and reusable Ops runbook cards |
 | `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
 
@@ -194,10 +194,10 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.26` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, and terminal live tool cards rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.27` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, and grouped/ranked memory inbox review rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 
-1. `0.4.27`: improve memory inbox review with grouping, conflicts, confidence bands, and batch decisions.
-2. `0.4.28`: make Ops Mode safer and more useful with host profiles, host-scoped memory, and reusable runbook receipts.
-3. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.
+1. `0.4.28`: make Ops Mode safer and more useful with host profiles, host-scoped memory, trusted-host metadata, safer remote command receipts, and reusable runbook cards.
+2. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.
+3. Post-1.0: start MCP stdio client only after Chat/Ops/Project, memory review, TUI visibility, and Ops host safety are stable in daily use.

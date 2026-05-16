@@ -180,13 +180,13 @@ agenthub memory summary
 agenthub memory audit
 agenthub memory inbox
 agenthub memory inbox add "Prefer reviewed memory facts"
-agenthub memory inbox approve mem-inbox-12345678
-agenthub memory inbox reject mem-inbox-12345678
+agenthub memory inbox approve mem-inbox-12345678 mem-inbox-87654321
+agenthub memory inbox reject mem-inbox-12345678,mem-inbox-87654321
 ```
 
 `inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records. In Chat/Ops Mode these commands use `$AGENTHUB_HOME/memory` or the platform AgentHub data directory and do not create `.agent`; initialized projects continue to refresh `.agent/memory/audit.json`.
 
-`inbox` is the review-gated memory queue. `add` records a candidate without injecting it into active memory. `approve` promotes the candidate into committed memory; `reject` keeps the audit trail without promotion. Inside the shell, `/memory inbox`, `/memory inbox approve <id>`, and `/memory inbox reject <id>` use the same store.
+`inbox` is the review-gated memory queue. `add` records a candidate without injecting it into active memory. `agenthub memory inbox` shows a grouped/ranked review view: duplicate/conflict groups, confidence bands, per-candidate confidence, source, summary, and promotion diff preview. `approve` promotes candidates into committed memory, `reject` keeps the audit trail without promotion; both commands accept multiple ids and validate the full batch before promotion so a bad id does not partially apply the batch. Inside the shell, `/memory inbox`, `/memory inbox approve <id...>`, and `/memory inbox reject <id...>` use the same store.
 
 Completed Chat/Ops turns and successful Project transactions may add automatic candidates to this inbox. Each candidate carries source, scope, confidence, evidence excerpts, and diff metadata, and remains inactive until explicit approval.
 
