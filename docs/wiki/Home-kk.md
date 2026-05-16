@@ -21,6 +21,7 @@ agenthub> create a Django web application
 ## Күнделікті workflow
 
 - `agenthub` subcommand жоқ іске қосылса chat-first local shell ашылады.
+- Shell ішінде `/cd <folder>` project-ті restart жасамай ауыстырады.
 - Бірінші іске қосу fresh project үшін Git, `.agent`, baseline commit және bundled standard skills дайындай алады.
 - Interactive `agenthub run` және shell task execution live journal progress көрсетеді; quiet scripts үшін `--no-watch` қолдан.
 - Shell ішінде `/providers` provider wizard ретінде қолдан, содан кейін `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.

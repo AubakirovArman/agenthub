@@ -12,7 +12,7 @@ agenthub
 
 `agenthub` subcommand жоқ іске қосу — recommended daily entry. Ол Git және `.agent` дайындай алады, latest chat қалпына келтіреді, provider readiness көрсетеді және ordinary task бірден жазуға мүмкіндік береді. Shell draft plan жасайды, inline approval сұрайды, transaction іске қосады және `/diff`, `/logs`, `/report`, `/explain`, `/undo` ұсынады.
 
-`/` commands үшін, `@path` context үшін, `!command` policy-checked shell command үшін, `# note` project memory үшін қолданылады.
+`/` commands үшін, `/cd <folder>` project-ті restart жасамай ауыстыру үшін, `@path` context үшін, `!command` policy-checked shell command үшін, `# note` project memory үшін қолданылады.
 
 Chat sessions автоматты түрде қалпына келеді. `/chats` auto titles және pin state бар sessions көрсетеді, `/search <text>` titles/messages бойынша іздейді, `/rename <title>` current chat атын өзгертеді, ал `/pin` немесе `/unpin` маңызды жұмысты жоғарыда ұстайды немесе босатады.
 

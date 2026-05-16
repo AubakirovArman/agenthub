@@ -62,6 +62,7 @@ AgentHub message-ті draft plan етеді, target files, provider, verifier pr
 Shell ішінде:
 
 - `/` commands көрсетеді және persistent history бар tab completion қолдайды.
+- `/cd ../other-app` AgentHub restart жасамай басқа working folder-ға ауыстырады.
 - `@README.md`, `@src`, `@tx:latest` немесе `@memory:auth` келесі request үшін нақты file, folder, transaction немесе memory context қосады.
 - `!git status --short` shell command-ты AgentHub policy арқылы іске қосып, log жазады.
 - `# use fetch only, no axios` future tasks үшін typed memory note жазады.

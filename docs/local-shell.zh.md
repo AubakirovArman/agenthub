@@ -8,7 +8,7 @@
 agenthub
 ```
 
-这是推荐的日常入口。AgentHub 会打开 latest chat，在可能时准备项目，显示 readiness hints，然后让你直接输入任务：
+这是推荐的日常入口。AgentHub 会打开 latest chat，在可能时准备项目，显示紧凑的 working-folder/provider header，然后让你直接输入任务：
 
 ```text
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
@@ -20,6 +20,7 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 
 ```text
 /help                 commands
+/cd <folder>          不重启切换 project folder
 /status               current project, provider, transaction
 /providers            setup and provider health
 /transactions         recent transactions

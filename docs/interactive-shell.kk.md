@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, repository ішінде `HEAD` жоқ болса алғашқы baseline commit жасайды, active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес. Built-in standard skills binary ішіне bundled, сондықтан fresh project бірден core file/page workflows қолдана алады.
+Shell latest chat қалпына келтіреді, мүмкін болса project дайындайды, repository ішінде `HEAD` жоқ болса алғашқы baseline commit жасайды, compact header ішінде active provider көрсетеді және ordinary task жазуға мүмкіндік береді. `init`, `doctor`, `plan` немесе `run` бастапқы command ретінде міндетті емес. Built-in standard skills binary ішіне bundled, сондықтан fresh project бірден core file/page/Django workflows қолдана алады.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -31,6 +31,7 @@ agenthub> add a /courses page in the dashboard style
 ```text
 ordinary text      plan, approval, execution
 /                  commands және tab completion
+/cd ../other-app   restart жасамай басқа project folder-ға ауысу
 @README.md         next request үшін file context
 @src               next request үшін folder summary
 @last / @tx        latest transaction summary қосу
@@ -58,6 +59,7 @@ edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 
 ```text
 /help             shell help
+/cd <folder>      working folder ауыстыру
 /status           current project және transaction
 /providers        provider wizard: status, roles, profiles және next actions
 /memory           memory inspect

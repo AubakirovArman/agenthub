@@ -9,22 +9,21 @@ use crate::{agent_dir, git};
 
 pub(super) fn prepare(root: &Path) -> Result<()> {
     println!("AgentHub {}", crate::product_cli::version());
-    println!("Project: {}", root.display());
+    println!("Working folder: {}", root.display());
     ensure_git(root)?;
     ensure_agent(root)?;
     ensure_baseline(root)?;
     suggest_provider(root)?;
-    println!("Type what you want to build, fix, inspect, or change.");
-    println!("Use / for commands, @ for files, ! for shell, # for memory.");
+    println!("Type a task. Use / for commands, /cd <folder> to switch projects.");
     Ok(())
 }
 
 fn ensure_git(root: &Path) -> Result<()> {
     std::fs::create_dir_all(root).with_context(|| format!("create {}", root.display()))?;
     if git::is_repo(root) {
-        println!("Git: ok");
         return Ok(());
     }
+    println!("This folder is not a Git repository.");
     if confirm("Git repo not found. Create git repo here?", true)? {
         git::init(root)?;
         println!("Git: initialized");
@@ -53,9 +52,9 @@ fn ensure_baseline(root: &Path) -> Result<()> {
 
 fn ensure_agent(root: &Path) -> Result<()> {
     if root.join(".agent/project.yaml").exists() {
-        println!(".agent: ok");
         return Ok(());
     }
+    println!("This folder has no .agent runtime directory.");
     if confirm(".agent not found. Initialize AgentHub project?", true)? {
         agent_dir::init_project(root, false)?;
         println!(".agent: initialized");
@@ -68,11 +67,11 @@ fn ensure_agent(root: &Path) -> Result<()> {
 fn suggest_provider(root: &Path) -> Result<()> {
     let current = config::default_provider(root)?;
     if current != "command" || config::path(root).exists() {
-        println!("Provider: {current}");
+        println!("Provider: {current}  (change with /providers)");
         return Ok(());
     }
     if !io::stdin().is_terminal() {
-        println!("Provider: command");
+        println!("Provider: command  (change with /providers)");
         return Ok(());
     }
     let preferred = providers::statuses(root)?.into_iter().find(|status| {
@@ -87,7 +86,7 @@ fn suggest_provider(root: &Path) -> Result<()> {
             return Ok(());
         }
     }
-    println!("Provider: command");
+    println!("Provider: command  (change with /providers)");
     Ok(())
 }
 

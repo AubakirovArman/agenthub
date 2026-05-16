@@ -62,6 +62,7 @@ AgentHub turns the message into a draft plan, shows the target files, provider, 
 Inside the shell:
 
 - `/` shows commands and supports tab completion with persistent history.
+- `/cd ../other-app` switches to another working folder without restarting AgentHub.
 - `@README.md`, `@src`, `@tx:latest`, or `@memory:auth` adds explicit file, folder, transaction, or memory context to the next request.
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
 - `# use fetch only, no axios` writes a typed memory note for future tasks.

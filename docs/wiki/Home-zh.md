@@ -21,6 +21,7 @@ agenthub> create a Django web application
 ## 日常工作流
 
 - 不带 subcommand 运行 `agenthub` 会打开 chat-first local shell。
+- 在 shell 内使用 `/cd <folder>`，无需重启即可切换 project。
 - 首次启动可以为 fresh project 初始化 Git、`.agent`、baseline commit，以及 bundled standard skills。
 - Interactive `agenthub run` 和 shell task execution 会显示 live journal progress；quiet scripts 可使用 `--no-watch`。
 - 在 shell 内用 `/providers` 打开 provider wizard，然后使用 `/status`、`/diff`、`/logs`、`/report`、`/explain` 和 `/dashboard`。

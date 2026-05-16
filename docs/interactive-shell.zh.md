@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell 会恢复最近的 chat，在可能时准备项目，当 repository 没有 `HEAD` 时创建第一个 baseline commit，显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。Built-in standard skills 已内置在 binary 中，因此 fresh project 可以立即使用 core file/page workflows。
+Shell 会恢复最近的 chat，在可能时准备项目，当 repository 没有 `HEAD` 时创建第一个 baseline commit，在紧凑 header 中显示当前 provider，然后让你直接输入普通任务。你不需要先运行 `init`、`doctor`、`plan` 或 `run`。Built-in standard skills 已内置在 binary 中，因此 fresh project 可以立即使用 core file/page/Django workflows。
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -31,6 +31,7 @@ agenthub> add a /courses page in the dashboard style
 ```text
 普通文本          计划、确认、然后执行
 /                 显示命令，并支持 tab completion
+/cd ../other-app   不重启就切换到另一个 project folder
 @README.md        给下一条请求附加 file context
 @src              给下一条请求附加 folder summary
 @last / @tx       附加 latest transaction summary
@@ -58,6 +59,7 @@ edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
 
 ```text
 /help             shell help
+/cd <folder>      切换 working folder
 /status           当前 project 和 transaction
 /providers        provider wizard: status、roles、profiles 和 next actions
 /memory           inspect memory

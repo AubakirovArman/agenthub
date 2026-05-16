@@ -43,6 +43,10 @@ fn parses_shell_commands_and_plain_text() {
     );
     assert_eq!(parse_line("/sessions"), ShellCommand::Sessions);
     assert_eq!(parse_line("doctor"), ShellCommand::Doctor);
+    assert_eq!(
+        parse_line("/cd /tmp/demo"),
+        ShellCommand::Cd("/tmp/demo".into())
+    );
     assert_eq!(parse_line("dashboard"), ShellCommand::Dashboard);
     assert_eq!(
         parse_line("/serve 127.0.0.1:0"),

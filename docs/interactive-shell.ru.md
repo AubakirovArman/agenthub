@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-Shell восстанавливает последний chat, по возможности подготавливает проект, создаёт первый baseline commit, если у repository ещё нет `HEAD`, показывает активный provider и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно. Built-in standard skills встроены в binary, поэтому fresh project сразу может использовать core file/page workflows.
+Shell восстанавливает последний chat, по возможности подготавливает проект, создаёт первый baseline commit, если у repository ещё нет `HEAD`, показывает активный provider в компактном header и позволяет писать обычную задачу. Начинать с `init`, `doctor`, `plan` или `run` не нужно. Built-in standard skills встроены в binary, поэтому fresh project сразу может использовать core file/page/Django workflows.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -31,6 +31,7 @@ agenthub> add a /courses page in the dashboard style
 ```text
 обычный текст       plan, approval, затем execution
 /                   команды с tab completion
+/cd ../other-app   переключиться в другую project folder без restart
 @README.md          добавить file context к следующему запросу
 @src                добавить folder summary к следующему запросу
 @last / @tx         добавить latest transaction summary
@@ -58,6 +59,7 @@ edit       открыть draft в $VISUAL или $EDITOR и затем пров
 
 ```text
 /help             help по shell
+/cd <folder>      сменить working folder
 /status           текущий project и transaction
 /providers        provider wizard: status, roles, profiles и next actions
 /memory           memory inspect

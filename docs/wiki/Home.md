@@ -21,6 +21,7 @@ agenthub> create a Django web application
 ## Daily Workflow
 
 - Run `agenthub` without a subcommand to open the chat-first local shell.
+- Use `/cd <folder>` inside the shell to switch projects without restarting.
 - First launch can initialize Git, `.agent`, a baseline commit, and bundled standard skills for a fresh project.
 - Interactive `agenthub run` and shell task execution show live journal progress; use `--no-watch` for quiet scripts.
 - Use `/providers` for the provider wizard, then `/status`, `/diff`, `/logs`, `/report`, `/explain`, and `/dashboard` from inside the shell.

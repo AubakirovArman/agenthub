@@ -3,7 +3,7 @@ use super::line_editor::SLASH_COMMANDS;
 
 pub(super) fn print(mode: ShellMode) {
     println!("AgentHub commands");
-    println!("current mode: {} (advanced)", mode.as_str());
+    println!("mode: {}", mode.as_str());
     println!();
     println!("Work:");
     println!("  just type          plan, approve, and run a task");
@@ -12,6 +12,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  # rule             save a project memory note");
     println!();
     println!("Project:");
+    println!("  /cd <folder>       switch working folder");
     println!("  /status            project, provider, selected transaction");
     println!("  /providers         provider status and setup actions");
     println!("  /memory            project memory summary");
@@ -42,11 +43,14 @@ pub(super) fn print(mode: ShellMode) {
 
 pub(super) fn suggestions(prefix: Option<&str>) {
     let prefix = prefix.unwrap_or("/");
-    for command in SLASH_COMMANDS
+    println!("Commands");
+    println!("Type a command name, or press Tab after a prefix like /pro.");
+    println!();
+    for item in SLASH_COMMANDS
         .iter()
-        .filter(|command| command.starts_with(prefix))
+        .filter(|item| item.command.starts_with(prefix))
     {
-        println!("{command}");
+        println!("{:<18} {}", item.command, item.summary);
     }
 }
 
@@ -66,7 +70,7 @@ pub(super) fn unknown_slash(command: &str) {
 fn closest_commands(command: &str) -> Vec<&'static str> {
     let mut scored = SLASH_COMMANDS
         .iter()
-        .copied()
+        .map(|item| item.command)
         .map(|candidate| {
             let plain = candidate.trim_start_matches('/');
             (distance(command, plain), candidate)

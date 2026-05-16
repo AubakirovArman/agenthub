@@ -25,6 +25,7 @@ pub(super) fn handle(
         ShellCommand::Help => help::print(*mode),
         ShellCommand::Suggestions(prefix) => help::suggestions(prefix.as_deref()),
         ShellCommand::UnknownSlash(command) => help::unknown_slash(&command),
+        ShellCommand::Cd(_) => println!("project switching is handled by the shell"),
         ShellCommand::Init => {
             agent_dir::init_project(root, false)?;
             println!("initialized {}", root.display());

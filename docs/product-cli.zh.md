@@ -12,7 +12,7 @@ agenthub
 
 不带 subcommand 运行 `agenthub` 是推荐的 daily entry。它可以准备 Git 和 `.agent`，恢复 latest chat，显示 provider readiness，然后让你直接输入普通任务。Shell 会创建 draft plan，询问 inline approval，运行 transaction，然后提示 `/diff`、`/logs`、`/report`、`/explain` 和 `/undo`。
 
-使用 `/` 输入 commands，`@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 写入 project memory。
+使用 `/` 输入 commands，`/cd <folder>` 不重启切换 project，`@path` 添加 context，`!command` 运行 policy-checked shell command，`# note` 写入 project memory。
 
 Chat sessions 会自动恢复。使用 `/chats` 查看带 auto titles 和 pin state 的 sessions，`/search <text>` 搜索 titles/messages，`/rename <title>` 命名当前 chat，`/pin` 或 `/unpin` 把重要工作固定在顶部或取消固定。
 

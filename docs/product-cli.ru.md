@@ -12,7 +12,7 @@ agenthub
 
 Запуск `agenthub` без subcommand — рекомендованный daily entry. Он может подготовить Git и `.agent`, восстановить latest chat, показать provider readiness и дать сразу написать обычную задачу. Shell создаёт draft plan, спрашивает inline approval, запускает transaction и подсказывает `/diff`, `/logs`, `/report`, `/explain` и `/undo`.
 
-Используй `/` для commands, `@path` для context, `!command` для policy-checked shell commands и `# note` для project memory.
+Используй `/` для commands, `/cd <folder>` для смены project без перезапуска, `@path` для context, `!command` для policy-checked shell commands и `# note` для project memory.
 
 Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху.
 

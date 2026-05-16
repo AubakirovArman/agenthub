@@ -95,7 +95,7 @@ impl Completer for SlashHelper {
         let matches = slash_matches(&line[..pos])
             .into_iter()
             .map(|command| Pair {
-                display: command.to_string(),
+                display: slash_display(command),
                 replacement: command.to_string(),
             })
             .collect();
@@ -103,38 +103,57 @@ impl Completer for SlashHelper {
     }
 }
 
+fn slash_display(command: &str) -> String {
+    SLASH_COMMANDS
+        .iter()
+        .find(|item| item.command == command)
+        .map(|item| format!("{:<18} {}", item.command, item.summary))
+        .unwrap_or_else(|| command.to_string())
+}
+
 fn slash_matches(prefix: &str) -> Vec<&'static str> {
     SLASH_COMMANDS
         .iter()
-        .copied()
+        .map(|item| item.command)
         .filter(|command| command.starts_with(prefix))
         .collect()
 }
 
-pub(super) const SLASH_COMMANDS: &[&str] = &[
-    "/help",
-    "/status",
-    "/providers",
-    "/memory",
-    "/skills",
-    "/chats",
-    "/messages",
-    "/context",
-    "/search",
-    "/rename",
-    "/pin",
-    "/unpin",
-    "/transactions",
-    "/dashboard",
-    "/serve",
-    "/config",
-    "/clear",
-    "/new",
-    "/resume",
-    "/diff",
-    "/logs",
-    "/report",
-    "/explain",
-    "/undo",
-    "/exit",
+#[derive(Debug, Clone, Copy)]
+pub(super) struct SlashCommand {
+    pub command: &'static str,
+    pub summary: &'static str,
+}
+
+pub(super) const SLASH_COMMANDS: &[SlashCommand] = &[
+    item("/help", "show commands with examples"),
+    item("/cd", "switch the working project folder"),
+    item("/status", "show project, provider, and current tx"),
+    item("/providers", "setup or inspect Codex/Kimi/Gemini/API"),
+    item("/memory", "inspect project memory"),
+    item("/skills", "list built-in and project skills"),
+    item("/chats", "list or filter chat sessions"),
+    item("/messages", "show current chat transcript"),
+    item("/context", "preview selected files, memory, and tx"),
+    item("/search", "search chat titles and messages"),
+    item("/rename", "rename current chat"),
+    item("/pin", "pin current chat"),
+    item("/unpin", "unpin current chat"),
+    item("/transactions", "list recent transactions"),
+    item("/dashboard", "open local dashboard"),
+    item("/serve", "serve auto-refresh dashboard"),
+    item("/config", "show or edit local config"),
+    item("/clear", "clear terminal"),
+    item("/new", "start a new chat"),
+    item("/resume", "resume blocked transaction"),
+    item("/diff", "show latest/current transaction diff"),
+    item("/logs", "show latest/current transaction logs"),
+    item("/report", "print latest/current report"),
+    item("/explain", "explain latest/current result"),
+    item("/undo", "revert last committed transaction"),
+    item("/exit", "quit AgentHub"),
 ];
+
+const fn item(command: &'static str, summary: &'static str) -> SlashCommand {
+    SlashCommand { command, summary }
+}

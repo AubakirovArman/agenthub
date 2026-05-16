@@ -8,7 +8,7 @@
 agenthub
 ```
 
-Это рекомендованный ежедневный интерфейс. AgentHub открывает latest chat, по возможности готовит проект, показывает readiness hints и позволяет сразу писать задачу:
+Это рекомендованный ежедневный интерфейс. AgentHub открывает latest chat, по возможности готовит проект, показывает компактный header с working folder/provider и позволяет сразу писать задачу:
 
 ```text
 agenthub> fix the failing runtime smoke test and keep files under 200 lines
@@ -20,6 +20,7 @@ Shell создаёт draft plan, показывает что будет выпо
 
 ```text
 /help                 commands
+/cd <folder>          сменить project folder без перезапуска
 /status               current project, provider, transaction
 /providers            setup and provider health
 /transactions         recent transactions

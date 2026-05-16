@@ -10,7 +10,7 @@ agenthub
 agenthub shell
 ```
 
-The shell restores the latest chat, prepares the project when possible, creates the first baseline commit when the repository has no `HEAD`, shows the active provider, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`. Built-in standard skills are bundled with the binary, so a fresh project can use core file/page workflows immediately.
+The shell restores the latest chat, prepares the project when possible, creates the first baseline commit when the repository has no `HEAD`, shows the active provider in a compact header, and lets you type a normal task. You do not need to start with `init`, `doctor`, `plan`, or `run`. Built-in standard skills are bundled with the binary, so a fresh project can use core file/page/Django workflows immediately.
 
 ```text
 agenthub> add a /courses page in the dashboard style
@@ -31,6 +31,7 @@ AgentHub then:
 ```text
 plain text        plan, ask for approval, then execute
 /                 show commands with tab completion
+/cd ../other-app   switch to another project folder without restarting
 @README.md        attach a file to the next request
 @src              attach a folder summary to the next request
 @last / @tx       attach the latest transaction summary
@@ -58,6 +59,7 @@ edit       open the draft in $VISUAL or $EDITOR, then revalidate it
 
 ```text
 /help             show shell help
+/cd <folder>      switch working folder
 /status           show current project and transaction
 /providers        provider wizard with status, roles, profiles, and next actions
 /memory           inspect memory

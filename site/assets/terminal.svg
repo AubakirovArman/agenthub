@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
-  <title id="title">AgentHub terminal transaction report</title>
-  <desc id="desc">A terminal screenshot-style view showing AgentHub commands and transaction output.</desc>
+  <title id="title">AgentHub chat-first shell</title>
+  <desc id="desc">A terminal screenshot-style view showing a clean AgentHub prompt, slash commands, and project switching.</desc>
   <rect width="920" height="560" rx="16" fill="#101820"/>
   <rect x="0" y="0" width="920" height="46" rx="16" fill="#1d2a35"/>
   <circle cx="28" cy="23" r="7" fill="#ff6b6b"/>
   <circle cx="52" cy="23" r="7" fill="#f7c948"/>
   <circle cx="76" cy="23" r="7" fill="#3ddc97"/>
-  <text x="28" y="92" fill="#93f5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">$ agenthub run "add a health-check page" --no-commit</text>
-  <text x="28" y="140" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="21">tx-20260516-healthy NOOP</text>
-  <text x="28" y="184" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">AgentHub transaction completed without commit</text>
-  <text x="28" y="232" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Provider: codex</text>
-  <text x="28" y="270" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Verifier: code_build + runtime smoke</text>
-  <text x="28" y="308" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Files changed: 1</text>
-  <text x="28" y="346" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Memory promoted: no</text>
-  <text x="28" y="394" fill="#93f5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Report: .agent/tx/tx-20260516-healthy/report.md</text>
-  <text x="28" y="432" fill="#93f5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Dashboard: .agent/reports/dashboard/index.html</text>
+  <text x="28" y="88" fill="#93f5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22">$ agenthub</text>
+  <text x="28" y="132" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Working folder: ./my-app</text>
+  <text x="28" y="170" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Provider: codex  (change with /providers)</text>
+  <text x="28" y="220" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="21">agenthub&gt; /</text>
+  <text x="28" y="262" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">/help       show commands with examples</text>
+  <text x="28" y="298" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">/cd         switch the working project folder</text>
+  <text x="28" y="334" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">/providers  setup or inspect Codex/Kimi/Gemini/API</text>
+  <text x="28" y="384" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="21">agenthub&gt; /cd ../other-app</text>
+  <text x="28" y="428" fill="#c8d6e5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">Working folder: ../other-app</text>
   <rect x="28" y="470" width="864" height="1" fill="#304657"/>
-  <text x="28" y="516" fill="#f7c948" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">verified, auditable, rollback-aware AI agent work</text>
+  <text x="28" y="516" fill="#f7c948" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">type a task first; commands stay one slash away</text>
 </svg>

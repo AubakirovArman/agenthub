@@ -21,6 +21,7 @@ agenthub> создай Django веб приложение
 ## Ежедневная работа
 
 - `agenthub` без subcommand открывает chat-first local shell.
+- Внутри shell используй `/cd <folder>`, чтобы сменить project без перезапуска.
 - Первый запуск может подготовить Git, `.agent`, baseline commit и bundled standard skills для fresh project.
 - Interactive `agenthub run` и shell task execution показывают live journal progress; для quiet scripts используй `--no-watch`.
 - Внутри shell используй `/providers` как provider wizard, затем `/status`, `/diff`, `/logs`, `/report`, `/explain` и `/dashboard`.

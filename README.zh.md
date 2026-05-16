@@ -62,6 +62,7 @@ AgentHub 会把消息转换成 draft plan，显示 target files、provider、ver
 Shell 内：
 
 - `/` 显示命令，并支持 tab completion 和 persistent history。
+- `/cd ../other-app` 不重启 AgentHub 就能切换到另一个 working folder。
 - `@README.md`、`@src`、`@tx:latest` 或 `@memory:auth` 给下一条请求添加明确的 file、folder、transaction 或 memory context。
 - `!git status --short` 通过 AgentHub policy 运行 shell command 并记录日志。
 - `# use fetch only, no axios` 写入 typed memory note，供后续任务使用。
