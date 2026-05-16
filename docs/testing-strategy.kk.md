@@ -76,4 +76,4 @@ Pre-commit faults rollback жасап, main clean қалдыруы керек. P
 
 ## Current Coverage
 
-Rust integration suite transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration және domain profiles қамтиды. 1.0 алдындағы жаңа жұмыс product UX қосудан бұрын осы suite-ті кеңейтуі керек.
+Rust integration suite transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration және domain profiles қамтиды. Product CLI tests doctor/config/provider flows жабады, оның ішінде `providers test openai-http` үшін OpenAI-compatible local stub бар. 1.0 алдындағы жаңа жұмыс product UX қосудан бұрын осы suite-ті кеңейтуі керек.

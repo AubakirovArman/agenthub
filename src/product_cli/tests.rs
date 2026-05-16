@@ -2,10 +2,11 @@ use anyhow::Result;
 
 use crate::agent_dir;
 
-use super::{config, doctor, open, providers};
+use super::{config, doctor, providers};
 
+mod open_tests;
 mod support;
-use support::with_openai_env;
+use support::{openai_stub_server, with_openai_env};
 
 #[test]
 fn config_set_and_show_round_trips() -> Result<()> {
@@ -92,6 +93,26 @@ fn provider_diagnose_reports_openai_http_endpoint_details() -> Result<()> {
 }
 
 #[test]
+fn providers_openai_http_test_calls_stub_server() -> Result<()> {
+    let stub = openai_stub_server("product cli ok", 3)?;
+    with_openai_env(Some(&stub.endpoint), Some("test-key"), || {
+        let dir = tempfile::tempdir()?;
+
+        let setup = providers::setup_provider(dir.path(), "openai-http")?;
+        let test = providers::test_provider(dir.path(), "openai-http")?;
+        let request = stub.received_request()?;
+        let lower = request.to_ascii_lowercase();
+
+        assert!(setup.contains("configured\topenai-http"));
+        assert!(setup.contains("default_provider\topenai-http"));
+        assert!(test.contains("ok\topenai-http\tcompletion_tokens:3"));
+        assert!(request.contains("POST /v1/chat/completions"));
+        assert!(lower.contains("authorization: bearer test-key"));
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_set_role_and_fallback_config() -> Result<()> {
     let dir = tempfile::tempdir()?;
 
@@ -151,26 +172,4 @@ fn doctor_warns_when_default_provider_is_configured_but_missing() -> Result<()> 
         assert!(rendered.contains("openai-http is configured but not ready"));
         Ok(())
     })
-}
-
-#[test]
-fn open_dashboard_and_report_return_paths_without_launching() -> Result<()> {
-    std::env::set_var("AGENTHUB_OPEN_DRY_RUN", "1");
-    let dir = tempfile::tempdir()?;
-    agent_dir::init_project(dir.path(), false)?;
-    let tx = dir.path().join(".agent/tx/tx-open");
-    std::fs::create_dir_all(&tx)?;
-    std::fs::write(tx.join("journal.jsonl"), "")?;
-    std::fs::write(tx.join("report.md"), "# Report\n")?;
-
-    let dashboard = open::dashboard(dir.path())?;
-    let report = open::report(dir.path(), "tx-open")?;
-
-    assert_eq!(dashboard.kind, "dashboard");
-    assert!(dashboard.path.ends_with("index.html"));
-    assert!(!dashboard.launched);
-    assert_eq!(report.kind, "report");
-    assert!(report.path.ends_with("report.md"));
-    assert!(!report.launched);
-    Ok(())
 }

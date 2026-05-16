@@ -76,4 +76,4 @@ Pre-commit faults 必须 rollback 并保持 main 干净。Post-commit memory 或
 
 ## 当前覆盖
 
-Rust integration suite 已覆盖 transaction kernel、rollback、blocked approval、resume、smart sync rebase/overlap、sandbox levels、remote runner dispatch、repair、adaptive orchestration 和 domain profiles。1.0 之前的新工作应先扩展这个 suite，再添加外层 product UX。
+Rust integration suite 已覆盖 transaction kernel、rollback、blocked approval、resume、smart sync rebase/overlap、sandbox levels、remote runner dispatch、repair、adaptive orchestration 和 domain profiles。Product CLI tests 覆盖 doctor/config/provider flows，包括用于 `providers test openai-http` 的 OpenAI-compatible local stub。1.0 之前的新工作应先扩展这个 suite，再添加外层 product UX。

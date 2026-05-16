@@ -76,4 +76,4 @@ Pre-commit faults must roll back and leave main clean. Post-commit memory or cle
 
 ## Current Coverage
 
-The Rust integration suite already covers the main transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration, and domain profiles. New 1.0 work should extend this suite before adding product UX around it.
+The Rust integration suite already covers the main transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration, and domain profiles. Product CLI tests cover doctor/config/provider flows, including an OpenAI-compatible local stub for `providers test openai-http`. New 1.0 work should extend this suite before adding product UX around it.

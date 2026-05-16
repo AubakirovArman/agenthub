@@ -76,4 +76,4 @@ Pre-commit faults должны rollback и оставлять main чистым.
 
 ## Текущее покрытие
 
-Rust integration suite уже покрывает transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration и domain profiles. Новые задачи до 1.0 должны расширять этот suite до добавления product UX вокруг него.
+Rust integration suite уже покрывает transaction kernel, rollback, blocked approval, resume, smart sync rebase/overlap, sandbox levels, remote runner dispatch, repair, adaptive orchestration и domain profiles. Product CLI tests покрывают doctor/config/provider flows, включая OpenAI-compatible local stub для `providers test openai-http`. Новые задачи до 1.0 должны расширять этот suite до добавления product UX вокруг него.
