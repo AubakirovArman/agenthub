@@ -6,7 +6,11 @@ use std::time::UNIX_EPOCH;
 use anyhow::{Context, Result};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+mod events;
+#[cfg(test)]
+mod tests;
+
+use events::read_events;
 
 use crate::home;
 
@@ -332,50 +336,6 @@ fn parse_chat(id: &str, path: &Path, stamp: FileStamp) -> Result<ParsedChat> {
     })
 }
 
-fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    fs::read_to_string(path)
-        .with_context(|| format!("read {}", path.display()))?
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-        .map(|line| {
-            let event: Value =
-                serde_json::from_str(line).with_context(|| format!("parse {}", path.display()))?;
-            Ok(ChatEventView {
-                at: event["at"].as_str().unwrap_or("").to_string(),
-                kind: event["kind"].as_str().unwrap_or("event").to_string(),
-                text: event["text"].as_str().unwrap_or("").to_string(),
-                intent: event
-                    .get("intent")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-                mode: event
-                    .get("mode")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-                provider: event
-                    .get("provider")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-                reason: event
-                    .get("reason")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-                tx_id: event
-                    .get("tx_id")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-                path: event
-                    .get("path")
-                    .and_then(Value::as_str)
-                    .map(str::to_string),
-            })
-        })
-        .collect()
-}
-
 fn row_from_sql(row: &rusqlite::Row<'_>) -> rusqlite::Result<ChatIndexRow> {
     Ok(ChatIndexRow {
         id: row.get(0)?,
@@ -498,39 +458,5 @@ fn db_path(root: &Path) -> PathBuf {
         root.join(".agent/cache/indexes/chats.sqlite3")
     } else {
         home::base_dir().join("indexes").join("chats.sqlite3")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::fs;
-
-    use anyhow::Result;
-
-    use super::*;
-
-    #[test]
-    fn indexes_chats_and_searches_messages_with_fts() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let chats = dir.path().join(".agent/shell/chats");
-        fs::create_dir_all(&chats)?;
-        fs::write(
-            chats.join("chat-demo.jsonl"),
-            "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"created\"}\n\
-             {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"user_message\",\"text\":\"@src/page.tsx add dashboard metrics\"}\n\
-             {\"at\":\"2026-01-01T00:00:02Z\",\"kind\":\"transaction_recorded\",\"text\":\"done\",\"tx_id\":\"tx-1\"}\n\
-             {\"at\":\"2026-01-01T00:00:03Z\",\"kind\":\"chat_pinned\",\"text\":\"true\"}\n",
-        )?;
-
-        let rows = list(dir.path(), 10)?;
-        let hits = search(dir.path(), "dashboard", 10)?;
-
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].title, "add dashboard metrics");
-        assert!(rows[0].pinned);
-        assert_eq!(rows[0].txs, 1);
-        assert!(hits.iter().any(|hit| hit.kind == "user_message"));
-        assert_eq!(open(dir.path(), "demo")?.unwrap().id, "chat-demo");
-        Ok(())
     }
 }
