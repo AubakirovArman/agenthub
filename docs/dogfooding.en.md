@@ -38,6 +38,16 @@ Every run writes a machine-readable report:
 target/dogfood/dogfood-report.json
 ```
 
+Every dogfood run also archives release evidence by default:
+
+```text
+target/dogfood/history/index.jsonl
+target/dogfood/history/latest.json
+target/dogfood/history/runs/<run-id>/
+```
+
+The archive stores the suite report, provider report when present, and persisted provider artifacts. Use `AGENTHUB_DOGFOOD_ARCHIVE=0` to skip suite archival, or `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` to skip direct provider archival.
+
 For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
 
 Use an installed binary instead of building from source:

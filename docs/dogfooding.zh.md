@@ -38,6 +38,16 @@ AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 target/dogfood/dogfood-report.json
 ```
 
+每次 dogfood run 默认也会归档 release evidence：
+
+```text
+target/dogfood/history/index.jsonl
+target/dogfood/history/latest.json
+target/dogfood/history/runs/<run-id>/
+```
+
+Archive 会保存 suite report、存在时的 provider report，以及持久化 provider artifacts。使用 `AGENTHUB_DOGFOOD_ARCHIVE=0` 可跳过 suite archive，使用 `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` 可跳过 direct provider archive。
+
 对于 stress runs，report 包含 requested count、completed count、`tx status` 行数、elapsed seconds，以及 `.agent/cache/indexes/transactions.sqlite3` 是否存在。设置 `AGENTHUB_DOGFOOD_KEEP=1` 可以保留临时 stress project，并把 path 写入 report 供手动检查。
 
 使用已安装的 `agenthub`，而不是从源码构建：

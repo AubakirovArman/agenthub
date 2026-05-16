@@ -153,4 +153,9 @@ JSON
 }
 
 write_report
+if [[ "${AGENTHUB_DOGFOOD_ARCHIVE:-1}" == "1" ]]; then
+  "$ROOT/scripts/archive-dogfood.sh"
+else
+  printf 'skip dogfood evidence archive; AGENTHUB_DOGFOOD_ARCHIVE=0\n'
+fi
 printf 'agenthub dogfood suite passed\n'

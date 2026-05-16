@@ -144,4 +144,12 @@ if [[ "$KEEP" == "1" ]]; then
 fi
 
 write_report "passed" "$tx_id" "$tx_status" "$persisted_project" "$persisted_report"
+if [[ "${AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE:-1}" == "1" ]]; then
+  AGENTHUB_PROVIDER_DOGFOOD_REPORT="$REPORT_PATH" \
+  AGENTHUB_DOGFOOD_ARCHIVE_KIND="provider" \
+  AGENTHUB_DOGFOOD_ARCHIVE_SOURCE="$REPORT_PATH" \
+  "$ROOT/scripts/archive-dogfood.sh"
+else
+  printf 'skip provider dogfood evidence archive; AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0\n'
+fi
 printf 'agenthub provider dogfood passed: %s %s\n' "$tx_id" "$tx_status"

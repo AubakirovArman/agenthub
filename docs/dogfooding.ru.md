@@ -38,6 +38,16 @@ AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 target/dogfood/dogfood-report.json
 ```
 
+Каждый dogfood run по умолчанию также архивирует release evidence:
+
+```text
+target/dogfood/history/index.jsonl
+target/dogfood/history/latest.json
+target/dogfood/history/runs/<run-id>/
+```
+
+Архив сохраняет suite report, provider report если он есть, и сохранённые provider artifacts. `AGENTHUB_DOGFOOD_ARCHIVE=0` отключает архивирование suite, а `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` отключает архивирование прямого provider-прогона.
+
 Для stress runs report содержит requested count, completed count, количество строк `tx status`, elapsed seconds и факт наличия `.agent/cache/indexes/transactions.sqlite3`. `AGENTHUB_DOGFOOD_KEEP=1` оставляет временный stress project и пишет его path в report для ручной проверки.
 
 Использовать установленный `agenthub` вместо сборки из исходников:

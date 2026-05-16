@@ -38,6 +38,16 @@ AGENTHUB_DOGFOOD_STRESS_COUNT=100 scripts/dogfood.sh
 target/dogfood/dogfood-report.json
 ```
 
+Әр dogfood run әдепкі түрде release evidence archive жасайды:
+
+```text
+target/dogfood/history/index.jsonl
+target/dogfood/history/latest.json
+target/dogfood/history/runs/<run-id>/
+```
+
+Archive suite report, бар болса provider report және persisted provider artifacts сақтайды. Suite archival өшіру үшін `AGENTHUB_DOGFOOD_ARCHIVE=0`, direct provider archival өшіру үшін `AGENTHUB_PROVIDER_DOGFOOD_ARCHIVE=0` қолдан.
+
 Stress runs үшін report ішінде requested count, completed count, `tx status` жол саны, elapsed seconds және `.agent/cache/indexes/transactions.sqlite3` бар-жоғы болады. `AGENTHUB_DOGFOOD_KEEP=1` temporary stress project сақтап, оның path мәнін manual inspection үшін report ішіне жазады.
 
 Source build орнына орнатылған `agenthub` қолдану:

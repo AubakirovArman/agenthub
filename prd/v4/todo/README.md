@@ -6,5 +6,5 @@
 
 ## Remaining Tasks
 
-- Continue collecting multi-day real-project dogfood before the final 1.0 tag.
+- Continue collecting multi-day real-project dogfood with `target/dogfood/history/` before the final 1.0 tag.
 - Publish Homebrew tap, Scoop bucket, and winget submission after 1.0 release assets are final.

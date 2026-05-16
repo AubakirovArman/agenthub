@@ -11,6 +11,7 @@ All notable AgentHub changes are tracked here.
 - Add TUI summary counts and next-action suggestions.
 - Add Homebrew, Scoop, and winget manifest templates plus manifest rendering checks.
 - Add opt-in live provider dogfood automation and provider evidence reports.
+- Add dogfood evidence history archives for multi-run 1.0 readiness tracking.
 
 ## 0.2.0-local-preview - 2026-05-15
 
