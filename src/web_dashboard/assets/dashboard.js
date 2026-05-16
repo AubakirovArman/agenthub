@@ -28,6 +28,8 @@ function badge(status) {
   return el("span", { class: `badge ${klass}`, text: status });
 }
 
+window.AgentHubRenderHelpers = { $, el, badge };
+
 function renderHeader() {
   $("#project").textContent = data.project;
   $("#generated").textContent = new Date(data.generated_at).toLocaleString();
@@ -176,11 +178,11 @@ function renderReports() {
 }
 
 function renderAll() {
-  [renderHeader, renderMetrics, renderTransactions, renderCost, renderMetricsDashboard,
-    renderTimeline, renderTrace, renderGraph, renderSkills, renderPolicies, renderReports]
-    .forEach((render) => render());
+  const renderers = [renderHeader, renderMetrics, renderTransactions, renderCost,
+    renderMetricsDashboard, renderTimeline, renderTrace, renderGraph, renderSkills,
+    renderPolicies, renderReports, window.renderTransactionViewer].filter(Boolean);
+  renderers.forEach((render) => render());
 }
-
 async function refreshLiveData() {
   if (!window.AGENTHUB_LIVE) return;
   try {

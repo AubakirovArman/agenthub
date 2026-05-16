@@ -50,6 +50,11 @@ h2 {
   text-transform: uppercase;
 }
 
+h3 {
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
 #project,
 #generated {
   color: #b9cbc4;
@@ -207,6 +212,53 @@ a {
   padding: 6px 9px;
 }
 
+.viewer-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.viewer-tab {
+  background: #eef3f1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-grid;
+  gap: 2px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.viewer-tab.active {
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.viewer-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+pre {
+  background: #101b17;
+  border-radius: 8px;
+  color: #eef8f4;
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.muted {
+  color: var(--muted);
+}
+
 #memoryGraph {
   height: 320px;
   max-width: 100%;
@@ -230,5 +282,13 @@ a {
   .metric,
   .panel {
     margin-bottom: 14px;
+  }
+
+  .viewer-grid {
+    display: block;
+  }
+
+  .viewer-grid > div {
+    margin-bottom: 12px;
   }
 }

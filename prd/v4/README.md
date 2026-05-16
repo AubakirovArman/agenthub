@@ -28,6 +28,7 @@ Success criteria:
 14. `/context` previews current chat, recent messages, memory, and selected transaction context.
 15. Shell mentions include file/folder context plus `@tx` and `@memory` transaction and memory summaries.
 16. Inline approval prompts expose risk plus `diff`, `details`, and `edit` controls.
+17. Local dashboard includes transaction viewer panes for report, diff, and log inspection.
 
 ## Rules
 

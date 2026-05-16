@@ -8,6 +8,7 @@ use crate::agent_dir::{self, AgentPaths};
 use crate::enterprise;
 use crate::memory;
 use crate::skill_registry;
+use crate::web_dashboard::details::collect_transaction_details;
 use crate::web_dashboard::memory_graph::build_memory_graph;
 use crate::web_dashboard::metrics::collect_metrics;
 use crate::web_dashboard::read::{
@@ -28,6 +29,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<WebDashboard> {
     let policies = collect_policies(project_root)?;
     let cost = collect_cost(&transactions);
     let reports = collect_reports(project_root, &rows)?;
+    let transaction_details = collect_transaction_details(project_root, &rows)?;
 
     Ok(WebDashboard {
         project: project_root.display().to_string(),
@@ -49,6 +51,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<WebDashboard> {
         cost,
         metrics: collect_metrics(project_root, &rows, &memory_stats)?,
         reports,
+        transaction_details,
     })
 }
 

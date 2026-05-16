@@ -1,5 +1,6 @@
 mod assets;
 mod collect;
+mod details;
 mod memory_graph;
 mod metrics;
 mod read;
@@ -29,6 +30,7 @@ pub struct WebDashboard {
     pub cost: CostPanel,
     pub metrics: MetricsPanel,
     pub reports: Vec<ReportLink>,
+    pub transaction_details: Vec<WebTransactionDetail>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -53,6 +55,16 @@ pub struct WebTransaction {
     pub dag_edges: usize,
     pub dag_roles: Vec<String>,
     pub domain_runtime: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct WebTransactionDetail {
+    pub tx_id: String,
+    pub status: String,
+    pub report_href: String,
+    pub report_excerpt: String,
+    pub diff_excerpt: String,
+    pub logs_excerpt: String,
 }
 
 #[derive(Debug, Clone, Serialize)]

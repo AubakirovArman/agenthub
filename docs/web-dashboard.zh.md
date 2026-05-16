@@ -63,6 +63,7 @@ agenthub serve --addr 127.0.0.1:4318 --once
 - transaction 数量、open/failed 数量、memory 数量、skill 数量和总 cost；
 - reliability、context、quality、trust 和 cost 的 aggregated KPI metrics；
 - recent transactions，包括 status、DAG 大小、cost、domain runtime 和 report links；
+- transaction viewer panes，包含 bounded report、diff 和 log excerpts；
 - 来自 `journal.jsonl` 的 transaction timeline；
 - 来自 DAG node roles 的 latest agent trace；
 - committed memory records 与 transactions 组成的 memory graph；

@@ -63,6 +63,7 @@ agenthub serve --addr 127.0.0.1:4318 --once
 - transaction саны, open/failed саны, memory саны, skill саны және total cost;
 - reliability, context, quality, trust және cost үшін aggregated KPI metrics;
 - recent transactions: status, DAG size, cost, domain runtime және report links;
+- report, diff және log excerpts көрсететін transaction viewer panes;
 - `journal.jsonl` ішінен transaction timeline;
 - DAG node roles ішінен latest agent trace;
 - committed memory records және linked transactions негізіндегі memory graph;

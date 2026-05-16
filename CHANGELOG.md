@@ -17,6 +17,7 @@ All notable AgentHub changes are tracked here.
 - Add `/context` in the shell to preview current chat, recent messages, memory, and selected transaction context.
 - Add `@tx`, `@tx:<id>`, `@memory`, and `@memory:<query>` shell mentions for transaction and project-memory context.
 - Add richer inline approval prompts with risk summaries plus `diff`, `details`, and `$EDITOR`-backed `edit` actions.
+- Add dashboard transaction viewer panes for report, diff, and log excerpts in static and live dashboards.
 - Verify release archive SHA-256 checksums in POSIX and Windows installers before extracting binaries.
 - Document checksum installation controls for downloaded and local package artifacts.
 - Add provider-specific CLI credential marker diagnostics for Codex, Gemini, and Kimi.

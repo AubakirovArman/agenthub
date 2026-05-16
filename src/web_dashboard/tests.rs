@@ -30,7 +30,7 @@ fn writes_static_browser_dashboard() -> Result<()> {
         r#"{"selected":{"id":"code.rust"}}"#,
     )?;
     fs::write(tx.join("review.json"), r#"{"passed":true}"#)?;
-    fs::write(tx.join("report.md"), "# report\n")?;
+    fs::write(tx.join("report.md"), "# report\n\ntransaction viewer\n")?;
     memory::stage_code_change(
         &tx,
         "tx-20260101000000-web",
@@ -51,9 +51,12 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"metrics\""));
     assert!(data.contains("\"history\""));
     assert!(data.contains("\"domain_runtime\": \"code.rust\""));
+    assert!(data.contains("\"transaction_details\""));
+    assert!(data.contains("transaction viewer"));
     assert!(data.contains("\"gate_pass_rate\": 1.0"));
     assert!(data.contains("example.skill"));
     assert!(output.join("dashboard.js").exists());
+    assert!(output.join("dashboard_viewer.js").exists());
     Ok(())
 }
 
