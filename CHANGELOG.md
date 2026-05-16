@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.5-local-preview - 2026-05-16
+
 - Add chat usage stats: `agenthub stats` and `/stats` summarize chat turns, prompt/completion/total tokens, estimated USD cost, and provider-level totals from the AgentHub-owned chat event store.
 
 ## 0.4.4-local-preview - 2026-05-16
