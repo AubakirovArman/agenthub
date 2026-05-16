@@ -20,7 +20,10 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
         chat_dir.join("chat-api.jsonl"),
         "{\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"user_message\",\"text\":\"review api dashboard\"}\n\
          {\"at\":\"2026-01-01T00:00:00Z\",\"kind\":\"intent_classified\",\"intent\":\"chat\",\"mode\":\"chat\",\"reason\":\"no project runtime\",\"text\":\"review api dashboard\"}\n\
-         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n",
+         {\"at\":\"2026-01-01T00:00:01Z\",\"kind\":\"provider_requested\",\"provider\":\"deepseek\",\"request_id\":\"chat-1\",\"prompt_tokens\":3,\"text\":\"deepseek request started\"}\n\
+         {\"at\":\"2026-01-01T00:00:02Z\",\"kind\":\"assistant_delta\",\"provider\":\"deepseek\",\"text\":\"stream chunk\"}\n\
+         {\"at\":\"2026-01-01T00:00:03Z\",\"kind\":\"provider_finished\",\"provider\":\"deepseek\",\"request_id\":\"chat-1\",\"status\":\"ok\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"text\":\"deepseek request ok\"}\n\
+         {\"at\":\"2026-01-01T00:00:04Z\",\"kind\":\"turn_finished\",\"provider\":\"deepseek\",\"status\":\"succeeded\",\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5,\"text\":\"turn succeeded\"}\n",
     )?;
 
     let empty = BTreeMap::new();
@@ -38,6 +41,9 @@ fn dashboard_api_exposes_transactions_chats_and_sse_events() -> Result<()> {
     assert!(events.contains("\"source\":\"chat\""));
     assert!(events.contains("intent_classified"));
     assert!(events.contains("\"intent\":\"chat\""));
+    assert!(events.contains("provider_requested"));
+    assert!(events.contains("provider_finished"));
+    assert!(events.contains("\"total_tokens\":5"));
     assert!(events.contains("assistant_delta"));
     assert!(events.contains("stream chunk"));
     Ok(())

@@ -181,6 +181,72 @@ pub(super) fn append_assistant_delta(
     )
 }
 
+pub(super) fn append_provider_requested(
+    session: &ChatSession,
+    request_id: &str,
+    provider: &str,
+    model: Option<&str>,
+    prompt_tokens: usize,
+) -> Result<()> {
+    append_event(
+        session,
+        "provider_requested",
+        json!({
+            "request_id": request_id,
+            "provider": provider,
+            "model": model,
+            "prompt_tokens": prompt_tokens,
+            "text": format!("{provider} request started")
+        }),
+    )
+}
+
+pub(super) fn append_provider_finished(
+    session: &ChatSession,
+    request_id: &str,
+    provider: &str,
+    status: &str,
+    prompt_tokens: usize,
+    completion_tokens: usize,
+    reason: Option<&str>,
+) -> Result<()> {
+    append_event(
+        session,
+        "provider_finished",
+        json!({
+            "request_id": request_id,
+            "provider": provider,
+            "status": status,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": prompt_tokens + completion_tokens,
+            "reason": reason,
+            "text": format!("{provider} request {status}")
+        }),
+    )
+}
+
+pub(super) fn append_turn_finished(
+    session: &ChatSession,
+    provider: &str,
+    status: &str,
+    prompt_tokens: usize,
+    completion_tokens: usize,
+) -> Result<()> {
+    append_event(
+        session,
+        "turn_finished",
+        json!({
+            "provider": provider,
+            "status": status,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": prompt_tokens + completion_tokens,
+            "text": format!("turn {status}")
+        }),
+    )
+}
+
 fn append_event(session: &ChatSession, kind: &str, mut data: Value) -> Result<()> {
     let object = data
         .as_object_mut()

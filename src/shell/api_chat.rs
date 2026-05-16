@@ -25,17 +25,26 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         provider.model.clone(),
     );
     let prompt = prompt_for(session, request)?;
+    let request_id = format!("chat-{}", Utc::now().timestamp_millis());
+    let prompt_tokens = estimate_tokens(request);
+    chat::append_provider_requested(
+        session,
+        &request_id,
+        &provider.info.id,
+        provider.model.as_deref(),
+        prompt_tokens,
+    )?;
     let mut stream_event_error = None;
-    let response = api.complete_streaming(
+    let response = match api.complete_streaming(
         LlmRequest {
-            id: format!("chat-{}", Utc::now().timestamp_millis()),
+            id: request_id.clone(),
             role: "chat".to_string(),
             provider: provider.info.id.clone(),
             model: provider.model.clone(),
             prompt: Some(prompt),
             context_pack_hash: "chat".to_string(),
             prompt_hash: "chat".to_string(),
-            prompt_tokens: estimate_tokens(request),
+            prompt_tokens,
             response_format: None,
         },
         |delta| {
@@ -48,8 +57,42 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
                 }
             }
         },
-    )?;
+    ) {
+        Ok(response) => {
+            chat::append_provider_finished(
+                session,
+                &request_id,
+                &provider.info.id,
+                &response.status,
+                prompt_tokens,
+                response.completion_tokens,
+                None,
+            )?;
+            response
+        }
+        Err(error) => {
+            let reason = error.to_string();
+            chat::append_provider_finished(
+                session,
+                &request_id,
+                &provider.info.id,
+                "error",
+                prompt_tokens,
+                0,
+                Some(&reason),
+            )?;
+            chat::append_turn_finished(session, &provider.info.id, "failed", prompt_tokens, 0)?;
+            return Err(error);
+        }
+    };
     if let Some(error) = stream_event_error {
+        chat::append_turn_finished(
+            session,
+            &provider.info.id,
+            "failed",
+            prompt_tokens,
+            response.completion_tokens,
+        )?;
         return Err(error).context("write assistant stream event");
     }
     let content = response
@@ -58,6 +101,13 @@ pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Resul
         .unwrap_or_else(|| "<empty response>".to_string());
     println!();
     chat::append_assistant(session, &provider.info.id, &content)?;
+    chat::append_turn_finished(
+        session,
+        &provider.info.id,
+        "succeeded",
+        prompt_tokens,
+        response.completion_tokens,
+    )?;
     Ok(())
 }
 

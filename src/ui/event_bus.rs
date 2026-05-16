@@ -49,10 +49,14 @@ impl UiEvent {
             .ok()?
             .with_timezone(&Utc);
         let state = row.event.kind.clone();
+        let failed_status = matches!(row.event.status.as_deref(), Some("error" | "failed"));
         let ui_state = match state.as_str() {
             "assistant_delta" => "running",
             "assistant_message" => "succeeded",
             "user_message" => "pending",
+            "provider_requested" => "running",
+            "provider_finished" | "turn_finished" if failed_status => "failed",
+            "provider_finished" | "turn_finished" => "succeeded",
             "intent_classified" => "info",
             _ => "info",
         };
@@ -63,10 +67,10 @@ impl UiEvent {
             state: state.clone(),
             ui_state: ui_state.to_string(),
             stage: "chat".to_string(),
-            badge: if state == "assistant_delta" {
-                "run".to_string()
-            } else {
-                "ok".to_string()
+            badge: match state.as_str() {
+                "assistant_delta" | "provider_requested" => "run".to_string(),
+                "provider_finished" | "turn_finished" if failed_status => "fail".to_string(),
+                _ => "ok".to_string(),
             },
             message: row.event.text.clone(),
             data: json!({
@@ -76,6 +80,12 @@ impl UiEvent {
                 "intent": row.event.intent,
                 "mode": row.event.mode,
                 "provider": row.event.provider,
+                "model": row.event.model,
+                "request_id": row.event.request_id,
+                "status": row.event.status,
+                "prompt_tokens": row.event.prompt_tokens,
+                "completion_tokens": row.event.completion_tokens,
+                "total_tokens": row.event.total_tokens,
                 "reason": row.event.reason,
                 "path": row.event.path,
             }),

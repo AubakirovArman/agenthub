@@ -24,6 +24,12 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
                 intent: text_field(&event, "intent"),
                 mode: text_field(&event, "mode"),
                 provider: text_field(&event, "provider"),
+                model: text_field(&event, "model"),
+                request_id: text_field(&event, "request_id"),
+                status: text_field(&event, "status"),
+                prompt_tokens: usize_field(&event, "prompt_tokens"),
+                completion_tokens: usize_field(&event, "completion_tokens"),
+                total_tokens: usize_field(&event, "total_tokens"),
                 reason: text_field(&event, "reason"),
                 tx_id: text_field(&event, "tx_id"),
                 path: text_field(&event, "path"),
@@ -34,4 +40,11 @@ pub(super) fn read_events(path: &Path) -> Result<Vec<ChatEventView>> {
 
 fn text_field(event: &Value, key: &str) -> Option<String> {
     event.get(key).and_then(Value::as_str).map(str::to_string)
+}
+
+fn usize_field(event: &Value, key: &str) -> Option<usize> {
+    event
+        .get(key)
+        .and_then(Value::as_u64)
+        .and_then(|value| usize::try_from(value).ok())
 }

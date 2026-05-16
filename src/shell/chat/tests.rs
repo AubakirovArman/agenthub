@@ -17,6 +17,9 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
         "add page",
         "project runtime is initialized and shell mode is plan",
     )?;
+    append_provider_requested(&session, "chat-1", "deepseek", Some("deepseek-chat"), 12)?;
+    append_provider_finished(&session, "chat-1", "deepseek", "ok", 12, 7, None)?;
+    append_turn_finished(&session, "deepseek", "succeeded", 12, 7)?;
     append_draft(&session, "add page", Path::new(".agent/drafts/demo.yaml"))?;
     append_tx(
         &session,
@@ -35,6 +38,16 @@ fn persists_chat_messages_and_transactions() -> Result<()> {
         event["kind"].as_str() == Some("intent_classified")
             && event["intent"].as_str() == Some("project_plan")
             && event["mode"].as_str() == Some("project")
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("provider_finished")
+            && event["provider"].as_str() == Some("deepseek")
+            && event["completion_tokens"].as_u64() == Some(7)
+    }));
+    assert!(events.iter().any(|event| {
+        event["kind"].as_str() == Some("turn_finished")
+            && event["status"].as_str() == Some("succeeded")
+            && event["total_tokens"].as_u64() == Some(19)
     }));
     Ok(())
 }

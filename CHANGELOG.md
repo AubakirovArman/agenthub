@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Add provider lifecycle events for API chat turns: `provider_requested`, `provider_finished`, and `turn_finished` now persist request ids, provider ids, status, and token receipts into the chat/session event stream and `/api/events`.
+
 ## 0.4.2-local-preview - 2026-05-16
 
 - Add chat stream events to the dashboard event bus: API chat deltas are now persisted as `assistant_delta` events and exposed through `/api/events` alongside transaction journal events.
