@@ -10,6 +10,7 @@ use serde_json::Value;
 use super::*;
 use crate::agent_dir;
 use crate::memory::{self, MemoryInboxInput, TypedMemoryInput};
+use crate::test_support::with_agenthub_home;
 
 #[test]
 fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
@@ -161,21 +162,24 @@ fn successful_chat_turn_adds_auto_memory_to_inbox_only() -> Result<()> {
 #[test]
 fn chat_answer_without_project_runtime_does_not_create_agent_dir() -> Result<()> {
     let dir = tempfile::tempdir()?;
-    let session = chat::create(dir.path())?;
-    chat::append_user(&session, "exec", "ping")?;
+    let home = tempfile::tempdir()?;
+    with_agenthub_home(home.path(), || {
+        let session = chat::create(dir.path())?;
+        chat::append_user(&session, "exec", "ping")?;
 
-    let outcome = answer_with_providers(
-        dir.path(),
-        &session,
-        "ping",
-        vec![test_provider("deepseek", stub_sse_server())],
-        false,
-        None,
-    )?;
+        let outcome = answer_with_providers(
+            dir.path(),
+            &session,
+            "ping",
+            vec![test_provider("deepseek", stub_sse_server())],
+            false,
+            None,
+        )?;
 
-    assert_eq!(outcome.content, "ok");
-    assert!(!dir.path().join(".agent").exists());
-    Ok(())
+        assert_eq!(outcome.content, "ok");
+        assert!(!dir.path().join(".agent").exists());
+        Ok(())
+    })
 }
 
 #[test]

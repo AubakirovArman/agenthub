@@ -15,6 +15,7 @@ Panels:
 - `Composer`: input hint, slash palette и `@` context mention forms.
 - `Chat Transcript`: recent user, assistant, streaming и tool transcript lines из latest chat.
 - `Event Rail`: recent `intent_classified`, `context_built`, `provider_requested`, `assistant_delta`, `tool_permission`, fallback, provider-finished и turn-finished events со states running/streaming/approval/error/done.
+- `Live Tool Cards`: chat tool permissions, approval-required stops, memory extraction, turn cost/tokens, native command-plan receipts, builtin tool-result reinjection receipts, policy summaries и artifact links.
 - `Summary`: total transactions and counts for committed, rolled back, blocked, and running states.
 - `Transactions`: latest transaction ids and statuses from `.agent/tx`.
 - `Latest Transaction`: current stage, last event, DAG node/edge counts, DAG roles, verifier status, verifier log tail, cost, estimated tokens, provider, effect count, heartbeat, and last output tail.
@@ -43,6 +44,14 @@ Tabs: Chat | Events | Run | Transactions | Diff | Logs | Effects | Approvals | M
 - slash palette:
   - /messages    show current chat transcript
 - context mentions: @file @folder @tx:latest @chat:latest @memory:summary
+
+[Live Tool Cards]
+- [memory] memory: memory extraction
+  memory extraction added 2 inbox candidate(s)
+- [done] command_plan: tx-20260515030834-2aefeacd executor command plan
+  status ok source native_tool_call native_calls 1 commands 1 approvals 0
+- [done] tool_results: tx-20260515030834-2aefeacd executor tool results
+  status ok rounds 1 results 1 approvals 0 protected 0 truncated 0 network_denied 0
 
 [Summary]
 - total transactions: 1

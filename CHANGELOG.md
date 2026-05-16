@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.26-local-preview - 2026-05-16
+
+- Add live tool cards to `agenthub tui`, rendering chat tool permissions, approval-required stops, post-turn memory extraction, turn cost/tokens, native command-plan receipts, and builtin tool-result reinjection receipts in the terminal surface.
+- Surface tool-result policy summaries in the TUI with rounds, result counts, approval/protected-path/truncation/network-denial counts, and direct artifact links to `tool_loop_<role>.json` and `tool_results_<role>.json`.
+- Keep the TUI on the existing AgentHub event/artifact store: no second runtime, and regression coverage now verifies live cards alongside the event rail, transcript, providers, memory, approvals, and latest transaction panels.
+
 ## 0.4.25-local-preview - 2026-05-16
 
 - Add deterministic automatic memory extraction for completed Chat/Ops turns and successful Project transactions, writing review-only candidates to the existing memory inbox.

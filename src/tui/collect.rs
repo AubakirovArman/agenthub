@@ -21,12 +21,13 @@ use crate::tui::{
 use crate::workspace;
 
 use super::providers::collect_provider_panel;
+use super::tool_cards::collect_tool_cards;
 
 pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
     let rows = agent_dir::list_transactions(project_root)?;
     let memory = memory::inspect(project_root)?;
     let providers = collect_provider_panel(project_root)?;
-    let shell = collect_shell_panel(project_root, &providers)?;
+    let shell = collect_shell_panel(project_root, &rows, &providers)?;
     let latest = rows
         .last()
         .map(|row| collect_latest(project_root, &row.id, &row.status))
@@ -60,6 +61,7 @@ pub fn collect_dashboard(project_root: &Path) -> Result<Dashboard> {
 
 fn collect_shell_panel(
     project_root: &Path,
+    rows: &[agent_dir::TransactionRow],
     providers: &crate::tui::ProviderPanel,
 ) -> Result<ShellPanel> {
     let latest_chat = chat_index::list(project_root, 1)?.into_iter().next();
@@ -68,6 +70,7 @@ fn collect_shell_panel(
         None => Vec::new(),
     };
     let recent_events = chat_index::recent_events(project_root, 12)?;
+    let tool_cards = collect_tool_cards(project_root, rows, &recent_events)?;
     let provider = default_provider(project_root, providers);
     Ok(ShellPanel {
         status: ShellStatusLine {
@@ -103,6 +106,7 @@ fn collect_shell_panel(
             .into_iter()
             .map(|row| event_rail_item(row.event))
             .collect(),
+        tool_cards,
     })
 }
 
@@ -256,6 +260,7 @@ fn event_rail_item(event: ChatEventView) -> EventRailItem {
         }
         "provider_finished" => ("done", "provider finished"),
         "session_recovery" => ("recovery", "session recovery"),
+        "memory_extraction" => ("memory", "memory extraction"),
         "turn_finished" if event.status.as_deref() == Some("failed") => ("error", "turn finished"),
         "turn_finished" => ("done", "turn finished"),
         "intent_classified" => ("ready", "intent"),
@@ -302,6 +307,9 @@ fn event_detail(event: &ChatEventView) -> String {
             .reason
             .clone()
             .unwrap_or_else(|| "recovered session event".to_string());
+    }
+    if event.kind == "memory_extraction" {
+        return event.text.clone();
     }
     if let Some(provider) = &event.provider {
         let status = event.status.as_deref().unwrap_or("");

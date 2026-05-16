@@ -24,7 +24,7 @@ Chat sessions are restored automatically. Use `/chats` to list sessions with aut
 
 Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
 
-Use `agenthub tui` or `agenthub tui --live` for an event-backed terminal surface with status line, composer hints, slash palette, `@` context mentions, latest chat transcript, and a live event rail for provider/streaming/tool/turn state.
+Use `agenthub tui` or `agenthub tui --live` for an event-backed terminal surface with status line, composer hints, slash palette, `@` context mentions, latest chat transcript, a live event rail for provider/streaming/tool/turn state, and live tool cards for tool permissions, approval stops, memory extraction, cost/tokens, command-plan receipts, and tool-result reinjection receipts.
 
 ## Headless Exec
 

@@ -1,6 +1,6 @@
 use crate::tui::{
     ApprovalPanel, Dashboard, DashboardSummary, EventRailItem, LatestTransaction, MemoryPanel,
-    ShellPanel, ShellStatusLine, TransactionSummary, TranscriptLine,
+    ShellPanel, ShellStatusLine, ToolCard, TransactionSummary, TranscriptLine,
 };
 
 use super::provider_render;
@@ -30,6 +30,7 @@ fn render_shell(out: &mut String, shell: &ShellPanel) {
     render_composer(out, shell);
     render_transcript(out, &shell.transcript);
     render_event_rail(out, &shell.event_rail);
+    render_tool_cards(out, &shell.tool_cards);
 }
 
 fn render_status_line(out: &mut String, status: &ShellStatusLine) {
@@ -133,6 +134,31 @@ fn render_event_rail(out: &mut String, items: &[EventRailItem]) {
                 trim_line(&item.detail.replace('\n', " "), 120)
             ),
         );
+    }
+    push_line(out, "");
+}
+
+fn render_tool_cards(out: &mut String, cards: &[ToolCard]) {
+    push_line(out, "[Live Tool Cards]");
+    if cards.is_empty() {
+        push_line(out, "- none");
+        push_line(out, "");
+        return;
+    }
+    for card in cards {
+        push_line(
+            out,
+            &format!(
+                "- [{}] {}: {}",
+                card.state,
+                card.kind,
+                trim_line(&card.title, 100)
+            ),
+        );
+        push_line(out, &format!("  {}", trim_line(&card.detail, 120)));
+        if let Some(link) = &card.link {
+            push_line(out, &format!("  link: {}", trim_line(link, 120)));
+        }
     }
     push_line(out, "");
 }

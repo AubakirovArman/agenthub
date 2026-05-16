@@ -36,6 +36,8 @@ pub mod skill_registry;
 pub mod smart_sync;
 pub mod spec;
 pub mod team;
+#[cfg(test)]
+pub mod test_support;
 pub mod tool_permissions;
 pub mod tool_registry;
 pub mod topology;

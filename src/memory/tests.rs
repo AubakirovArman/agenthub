@@ -1,9 +1,8 @@
 use anyhow::Result;
 use serde_json::json;
-use std::path::Path;
-use std::sync::{Mutex, OnceLock};
 
 use crate::agent_dir;
+use crate::test_support::with_agenthub_home;
 
 use super::{
     add_inbox_candidate, build_context, build_summary, extract_to_inbox, failed_attempt_warnings,
@@ -11,8 +10,6 @@ use super::{
     review_inbox, run_audit, write_context_receipt, write_typed_fact, AutoMemoryExtractionInput,
     InboxDecision, MemoryContextBudget, MemoryInboxInput, TypedMemoryInput,
 };
-
-static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
 #[test]
 fn typed_memory_write_retrieval_and_views() -> Result<()> {
@@ -400,17 +397,4 @@ fn memory_summary_audit_scoring_and_warnings_are_actionable() -> Result<()> {
     assert_eq!(audit.failed_attempts, 1);
     assert!(dir.path().join(".agent/memory/audit.json").exists());
     Ok(())
-}
-
-fn with_agenthub_home<T>(home: &Path, run: impl FnOnce() -> Result<T>) -> Result<T> {
-    let lock = ENV_LOCK.get_or_init(|| Mutex::new(()));
-    let _guard = lock.lock().expect("env lock poisoned");
-    let previous = std::env::var_os("AGENTHUB_HOME");
-    std::env::set_var("AGENTHUB_HOME", home);
-    let result = run();
-    match previous {
-        Some(value) => std::env::set_var("AGENTHUB_HOME", value),
-        None => std::env::remove_var("AGENTHUB_HOME"),
-    }
-    result
 }

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.25-local-preview}"
+EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.26-local-preview}"
 WORK="$ROOT/target/release-readiness"
 DIST="$WORK/dist"
 INSTALL="$WORK/install"

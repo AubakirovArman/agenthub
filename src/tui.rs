@@ -6,6 +6,7 @@ mod read;
 mod render;
 #[cfg(test)]
 mod tests;
+mod tool_cards;
 
 use std::path::Path;
 
@@ -43,6 +44,7 @@ pub struct ShellPanel {
     pub composer: ComposerPanel,
     pub transcript: Vec<TranscriptLine>,
     pub event_rail: Vec<EventRailItem>,
+    pub tool_cards: Vec<ToolCard>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -87,6 +89,15 @@ pub struct EventRailItem {
     pub state: String,
     pub label: String,
     pub detail: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct ToolCard {
+    pub kind: String,
+    pub state: String,
+    pub title: String,
+    pub detail: String,
+    pub link: Option<String>,
 }
 
 #[derive(Debug, Clone)]
