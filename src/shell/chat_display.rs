@@ -87,6 +87,21 @@ pub(super) fn print_messages(session: &ChatSession) -> Result<()> {
             let approval = event["approval_required"].as_bool().unwrap_or(false);
             println!("    profile {profile}\trisk {risk}\tapproval_required {approval}");
         }
+        if kind == "context_built" {
+            let compressed = event["context_compressed"].as_bool().unwrap_or(false);
+            let prompt = event["prompt_tokens"].as_u64().unwrap_or_default();
+            let max_prompt = event["max_prompt_tokens"].as_u64().unwrap_or_default();
+            let dropped = event["memory_records_budget_dropped"]
+                .as_u64()
+                .unwrap_or_default();
+            let expired = event["memory_records_expired"].as_u64().unwrap_or_default();
+            let conflicts = event["memory_records_conflict_suppressed"]
+                .as_u64()
+                .unwrap_or_default();
+            println!(
+                "    budget prompt {prompt}/{max_prompt}\tcompressed {compressed}\tdropped {dropped}\texpired {expired}\tconflicts {conflicts}"
+            );
+        }
         if !tx_id.is_empty() {
             println!("    tx {tx_id}");
         }

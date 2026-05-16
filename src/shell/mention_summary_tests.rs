@@ -26,6 +26,9 @@ fn resolves_transaction_and_memory_mentions() -> Result<()> {
             task_id: Some("docs".to_string()),
             supersedes: None,
             confidence: Some(0.9),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
 

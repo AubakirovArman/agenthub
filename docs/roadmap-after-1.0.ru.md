@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.15-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.16-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -167,10 +167,13 @@ These are the next concrete engineering steps from the current `0.4.15-local-pre
 | `0.4.13` | Intent router and Chat/Ops/Project mode status | Done: shared mode classifier feeds exec intent events, prompt/status/context surfaces, and no-`.agent` Chat/Ops regressions |
 | `0.4.14` | Tool permission profiles: `chat`, `read-only`, `workspace-write`, `ops-host` | Done: explicit shell actions now emit `tool_permission` transcript events with profile, risk, approval flag, and reason; high-risk destructive/package/HTTP/Ops commands ask for approval |
 | `0.4.15` | Lazy project bootstrap | Done: draft-only flows use AgentHub user data storage before project runtime exists, and Git/`.agent`/baseline bootstrap is planned and confirmed only when a transaction is about to run |
-| `0.4.16` | Context budget, compaction receipts, memory TTL/conflict handling | Pending memory remains out of prompts and compressed context is visible to the user |
+| `0.4.16` | Context budget, compaction receipts, memory TTL/conflict handling | Done: API chat now budgets committed memory and recent messages, writes `memory/compacted/context_receipt.json`, excludes pending inbox memory, and exposes expired/conflict/budget-drop fields in `context_built` |
 | `0.4.17` | TUI foundation: transcript, composer, status line, event rail, slash palette, `@` context | Long streaming turns remain visibly alive and controllable |
 | `0.4.18` | Transactions v2: inline approval cards, diff preview, verifiers, rollback receipts | Project edits flow through plan, approval, diff, verify, and commit without log hunting |
 | `0.4.19` | Headless parity for `agenthub exec` | Interactive and non-interactive runs produce comparable JSONL traces |
+| `0.4.20` | Resume/rewind/session durability | Chat, Ops, Project, background-style runs, checkpoints, and corrupted session recovery use one recoverable event store |
+| `0.4.21` | Provider tool-loop v2 for DeepSeek/Kimi | Native tool calls, tool result injection, retries, fallback receipts, and permission gates run fully inside AgentHub without external CLIs |
+| `0.4.22` | Dashboard/observability v2 | Browser dashboard shows live chat events, context receipts, tool approvals, costs, diffs, reports, and session recovery state |
 | `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
 
 ## Current 0.4.x Bridge
@@ -185,4 +188,14 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.15` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, and lazy project bootstrap rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.16` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, and context compaction receipts rather than starting MCP/A2A early.
+
+## Next Implementation Sequence
+
+1. `0.4.17`: build the full-screen TUI around the existing event stream first. The TUI must not invent a second runtime; it should render transcript, composer, status line, event rail, slash palette, context mentions, and live streaming state from the same events already used by `exec --jsonl`.
+2. `0.4.18`: move project edits into the new inline approval UX. The acceptance gate is one compact approval card with action scope, patch preview, verifier plan, protected-path warnings, and rollback receipt links.
+3. `0.4.19`: make headless parity strict. Every interactive flow that can answer, run a tool, request approval, fail, retry, or finish should have equivalent JSONL events and CI-friendly exit codes.
+4. `0.4.20`: harden resume and rewind before adding more orchestration. Session recovery must tolerate partial writes, interrupted provider streams, cancelled shell commands, and corrupt receipt files without losing the transcript.
+5. `0.4.21`: complete the DeepSeek/Kimi-native tool loop. Tool calls should be normalized, permission-checked, executed, logged, redacted, and reinjected by AgentHub itself.
+6. `0.4.22`: promote observability into the dashboard. The dashboard should show live context receipts, cost receipts, pending approvals, tool outputs, diffs, reports, and recovery status without requiring log hunting.
+7. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.

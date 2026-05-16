@@ -7,6 +7,7 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::llm_gateway::estimate_cost;
+use crate::memory::MemoryContextReceipt;
 use crate::observability::write_jsonl;
 use crate::tool_permissions::ToolPermissionDecision;
 use crate::{chat_index, home};
@@ -185,16 +186,31 @@ pub(super) fn append_intent(
 
 pub(super) fn append_context_built(
     session: &ChatSession,
-    memory_records: usize,
-    prompt_tokens: usize,
+    receipt: &MemoryContextReceipt,
 ) -> Result<Value> {
     append_event(
         session,
         "context_built",
         json!({
-            "memory_records": memory_records,
-            "prompt_tokens": prompt_tokens,
-            "text": format!("context built with {memory_records} memory record(s)")
+            "memory_records": receipt.memory_records_selected,
+            "memory_records_available": receipt.memory_records_available,
+            "memory_records_expired": receipt.memory_records_expired,
+            "memory_records_conflict_suppressed": receipt.memory_records_conflict_suppressed,
+            "memory_records_budget_dropped": receipt.memory_records_budget_dropped,
+            "memory_tokens": receipt.memory_tokens,
+            "prompt_tokens": receipt.prompt_tokens,
+            "max_prompt_tokens": receipt.budget.max_prompt_tokens,
+            "max_memory_tokens": receipt.budget.max_memory_tokens,
+            "max_memory_records": receipt.budget.max_memory_records,
+            "recent_messages": receipt.recent_messages_selected,
+            "recent_messages_dropped": receipt.recent_messages_dropped,
+            "context_compressed": receipt.compressed,
+            "pending_memory_included": receipt.pending_memory_included,
+            "text": format!(
+                "context built with {} memory record(s){}",
+                receipt.memory_records_selected,
+                if receipt.compressed { " after compaction" } else { "" }
+            )
         }),
     )
 }

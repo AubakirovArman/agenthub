@@ -48,7 +48,13 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     assert!(events.iter().any(|event| {
         event["kind"].as_str() == Some("context_built")
             && event["memory_records"].as_u64() == Some(0)
+            && event["max_prompt_tokens"].as_u64().unwrap_or_default() > 0
+            && event["pending_memory_included"].as_bool() == Some(false)
     }));
+    assert!(dir
+        .path()
+        .join(".agent/memory/compacted/context_receipt.json")
+        .exists());
     assert!(events.iter().any(|event| {
         event["kind"].as_str() == Some("turn_finished")
             && event["status"].as_str() == Some("succeeded")
@@ -147,6 +153,9 @@ fn prompt_uses_only_committed_memory() -> Result<()> {
             task_id: Some("test".to_string()),
             supersedes: None,
             confidence: Some(0.9),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
     memory::add_inbox_candidate(
@@ -160,12 +169,18 @@ fn prompt_uses_only_committed_memory() -> Result<()> {
         },
     )?;
 
-    let (memory, records) = memory_context(dir.path())?;
-    let prompt = prompt_for(&session, "how should you answer?", &memory)?;
+    let memory = memory_context(dir.path())?;
+    let prompt = prompt_for(
+        &session,
+        "how should you answer?",
+        &memory.rendered,
+        &memory.receipt,
+    )?;
 
-    assert_eq!(records, 1);
-    assert!(prompt.contains("Prefer concise terminal answers"));
-    assert!(!prompt.contains("Pending memory must stay out"));
+    assert_eq!(memory.receipt.memory_records_selected, 1);
+    assert!(!memory.receipt.pending_memory_included);
+    assert!(prompt.prompt.contains("Prefer concise terminal answers"));
+    assert!(!prompt.prompt.contains("Pending memory must stay out"));
     Ok(())
 }
 

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -16,6 +16,9 @@ pub struct TypedMemoryInput {
     pub task_id: Option<String>,
     pub supersedes: Option<String>,
     pub confidence: Option<f32>,
+    pub ttl_days: Option<i64>,
+    pub pinned: bool,
+    pub conflict_key: Option<String>,
 }
 
 pub fn write_typed_fact(root: &Path, input: TypedMemoryInput) -> Result<MemoryRecord> {
@@ -29,6 +32,11 @@ pub fn write_typed_fact(root: &Path, input: TypedMemoryInput) -> Result<MemoryRe
         stale: false,
         confidence: input.confidence.or(Some(0.8)),
         last_verified_commit: crate::git::head(root).ok().flatten(),
+        expires_at: input
+            .ttl_days
+            .map(|days| Utc::now() + Duration::days(days.max(0))),
+        pinned: input.pinned,
+        conflict_key: input.conflict_key,
         tx_id: "manual".to_string(),
         task_id: input.task_id,
         created_at: Utc::now(),

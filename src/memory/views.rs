@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use serde_json::{json, Value};
 
+use super::is_active_truth;
 use super::storage::read_records;
 use super::MemoryRecord;
 use super::{memory_paths, MemoryPaths};
@@ -122,7 +123,7 @@ fn domains(records: &[MemoryRecord]) -> Vec<String> {
 }
 
 fn is_active(record: &MemoryRecord) -> bool {
-    !record.stale && record.status.as_deref().unwrap_or("active") == "active"
+    is_active_truth(record, Utc::now())
 }
 
 fn write_json(path: &Path, value: &Value) -> Result<()> {

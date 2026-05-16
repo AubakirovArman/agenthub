@@ -109,6 +109,9 @@ pub fn review_inbox(root: &Path, id: &str, decision: InboxDecision) -> Result<Me
                 task_id: Some("memory_inbox_approved".to_string()),
                 supersedes: None,
                 confidence: Some(0.75),
+                ttl_days: None,
+                pinned: false,
+                conflict_key: None,
             },
         )?;
         item.memory_id = Some(record.id);

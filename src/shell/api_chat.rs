@@ -62,11 +62,18 @@ fn answer_with_providers(
     print_terminal: bool,
     mut emit_event: EventEmitter<'_>,
 ) -> Result<AnswerOutcome> {
-    let (memory, memory_records) = memory_context(root)?;
-    let prompt = prompt_for(session, request, &memory)?;
-    let prompt_tokens = estimate_tokens(&prompt);
-    let event = chat::append_context_built(session, memory_records, prompt_tokens)?;
+    let mut memory = memory_context(root)?;
+    let prompt_context = prompt_for(session, request, &memory.rendered, &memory.receipt)?;
+    let prompt = prompt_context.prompt;
+    memory.receipt.prompt_tokens = estimate_tokens(&prompt);
+    memory.receipt.recent_messages_selected = prompt_context.recent_messages_selected;
+    memory.receipt.recent_messages_dropped = prompt_context.recent_messages_dropped;
+    memory.receipt.compressed =
+        memory.receipt.compressed || prompt_context.recent_messages_dropped > 0;
+    memory::write_context_receipt(root, &memory.receipt)?;
+    let event = chat::append_context_built(session, &memory.receipt)?;
     emit(&mut emit_event, &event)?;
+    let prompt_tokens = memory.receipt.prompt_tokens;
     let mut last_error = None;
     let mut last_provider = None;
 
@@ -276,48 +283,53 @@ fn is_api_provider(status: &providers::ProviderStatus) -> bool {
     matches!(status.info.id.as_str(), "deepseek" | "kimi")
 }
 
-fn prompt_for(session: &ChatSession, request: &str, memory: &str) -> Result<String> {
-    let recent = chat::read_events(&session.path)?
+struct PromptContext {
+    prompt: String,
+    recent_messages_selected: usize,
+    recent_messages_dropped: usize,
+}
+
+fn prompt_for(
+    session: &ChatSession,
+    request: &str,
+    memory: &str,
+    receipt: &memory::MemoryContextReceipt,
+) -> Result<PromptContext> {
+    let all_recent = chat::read_events(&session.path)?
         .into_iter()
         .rev()
         .filter_map(event_text)
-        .take(8)
-        .collect::<Vec<_>>()
-        .into_iter()
-        .rev()
-        .collect::<Vec<_>>()
-        .join("\n");
-    Ok(format!(
-        "You are AgentHub, an API-native terminal assistant. Answer directly unless the user explicitly asks to modify files or run commands.\n\nRelevant committed memory:\n{memory}\n\nRecent conversation:\n{recent}\n\nUser:\n{request}"
-    ))
+        .collect::<Vec<_>>();
+    let max_recent = receipt.budget.max_recent_messages.min(all_recent.len());
+    for count in (0..=max_recent).rev() {
+        let recent = all_recent
+            .iter()
+            .take(count)
+            .rev()
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n");
+        let prompt = format!(
+            "You are AgentHub, an API-native terminal assistant. Answer directly unless the user explicitly asks to modify files or run commands.\n\nRelevant committed memory:\n{memory}\n\nRecent conversation:\n{recent}\n\nUser:\n{request}"
+        );
+        if estimate_tokens(&prompt) <= receipt.budget.max_prompt_tokens || count == 0 {
+            return Ok(PromptContext {
+                prompt,
+                recent_messages_selected: count,
+                recent_messages_dropped: all_recent.len().saturating_sub(count),
+            });
+        }
+    }
+    unreachable!("prompt loop always returns at count zero")
 }
 
-fn memory_context(root: &Path) -> Result<(String, usize)> {
+fn memory_context(root: &Path) -> Result<memory::MemoryContext> {
     let domain = if home::project_has_runtime(root) {
         "code"
     } else {
         "core"
     };
-    let records = memory::retrieve_relevant(root, domain, 6)?;
-    if records.is_empty() {
-        return Ok(("- none".to_string(), 0));
-    }
-    let count = records.len();
-    let context = records
-        .into_iter()
-        .map(|record| format!("- {}: {}", record.kind, memory_summary(&record.content)))
-        .collect::<Vec<_>>()
-        .join("\n");
-    Ok((context, count))
-}
-
-fn memory_summary(value: &Value) -> String {
-    for key in ["note", "decision", "rule", "summary", "policy", "path"] {
-        if let Some(text) = value.get(key).and_then(Value::as_str) {
-            return text.replace('\n', " ");
-        }
-    }
-    value.to_string()
+    memory::build_context(root, domain, memory::MemoryContextBudget::default())
 }
 
 fn event_text(event: Value) -> Option<String> {

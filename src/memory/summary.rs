@@ -1,9 +1,11 @@
 use std::path::Path;
 
 use anyhow::Result;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use super::is_active_truth;
 use super::memory_paths;
 use super::storage::read_records;
 use super::MemoryRecord;
@@ -120,7 +122,7 @@ fn truncate(value: &str, max: usize) -> String {
 }
 
 fn is_active(record: &MemoryRecord) -> bool {
-    !record.stale && record.status.as_deref().unwrap_or("active") == "active"
+    is_active_truth(record, Utc::now())
 }
 
 fn is_decision_kind(kind: &str) -> bool {

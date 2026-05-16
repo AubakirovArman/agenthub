@@ -1,4 +1,5 @@
 mod audit;
+mod context;
 mod inbox;
 mod retrieval;
 mod storage;
@@ -26,6 +27,9 @@ use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
 pub use audit::{run_audit, MemoryAudit};
+pub use context::{
+    build_context, write_context_receipt, MemoryContext, MemoryContextBudget, MemoryContextReceipt,
+};
 pub use inbox::{
     add_inbox_candidate, list_inbox, review_inbox, InboxDecision, MemoryInboxInput, MemoryInboxItem,
 };
@@ -54,6 +58,12 @@ pub struct MemoryRecord {
     pub confidence: Option<f32>,
     #[serde(default)]
     pub last_verified_commit: Option<String>,
+    #[serde(default)]
+    pub expires_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub pinned: bool,
+    #[serde(default)]
+    pub conflict_key: Option<String>,
     pub tx_id: String,
     pub task_id: Option<String>,
     pub created_at: DateTime<Utc>,
@@ -110,6 +120,9 @@ pub fn stage_workspace_change(
         stale: false,
         confidence: Some(0.7),
         last_verified_commit: None,
+        expires_at: None,
+        pinned: false,
+        conflict_key: None,
         tx_id: tx_id.to_string(),
         task_id: Some(task_id.to_string()),
         created_at: Utc::now(),
@@ -155,6 +168,9 @@ pub fn record_failed_attempt(root: &Path, tx_id: &str, task_id: &str, reason: &s
         stale: false,
         confidence: Some(0.4),
         last_verified_commit: None,
+        expires_at: None,
+        pinned: false,
+        conflict_key: None,
         tx_id: tx_id.to_string(),
         task_id: Some(task_id.to_string()),
         created_at: Utc::now(),
@@ -215,4 +231,43 @@ fn ensure_memory_files(memory: &Path) -> Result<()> {
 
 pub(super) fn new_memory_id(kind: &str) -> String {
     format!("mem-{}-{}", kind, &Uuid::new_v4().to_string()[..8])
+}
+
+pub(super) fn is_active_truth(record: &MemoryRecord, now: DateTime<Utc>) -> bool {
+    !record.stale
+        && record.status.as_deref().unwrap_or("active") == "active"
+        && !is_expired(record, now)
+}
+
+pub(super) fn is_expired(record: &MemoryRecord, now: DateTime<Utc>) -> bool {
+    record
+        .expires_at
+        .is_some_and(|expires_at| expires_at <= now)
+        && !record.pinned
+}
+
+pub(super) fn derived_conflict_key(record: &MemoryRecord) -> Option<String> {
+    if let Some(key) = record
+        .conflict_key
+        .as_deref()
+        .filter(|value| !value.is_empty())
+    {
+        return Some(key.to_string());
+    }
+    if !is_decision_kind(&record.kind) {
+        return None;
+    }
+    let topic = record
+        .content
+        .get("topic")
+        .and_then(Value::as_str)
+        .unwrap_or(&record.kind);
+    Some(format!("{}:{topic}", record.kind))
+}
+
+fn is_decision_kind(kind: &str) -> bool {
+    matches!(
+        kind,
+        "architecture_decision" | "dependency_policy" | "test_policy" | "style_rule"
+    )
 }

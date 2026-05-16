@@ -6,9 +6,10 @@ use std::sync::{Mutex, OnceLock};
 use crate::agent_dir;
 
 use super::{
-    add_inbox_candidate, build_summary, failed_attempt_warnings, inspect, list_inbox,
-    record_failed_attempt, retrieve_relevant, retrieve_relevant_scored, review_inbox, run_audit,
-    write_typed_fact, InboxDecision, MemoryInboxInput, TypedMemoryInput,
+    add_inbox_candidate, build_context, build_summary, failed_attempt_warnings, inspect,
+    list_inbox, record_failed_attempt, retrieve_relevant, retrieve_relevant_scored, review_inbox,
+    run_audit, write_context_receipt, write_typed_fact, InboxDecision, MemoryContextBudget,
+    MemoryInboxInput, TypedMemoryInput,
 };
 
 static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
@@ -27,6 +28,9 @@ fn typed_memory_write_retrieval_and_views() -> Result<()> {
             task_id: Some("task-1".to_string()),
             supersedes: None,
             confidence: Some(0.9),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
     write_typed_fact(
@@ -38,6 +42,9 @@ fn typed_memory_write_retrieval_and_views() -> Result<()> {
             task_id: Some("task-1".to_string()),
             supersedes: None,
             confidence: None,
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
 
@@ -77,6 +84,9 @@ fn chat_memory_uses_global_home_without_project_runtime() -> Result<()> {
                 task_id: Some("manual-memory".to_string()),
                 supersedes: None,
                 confidence: Some(0.9),
+                ttl_days: None,
+                pinned: false,
+                conflict_key: None,
             },
         )?;
 
@@ -141,6 +151,109 @@ fn memory_inbox_requires_review_before_promotion() -> Result<()> {
 }
 
 #[test]
+fn context_budget_excludes_expired_conflicting_and_pending_memory() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+    agent_dir::init_project(dir.path(), false)?;
+
+    write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "architecture_decision".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "topic": "http-client", "decision": "Use axios" }),
+            task_id: Some("decision-1".to_string()),
+            supersedes: None,
+            confidence: Some(0.9),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: Some("architecture_decision:http-client".to_string()),
+        },
+    )?;
+    write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "architecture_decision".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "topic": "http-client", "decision": "Use fetch" }),
+            task_id: Some("decision-2".to_string()),
+            supersedes: None,
+            confidence: Some(0.95),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: Some("architecture_decision:http-client".to_string()),
+        },
+    )?;
+    write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "style_rule".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "note": "Expired rule must not enter prompt" }),
+            task_id: Some("expired".to_string()),
+            supersedes: None,
+            confidence: Some(0.9),
+            ttl_days: Some(0),
+            pinned: false,
+            conflict_key: None,
+        },
+    )?;
+    write_typed_fact(
+        dir.path(),
+        TypedMemoryInput {
+            kind: "route".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "path": "/budget-dropped" }),
+            task_id: Some("budget".to_string()),
+            supersedes: None,
+            confidence: Some(0.9),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
+        },
+    )?;
+    add_inbox_candidate(
+        dir.path(),
+        MemoryInboxInput {
+            kind: "style_rule".to_string(),
+            domain: "code".to_string(),
+            content: json!({ "note": "Pending memory must stay out" }),
+            source: "test".to_string(),
+            reason: Some("candidate".to_string()),
+        },
+    )?;
+
+    let mut context = build_context(
+        dir.path(),
+        "code",
+        MemoryContextBudget {
+            max_prompt_tokens: 6_000,
+            max_memory_tokens: 400,
+            max_memory_records: 1,
+            max_recent_messages: 8,
+        },
+    )?;
+    context.receipt.prompt_tokens = 123;
+    write_context_receipt(dir.path(), &context.receipt)?;
+
+    assert_eq!(context.receipt.memory_records_selected, 1);
+    assert!(context.receipt.memory_records_expired >= 1);
+    assert!(context.receipt.memory_records_conflict_suppressed >= 1);
+    assert!(context.receipt.memory_records_budget_dropped >= 1);
+    assert!(context.receipt.compressed);
+    assert!(!context.rendered.contains("Expired rule"));
+    assert!(!context.rendered.contains("Pending memory"));
+    assert!(dir
+        .path()
+        .join(".agent/memory/compacted/context_receipt.json")
+        .exists());
+
+    let audit = run_audit(dir.path())?;
+    assert!(audit.expired >= 1);
+    assert!(!audit.conflicting_decisions.is_empty());
+    Ok(())
+}
+
+#[test]
 fn failed_attempts_are_warning_memory_not_truth() -> Result<()> {
     let dir = tempfile::tempdir()?;
     agent_dir::init_project(dir.path(), false)?;
@@ -180,6 +293,9 @@ fn memory_summary_audit_scoring_and_warnings_are_actionable() -> Result<()> {
             task_id: Some("task-license".to_string()),
             supersedes: None,
             confidence: Some(0.95),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
     record_failed_attempt(

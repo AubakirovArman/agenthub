@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.16-local-preview - 2026-05-16
+
+- Add memory context budgeting for API chat turns: committed memory is capped by record count and token estimate, recent conversation is trimmed to the prompt budget, and each turn writes a `memory/compacted/context_receipt.json` receipt.
+- Add memory TTL, pinned records, and conflict keys so expired unpinned facts are excluded, pinned facts can survive expiry, and conflicting facts are suppressed before prompt injection.
+- Extend `context_built` events, `/messages`, chat indexing, and the shared event bus with compaction fields: selected/available/expired/conflict/budget-dropped memory counts, memory tokens, prompt budget, recent message drops, and pending-memory exclusion.
+
 ## 0.4.15-local-preview - 2026-05-16
 
 - Make project bootstrap lazier: planning/draft generation in an uninitialized folder now stores draft AgentSpecs under the AgentHub user data directory instead of creating `.agent/drafts`.

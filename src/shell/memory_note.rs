@@ -33,6 +33,9 @@ pub(super) fn add(root: &Path, note: &str) -> Result<()> {
             task_id: Some("manual_memory_note".to_string()),
             supersedes: None,
             confidence: Some(0.85),
+            ttl_days: None,
+            pinned: false,
+            conflict_key: None,
         },
     )?;
     println!("memory saved {}", record.id);

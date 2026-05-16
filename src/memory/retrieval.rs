@@ -2,9 +2,11 @@ use std::cmp::Ordering;
 use std::path::Path;
 
 use anyhow::Result;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use super::is_active_truth;
 use super::memory_paths;
 use super::storage::read_records;
 use super::MemoryRecord;
@@ -24,9 +26,10 @@ pub fn retrieve_relevant_scored(
 ) -> Result<Vec<ScoredMemoryRecord>> {
     let paths = memory_paths(root)?;
     let records = read_records(&paths.memory.join("committed.jsonl"))?;
+    let now = Utc::now();
     let mut scored = records
         .into_iter()
-        .filter(is_current_truth)
+        .filter(|record| is_active_truth(record, now))
         .map(|record| score_record(record, domain))
         .filter(|record| record.score >= 0.25)
         .collect::<Vec<_>>();
@@ -70,10 +73,6 @@ fn score_record(record: MemoryRecord, domain: &str) -> ScoredMemoryRecord {
         score: score.min(1.0),
         reasons,
     }
-}
-
-fn is_current_truth(record: &MemoryRecord) -> bool {
-    !record.stale && record.status.as_deref().unwrap_or("active") == "active"
 }
 
 fn matches_domain(record: &MemoryRecord, domain: &str) -> bool {

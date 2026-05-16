@@ -3,17 +3,20 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::memory_paths;
 use super::storage::read_records;
 use super::MemoryRecord;
+use super::{derived_conflict_key, is_active_truth, is_expired};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryAudit {
     pub active: usize,
     pub stale: usize,
+    pub expired: usize,
     pub failed_attempts: usize,
     pub low_confidence: usize,
     pub missing_last_verified_commit: usize,
@@ -25,9 +28,17 @@ pub fn run_audit(root: &Path) -> Result<MemoryAudit> {
     let paths = memory_paths(root)?;
     let committed = read_records(&paths.memory.join("committed.jsonl"))?;
     let failed = read_records(&paths.memory.join("failed_attempts.jsonl"))?;
+    let now = Utc::now();
     let audit = MemoryAudit {
-        active: committed.iter().filter(|record| is_active(record)).count(),
+        active: committed
+            .iter()
+            .filter(|record| is_active_truth(record, now))
+            .count(),
         stale: committed.iter().filter(|record| record.stale).count(),
+        expired: committed
+            .iter()
+            .filter(|record| is_expired(record, now))
+            .count(),
         failed_attempts: failed.len(),
         low_confidence: committed
             .iter()
@@ -35,9 +46,9 @@ pub fn run_audit(root: &Path) -> Result<MemoryAudit> {
             .count(),
         missing_last_verified_commit: committed
             .iter()
-            .filter(|record| is_active(record) && record.last_verified_commit.is_none())
+            .filter(|record| is_active_truth(record, now) && record.last_verified_commit.is_none())
             .count(),
-        conflicting_decisions: conflicting_decisions(&committed),
+        conflicting_decisions: conflicting_decisions(&committed, now),
         warnings: Vec::new(),
     }
     .with_warnings();
@@ -52,6 +63,12 @@ impl MemoryAudit {
         if self.stale > 0 {
             self.warnings
                 .push(format!("{} stale records should be reviewed.", self.stale));
+        }
+        if self.expired > 0 {
+            self.warnings.push(format!(
+                "{} expired records are excluded from context.",
+                self.expired
+            ));
         }
         if self.low_confidence > 0 {
             self.warnings.push(format!(
@@ -75,20 +92,15 @@ impl MemoryAudit {
     }
 }
 
-fn conflicting_decisions(records: &[MemoryRecord]) -> Vec<String> {
+fn conflicting_decisions(records: &[MemoryRecord], now: DateTime<Utc>) -> Vec<String> {
     let mut groups: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
     for record in records
         .iter()
-        .filter(|record| is_active(record) && is_decision_kind(&record.kind))
+        .filter(|record| is_active_truth(record, now) && is_decision_kind(&record.kind))
     {
-        let topic = record
-            .content
-            .get("topic")
-            .and_then(Value::as_str)
-            .unwrap_or(&record.kind);
         let decision = decision_value(record);
         groups
-            .entry(format!("{}:{topic}", record.kind))
+            .entry(derived_conflict_key(record).unwrap_or_else(|| record.kind.clone()))
             .or_default()
             .insert(decision);
     }
@@ -111,10 +123,6 @@ fn decision_value(record: &MemoryRecord) -> String {
         }
     }
     record.id.clone()
-}
-
-fn is_active(record: &MemoryRecord) -> bool {
-    !record.stale && record.status.as_deref().unwrap_or("active") == "active"
 }
 
 fn is_decision_kind(kind: &str) -> bool {

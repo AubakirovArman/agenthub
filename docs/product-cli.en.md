@@ -31,7 +31,7 @@ agenthub exec "answer with one word: ok"
 agenthub exec "answer with one word: ok" --jsonl
 ```
 
-`exec` runs one API-native chat turn through the same DeepSeek/Kimi provider selection and AgentHub-owned chat event store. It does not initialize Git or `.agent` for a plain chat request. The provider prompt includes relevant committed memory, but pending memory inbox candidates stay out of context until approval. With `--jsonl`, it prints the live session event stream, including `intent_classified`, `context_built`, `provider_requested`, `assistant_delta`, `provider_finished`, and `turn_finished`; completed provider and turn events include token counts, estimated USD cost, and pricing source.
+`exec` runs one API-native chat turn through the same DeepSeek/Kimi provider selection and AgentHub-owned chat event store. It does not initialize Git or `.agent` for a plain chat request. The provider prompt includes budgeted relevant committed memory, but pending memory inbox candidates stay out of context until approval. With `--jsonl`, it prints the live session event stream, including `intent_classified`, `context_built`, `provider_requested`, `assistant_delta`, `provider_finished`, and `turn_finished`; `context_built` includes memory token counts, prompt budget, expired/conflict/budget-dropped records, recent-message drops, and whether context was compressed. Completed provider and turn events include token counts, estimated USD cost, and pricing source.
 
 ## Chat Usage Stats
 
@@ -181,6 +181,8 @@ agenthub memory inbox reject mem-inbox-12345678
 `inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records. In Chat/Ops Mode these commands use `$AGENTHUB_HOME/memory` or the platform AgentHub data directory and do not create `.agent`; initialized projects continue to refresh `.agent/memory/audit.json`.
 
 `inbox` is the review-gated memory queue. `add` records a candidate without injecting it into active memory. `approve` promotes the candidate into committed memory; `reject` keeps the audit trail without promotion. Inside the shell, `/memory inbox`, `/memory inbox approve <id>`, and `/memory inbox reject <id>` use the same store.
+
+API chat turns write a compaction receipt at `memory/compacted/context_receipt.json` in the active memory scope. It records selected committed memory, expired records, conflict suppression, budget drops, prompt token estimate, and confirms that pending inbox memory was not injected.
 
 ## Skills
 

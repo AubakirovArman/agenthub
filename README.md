@@ -72,7 +72,7 @@ Inside the shell:
 - `/stats` shows chat turns, token totals, estimated cost, and provider-level usage from the AgentHub event store.
 - `/memory inbox` lists review-gated memory candidates; `/memory inbox approve <id>` promotes a candidate into committed memory.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
-- Direct API chat includes relevant committed memory in the provider prompt and leaves pending inbox candidates out until approval.
+- Direct API chat includes budgeted relevant committed memory in the provider prompt, writes a context compaction receipt, and leaves pending inbox candidates out until approval.
 
 Scriptable commands still exist for automation:
 
@@ -179,7 +179,7 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
 - DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
-- Streaming chat, API-native project command execution, memory-aware chat context, and a basic review-gated memory inbox are available; the broader structured tool loop, full-screen TUI, and automatic memory extraction are still in progress.
+- Streaming chat, API-native project command execution, budgeted memory-aware chat context, and a basic review-gated memory inbox are available; the broader structured tool loop, full-screen TUI, and automatic memory extraction are still in progress.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 
