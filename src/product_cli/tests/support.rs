@@ -13,27 +13,56 @@ pub(super) fn with_kimi_env<T>(
     api_key: Option<&str>,
     run: impl FnOnce() -> Result<T>,
 ) -> Result<T> {
+    with_kimi_env_using_base(
+        "KIMI_API_BASE_URL",
+        base_url,
+        api_key,
+        Some("moonshot-test"),
+        run,
+    )
+}
+
+pub(super) fn with_kimi_env_using_base<T>(
+    base_env: &str,
+    base_url: Option<&str>,
+    api_key: Option<&str>,
+    model: Option<&str>,
+    run: impl FnOnce() -> Result<T>,
+) -> Result<T> {
     let lock = ENV_LOCK.get_or_init(|| Mutex::new(()));
     let _guard = lock.lock().expect("env lock poisoned");
     let previous_base = std::env::var_os("KIMI_API_BASE_URL");
+    let previous_base_short = std::env::var_os("KIMI_BASE_URL");
+    let previous_moonshot_base = std::env::var_os("MOONSHOT_API_BASE_URL");
+    let previous_moonshot_base_short = std::env::var_os("MOONSHOT_BASE_URL");
     let previous_key = std::env::var_os("KIMI_API_KEY");
     let previous_key_file = std::env::var_os("KIMI_API_KEY_FILE");
     let previous_moonshot = std::env::var_os("MOONSHOT_API_KEY");
     let previous_moonshot_file = std::env::var_os("MOONSHOT_API_KEY_FILE");
     let previous_model = std::env::var_os("KIMI_MODEL");
-    set_optional_env("KIMI_API_BASE_URL", base_url);
+    let previous_api_model = std::env::var_os("KIMI_API_MODEL");
+    set_optional_env("KIMI_API_BASE_URL", None);
+    set_optional_env("KIMI_BASE_URL", None);
+    set_optional_env("MOONSHOT_API_BASE_URL", None);
+    set_optional_env("MOONSHOT_BASE_URL", None);
+    set_optional_env(base_env, base_url);
     set_optional_env("KIMI_API_KEY", api_key);
     set_optional_env("KIMI_API_KEY_FILE", None);
     set_optional_env("MOONSHOT_API_KEY", None);
     set_optional_env("MOONSHOT_API_KEY_FILE", None);
-    set_optional_env("KIMI_MODEL", Some("moonshot-test"));
+    set_optional_env("KIMI_MODEL", model);
+    set_optional_env("KIMI_API_MODEL", None);
     let result = run();
     restore_env("KIMI_API_BASE_URL", previous_base);
+    restore_env("KIMI_BASE_URL", previous_base_short);
+    restore_env("MOONSHOT_API_BASE_URL", previous_moonshot_base);
+    restore_env("MOONSHOT_BASE_URL", previous_moonshot_base_short);
     restore_env("KIMI_API_KEY", previous_key);
     restore_env("KIMI_API_KEY_FILE", previous_key_file);
     restore_env("MOONSHOT_API_KEY", previous_moonshot);
     restore_env("MOONSHOT_API_KEY_FILE", previous_moonshot_file);
     restore_env("KIMI_MODEL", previous_model);
+    restore_env("KIMI_API_MODEL", previous_api_model);
     result
 }
 

@@ -104,7 +104,7 @@ agenthub providers fallback reviewer deepseek kimi
 Поддерживаемые providers:
 
 - `deepseek`: DeepSeek OpenAI-compatible API endpoint. По умолчанию `https://api.deepseek.com/v1`; использует `DEEPSEEK_API_KEY`, а `ANTHROPIC_AUTH_TOKEN` можно переиспользовать для DeepSeek-compatible deployments.
-- `kimi`: Kimi/Moonshot API endpoint. По умолчанию `https://api.moonshot.cn/v1`; использует `KIMI_API_KEY` или `MOONSHOT_API_KEY`.
+- `kimi`: Kimi/Moonshot API endpoint. По умолчанию `https://api.moonshot.ai/v1`; использует `KIMI_API_KEY` или `MOONSHOT_API_KEY`.
 
 Локальный command runner остаётся внутренней частью transaction kernel; это не пользовательский AI provider.
 

@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Align Kimi API defaults with the current global Moonshot endpoint: default to `https://api.moonshot.ai/v1`, use `kimi-k2.6`, accept `MOONSHOT_BASE_URL` aliases, disable Kimi thinking by default for token-saving chat/project calls, and update Kimi cost estimates for K2.6.
+
 ## 0.4.5-local-preview - 2026-05-16
 
 - Add chat usage stats: `agenthub stats` and `/stats` summarize chat turns, prompt/completion/total tokens, estimated USD cost, and provider-level totals from the AgentHub-owned chat event store.

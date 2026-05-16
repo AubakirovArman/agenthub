@@ -58,8 +58,16 @@ Optional variables:
 DEEPSEEK_API_BASE_URL
 DEEPSEEK_MODEL
 KIMI_API_BASE_URL
+KIMI_BASE_URL
+MOONSHOT_API_BASE_URL
+MOONSHOT_BASE_URL
 KIMI_MODEL
+KIMI_API_MODEL
+AGENTHUB_KIMI_THINKING
+KIMI_THINKING
 ```
+
+Для thinking-capable моделей Kimi K2.6/K2.5 AgentHub по умолчанию отправляет `thinking: {"type":"disabled"}`, чтобы chat/project turns оставались быстрыми и ограниченными по стоимости. Установите `AGENTHUB_KIMI_THINKING=enabled`, если явно нужен thinking mode Kimi.
 
 ## Budget Policy
 

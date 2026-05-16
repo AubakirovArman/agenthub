@@ -92,9 +92,11 @@ pub fn statuses(project_root: &Path) -> Result<Vec<ProviderStatus>> {
 fn kimi_api_base_url() -> String {
     std::env::var("KIMI_API_BASE_URL")
         .or_else(|_| std::env::var("KIMI_BASE_URL"))
+        .or_else(|_| std::env::var("MOONSHOT_API_BASE_URL"))
+        .or_else(|_| std::env::var("MOONSHOT_BASE_URL"))
         .ok()
         .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| "https://api.moonshot.cn/v1".to_string())
+        .unwrap_or_else(|| "https://api.moonshot.ai/v1".to_string())
 }
 
 fn kimi_api_model() -> String {
@@ -102,7 +104,7 @@ fn kimi_api_model() -> String {
         .or_else(|_| std::env::var("KIMI_API_MODEL"))
         .ok()
         .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| "kimi-k2-6".to_string())
+        .unwrap_or_else(|| "kimi-k2.6".to_string())
 }
 
 fn kimi_api_key_env() -> Option<String> {

@@ -141,11 +141,28 @@ impl LlmProvider for HttpProvider {
 }
 
 fn completion_body(request: &LlmRequest, provider_model: Option<String>, stream: bool) -> Value {
+    let model = request
+        .model
+        .clone()
+        .or(provider_model)
+        .unwrap_or_else(|| "default".to_string());
     let mut body = json!({
-        "model": request.model.clone().or(provider_model).unwrap_or_else(|| "default".to_string()),
+        "model": model,
         "messages": [{ "role": "user", "content": request.prompt.clone().unwrap_or_default() }],
         "stream": stream
     });
+    if is_kimi_thinking_model(
+        body.pointer("/model")
+            .and_then(Value::as_str)
+            .unwrap_or_default(),
+    ) {
+        if let Some(object) = body.as_object_mut() {
+            object.insert(
+                "thinking".to_string(),
+                json!({ "type": kimi_thinking_mode() }),
+            );
+        }
+    }
     if matches!(
         request.response_format.as_deref(),
         Some("json" | "json_object")
@@ -158,6 +175,21 @@ fn completion_body(request: &LlmRequest, provider_model: Option<String>, stream:
         }
     }
     body
+}
+
+fn is_kimi_thinking_model(model: &str) -> bool {
+    matches!(
+        model,
+        "kimi-k2.6" | "kimi-k2.5" | "kimi-k2-thinking" | "kimi-k2-thinking-turbo"
+    )
+}
+
+fn kimi_thinking_mode() -> String {
+    std::env::var("AGENTHUB_KIMI_THINKING")
+        .or_else(|_| std::env::var("KIMI_THINKING"))
+        .ok()
+        .filter(|value| matches!(value.as_str(), "enabled" | "disabled"))
+        .unwrap_or_else(|| "disabled".to_string())
 }
 
 fn completion_url(endpoint: &str) -> String {
@@ -267,6 +299,35 @@ fn estimate_tokens(value: &str) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn request(model: Option<&str>) -> LlmRequest {
+        LlmRequest {
+            id: "req-1".to_string(),
+            role: "executor".to_string(),
+            provider: "kimi".to_string(),
+            model: model.map(str::to_string),
+            prompt: Some("hello".to_string()),
+            context_pack_hash: "context".to_string(),
+            prompt_hash: "prompt".to_string(),
+            prompt_tokens: 1,
+            response_format: None,
+        }
+    }
+
+    #[test]
+    fn disables_kimi_thinking_by_default_for_k2_6() {
+        let body = completion_body(&request(Some("kimi-k2.6")), None, false);
+        assert_eq!(
+            body.pointer("/thinking/type").and_then(Value::as_str),
+            Some("disabled")
+        );
+    }
+
+    #[test]
+    fn leaves_non_kimi_models_openai_compatible() {
+        let body = completion_body(&request(Some("deepseek-chat")), None, false);
+        assert!(body.get("thinking").is_none());
+    }
 
     #[test]
     fn completion_body_includes_json_response_format() {

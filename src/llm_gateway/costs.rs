@@ -34,7 +34,7 @@ fn default_input(adapter: &str) -> f64 {
     match adapter {
         "command" => 0.0,
         "deepseek" => 0.00027,
-        "kimi" => 0.00050,
+        "kimi" => 0.00095,
         _ => 0.0,
     }
 }
@@ -43,7 +43,7 @@ fn default_output(adapter: &str) -> f64 {
     match adapter {
         "command" => 0.0,
         "deepseek" => 0.00110,
-        "kimi" => 0.00200,
+        "kimi" => 0.00400,
         _ => 0.0,
     }
 }

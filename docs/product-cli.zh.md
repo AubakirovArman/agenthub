@@ -104,7 +104,7 @@ Inside the interactive shell, `/providers` opens a provider wizard with API read
 Supported providers:
 
 - `deepseek`: DeepSeek OpenAI-compatible API endpoint. Defaults to `https://api.deepseek.com/v1`; reads `DEEPSEEK_API_KEY`, with `ANTHROPIC_AUTH_TOKEN` accepted for DeepSeek-compatible deployments.
-- `kimi`: Kimi/Moonshot API endpoint. Defaults to `https://api.moonshot.cn/v1`; reads `KIMI_API_KEY` or `MOONSHOT_API_KEY`.
+- `kimi`: Kimi/Moonshot API endpoint. Defaults to `https://api.moonshot.ai/v1`; reads `KIMI_API_KEY` or `MOONSHOT_API_KEY`.
 
 The local command runner is internal to the transaction kernel; it is not a user-facing AI provider.
 

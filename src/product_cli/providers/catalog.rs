@@ -49,7 +49,7 @@ pub fn supported() -> Vec<ProviderInfo> {
             auth_hint: "set KIMI_API_KEY, MOONSHOT_API_KEY, or place the key in a .kimi file in the project tree",
             status_hint:
                 "providers test performs a live Kimi OpenAI-compatible completion request",
-            note: "Kimi API endpoint, defaulting to https://api.moonshot.cn/v1",
+            note: "Kimi API endpoint, defaulting to https://api.moonshot.ai/v1",
         },
     ]
 }
