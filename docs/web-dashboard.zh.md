@@ -19,6 +19,8 @@ agenthub dashboard
 .agent/reports/dashboard/data.js
 .agent/reports/dashboard/dashboard.css
 .agent/reports/dashboard/dashboard.js
+.agent/reports/dashboard/dashboard_insights.js
+.agent/reports/dashboard/dashboard_viewer.js
 ```
 
 自定义输出目录：
@@ -41,7 +43,7 @@ Default URL：
 http://127.0.0.1:4317
 ```
 
-Server 会在请求时重新生成 dashboard data，并向 HTML 注入 live refresh options。Transaction 运行时保持页面打开，即可持续更新 timeline、latest status、metrics、memory graph、skills、policies 和 report links。
+Server 会在请求时重新生成 dashboard data，并向 HTML 注入 live refresh options。Transaction 运行时保持页面打开，即可持续更新 timeline、latest status、metrics、provider panel、approval inbox、memory browser、history browser、skills、policies 和 report links。
 
 Options：
 
@@ -63,7 +65,11 @@ agenthub serve --addr 127.0.0.1:4318 --once
 - transaction 数量、open/failed 数量、memory 数量、skill 数量和总 cost；
 - reliability、context、quality、trust 和 cost 的 aggregated KPI metrics；
 - recent transactions，包括 status、DAG 大小、cost、domain runtime 和 report links；
+- provider status、default marker、named profiles、role assignments 和 fallbacks；
+- approval inbox，用于 blocked transactions 和需要 approval 的 AgentSpec drafts；
 - transaction viewer panes，包含 bounded report、diff 和 log excerpts；
+- memory browser，展示 recent typed facts、status、schema、confidence 和 summaries；
+- transaction history browser，展示 provider、domain runtime、cost、latest event 和 report link；
 - 来自 `journal.jsonl` 的 transaction timeline；
 - 来自 DAG node roles 的 latest agent trace；
 - committed memory records 与 transactions 组成的 memory graph；

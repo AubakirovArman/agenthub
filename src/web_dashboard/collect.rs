@@ -9,8 +9,12 @@ use crate::enterprise;
 use crate::memory;
 use crate::skill_registry;
 use crate::web_dashboard::details::collect_transaction_details;
+use crate::web_dashboard::insight_panels::{
+    collect_approval_inbox, collect_history, collect_memory_browser,
+};
 use crate::web_dashboard::memory_graph::build_memory_graph;
 use crate::web_dashboard::metrics::collect_metrics;
+use crate::web_dashboard::provider_panel::collect_provider_panel;
 use crate::web_dashboard::read::{
     array_len, dag_roles, file_href, is_failed, is_open, read_json, read_timeline,
 };
@@ -30,6 +34,10 @@ pub fn collect_dashboard(project_root: &Path) -> Result<WebDashboard> {
     let cost = collect_cost(&transactions);
     let reports = collect_reports(project_root, &rows)?;
     let transaction_details = collect_transaction_details(project_root, &rows)?;
+    let providers = collect_provider_panel(project_root)?;
+    let approvals = collect_approval_inbox(project_root, &rows)?;
+    let memory_browser = collect_memory_browser(project_root)?;
+    let history = collect_history(project_root, &rows)?;
 
     Ok(WebDashboard {
         project: project_root.display().to_string(),
@@ -52,6 +60,10 @@ pub fn collect_dashboard(project_root: &Path) -> Result<WebDashboard> {
         metrics: collect_metrics(project_root, &rows, &memory_stats)?,
         reports,
         transaction_details,
+        providers,
+        approvals,
+        memory_browser,
+        history,
     })
 }
 

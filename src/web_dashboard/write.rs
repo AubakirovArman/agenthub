@@ -17,6 +17,10 @@ pub fn write_dashboard(project_root: &Path, output_dir: &Path) -> Result<Dashboa
         output_dir.join("dashboard_viewer.js").as_path(),
         assets::VIEWER_SCRIPT,
     )?;
+    write(
+        output_dir.join("dashboard_insights.js").as_path(),
+        assets::INSIGHTS_SCRIPT,
+    )?;
     write(output_dir.join("data.json").as_path(), &data_json)?;
     write(
         output_dir.join("data.js").as_path(),

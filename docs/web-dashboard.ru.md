@@ -19,6 +19,8 @@ agenthub dashboard
 .agent/reports/dashboard/data.js
 .agent/reports/dashboard/dashboard.css
 .agent/reports/dashboard/dashboard.js
+.agent/reports/dashboard/dashboard_insights.js
+.agent/reports/dashboard/dashboard_viewer.js
 ```
 
 Можно указать другую папку:
@@ -41,7 +43,7 @@ Default URL:
 http://127.0.0.1:4317
 ```
 
-Server регенерирует dashboard data на requests и добавляет live refresh options в HTML. Его удобно держать открытым во время transaction, чтобы timeline, latest status, metrics, memory graph, skills, policies и report links обновлялись.
+Server регенерирует dashboard data на requests и добавляет live refresh options в HTML. Его удобно держать открытым во время transaction, чтобы timeline, latest status, metrics, provider panel, approval inbox, memory browser, history browser, skills, policies и report links обновлялись.
 
 Options:
 
@@ -63,7 +65,11 @@ agenthub serve --addr 127.0.0.1:4318 --once
 - количество transactions, open/failed, memory records, skills и общий cost;
 - aggregated KPI metrics для reliability, context, quality, trust и cost;
 - последние transactions со status, размером DAG, cost, domain runtime и ссылками на reports;
+- provider status, default marker, named profiles, role assignments и fallbacks;
+- approval inbox для blocked transactions и AgentSpec drafts, которым нужен approval;
 - transaction viewer panes с bounded excerpts для report, diff и logs;
+- memory browser с recent typed facts, status, schema, confidence и summaries;
+- transaction history browser с provider, domain runtime, cost, latest event и report link;
 - timeline транзакций из `journal.jsonl`;
 - latest agent trace из DAG node roles;
 - memory graph из committed memory records и связанных transactions;

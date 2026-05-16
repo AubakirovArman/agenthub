@@ -20,9 +20,9 @@ function metric(label, value) {
 }
 
 function badge(status) {
-  const klass = status.includes("FAIL") || status.includes("ERROR")
+  const klass = status.includes("FAIL") || status.includes("ERROR") || status === "missing"
     ? "bad"
-    : status === "COMMITTED" || status === "CLOSED"
+    : status === "COMMITTED" || status === "CLOSED" || status === "ok"
       ? "ok"
       : "warn";
   return el("span", { class: `badge ${klass}`, text: status });
@@ -180,7 +180,7 @@ function renderReports() {
 function renderAll() {
   const renderers = [renderHeader, renderMetrics, renderTransactions, renderCost,
     renderMetricsDashboard, renderTimeline, renderTrace, renderGraph, renderSkills,
-    renderPolicies, renderReports, window.renderTransactionViewer].filter(Boolean);
+    renderPolicies, renderReports, window.renderTransactionViewer, window.renderInsightPanels].filter(Boolean);
   renderers.forEach((render) => render());
 }
 async function refreshLiveData() {

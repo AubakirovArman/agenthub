@@ -19,6 +19,8 @@ Default output:
 .agent/reports/dashboard/data.js
 .agent/reports/dashboard/dashboard.css
 .agent/reports/dashboard/dashboard.js
+.agent/reports/dashboard/dashboard_insights.js
+.agent/reports/dashboard/dashboard_viewer.js
 ```
 
 Басқа output directory беру:
@@ -41,7 +43,7 @@ Default URL:
 http://127.0.0.1:4317
 ```
 
-Server requests кезінде dashboard data қайта жасайды және HTML ішіне live refresh options қосады. Transaction жүріп жатқанда timeline, latest status, metrics, memory graph, skills, policies және report links жаңарып тұрады.
+Server requests кезінде dashboard data қайта жасайды және HTML ішіне live refresh options қосады. Transaction жүріп жатқанда timeline, latest status, metrics, provider panel, approval inbox, memory browser, history browser, skills, policies және report links жаңарып тұрады.
 
 Options:
 
@@ -63,7 +65,11 @@ agenthub serve --addr 127.0.0.1:4318 --once
 - transaction саны, open/failed саны, memory саны, skill саны және total cost;
 - reliability, context, quality, trust және cost үшін aggregated KPI metrics;
 - recent transactions: status, DAG size, cost, domain runtime және report links;
+- provider status, default marker, named profiles, role assignments және fallbacks;
+- blocked transactions және approval керек AgentSpec drafts үшін approval inbox;
 - report, diff және log excerpts көрсететін transaction viewer panes;
+- recent typed facts, status, schema, confidence және summaries көрсететін memory browser;
+- provider, domain runtime, cost, latest event және report link көрсететін transaction history browser;
 - `journal.jsonl` ішінен transaction timeline;
 - DAG node roles ішінен latest agent trace;
 - committed memory records және linked transactions негізіндегі memory graph;

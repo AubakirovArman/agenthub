@@ -23,7 +23,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 - Interactive `agenthub run` 和 shell task execution 会显示 live journal progress；quiet scripts 可使用 `--no-watch`。
 - 在 shell 内使用 `/providers`、`/status`、`/diff`、`/logs`、`/report`、`/explain` 和 `/dashboard`。
 - 使用 `/serve` 或 `agenthub serve` 打开 local auto-refresh dashboard。
-- Dashboard 包含用于 report、diff 和 logs 的 transaction viewer panes。
+- Dashboard 包含 provider status、approval inbox、memory browser、history browser，以及用于 report、diff 和 logs 的 transaction viewer panes。
 - 使用 `agenthub providers add openai-http --name local-vllm --url ...` 保存 reusable local model endpoints。
 - 使用 `/chats`、`/search`、`/rename`、`/pin` 和 `/unpin` 管理带 auto titles 的 chat sessions。
 - `/context` 可预览 current chat、recent messages、memory 和 selected transaction context。

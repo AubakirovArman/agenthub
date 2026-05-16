@@ -5,6 +5,7 @@ use anyhow::Result;
 use super::write_dashboard;
 use crate::agent_dir::init_project;
 use crate::memory;
+use crate::product_cli::{config, providers};
 
 #[test]
 fn writes_static_browser_dashboard() -> Result<()> {
@@ -30,7 +31,12 @@ fn writes_static_browser_dashboard() -> Result<()> {
         r#"{"selected":{"id":"code.rust"}}"#,
     )?;
     fs::write(tx.join("review.json"), r#"{"passed":true}"#)?;
+    fs::write(
+        tx.join("agent_trace.json"),
+        r#"{"routes":{"executor":{"selected_adapter":"command"}}}"#,
+    )?;
     fs::write(tx.join("report.md"), "# report\n\ntransaction viewer\n")?;
+    write_blocked_tx(dir.path())?;
     memory::stage_code_change(
         &tx,
         "tx-20260101000000-web",
@@ -38,7 +44,16 @@ fn writes_static_browser_dashboard() -> Result<()> {
         &["src/lib.rs".into()],
     )?;
     memory::promote_staging(dir.path(), &tx)?;
+    write_approval_spec(dir.path())?;
     write_skill(dir.path())?;
+    providers::add_openai_http(
+        dir.path(),
+        "local-vllm",
+        "http://127.0.0.1:8000",
+        Some("qwen3"),
+        Some("AGENTHUB_TEST_KEY"),
+    )?;
+    config::set_value(dir.path(), "provider.role.executor", "local-vllm")?;
 
     let output = dir.path().join(".agent/reports/dashboard");
     let result = write_dashboard(dir.path(), &output)?;
@@ -52,11 +67,40 @@ fn writes_static_browser_dashboard() -> Result<()> {
     assert!(data.contains("\"history\""));
     assert!(data.contains("\"domain_runtime\": \"code.rust\""));
     assert!(data.contains("\"transaction_details\""));
+    assert!(data.contains("\"providers\""));
+    assert!(data.contains("\"approvals\""));
+    assert!(data.contains("\"memory_browser\""));
+    assert!(data.contains("\"history\""));
+    assert!(data.contains("local-vllm"));
+    assert!(data.contains("approval_required"));
+    assert!(data.contains("BLOCKED_ON_HUMAN"));
     assert!(data.contains("transaction viewer"));
     assert!(data.contains("\"gate_pass_rate\": 1.0"));
     assert!(data.contains("example.skill"));
     assert!(output.join("dashboard.js").exists());
     assert!(output.join("dashboard_viewer.js").exists());
+    assert!(output.join("dashboard_insights.js").exists());
+    Ok(())
+}
+
+fn write_blocked_tx(root: &std::path::Path) -> Result<()> {
+    let tx = root.join(".agent/tx/tx-20260101000001-blocked");
+    fs::create_dir_all(&tx)?;
+    fs::write(
+        tx.join("journal.jsonl"),
+        "{\"ts\":\"2026-01-01T00:01:00Z\",\"tx_id\":\"tx-20260101000001-blocked\",\"state\":\"BLOCKED_ON_HUMAN\",\"message\":\"approval required\",\"data\":{}}\n",
+    )?;
+    fs::write(tx.join("report.md"), "# blocked\n")?;
+    Ok(())
+}
+
+fn write_approval_spec(root: &std::path::Path) -> Result<()> {
+    let dir = root.join(".agent/specs");
+    fs::create_dir_all(&dir)?;
+    fs::write(
+        dir.join("approval.yaml"),
+        "transaction:\n  approval_required: true\n",
+    )?;
     Ok(())
 }
 

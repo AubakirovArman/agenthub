@@ -183,6 +183,17 @@ a {
   gap: 10px;
 }
 
+.provider-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.provider-section {
+  display: grid;
+  gap: 10px;
+}
+
 .metric-dashboard {
   display: grid;
   gap: 12px;
@@ -288,7 +299,15 @@ pre {
     display: block;
   }
 
+  .provider-grid {
+    display: block;
+  }
+
   .viewer-grid > div {
+    margin-bottom: 12px;
+  }
+
+  .provider-section {
     margin-bottom: 12px;
   }
 }

@@ -1,8 +1,10 @@
 mod assets;
 mod collect;
 mod details;
+mod insight_panels;
 mod memory_graph;
 mod metrics;
+mod provider_panel;
 mod read;
 mod reports;
 #[cfg(test)]
@@ -15,6 +17,8 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 pub use collect::collect_dashboard;
+pub use insight_panels::{ApprovalInboxItem, HistoryItem, MemoryBrowserItem};
+pub use provider_panel::{DashboardProvider, ProviderPanel, ProviderRoleView};
 pub use write::write_dashboard;
 
 #[derive(Debug, Clone, Serialize)]
@@ -31,6 +35,10 @@ pub struct WebDashboard {
     pub metrics: MetricsPanel,
     pub reports: Vec<ReportLink>,
     pub transaction_details: Vec<WebTransactionDetail>,
+    pub providers: ProviderPanel,
+    pub approvals: Vec<ApprovalInboxItem>,
+    pub memory_browser: Vec<MemoryBrowserItem>,
+    pub history: Vec<HistoryItem>,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -78,6 +78,8 @@ agenthub open dashboard
 agenthub serve
 ```
 
+`agenthub serve` держит local dashboard обновлённым: provider status, role/fallback setup, pending approvals, recent memory facts, transaction history и panes для report/diff/log.
+
 ## Использование с Codex, Gemini, Kimi
 
 AgentHub provider-neutral. Настрой provider и запускай задачи через тот же transaction engine:
