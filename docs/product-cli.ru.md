@@ -96,6 +96,7 @@ DEEPSEEK_API_KEY=... agenthub providers test deepseek
 KIMI_API_KEY=... agenthub providers test kimi
 agenthub providers diagnose deepseek
 agenthub providers set executor deepseek
+agenthub providers fallback chat deepseek kimi
 agenthub providers fallback reviewer deepseek kimi
 ```
 
@@ -124,7 +125,7 @@ next	agenthub ask "describe the change" --output .agent/drafts/task.yaml
 
 `providers diagnose <id>` печатает endpoint, model, API-key marker, auth hint, status hint, install hint, scheme и provider-specific details. Он проверяет только environment markers и никогда не печатает secret values.
 
-`providers set <role> <provider>` сохраняет `provider.role.<role>` в `.agent/config.yaml`. `providers fallback <role> ...` сохраняет comma-separated fallback chain в `provider.fallback.<role>`. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, manager и worker.
+`providers set <role> <provider>` сохраняет `provider.role.<role>` в `.agent/config.yaml`. `providers fallback <role> ...` сохраняет comma-separated fallback chain в `provider.fallback.<role>`. Valid roles: planner, executor, reviewer, repair, generator, critic, researcher, aggregator, chat, manager и worker. Chat turns используют `provider.role.chat` и `provider.fallback.chat`, а затем переходят к любому другому доступному API provider.
 
 Named HTTP profiles намеренно отключены в API-native mode. Provider logs, retries, memory и будущий tool loop остаются внутри AgentHub для двух поддерживаемых API.
 

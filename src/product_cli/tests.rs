@@ -166,12 +166,19 @@ fn providers_set_role_and_fallback_config() -> Result<()> {
         "reviewer",
         &["deepseek".to_string(), "kimi".to_string()],
     )?;
+    let chat_fallback = providers::set_role_fallback(
+        dir.path(),
+        "chat",
+        &["deepseek".to_string(), "kimi".to_string()],
+    )?;
     let config = config::render_show(dir.path())?;
 
     assert!(role.contains("role\texecutor\tdeepseek"));
     assert!(fallback.contains("fallback\treviewer\tdeepseek,kimi"));
+    assert!(chat_fallback.contains("fallback\tchat\tdeepseek,kimi"));
     assert!(config.contains("provider.role.executor\tdeepseek"));
     assert!(config.contains("provider.fallback.reviewer\tdeepseek,kimi"));
+    assert!(config.contains("provider.fallback.chat\tdeepseek,kimi"));
     Ok(())
 }
 

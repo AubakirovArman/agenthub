@@ -53,6 +53,7 @@ fn validate_role(role: &str) -> Result<()> {
         "critic",
         "researcher",
         "aggregator",
+        "chat",
         "manager",
         "worker",
     ];

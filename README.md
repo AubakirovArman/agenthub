@@ -108,6 +108,13 @@ agenthub providers setup kimi
 agenthub providers test kimi
 ```
 
+Chat fallback chains are configured inside AgentHub and are visible in the chat event stream:
+
+```bash
+agenthub providers fallback chat deepseek kimi
+agenthub exec "answer with one word: ok" --jsonl
+```
+
 For server installs, AgentHub also discovers `.deepseek` and `.kimi` key files in the current project directory, current shell directory, or their parent directories. The key contents stay out of AgentHub config and git.
 
 Plain `agenthub` opens chat mode without requiring Git or `.agent`. Project transactions still use the existing transaction kernel; API-native project execution is being wired in behind the same DeepSeek/Kimi provider surface.

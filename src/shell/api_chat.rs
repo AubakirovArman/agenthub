@@ -19,12 +19,13 @@ pub(super) struct AnswerOutcome {
 }
 
 pub(super) fn answer(root: &Path, session: &ChatSession, request: &str) -> Result<()> {
-    let Some(provider) = select_provider(root)? else {
+    let providers = select_provider_chain(root)?;
+    if providers.is_empty() {
         println!("API provider is not configured.");
         println!("Set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi, then run `/providers test deepseek` or `/providers test kimi`.");
         return Ok(());
-    };
-    let _ = answer_with_provider(root, session, request, provider, true, None)?;
+    }
+    let _ = answer_with_providers(session, request, providers, true, None)?;
     Ok(())
 }
 
@@ -42,33 +43,91 @@ pub(super) fn answer_silent_with_events(
     request: &str,
     emit_event: EventEmitter<'_>,
 ) -> Result<AnswerOutcome> {
-    let provider = select_provider(root)?.ok_or_else(|| {
-        anyhow!(
+    let providers = select_provider_chain(root)?;
+    if providers.is_empty() {
+        return Err(anyhow!(
             "API provider is not configured; set DEEPSEEK_API_KEY/KIMI_API_KEY or create .deepseek/.kimi"
-        )
-    })?;
-    answer_with_provider(root, session, request, provider, false, emit_event)
+        ));
+    }
+    answer_with_providers(session, request, providers, false, emit_event)
 }
 
-fn answer_with_provider(
-    _root: &Path,
+fn answer_with_providers(
     session: &ChatSession,
     request: &str,
-    provider: providers::ProviderStatus,
+    providers: Vec<providers::ProviderStatus>,
     print_terminal: bool,
     mut emit_event: EventEmitter<'_>,
 ) -> Result<AnswerOutcome> {
+    let prompt = prompt_for(session, request)?;
+    let prompt_tokens = estimate_tokens(request);
+    let mut last_error = None;
+    let mut last_provider = None;
+
+    for (index, provider) in providers.iter().enumerate() {
+        match request_provider(
+            session,
+            &prompt,
+            prompt_tokens,
+            provider,
+            print_terminal,
+            &mut emit_event,
+        ) {
+            Ok(outcome) => return Ok(outcome),
+            Err(error) => {
+                let reason = error.to_string();
+                last_provider = Some(provider.info.id.clone());
+                last_error = Some(reason.clone());
+                if let Some(next) = providers.get(index + 1) {
+                    let event = chat::append_provider_fallback(
+                        session,
+                        &provider.info.id,
+                        &next.info.id,
+                        &reason,
+                    )?;
+                    emit(&mut emit_event, &event)?;
+                    if print_terminal {
+                        println!(
+                            "\n[{} failed; falling back to {}]",
+                            provider.info.id, next.info.id
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    let provider = last_provider.unwrap_or_else(|| "unknown".to_string());
+    let event = chat::append_turn_finished(session, &provider, "failed", prompt_tokens, 0)?;
+    emit(&mut emit_event, &event)?;
+    Err(anyhow!(
+        "{}",
+        last_error.unwrap_or_else(|| "provider call failed".to_string())
+    ))
+}
+
+fn request_provider(
+    session: &ChatSession,
+    prompt: &str,
+    prompt_tokens: usize,
+    provider: &providers::ProviderStatus,
+    print_terminal: bool,
+    emit_event: &mut EventEmitter<'_>,
+) -> Result<AnswerOutcome> {
+    let endpoint = provider
+        .endpoint
+        .clone()
+        .ok_or_else(|| anyhow!("provider `{}` endpoint missing", provider.info.id))?;
     let api = HttpProvider::new(
-        provider
-            .endpoint
-            .clone()
-            .ok_or_else(|| anyhow!("provider endpoint missing"))?,
-        providers::api_key_for_status(&provider),
+        endpoint,
+        providers::api_key_for_status(provider),
         provider.model.clone(),
     );
-    let prompt = prompt_for(session, request)?;
-    let request_id = format!("chat-{}", Utc::now().timestamp_millis());
-    let prompt_tokens = estimate_tokens(request);
+    let request_id = format!(
+        "chat-{}-{}",
+        provider.info.id,
+        Utc::now().timestamp_millis()
+    );
     let event = chat::append_provider_requested(
         session,
         &request_id,
@@ -76,7 +135,7 @@ fn answer_with_provider(
         provider.model.as_deref(),
         prompt_tokens,
     )?;
-    emit(&mut emit_event, &event)?;
+    emit(emit_event, &event)?;
     let mut stream_event_error = None;
     let response = match api.complete_streaming(
         LlmRequest {
@@ -84,7 +143,7 @@ fn answer_with_provider(
             role: "chat".to_string(),
             provider: provider.info.id.clone(),
             model: provider.model.clone(),
-            prompt: Some(prompt),
+            prompt: Some(prompt.to_string()),
             context_pack_hash: "chat".to_string(),
             prompt_hash: "chat".to_string(),
             prompt_tokens,
@@ -98,7 +157,7 @@ fn answer_with_provider(
             if stream_event_error.is_none() {
                 match chat::append_assistant_delta(session, &provider.info.id, delta) {
                     Ok(event) => {
-                        if let Err(error) = emit(&mut emit_event, &event) {
+                        if let Err(error) = emit(emit_event, &event) {
                             stream_event_error = Some(error);
                         }
                     }
@@ -119,7 +178,7 @@ fn answer_with_provider(
                 response.completion_tokens,
                 None,
             )?;
-            emit(&mut emit_event, &event)?;
+            emit(emit_event, &event)?;
             response
         }
         Err(error) => {
@@ -133,22 +192,11 @@ fn answer_with_provider(
                 0,
                 Some(&reason),
             )?;
-            emit(&mut emit_event, &event)?;
-            let event =
-                chat::append_turn_finished(session, &provider.info.id, "failed", prompt_tokens, 0)?;
-            emit(&mut emit_event, &event)?;
+            emit(emit_event, &event)?;
             return Err(error);
         }
     };
     if let Some(error) = stream_event_error {
-        let event = chat::append_turn_finished(
-            session,
-            &provider.info.id,
-            "failed",
-            prompt_tokens,
-            response.completion_tokens,
-        )?;
-        emit(&mut emit_event, &event)?;
         return Err(error).context("write assistant stream event");
     }
     let content = response
@@ -159,7 +207,7 @@ fn answer_with_provider(
         println!();
     }
     let event = chat::append_assistant(session, &provider.info.id, &content)?;
-    emit(&mut emit_event, &event)?;
+    emit(emit_event, &event)?;
     let event = chat::append_turn_finished(
         session,
         &provider.info.id,
@@ -167,7 +215,7 @@ fn answer_with_provider(
         prompt_tokens,
         response.completion_tokens,
     )?;
-    emit(&mut emit_event, &event)?;
+    emit(emit_event, &event)?;
     Ok(AnswerOutcome { content })
 }
 
@@ -178,18 +226,44 @@ fn emit(emit_event: &mut EventEmitter<'_>, event: &Value) -> Result<()> {
     Ok(())
 }
 
-fn select_provider(root: &Path) -> Result<Option<providers::ProviderStatus>> {
+fn select_provider_chain(root: &Path) -> Result<Vec<providers::ProviderStatus>> {
     let default = config::default_provider(root)?;
+    let config = config::load(root)?;
     let statuses = providers::statuses(root)?;
-    let preferred = statuses
-        .iter()
-        .find(|status| status.info.id == default && is_api_provider(status) && status.available)
-        .cloned();
-    Ok(preferred.or_else(|| {
+    let mut ids = Vec::new();
+    ids.push(config.get("provider.role.chat").cloned().unwrap_or(default));
+    if let Some(fallbacks) = config.get("provider.fallback.chat") {
+        ids.extend(
+            fallbacks
+                .split(',')
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string),
+        );
+    }
+    ids.extend(
         statuses
-            .into_iter()
-            .find(|status| is_api_provider(status) && status.available)
-    }))
+            .iter()
+            .filter(|status| is_api_provider(status) && status.available)
+            .map(|status| status.info.id.clone()),
+    );
+
+    let mut selected = Vec::new();
+    for id in ids {
+        if selected
+            .iter()
+            .any(|status: &providers::ProviderStatus| status.info.id == id)
+        {
+            continue;
+        }
+        if let Some(status) = statuses
+            .iter()
+            .find(|status| status.info.id == id && is_api_provider(status) && status.available)
+        {
+            selected.push(status.clone());
+        }
+    }
+    Ok(selected)
 }
 
 fn is_api_provider(status: &providers::ProviderStatus) -> bool {
@@ -227,151 +301,4 @@ fn estimate_tokens(value: &str) -> usize {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::io::{Read, Write};
-    use std::net::{Shutdown, TcpListener};
-    use std::thread;
-    use std::time::Duration;
-
-    use super::*;
-
-    #[test]
-    fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
-        let dir = tempfile::tempdir()?;
-        let session = chat::create(dir.path())?;
-        chat::append_user(&session, "exec", "ping")?;
-        let mut emitted = Vec::new();
-        let mut sink = |event: &Value| -> Result<()> {
-            emitted.push(event["kind"].as_str().unwrap_or_default().to_string());
-            Ok(())
-        };
-
-        let outcome = answer_with_provider(
-            dir.path(),
-            &session,
-            "ping",
-            test_provider(stub_sse_server()),
-            false,
-            Some(&mut sink),
-        )?;
-
-        assert_eq!(outcome.content, "ok");
-        assert_eq!(
-            emitted,
-            vec![
-                "provider_requested",
-                "assistant_delta",
-                "provider_finished",
-                "assistant_message",
-                "turn_finished",
-            ]
-        );
-        let events = chat::read_events(&session.path)?;
-        assert!(events.iter().any(|event| {
-            event["kind"].as_str() == Some("turn_finished")
-                && event["status"].as_str() == Some("succeeded")
-                && event["estimated_cost_usd"].as_f64().unwrap_or_default() > 0.0
-                && event["pricing_source"].as_str() == Some("configured_estimate")
-        }));
-        Ok(())
-    }
-
-    fn test_provider(endpoint: String) -> providers::ProviderStatus {
-        providers::ProviderStatus {
-            info: providers::ProviderInfo {
-                id: "deepseek".to_string(),
-                binary: None,
-                endpoint_env: None,
-                template: None,
-                credential_env: &[],
-                credential_paths: &[],
-                auth_hint: "",
-                status_hint: "",
-                note: "test provider",
-            },
-            available: true,
-            path: None,
-            endpoint: Some(endpoint),
-            model: Some("stub-chat".to_string()),
-            api_key_env: None,
-            api_key_file: None,
-            profile_kind: Some("api".to_string()),
-            is_default: true,
-        }
-    }
-
-    fn stub_sse_server() -> String {
-        let listener = TcpListener::bind("127.0.0.1:0").expect("bind stub");
-        let addr = listener.local_addr().expect("stub addr");
-        thread::spawn(move || {
-            let (mut stream, _) = listener.accept().expect("accept stub");
-            stream
-                .set_read_timeout(Some(Duration::from_millis(250)))
-                .expect("set read timeout");
-            read_http_request(&mut stream).expect("read request");
-            let body = concat!(
-                "data: {\"choices\":[{\"delta\":{\"content\":\"ok\"}}],\"usage\":{\"completion_tokens\":1}}\n\n",
-                "data: [DONE]\n\n",
-            );
-            let response = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-                body.len(),
-                body
-            );
-            stream.write_all(response.as_bytes()).expect("write stub");
-            stream.flush().expect("flush stub");
-            let _ = stream.shutdown(Shutdown::Write);
-            drain_client_close(&mut stream);
-        });
-        format!("http://{addr}")
-    }
-
-    fn read_http_request(stream: &mut impl Read) -> std::io::Result<()> {
-        let mut buffer = Vec::new();
-        let mut chunk = [0_u8; 512];
-        loop {
-            let read = stream.read(&mut chunk)?;
-            if read == 0 {
-                return Ok(());
-            }
-            buffer.extend_from_slice(&chunk[..read]);
-            if let Some(header_end) = buffer.windows(4).position(|window| window == b"\r\n\r\n") {
-                let headers = String::from_utf8_lossy(&buffer[..header_end]);
-                let content_length = headers
-                    .lines()
-                    .find_map(|line| line.split_once(':'))
-                    .filter(|(key, _)| key.eq_ignore_ascii_case("content-length"))
-                    .and_then(|(_, value)| value.trim().parse::<usize>().ok())
-                    .unwrap_or(0);
-                let body_start = header_end + 4;
-                while buffer.len().saturating_sub(body_start) < content_length {
-                    let read = stream.read(&mut chunk)?;
-                    if read == 0 {
-                        break;
-                    }
-                    buffer.extend_from_slice(&chunk[..read]);
-                }
-                return Ok(());
-            }
-        }
-    }
-
-    fn drain_client_close(stream: &mut impl Read) {
-        let mut chunk = [0_u8; 128];
-        loop {
-            match stream.read(&mut chunk) {
-                Ok(0) => return,
-                Ok(_) => {}
-                Err(error)
-                    if matches!(
-                        error.kind(),
-                        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
-                    ) =>
-                {
-                    return;
-                }
-                Err(_) => return,
-            }
-        }
-    }
-}
+mod tests;

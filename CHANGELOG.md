@@ -4,6 +4,8 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+- Add API chat provider fallback chains: chat turns now honor `provider.role.chat` and `provider.fallback.chat`, emit `provider_fallback` events between failed providers, and finish the turn once with the final provider status.
+
 ## 0.4.6-local-preview - 2026-05-16
 
 - Align Kimi API defaults with the current global Moonshot endpoint: default to `https://api.moonshot.ai/v1`, use `kimi-k2.6`, accept `MOONSHOT_BASE_URL` aliases, disable Kimi thinking by default for token-saving chat/project calls, and update Kimi cost estimates for K2.6.

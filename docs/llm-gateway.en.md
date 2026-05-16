@@ -44,6 +44,7 @@ v0.4 keeps planned metadata compatibility while moving user-facing provider exec
 
 - `HttpProvider` can call DeepSeek/Kimi OpenAI-compatible `http://` or `https://` endpoints at `/v1/chat/completions`, with timeout, bearer token, and structured error body handling. It can also probe optional `/v1/models`; missing model-list support is reported without failing the completion test.
 - `complete_with_retry` wraps provider calls with retry/backoff and optional attempt transcript records.
+- Non-project chat turns use `provider.role.chat` and `provider.fallback.chat` to try multiple API providers inside AgentHub. Failed providers emit `provider_finished` with the error, `provider_fallback` names the next provider, and the turn emits one final `turn_finished` receipt.
 
 Provider tests:
 

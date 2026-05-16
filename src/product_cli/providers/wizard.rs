@@ -80,6 +80,7 @@ fn append_next_actions(out: &mut String, statuses: &[ProviderStatus]) {
     out.push_str(&format!("  /providers diagnose {provider}\n"));
     out.push_str(&format!("  /providers test {provider}\n"));
     out.push_str(&format!("  /providers set executor {provider}\n"));
+    out.push_str("  /providers fallback chat deepseek kimi\n");
     out.push_str("  /providers fallback reviewer deepseek kimi\n");
 }
 

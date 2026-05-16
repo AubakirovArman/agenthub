@@ -237,6 +237,24 @@ pub(super) fn append_provider_finished(
     )
 }
 
+pub(super) fn append_provider_fallback(
+    session: &ChatSession,
+    from_provider: &str,
+    to_provider: &str,
+    reason: &str,
+) -> Result<Value> {
+    append_event(
+        session,
+        "provider_fallback",
+        json!({
+            "provider": from_provider,
+            "fallback_provider": to_provider,
+            "reason": reason,
+            "text": format!("{from_provider} failed; falling back to {to_provider}")
+        }),
+    )
+}
+
 pub(super) fn append_turn_finished(
     session: &ChatSession,
     provider: &str,
