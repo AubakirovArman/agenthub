@@ -59,7 +59,7 @@ edit       open the draft in $VISUAL or $EDITOR, then revalidate it
 ```text
 /help             show shell help
 /status           show current project and transaction
-/providers        show provider status and setup hints
+/providers        provider wizard with status, roles, profiles, and next actions
 /memory           inspect memory
 /skills           inspect skills
 /transactions     list recent transactions

@@ -59,7 +59,7 @@ edit       用 $VISUAL 或 $EDITOR 打开 draft，然后重新验证
 ```text
 /help             shell help
 /status           当前 project 和 transaction
-/providers        provider status 和 setup hints
+/providers        provider wizard: status、roles、profiles 和 next actions
 /memory           inspect memory
 /skills           inspect skills
 /transactions     recent transactions

@@ -21,7 +21,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 
 - Run `agenthub` without a subcommand to open the chat-first local shell.
 - Interactive `agenthub run` and shell task execution show live journal progress; use `--no-watch` for quiet scripts.
-- Use `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain`, and `/dashboard` from inside the shell.
+- Use `/providers` for the provider wizard, then `/status`, `/diff`, `/logs`, `/report`, `/explain`, and `/dashboard` from inside the shell.
 - Use `/serve` or `agenthub serve` for the local auto-refresh dashboard.
 - The dashboard includes provider status, approval inbox, memory browser, history browser, and transaction viewer panes for report, diff, and logs.
 - Save reusable local model endpoints with `agenthub providers add openai-http --name local-vllm --url ...`.

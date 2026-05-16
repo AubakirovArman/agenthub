@@ -84,6 +84,12 @@ AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test op
 AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
+В interactive shell команда `/providers` теперь открывает provider wizard, а не просто raw status. Он группирует найденные providers, default markers, role assignments, fallbacks, named profiles, примеры local endpoints и следующие setup/diagnose/test команды. Shell shorthand тоже принимает CLI-style flags:
+
+```text
+/providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
+```
+
 Поддерживаемые providers:
 
 - `command`: встроенный deterministic command runner.

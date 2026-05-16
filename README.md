@@ -92,6 +92,7 @@ agenthub run "add a small health-check page" --no-commit
 ```
 
 Equivalent setup commands exist for `gemini`, `kimi`, `command`, and `openai-http`. OpenAI-compatible endpoints use `AGENTHUB_OPENAI_COMPAT_BASE_URL` and optional bearer-token configuration.
+Inside the chat shell, `/providers` opens a wizard with provider readiness, default markers, role/fallback setup, named profiles, and copy-ready next actions.
 Reusable HTTP profiles can be saved by name:
 
 ```bash

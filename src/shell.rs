@@ -19,6 +19,7 @@ mod mention_summary_tests;
 mod onboarding;
 mod product;
 mod prompt;
+mod provider_args;
 mod run;
 mod status;
 mod system;

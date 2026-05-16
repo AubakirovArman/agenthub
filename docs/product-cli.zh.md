@@ -84,6 +84,12 @@ AGENTHUB_OPENAI_COMPAT_BASE_URL=http://127.0.0.1:8000 agenthub providers test op
 AGENTHUB_OPENAI_COMPAT_BASE_URL=https://api.example.com agenthub providers diagnose openai-http
 ```
 
+在 interactive shell 中，`/providers` 现在会打开 provider wizard，而不是只输出 raw status。它会分组显示 detected providers、default markers、role assignments、fallbacks、named profiles、local endpoint examples，以及下一步 setup/diagnose/test commands。Shell shorthand 也接受 CLI-style flags：
+
+```text
+/providers add openai-http --name local-vllm --url http://127.0.0.1:8000 --model qwen3
+```
+
 支持的 providers：
 
 - `command`: 内置 deterministic command runner。

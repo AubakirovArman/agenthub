@@ -21,7 +21,7 @@ agenthub> create docs/agenthub-check.md with a one-line AgentHub check
 
 - `agenthub` subcommand жоқ іске қосылса chat-first local shell ашылады.
 - Interactive `agenthub run` және shell task execution live journal progress көрсетеді; quiet scripts үшін `--no-watch` қолдан.
-- Shell ішінде `/providers`, `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.
+- Shell ішінде `/providers` provider wizard ретінде қолдан, содан кейін `/status`, `/diff`, `/logs`, `/report`, `/explain` және `/dashboard` қолдан.
 - Local auto-refresh dashboard үшін `/serve` немесе `agenthub serve` қолдан.
 - Dashboard provider status, approval inbox, memory browser, history browser және report, diff, logs үшін transaction viewer panes береді.
 - Reusable local model endpoints сақтау үшін `agenthub providers add openai-http --name local-vllm --url ...` қолдан.

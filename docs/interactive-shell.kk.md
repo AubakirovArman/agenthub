@@ -59,7 +59,7 @@ edit       draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 ```text
 /help             shell help
 /status           current project және transaction
-/providers        provider status және setup hints
+/providers        provider wizard: status, roles, profiles және next actions
 /memory           memory inspect
 /skills           skills inspect
 /transactions     recent transactions

@@ -11,10 +11,12 @@ mod http;
 mod probes;
 mod profiles;
 mod roles;
+mod wizard;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
 pub use profiles::{add_openai_http, list as list_profiles, ProviderProfile};
 pub use roles::{set_role_fallback, set_role_provider};
+pub use wizard::render_wizard;
 
 pub fn supported() -> Vec<ProviderInfo> {
     catalog::supported()
