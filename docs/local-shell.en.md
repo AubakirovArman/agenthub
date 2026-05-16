@@ -34,7 +34,7 @@ The shell creates a draft plan, shows what will run, asks for approval, executes
 @path                 attach file/folder context
 @last                 attach latest report
 !command              policy-checked shell command
-# note                save project memory
+# note                save memory
 ```
 
 Plain text is the main path. Expert commands like `ask`, `run`, `mode`, `watch`, `approve`, `resume`, `effects`, `memory`, `skills`, and `undo` are still available when needed.
@@ -43,6 +43,7 @@ Plain text is the main path. Expert commands like `ask`, `run`, `mode`, `watch`,
 
 - Shell history: `.agent/shell/history.txt` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
 - Chats: `.agent/shell/chats/` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
+- Memory: `.agent/memory/` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

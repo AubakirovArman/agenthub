@@ -6,8 +6,7 @@ use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::agent_dir::ensure_runtime_dirs;
-
+use super::memory_paths;
 use super::storage::read_records;
 use super::MemoryRecord;
 
@@ -23,7 +22,7 @@ pub struct MemoryAudit {
 }
 
 pub fn run_audit(root: &Path) -> Result<MemoryAudit> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let committed = read_records(&paths.memory.join("committed.jsonl"))?;
     let failed = read_records(&paths.memory.join("failed_attempts.jsonl"))?;
     let audit = MemoryAudit {

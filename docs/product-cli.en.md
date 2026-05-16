@@ -12,7 +12,7 @@ agenthub
 
 Running `agenthub` without a subcommand is the recommended daily entry. In an uninitialized folder it starts Chat Mode without creating Git or `.agent`; project bootstrap is deferred until a project transaction really needs it. The shell restores the latest chat, shows provider readiness, and lets you type a normal task. File-changing tasks still create a draft plan, ask for inline approval, run the transaction, and then suggest `/diff`, `/logs`, `/report`, `/explain`, and `/undo`.
 
-Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for project memory.
+Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@path` for context, `!command` for policy-checked shell commands, and `# note` for memory. In Chat/Ops Mode, memory is stored under the AgentHub user data directory; initialized projects keep project memory under `.agent/memory`.
 
 Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top.
 
@@ -168,7 +168,7 @@ agenthub memory summary
 agenthub memory audit
 ```
 
-`inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records and refreshes `.agent/memory/audit.json`.
+`inspect` prints raw committed and failed-attempt counts. `summary` is the user-facing view of stack, active decisions, and known failures. `audit` checks stale, conflicting, low-confidence, and unverified records. In Chat/Ops Mode these commands use `$AGENTHUB_HOME/memory` or the platform AgentHub data directory and do not create `.agent`; initialized projects continue to refresh `.agent/memory/audit.json`.
 
 ## Skills
 

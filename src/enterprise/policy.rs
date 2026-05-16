@@ -4,9 +4,9 @@ use std::path::Path;
 
 use anyhow::{anyhow, Context, Result};
 
-use crate::agent_dir::ensure_runtime_dirs;
 use crate::enterprise::network_policy;
 use crate::enterprise::types::{ActorContext, EnterprisePolicy, PolicySource};
+use crate::{agent_dir::ensure_runtime_dirs, home};
 
 pub fn load_policy(project_root: &Path) -> Result<EnterprisePolicy> {
     Ok(load_policy_with_source(project_root)?.0)
@@ -25,6 +25,17 @@ pub fn load_policy_with_source(project_root: &Path) -> Result<(EnterprisePolicy,
                 path: path.display().to_string(),
             },
         );
+    }
+
+    if !home::project_has_runtime(project_root) {
+        let path = project_root.join(".agent/enterprise/policy.yaml");
+        return Ok((
+            EnterprisePolicy::default(),
+            PolicySource {
+                mode: "default".to_string(),
+                path: path.display().to_string(),
+            },
+        ));
     }
 
     let paths = ensure_runtime_dirs(project_root)?;

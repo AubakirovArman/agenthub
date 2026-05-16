@@ -4,6 +4,7 @@ use std::path::Path;
 use anyhow::Result;
 use serde_json::json;
 
+use crate::home;
 use crate::memory::{self, TypedMemoryInput};
 
 pub(super) fn add(root: &Path, note: &str) -> Result<()> {
@@ -12,7 +13,11 @@ pub(super) fn add(root: &Path, note: &str) -> Result<()> {
         return Ok(());
     }
     let kind = infer_kind(note);
-    println!("Add to project memory?");
+    let project_memory = home::project_has_runtime(root);
+    println!(
+        "Add to {} memory?",
+        if project_memory { "project" } else { "global" }
+    );
     println!("Type: {kind}");
     println!("Value: {}", note.trim());
     if !confirm("Save?", true)? {
@@ -23,7 +28,7 @@ pub(super) fn add(root: &Path, note: &str) -> Result<()> {
         root,
         TypedMemoryInput {
             kind: kind.to_string(),
-            domain: "code".to_string(),
+            domain: if project_memory { "code" } else { "core" }.to_string(),
             content: json!({ "note": note.trim(), "source": "shell" }),
             task_id: Some("manual_memory_note".to_string()),
             supersedes: None,

@@ -5,13 +5,12 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use serde_json::{json, Value};
 
-use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
-
 use super::storage::read_records;
 use super::MemoryRecord;
+use super::{memory_paths, MemoryPaths};
 
 pub(super) fn compact_project_state(root: &Path) -> Result<()> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let records = read_records(&paths.memory.join("committed.jsonl"))?;
     let recent_workspace_changes = records
         .iter()
@@ -45,7 +44,7 @@ pub(super) fn compact_project_state(root: &Path) -> Result<()> {
 }
 
 pub(super) fn write_views(root: &Path, records: &[MemoryRecord]) -> Result<()> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let views = paths.memory.join("views");
     fs::create_dir_all(&views).with_context(|| format!("create {}", views.display()))?;
 
@@ -89,7 +88,7 @@ fn records_by_kind(records: &[MemoryRecord], kinds: &[&str]) -> Value {
     })
 }
 
-fn known_failures(paths: &AgentPaths) -> Result<Value> {
+fn known_failures(paths: &MemoryPaths) -> Result<Value> {
     let failed = read_records(&paths.memory.join("failed_attempts.jsonl"))?;
     Ok(json!({
         "updated_at": Utc::now(),
@@ -98,7 +97,7 @@ fn known_failures(paths: &AgentPaths) -> Result<Value> {
     }))
 }
 
-fn audit(paths: &AgentPaths, records: &[MemoryRecord]) -> Result<Value> {
+fn audit(paths: &MemoryPaths, records: &[MemoryRecord]) -> Result<Value> {
     let failed = read_records(&paths.memory.join("failed_attempts.jsonl"))?;
     Ok(json!({
         "updated_at": Utc::now(),

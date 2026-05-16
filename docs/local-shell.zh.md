@@ -34,7 +34,7 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 @path                 attach file/folder context
 @last                 attach latest report
 !command              policy-checked shell command
-# note                save project memory
+# note                save memory
 ```
 
 普通文本是主路径。需要时仍可使用 expert commands：`ask`、`run`、`mode`、`watch`、`approve`、`resume`、`effects`、`memory`、`skills` 和 `undo`。
@@ -43,6 +43,7 @@ Shell 会创建 draft plan，显示将要运行的内容，询问 approval，通
 
 - Shell history: initialized projects 使用 `.agent/shell/history.txt`，Chat/Ops Mode 使用 AgentHub user data directory
 - Chats: initialized projects 使用 `.agent/shell/chats/`，Chat/Ops Mode 使用 AgentHub user data directory
+- Memory: initialized projects 使用 `.agent/memory/`，Chat/Ops Mode 使用 AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

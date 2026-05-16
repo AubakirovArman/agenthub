@@ -5,10 +5,8 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::agent_dir::ensure_runtime_dirs;
-
 use super::storage::{append_jsonl, read_records};
-use super::{new_memory_id, views, MemoryRecord};
+use super::{memory_paths, new_memory_id, views, MemoryRecord};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TypedMemoryInput {
@@ -21,7 +19,7 @@ pub struct TypedMemoryInput {
 }
 
 pub fn write_typed_fact(root: &Path, input: TypedMemoryInput) -> Result<MemoryRecord> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let record = MemoryRecord {
         id: new_memory_id(&input.kind),
         kind: input.kind,

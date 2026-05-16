@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.8-local-preview - 2026-05-16
+
+- Add universal Chat/Ops memory storage: memory inspect/summary/audit, `@memory`, `/context`, and manual `# note` now use AgentHub home memory when a folder has no `.agent/project.yaml`, so plain chat and DevOps sessions do not create project runtime files.
+- Add the post-1.0 roadmap document for MCP/A2A, subagents v2, async jobs, Ollama/local LLMs, multimodal context, team collaboration, enterprise security, and marketplace sequencing.
+
 ## 0.4.7-local-preview - 2026-05-16
 
 - Add API chat provider fallback chains: chat turns now honor `provider.role.chat` and `provider.fallback.chat`, emit `provider_fallback` events between failed providers, and finish the turn once with the final provider status.

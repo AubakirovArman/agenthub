@@ -171,6 +171,7 @@ mod tests {
     #[test]
     fn derives_titles_pin_state_and_search_hits() -> Result<()> {
         let dir = tempfile::tempdir()?;
+        std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
         let session = chat::create(dir.path())?;
         chat::append_user(&session, "run", "@src/app/page.tsx add dashboard metrics")?;
 

@@ -22,6 +22,17 @@ fn default_policy_allows_transaction_run() -> Result<()> {
 }
 
 #[test]
+fn default_policy_without_project_runtime_has_no_side_effects() -> Result<()> {
+    let dir = tempfile::tempdir()?;
+
+    let actor = authorize(dir.path(), "memory.read")?;
+
+    assert!(actor.allows("memory.read"));
+    assert!(!dir.path().join(".agent").exists());
+    Ok(())
+}
+
+#[test]
 fn audit_events_are_append_only() -> Result<()> {
     let dir = tempfile::tempdir()?;
     init_project(dir.path(), false)?;

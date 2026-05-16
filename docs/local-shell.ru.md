@@ -34,7 +34,7 @@ Shell создаёт draft plan, показывает что будет выпо
 @path                 attach file/folder context
 @last                 attach latest report
 !command              policy-checked shell command
-# note                save project memory
+# note                save memory
 ```
 
 Обычный текст — главный путь. Expert commands `ask`, `run`, `mode`, `watch`, `approve`, `resume`, `effects`, `memory`, `skills` и `undo` остаются доступны, когда нужны.
@@ -43,6 +43,7 @@ Shell создаёт draft plan, показывает что будет выпо
 
 - Shell history: `.agent/shell/history.txt` для initialized projects или AgentHub user data directory для Chat/Ops Mode
 - Chats: `.agent/shell/chats/` для initialized projects или AgentHub user data directory для Chat/Ops Mode
+- Memory: `.agent/memory/` для initialized projects или AgentHub user data directory для Chat/Ops Mode
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

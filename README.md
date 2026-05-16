@@ -67,7 +67,7 @@ Inside the shell:
 - `/cd ../other-app` switches to another working folder without restarting AgentHub.
 - `@README.md`, `@src`, `@tx:latest`, or `@memory:auth` adds explicit file, folder, transaction, or memory context to the next request.
 - `!git status --short` runs a shell command through AgentHub policy and logs it.
-- `# use fetch only, no axios` writes a typed memory note for future tasks.
+- `# use fetch only, no axios` writes a typed memory note for future tasks; in Chat/Ops Mode this uses the AgentHub user data directory instead of creating `.agent`.
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:deepseek date:today` filters sessions.
 - `/stats` shows chat turns, token totals, estimated cost, and provider-level usage from the AgentHub event store.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
@@ -208,3 +208,4 @@ Start here:
 - [Plugin Governance](docs/plugin-governance.en.md)
 - [Governance v2](docs/governance-v2.en.md)
 - [PRD v4](docs/prd-v4.en.md)
+- [Roadmap After 1.0](docs/roadmap-after-1.0.ru.md)

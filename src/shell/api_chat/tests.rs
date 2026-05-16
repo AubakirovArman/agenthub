@@ -11,6 +11,7 @@ use super::*;
 #[test]
 fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
     let dir = tempfile::tempdir()?;
+    std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
     let session = chat::create(dir.path())?;
     chat::append_user(&session, "exec", "ping")?;
     let mut emitted = Vec::new();
@@ -51,6 +52,7 @@ fn silent_answer_emits_provider_lifecycle_events() -> Result<()> {
 #[test]
 fn silent_answer_falls_back_between_api_providers() -> Result<()> {
     let dir = tempfile::tempdir()?;
+    std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
     let session = chat::create(dir.path())?;
     chat::append_user(&session, "exec", "ping")?;
     let mut emitted = Vec::new();

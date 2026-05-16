@@ -5,8 +5,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::agent_dir::ensure_runtime_dirs;
-
+use super::memory_paths;
 use super::storage::read_records;
 use super::MemoryRecord;
 
@@ -23,7 +22,7 @@ pub fn retrieve_relevant_scored(
     domain: &str,
     limit: usize,
 ) -> Result<Vec<ScoredMemoryRecord>> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let records = read_records(&paths.memory.join("committed.jsonl"))?;
     let mut scored = records
         .into_iter()

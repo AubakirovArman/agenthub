@@ -9,7 +9,8 @@ mod views;
 mod warnings;
 
 use std::cmp::Reverse;
-use std::path::Path;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use chrono::{DateTime, Utc};
@@ -17,8 +18,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use crate::agent_dir::{ensure_runtime_dirs, AgentPaths};
+use crate::agent_dir::ensure_runtime_dirs;
 use crate::git;
+use crate::home;
 use crate::observability::redact_text;
 use crate::spec::WorkspaceProfile;
 
@@ -60,8 +62,13 @@ pub struct MemoryStats {
     pub failed_attempts: usize,
 }
 
+#[derive(Debug, Clone)]
+pub(super) struct MemoryPaths {
+    pub memory: PathBuf,
+}
+
 pub fn inspect(root: &Path) -> Result<MemoryStats> {
-    let paths = AgentPaths::new(root);
+    let paths = memory_paths(root)?;
     Ok(MemoryStats {
         committed: count_lines(&paths.memory.join("committed.jsonl"))?,
         failed_attempts: count_lines(&paths.memory.join("failed_attempts.jsonl"))?,
@@ -113,7 +120,7 @@ pub fn stage_workspace_change(
 }
 
 pub fn promote_staging(root: &Path, tx_dir: &Path) -> Result<Vec<MemoryRecord>> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let staging_path = tx_dir.join(STAGING_FILE);
     let mut promoted = Vec::new();
     let verified_head = git::head(root).ok().flatten();
@@ -134,7 +141,7 @@ pub fn promote_staging(root: &Path, tx_dir: &Path) -> Result<Vec<MemoryRecord>> 
 }
 
 pub fn record_failed_attempt(root: &Path, tx_id: &str, task_id: &str, reason: &str) -> Result<()> {
-    let paths = ensure_runtime_dirs(root)?;
+    let paths = memory_paths(root)?;
     let record = MemoryRecord {
         id: new_memory_id("failed_attempt"),
         kind: "failed_attempt".to_string(),
@@ -157,7 +164,7 @@ pub fn record_failed_attempt(root: &Path, tx_id: &str, task_id: &str, reason: &s
 }
 
 pub fn retrieve_recent(root: &Path, limit: usize) -> Result<Vec<MemoryRecord>> {
-    let paths = AgentPaths::new(root);
+    let paths = memory_paths(root)?;
     let mut records = read_records(&paths.memory.join("committed.jsonl"))?;
     records.sort_by_key(|record| Reverse(record.created_at));
     records.truncate(limit);
@@ -177,6 +184,29 @@ pub fn retrieve_relevant(root: &Path, domain: &str, limit: usize) -> Result<Vec<
 
 pub fn compact_project_state(root: &Path) -> Result<()> {
     views::compact_project_state(root)
+}
+
+pub(super) fn memory_paths(root: &Path) -> Result<MemoryPaths> {
+    let memory = if home::project_has_runtime(root) {
+        ensure_runtime_dirs(root)?.memory
+    } else {
+        home::global_memory_dir()
+    };
+    ensure_memory_files(&memory)?;
+    Ok(MemoryPaths { memory })
+}
+
+fn ensure_memory_files(memory: &Path) -> Result<()> {
+    for dir in [memory, &memory.join("compacted"), &memory.join("views")] {
+        fs::create_dir_all(dir)?;
+    }
+    for file in ["committed.jsonl", "failed_attempts.jsonl"] {
+        let path = memory.join(file);
+        if !path.exists() {
+            fs::write(path, "")?;
+        }
+    }
+    Ok(())
 }
 
 pub(super) fn new_memory_id(kind: &str) -> String {

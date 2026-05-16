@@ -161,6 +161,7 @@ mod tests {
     #[test]
     fn filters_chats_by_status_provider_and_date() -> Result<()> {
         let dir = tempfile::tempdir()?;
+        std::fs::create_dir_all(dir.path().join(".agent/shell"))?;
         let chat = chat::create(dir.path())?;
         chat::append_user(&chat, "run", "add page")?;
         chat::append_tx(
