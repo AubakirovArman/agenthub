@@ -67,7 +67,14 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
                 .collect::<Vec<_>>();
             print!("{}", providers::set_role_fallback(root, role, &fallback)?);
         }
-        other => return Err(anyhow!("unknown providers command `{other}`")),
+        other if provider_exists(root, other)? => {
+            print!("{}", providers::setup_provider(root, other)?)
+        }
+        other => {
+            return Err(anyhow!(
+            "unknown providers command `{other}`; use `/providers setup {other}` or `/providers`"
+        ))
+        }
     }
     Ok(())
 }
@@ -127,4 +134,29 @@ fn required<'a>(args: &'a [&str], index: usize, name: &str) -> Result<&'a str> {
         .copied()
         .filter(|value| !value.is_empty())
         .ok_or_else(|| anyhow!("missing {name}"))
+}
+
+fn provider_exists(root: &Path, provider: &str) -> Result<bool> {
+    Ok(providers::statuses(root)?
+        .into_iter()
+        .any(|status| status.info.id == provider))
+}
+
+#[cfg(test)]
+mod tests {
+    use anyhow::Result;
+
+    use crate::product_cli::config;
+
+    use super::*;
+
+    #[test]
+    fn providers_accepts_provider_name_as_setup_shorthand() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+
+        handle_providers(dir.path(), Some("command"))?;
+
+        assert_eq!(config::default_provider(dir.path())?, "command");
+        Ok(())
+    }
 }

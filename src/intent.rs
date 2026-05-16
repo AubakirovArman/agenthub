@@ -7,6 +7,7 @@ mod django_python;
 mod file_request;
 mod normalize;
 mod render;
+mod static_web;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -37,6 +38,9 @@ pub fn normalize_to_spec_for_project(
             .filter(|provider| {
                 matches!(provider.as_str(), "command" | "codex" | "kimi" | "gemini")
             });
+    }
+    if static_web::should_use(root, request) {
+        return static_web::preview(request, &options);
     }
     normalize::to_preview(request, options)
 }

@@ -86,6 +86,7 @@ fn suggest_provider(root: &Path) -> Result<()> {
             return Ok(());
         }
     }
+    config::set_value(root, "default_provider", "command")?;
     println!("Provider: command  (change with /providers)");
     Ok(())
 }

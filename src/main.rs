@@ -45,7 +45,12 @@ fn run() -> Result<()> {
             request,
             output,
             approval_required,
-        } => handlers::handle_ask(&request, output.as_deref(), approval_required)?,
+        } => handlers::handle_ask(
+            &project_root,
+            &request,
+            output.as_deref(),
+            approval_required,
+        )?,
         Commands::Run {
             target,
             no_commit,

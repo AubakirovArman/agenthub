@@ -77,3 +77,25 @@ fn django_request_generates_scaffold_spec() {
     let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
     assert!(spec.validate().is_ok());
 }
+
+#[test]
+fn empty_project_web_app_request_generates_static_app_spec() {
+    let dir = tempfile::tempdir().unwrap();
+    let preview = normalize_to_spec_for_project(
+        dir.path(),
+        "создай анимированное вэб приложение",
+        IntentOptions {
+            agent_adapter: Some("codex".to_string()),
+            ..Default::default()
+        },
+    );
+
+    assert_eq!(preview.inferred_intent, "code.static_web_app");
+    assert!(preview.questions.is_empty());
+    assert!(preview.agent_spec_yaml.contains("target: index.html"));
+    assert!(preview.agent_spec_yaml.contains("adapter: codex"));
+    assert!(preview.agent_spec_yaml.contains("- test -f index.html"));
+    assert!(!preview.agent_spec_yaml.contains("target: /todo"));
+    let spec: crate::spec::AgentSpec = serde_yaml::from_str(&preview.agent_spec_yaml).unwrap();
+    assert!(spec.validate().is_ok());
+}

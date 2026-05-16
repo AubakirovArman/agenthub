@@ -64,6 +64,7 @@ const DEFAULT_GITIGNORE: &[&str] = &[
     ".agent/shell/",
     ".agent/reports/",
     ".agent/metrics/",
+    ".agent/config.yaml",
     ".agent/memory/*.jsonl",
     ".agent/memory/audit.json",
     ".agent/memory/compacted/",

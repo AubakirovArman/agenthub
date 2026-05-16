@@ -8,8 +8,14 @@ use agenthub::{enterprise, intent, live_run, memory, product_cli::bootstrap, spe
 
 use super::run_summary;
 
-pub fn handle_ask(request: &str, output: Option<&Path>, approval_required: bool) -> Result<()> {
-    let preview = intent::normalize_to_spec_with_options(
+pub fn handle_ask(
+    root: &Path,
+    request: &str,
+    output: Option<&Path>,
+    approval_required: bool,
+) -> Result<()> {
+    let preview = intent::normalize_to_spec_for_project(
+        root,
         request,
         intent::IntentOptions {
             approval_required,

@@ -166,6 +166,7 @@ fn is_runtime_agent_path(path: &str) -> bool {
         || path.starts_with(".agent/metrics/")
         || path.starts_with(".agent/memory/compacted/")
         || path.starts_with(".agent/memory/views/")
+        || path == ".agent/config.yaml"
         || path == ".agent/enterprise/audit.jsonl"
         || path == ".agent/memory/audit.json"
         || path == ".agent/memory/committed.jsonl"
@@ -190,4 +191,27 @@ pub fn run(root: &Path, args: &[&str]) -> Result<GitOutput> {
     Ok(GitOutput {
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use anyhow::Result;
+
+    use super::*;
+
+    #[test]
+    fn dirty_blockers_ignore_local_agent_config() -> Result<()> {
+        let dir = tempfile::tempdir()?;
+        init(dir.path())?;
+        fs::create_dir_all(dir.path().join(".agent"))?;
+        fs::write(
+            dir.path().join(".agent/config.yaml"),
+            "default_provider: codex\n",
+        )?;
+
+        assert!(dirty_blockers(dir.path())?.is_empty());
+        Ok(())
+    }
 }
