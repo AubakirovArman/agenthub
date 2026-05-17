@@ -21,6 +21,8 @@ pub struct ProviderRecoveryItem {
     pub available: bool,
     pub default: bool,
     pub blocked: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
     pub credential_source: Option<String>,
     pub endpoint: Option<String>,
     pub model: Option<String>,
@@ -33,6 +35,8 @@ pub struct ProviderRecoveryItem {
 pub struct ProviderRecoveryGate {
     pub id: String,
     pub status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
     pub next_command: String,
     pub next_commands: Vec<String>,
     pub detail: String,
@@ -84,6 +88,7 @@ fn recovery_report(project_root: &Path) -> Result<ProviderRecoveryReport> {
             } else {
                 "blocked".to_string()
             },
+            blocker_kind: gate_blocker_kind(&status).map(str::to_string),
             next_command: "agenthub readiness audit --json --check".to_string(),
             next_commands: gate_next_commands,
             detail: if status == "ready" {
@@ -99,12 +104,14 @@ fn recovery_item(status: ProviderStatus) -> ProviderRecoveryItem {
     let state = status_state(&status).to_string();
     let blocked = state == "blocked";
     let next_commands = provider_next_commands(&status, &state);
+    let blocker_kind = provider_blocker_kind(&status, &state).map(str::to_string);
     ProviderRecoveryItem {
         provider: status.info.id.clone(),
         state,
         available: status.available,
         default: status.is_default,
         blocked,
+        blocker_kind,
         credential_source: credential_source(&status),
         endpoint: status.endpoint.clone(),
         model: status.model.clone(),
@@ -133,6 +140,30 @@ fn provider_action(status: &ProviderStatus, blocked: bool) -> String {
         "configure_api_key".to_string()
     } else {
         "ready".to_string()
+    }
+}
+
+fn provider_blocker_kind(status: &ProviderStatus, state: &str) -> Option<&'static str> {
+    if state == "ok" {
+        return None;
+    }
+    if matches!(status.info.id.as_str(), "deepseek" | "kimi") && !status.available {
+        return Some("external_credential");
+    }
+    if status.info.id == "kimi" && state == "blocked" {
+        return Some("external_credential");
+    }
+    if state == "blocked" {
+        return Some("external_provider");
+    }
+    None
+}
+
+fn gate_blocker_kind(status: &str) -> Option<&'static str> {
+    if status == "ready" {
+        None
+    } else {
+        Some("dependent_gate")
     }
 }
 
@@ -176,6 +207,9 @@ fn render_recovery_text(report: &ProviderRecoveryReport) -> String {
             "action\t{}\t{}\n",
             provider.provider, provider.action
         ));
+        if let Some(kind) = &provider.blocker_kind {
+            out.push_str(&format!("blocker_kind\t{}\t{}\n", provider.provider, kind));
+        }
         out.push_str(&format!(
             "detail\t{}\t{}\n",
             provider.provider, provider.detail
@@ -193,6 +227,12 @@ fn render_recovery_text(report: &ProviderRecoveryReport) -> String {
         "gate\t{}\t{}\t{}\n",
         report.gate.id, report.gate.status, report.gate.next_command
     ));
+    if let Some(kind) = &report.gate.blocker_kind {
+        out.push_str(&format!(
+            "gate_blocker_kind\t{}\t{}\n",
+            report.gate.id, kind
+        ));
+    }
     for (index, command) in report.gate.next_commands.iter().enumerate() {
         out.push_str(&format!(
             "gate_next\t{}\t{}\t{}\n",

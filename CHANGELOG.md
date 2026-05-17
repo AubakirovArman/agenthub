@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.88-local-preview - 2026-05-17
+
+- Add `blocker_kind` metadata to provider recovery JSON/text output, so the first recovery screen classifies blocked Kimi as an external credential problem and the completion gate as dependent.
+- Keep ready providers quiet by omitting `blocker_kind` on healthy recovery rows.
+
 ## 0.4.87-local-preview - 2026-05-17
 
 - Make provider recovery text coverage deterministic by clearing provider credential environment in the test fixture, fixing macOS tag CI when external provider state is present.

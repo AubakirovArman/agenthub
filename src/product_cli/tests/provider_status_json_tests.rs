@@ -54,8 +54,10 @@ fn providers_recovery_json_turns_blocked_kimi_into_next_actions() -> Result<()> 
         assert_eq!(parsed["objective"], "api_native_provider_recovery");
         assert_eq!(parsed["status"], "blocked");
         assert_eq!(parsed["gate"]["status"], "blocked");
+        assert_eq!(parsed["gate"]["blocker_kind"], "dependent_gate");
         assert_eq!(kimi["state"], "blocked");
         assert_eq!(kimi["action"], "replace_or_rotate_kimi_moonshot_key");
+        assert_eq!(kimi["blocker_kind"], "external_credential");
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
         assert!(json.contains("agenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(json.contains("agenthub providers rc-unblock kimi --from-file <new-key-file>"));
@@ -98,6 +100,10 @@ fn providers_recovery_json_marks_ready_providers_without_noise() -> Result<()> {
 
             assert_eq!(deepseek["state"], "ok");
             assert_eq!(deepseek["action"], "ready");
+            assert!(!deepseek
+                .as_object()
+                .expect("deepseek object")
+                .contains_key("blocker_kind"));
             assert_eq!(deepseek["next_commands"].as_array().map(Vec::len), Some(0));
             let next_commands = parsed["next_commands"]
                 .as_array()
@@ -133,6 +139,10 @@ fn providers_recovery_text_includes_completion_audit_gate() -> Result<()> {
             assert!(rendered.contains(
                 "gate\tapi_native_completion_audit\tblocked\tagenthub readiness audit --json --check"
             ));
+            assert!(rendered.contains("blocker_kind\tkimi\texternal_credential"));
+            assert!(
+                rendered.contains("gate_blocker_kind\tapi_native_completion_audit\tdependent_gate")
+            );
             assert!(rendered.contains(
                 "gate_next\tapi_native_completion_audit\t1\tagenthub readiness blockers --json --check"
             ));
