@@ -23,6 +23,8 @@ pub fn render_blockers(project_root: &Path, options: AuditOptions) -> Result<Aud
         objective: report.objective,
         status: if failed { "blocked" } else { "clear" }.to_string(),
         failed,
+        blocker_scope: report.blocker_scope,
+        blocker_kinds: report.blocker_kinds,
         sources: ReadinessSources {
             api_native_plan: report.sources.api_native_plan,
             post_1_0_plan: report.sources.post_1_0_plan,
@@ -47,6 +49,15 @@ fn render_blockers_text(report: &ReadinessBlockerReport) -> String {
     let mut out = String::new();
     out.push_str("AgentHub readiness blockers\n");
     out.push_str(&format!("objective\t{}\n", report.objective));
+    if let Some(scope) = &report.blocker_scope {
+        out.push_str(&format!("blocker_scope\t{}\n", scope));
+    }
+    if !report.blocker_kinds.is_empty() {
+        out.push_str(&format!(
+            "blocker_kinds\t{}\n",
+            report.blocker_kinds.join(",")
+        ));
+    }
     out.push_str(&format!("evidence\t{}\n", report.evidence));
     out.push_str(&format!("dogfood_history\t{}\n", report.dogfood_history));
     out.push_str(&format!("kimi_auth_report\t{}\n", report.kimi_auth_report));

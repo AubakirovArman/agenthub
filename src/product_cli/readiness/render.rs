@@ -4,6 +4,15 @@ pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
     let mut out = String::new();
     out.push_str("AgentHub API-native readiness audit\n");
     out.push_str(&format!("objective\t{}\n", report.objective));
+    if let Some(scope) = &report.blocker_scope {
+        out.push_str(&format!("blocker_scope\t{}\n", scope));
+    }
+    if !report.blocker_kinds.is_empty() {
+        out.push_str(&format!(
+            "blocker_kinds\t{}\n",
+            report.blocker_kinds.join(",")
+        ));
+    }
     out.push_str(&format!(
         "source\tapi_native_plan\t{}\n",
         report.sources.api_native_plan

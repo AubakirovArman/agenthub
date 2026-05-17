@@ -20,6 +20,8 @@ fn readiness_audit_json_reports_ready_fixture() -> Result<()> {
         assert!(!result.failed);
         assert_eq!(parsed["status"], "ready");
         assert_eq!(parsed["failed"], false);
+        assert!(parsed.get("blocker_scope").is_none());
+        assert!(parsed.get("blocker_kinds").is_none());
         assert_eq!(parsed["metrics"]["real_sessions"], 3);
         assert!(result.output.contains(r#""id": "ecosystem_surfaces""#));
         assert!(result.output.contains(r#""id": "provider_surface""#));
@@ -45,6 +47,9 @@ fn readiness_audit_json_reports_blocked_kimi_without_secret() -> Result<()> {
         assert!(result.failed);
         assert_eq!(parsed["status"], "incomplete");
         assert_eq!(parsed["failed"], true);
+        assert_eq!(parsed["blocker_scope"], "external_only");
+        assert_eq!(parsed["blocker_kinds"][0], "dependent_gate");
+        assert_eq!(parsed["blocker_kinds"][1], "external_credential");
         assert_eq!(parsed["metrics"]["open_blockers"], 1);
         assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
         assert!(result.output.contains(r#""id": "kimi_auth""#));
@@ -94,6 +99,10 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
         assert!(result.output.contains(
             "check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
         ));
+        assert!(result.output.contains("blocker_scope\texternal_only"));
+        assert!(result
+            .output
+            .contains("blocker_kinds\tdependent_gate,external_credential"));
         assert!(result.output.contains("status\tincomplete"));
         assert!(result
             .output
@@ -123,6 +132,9 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
 
         assert!(result.failed);
         assert_eq!(parsed["status"], "blocked");
+        assert_eq!(parsed["blocker_scope"], "external_only");
+        assert_eq!(parsed["blocker_kinds"][0], "dependent_gate");
+        assert_eq!(parsed["blocker_kinds"][1], "external_credential");
         assert!(blocker_ids.contains(&"kimi_auth"));
         assert!(blocker_ids.contains(&"open_blockers"));
         assert!(blocker_ids.contains(&"rc_dogfood_gate"));
@@ -163,6 +175,10 @@ fn readiness_blockers_text_reports_blocker_kind() -> Result<()> {
         )?;
 
         assert!(result.failed);
+        assert!(result.output.contains("blocker_scope\texternal_only"));
+        assert!(result
+            .output
+            .contains("blocker_kinds\tdependent_gate,external_credential"));
         assert!(result.output.contains("blocker\tkimi_auth\tblocked"));
         assert!(result
             .output

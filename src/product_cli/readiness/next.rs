@@ -1,3 +1,7 @@
+use std::collections::BTreeSet;
+
+use super::types::ReadinessCheck;
+
 pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
     if id == "kimi_auth" {
         return vec![
@@ -83,4 +87,42 @@ pub(super) fn check_blocker_kind(id: &str, detail: &str) -> Option<&'static str>
         return Some("dependent_gate");
     }
     None
+}
+
+pub(super) fn blocker_kinds(checks: &[ReadinessCheck]) -> Vec<String> {
+    checks
+        .iter()
+        .filter(|check| check.status != "passed")
+        .filter_map(|check| check.blocker_kind.as_deref())
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .map(str::to_string)
+        .collect()
+}
+
+pub(super) fn blocker_scope(checks: &[ReadinessCheck], blocker_kinds: &[String]) -> Option<String> {
+    if checks.iter().all(|check| check.status == "passed") {
+        return None;
+    }
+
+    let has_external = blocker_kinds
+        .iter()
+        .any(|kind| kind.starts_with("external_"));
+    let has_unknown_or_local =
+        checks
+            .iter()
+            .filter(|check| check.status != "passed")
+            .any(|check| match check.blocker_kind.as_deref() {
+                Some(kind) => !kind.starts_with("external_") && kind != "dependent_gate",
+                None => true,
+            });
+
+    let scope = if has_external && !has_unknown_or_local {
+        "external_only"
+    } else if has_external {
+        "mixed"
+    } else {
+        "local_or_unknown"
+    };
+    Some(scope.to_string())
 }

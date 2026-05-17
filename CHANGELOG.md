@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.89-local-preview - 2026-05-17
+
+- Add top-level `blocker_scope` and `blocker_kinds` metadata to `agenthub readiness audit` and `agenthub readiness blockers` JSON/text output.
+- Classify the current Kimi-gated readiness state as `external_only`, so automation can distinguish a remaining external credential/provider-evidence blocker from unfinished local implementation work.
+
 ## 0.4.88-local-preview - 2026-05-17
 
 - Add `blocker_kind` metadata to provider recovery JSON/text output, so the first recovery screen classifies blocked Kimi as an external credential problem and the completion gate as dependent.
