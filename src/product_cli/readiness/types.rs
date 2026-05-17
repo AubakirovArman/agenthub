@@ -69,6 +69,8 @@ pub struct ReadinessCheck {
     pub id: String,
     pub status: String,
     pub detail: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub next_commands: Vec<String>,
 }
@@ -78,6 +80,8 @@ pub struct ReadinessBlocker {
     pub id: String,
     pub status: String,
     pub detail: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
     pub next_commands: Vec<String>,
 }
 

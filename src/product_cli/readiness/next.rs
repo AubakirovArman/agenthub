@@ -68,3 +68,19 @@ pub(super) fn check_next_commands(id: &str, detail: &str) -> Vec<String> {
     }
     Vec::new()
 }
+
+pub(super) fn check_blocker_kind(id: &str, detail: &str) -> Option<&'static str> {
+    if id == "kimi_auth" {
+        return Some("external_credential");
+    }
+    if id == "open_blockers" && detail.contains("kimi-auth") {
+        return Some("external_credential");
+    }
+    if id == "provider_kimi" {
+        return Some("external_provider_evidence");
+    }
+    if id == "rc_dogfood_gate" {
+        return Some("dependent_gate");
+    }
+    None
+}

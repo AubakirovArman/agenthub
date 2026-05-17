@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.86-local-preview - 2026-05-17
+
+- Add machine-readable `blocker_kind` metadata to readiness audit and focused blocker reports, so Kimi auth failures are classified as external credential blockers instead of looking like unfinished product code.
+- Render matching `check_blocker_kind` and `blocker_kind` rows in text readiness output for human release triage.
+
 ## 0.4.85-local-preview - 2026-05-17
 
 - Fix the cross-platform Kimi inspect-key blocker fixture by serializing the auth report as JSON, so Windows paths cannot break CI parsing.

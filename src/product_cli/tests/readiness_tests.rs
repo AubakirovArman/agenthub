@@ -55,6 +55,7 @@ fn readiness_audit_json_reports_blocked_kimi_without_secret() -> Result<()> {
             .iter()
             .find(|entry| entry["id"] == "kimi_auth")
             .expect("kimi auth check");
+        assert_eq!(kimi_auth["blocker_kind"], "external_credential");
         assert!(kimi_auth["next_commands"]
             .as_array()
             .unwrap()
@@ -87,6 +88,9 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
             .output
             .contains("AgentHub API-native readiness audit"));
         assert!(result.output.contains("check\tkimi_auth\tblocked"));
+        assert!(result
+            .output
+            .contains("check_blocker_kind\tkimi_auth\texternal_credential"));
         assert!(result.output.contains(
             "check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
         ));
@@ -129,6 +133,7 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
             .iter()
             .find(|entry| entry["id"] == "kimi_auth")
             .expect("kimi auth blocker");
+        assert_eq!(kimi_auth["blocker_kind"], "external_credential");
         assert!(kimi_auth["next_commands"]
             .as_array()
             .unwrap()
@@ -141,6 +146,27 @@ fn readiness_blockers_json_reports_only_unpassed_checks() -> Result<()> {
             .output
             .contains("agenthub providers preflight-key kimi --from-file"));
         assert!(!result.output.contains("kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn readiness_blockers_text_reports_blocker_kind() -> Result<()> {
+    let fixture = ReadinessFixture::blocked_kimi()?;
+    with_readiness_fixture(&fixture, || {
+        let result = readiness::render_blockers(
+            fixture.root.path(),
+            readiness::AuditOptions {
+                json: false,
+                no_refresh: true,
+            },
+        )?;
+
+        assert!(result.failed);
+        assert!(result.output.contains("blocker\tkimi_auth\tblocked"));
+        assert!(result
+            .output
+            .contains("blocker_kind\tkimi_auth\texternal_credential"));
         Ok(())
     })
 }

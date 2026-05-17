@@ -78,6 +78,9 @@ fn render_blockers_text(report: &ReadinessBlockerReport) -> String {
                 "blocker\t{}\t{}\t{}\n",
                 blocker.id, blocker.status, blocker.detail
             ));
+            if let Some(kind) = &blocker.blocker_kind {
+                out.push_str(&format!("blocker_kind\t{}\t{}\n", blocker.id, kind));
+            }
             for (index, command) in blocker.next_commands.iter().enumerate() {
                 out.push_str(&format!(
                     "blocker_next\t{}\t{}\t{}\n",
@@ -100,6 +103,7 @@ fn blocker_from_check(check: &ReadinessCheck) -> ReadinessBlocker {
         id: check.id.clone(),
         status: check.status.clone(),
         detail: check.detail.clone(),
+        blocker_kind: check.blocker_kind.clone(),
         next_commands: check.next_commands.clone(),
     }
 }

@@ -24,6 +24,9 @@ pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
             "check\t{}\t{}\t{}\n",
             check.id, check.status, check.detail
         ));
+        if let Some(kind) = &check.blocker_kind {
+            out.push_str(&format!("check_blocker_kind\t{}\t{}\n", check.id, kind));
+        }
         for (index, command) in check.next_commands.iter().enumerate() {
             out.push_str(&format!(
                 "check_next\t{}\t{}\t{}\n",
