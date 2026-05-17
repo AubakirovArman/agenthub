@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.94-local-preview - 2026-05-17
+
+- Add top-level `blocked_checks` metadata to `scripts/api-native-completion-audit.sh --json`, listing every incomplete completion-audit row by ID.
+- Add a matching `blocked_checks` row to text output so human release triage can see the same unresolved requirement list without walking all `check` rows.
+
 ## 0.4.93-local-preview - 2026-05-17
 
 - Add top-level `blocker_scope` and `blocker_kinds` rows to text output from `scripts/api-native-completion-audit.sh`, matching the JSON completion-audit scope metadata.

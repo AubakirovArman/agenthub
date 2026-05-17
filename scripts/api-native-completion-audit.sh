@@ -272,6 +272,21 @@ collect_blocker_kinds() {
   printf '%s\n' "$csv" | tr ',' '\n' | sort -u | paste -sd, -
 }
 
+collect_blocked_checks() {
+  local csv=""
+  local index
+  for index in "${!check_ids[@]}"; do
+    if [[ "${check_statuses[$index]}" == "passed" ]]; then
+      continue
+    fi
+    csv="$(csv_add_unique "$csv" "${check_ids[$index]}")"
+  done
+  if [[ -z "$csv" ]]; then
+    return
+  fi
+  printf '%s' "$csv"
+}
+
 completion_blocker_scope() {
   if [[ "$failed" != true ]]; then
     return
@@ -311,8 +326,10 @@ render_json() {
   local final_status="$1"
   local blocker_scope
   local blocker_kinds
+  local blocked_checks
   blocker_scope="$(completion_blocker_scope)"
   blocker_kinds="$(collect_blocker_kinds)"
+  blocked_checks="$(collect_blocked_checks)"
 
   printf '{\n'
   printf '  "objective": '
@@ -335,6 +352,19 @@ render_json() {
       printf '    '
       json_string "${blocker_kind_items[$blocker_kind_index]}"
       if (( blocker_kind_index + 1 == ${#blocker_kind_items[@]} )); then
+        printf '\n'
+      else
+        printf ',\n'
+      fi
+    done
+    printf '  ],\n'
+    printf '  "blocked_checks": [\n'
+    IFS=',' read -r -a blocked_check_items <<< "$blocked_checks"
+    local blocked_check_index
+    for blocked_check_index in "${!blocked_check_items[@]}"; do
+      printf '    '
+      json_string "${blocked_check_items[$blocked_check_index]}"
+      if (( blocked_check_index + 1 == ${#blocked_check_items[@]} )); then
         printf '\n'
       else
         printf ',\n'
@@ -651,6 +681,10 @@ if [[ "$failed" == true ]]; then
     fi
     if [[ -n "$blocker_kinds" ]]; then
       printf 'blocker_kinds\t%s\n' "$blocker_kinds"
+    fi
+    blocked_checks="$(collect_blocked_checks)"
+    if [[ -n "$blocked_checks" ]]; then
+      printf 'blocked_checks\t%s\n' "$blocked_checks"
     fi
     printf 'status\tincomplete\n'
   fi
