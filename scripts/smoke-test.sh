@@ -2,7 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/agenthub-smoke.XXXXXX")"
+TMP_ROOT="${TMPDIR:-$ROOT/target/tmp}"
+mkdir -p "$TMP_ROOT"
+TMP="$(mktemp -d "$TMP_ROOT/agenthub-smoke.XXXXXX")"
 PROJECT="$TMP/project"
 SPEC="$TMP/smoke-task.yaml"
 

@@ -4,6 +4,10 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.43-local-preview - 2026-05-17
+
+- Make the CI smoke-test temp directory portable on Windows tag builds by falling back to the repo-local `target/tmp` directory when `TMPDIR` is not available.
+
 ## 0.4.42-local-preview - 2026-05-17
 
 - Fix Windows CI stability for Ops tests by replacing a Unix-only `uptime` fixture command with a portable shell command.
