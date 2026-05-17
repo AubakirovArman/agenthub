@@ -161,6 +161,8 @@ Named HTTP profiles намеренно отключены в API-native mode. Pr
 
 Для разблокировки Kimi `providers unblock kimi` показывает текущий source-backed статус и точный порядок проверок. `providers preflight-key kimi --from-file <new-key-file>` проверяет candidate key через тот же OpenAI-compatible provider path без записи в `.kimi` и без вывода secret. Если настроен один из official Moonshot endpoint-ов, preflight проверяет и global, и China endpoint, а при успехе только одного региона печатает точную команду `MOONSHOT_BASE_URL=... providers rc-unblock`. `providers rc-unblock kimi --from-file <new-key-file>` теперь сам повторяет этот no-write preflight перед установкой; если проходит только один official region, команда использует этот endpoint для provider test и live Kimi provider dogfood sequence. Двухшаговый путь тоже остаётся: установить key через `providers rotate-key kimi`, затем запустить `providers rc-unblock kimi` из репозитория AgentHub. Если первый provider test всё ещё падает, `providers rc-unblock kimi` всё равно запускает Kimi auth check как диагностику, чтобы обновить redacted two-endpoint auth report перед возвратом `blocked`. `scripts/kimi-rc-unblock.sh` остаётся совместимым script path и теперь переносит `passed_endpoint` из `kimi-auth-report.json` в retry provider test и provider dogfood.
 
+Kimi Code CLI credentials не являются Moonshot API key. Если source file похож на Kimi CLI OAuth JSON с `access_token` или `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi` и `scripts/kimi-key-rotate.sh` отклоняют его до любой записи или provider test и не выводят token material.
+
 ## Config
 
 ```bash

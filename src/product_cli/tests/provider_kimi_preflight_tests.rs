@@ -80,6 +80,38 @@ fn providers_kimi_preflight_key_reports_failed_candidate_without_writing_secret(
 }
 
 #[test]
+fn providers_kimi_preflight_key_rejects_kimi_cli_oauth_credentials() -> Result<()> {
+    with_kimi_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let source = dir.path().join("kimi-code.json");
+        let target = dir.path().join(".kimi");
+        std::fs::write(
+            &source,
+            r#"{"access_token":"cli-access-secret","refresh_token":"cli-refresh-secret","scope":"kimi-code","token_type":"Bearer"}"#,
+        )?;
+        std::fs::write(&target, "old-kimi-secret\n")?;
+
+        let error = providers::preflight_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyPreflightOptions {
+                from_file: Some(source),
+                ..Default::default()
+            },
+        )
+        .unwrap_err()
+        .to_string();
+
+        assert!(error.contains("Kimi Code CLI OAuth credentials"));
+        assert!(error.contains("Moonshot OpenAI-compatible API key"));
+        assert!(!error.contains("cli-access-secret"));
+        assert!(!error.contains("cli-refresh-secret"));
+        assert_eq!(std::fs::read_to_string(target)?, "old-kimi-secret\n");
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_kimi_preflight_key_falls_forward_to_china_endpoint() -> Result<()> {
     let global = openai_error_stub_server(
         401,

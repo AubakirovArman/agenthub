@@ -152,6 +152,8 @@ Named HTTP profiles are intentionally disabled in API-native mode. Provider logs
 
 For Kimi auth unblock work, `providers unblock kimi` prints the current source-backed status and exact verification sequence. `providers preflight-key kimi --from-file <new-key-file>` tests a candidate key through the same OpenAI-compatible provider path without writing it to `.kimi` or printing the secret. When the configured endpoint is one of the official Moonshot endpoints, preflight tests both global and China endpoints and prints the exact `MOONSHOT_BASE_URL=... providers rc-unblock` command if only one region passes. `providers rc-unblock kimi --from-file <new-key-file>` now also runs that no-write preflight before installation; if only one official region passes, it reuses that endpoint for the provider test and live Kimi provider dogfood sequence. The two-step path still works: install a key with `providers rotate-key kimi`, then run `providers rc-unblock kimi` from the AgentHub repository. If the first provider test still fails, `providers rc-unblock kimi` runs the Kimi auth check anyway as diagnostics so the redacted two-endpoint auth report is refreshed before returning `blocked`. `scripts/kimi-rc-unblock.sh` remains as a compatible script path and now carries `passed_endpoint` from `kimi-auth-report.json` into provider test retry and provider dogfood.
 
+Kimi Code CLI credentials are not Moonshot API keys. If a source file looks like Kimi CLI OAuth JSON with `access_token` or `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi`, and `scripts/kimi-key-rotate.sh` reject it before any write or provider test and keep token material out of the output.
+
 ## Config
 
 ```bash

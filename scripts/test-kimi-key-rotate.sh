@@ -60,4 +60,19 @@ if printf 'bad key with spaces' | AGENTHUB_KIMI_KEY_FILE="$target" \
 fi
 grep -q 'embedded whitespace' "$TMP/bad.out"
 
+cli_credentials="$TMP/kimi-code.json"
+cat > "$cli_credentials" <<'JSON'
+{"access_token":"cli-access-secret","refresh_token":"cli-refresh-secret","scope":"kimi-code","token_type":"Bearer"}
+JSON
+if AGENTHUB_KIMI_KEY_FILE="$target" \
+  "$ROOT/scripts/kimi-key-rotate.sh" --from-file "$cli_credentials" --no-test > "$TMP/cli.out" 2>&1; then
+  printf 'expected Kimi Code CLI OAuth credentials to be rejected\n' >&2
+  exit 1
+fi
+grep -q 'Kimi Code CLI OAuth credentials' "$TMP/cli.out"
+if grep -q 'cli-access-secret\|cli-refresh-secret' "$TMP/cli.out"; then
+  printf 'CLI credential rejection leaked token material\n' >&2
+  exit 1
+fi
+
 printf 'agenthub Kimi key rotation test passed\n'

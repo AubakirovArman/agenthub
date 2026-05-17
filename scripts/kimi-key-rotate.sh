@@ -126,6 +126,10 @@ if [[ -z "$new_key" ]]; then
   printf 'replacement key is empty after trimming\n' >&2
   exit 2
 fi
+if printf '%s' "$new_key" | grep -Eq '"(access_token|refresh_token)"[[:space:]]*:'; then
+  printf 'source appears to be Kimi Code CLI OAuth credentials, not a Moonshot OpenAI-compatible API key; create a Moonshot API key and pass the plain key via --from-file, --from-env, or --stdin\n' >&2
+  exit 2
+fi
 if printf '%s' "$new_key" | grep -q '[[:space:]]'; then
   printf 'replacement key contains embedded whitespace after trimming\n' >&2
   exit 2

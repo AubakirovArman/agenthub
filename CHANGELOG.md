@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.61-local-preview - 2026-05-17
+
+- Reject Kimi Code CLI OAuth credential JSON during `providers preflight-key kimi`, `providers rotate-key kimi`, and `scripts/kimi-key-rotate.sh` before any write or provider test.
+- Keep the rejection redacted and explicit that AgentHub needs a plain Moonshot OpenAI-compatible API key, not Kimi CLI `access_token`/`refresh_token` material.
+
 ## 0.4.60-local-preview - 2026-05-17
 
 - Make `scripts/kimi-auth-check.sh` record the passing Moonshot endpoint in `kimi-auth-report.json` and print a region-preserving provider dogfood next action.

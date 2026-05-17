@@ -430,6 +430,38 @@ fn providers_kimi_rotate_key_rejects_embedded_whitespace() -> Result<()> {
 }
 
 #[test]
+fn providers_kimi_rotate_key_rejects_kimi_cli_oauth_credentials() -> Result<()> {
+    with_kimi_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let target = dir.path().join(".kimi");
+        std::fs::write(&target, "old-kimi-secret\n")?;
+
+        let error = providers::rotate_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyRotationOptions {
+                stdin_value: Some(
+                    r#"{"access_token":"cli-access-secret","refresh_token":"cli-refresh-secret","scope":"kimi-code"}"#
+                        .to_string(),
+                ),
+                target: Some(target.clone()),
+                test_after_install: false,
+                ..Default::default()
+            },
+        )
+        .unwrap_err()
+        .to_string();
+
+        assert!(error.contains("Kimi Code CLI OAuth credentials"));
+        assert!(error.contains("Moonshot OpenAI-compatible API key"));
+        assert!(!error.contains("cli-access-secret"));
+        assert!(!error.contains("cli-refresh-secret"));
+        assert_eq!(std::fs::read_to_string(target)?, "old-kimi-secret\n");
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result<()> {
     with_kimi_env(None, Some("new-kimi-test-key"), || {
         let dir = tempfile::tempdir()?;

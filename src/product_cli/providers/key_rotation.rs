@@ -6,6 +6,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
+use serde_json::Value;
 
 #[cfg(unix)]
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
@@ -350,12 +351,34 @@ fn normalize_replacement_key(raw_key: String) -> Result<(String, bool)> {
     if key.is_empty() {
         return Err(anyhow!("replacement key is empty after trimming"));
     }
+    if let Some(reason) = unsupported_kimi_credential_reason(&key) {
+        return Err(anyhow!(reason));
+    }
     if key.chars().any(char::is_whitespace) {
         return Err(anyhow!(
             "replacement key contains embedded whitespace after trimming"
         ));
     }
     Ok((key, trimmed))
+}
+
+fn unsupported_kimi_credential_reason(key: &str) -> Option<&'static str> {
+    let value = serde_json::from_str::<Value>(key).ok()?;
+    let object = value.as_object()?;
+    if object.contains_key("access_token")
+        || object.contains_key("refresh_token")
+        || object
+            .get("scope")
+            .and_then(Value::as_str)
+            .is_some_and(|scope| scope.contains("kimi-code"))
+    {
+        return Some(
+            "source appears to be Kimi Code CLI OAuth credentials, not a Moonshot OpenAI-compatible API key; create a Moonshot API key and pass the plain key via --from-file, --from-env, or --stdin",
+        );
+    }
+    Some(
+        "source is a JSON object, but AgentHub expects a plain Moonshot OpenAI-compatible API key value",
+    )
 }
 
 fn rotation_source(options: &KeyRotationOptions) -> Result<(String, String)> {
