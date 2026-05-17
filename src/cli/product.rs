@@ -5,7 +5,10 @@ use clap::Subcommand;
 #[derive(Debug, Subcommand)]
 pub enum ProviderCommands {
     List,
-    Status,
+    Status {
+        #[arg(long)]
+        json: bool,
+    },
     Setup {
         provider: String,
     },

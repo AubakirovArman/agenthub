@@ -51,6 +51,9 @@ git -C "$PROJECT" add .agent
 git -C "$PROJECT" commit -q -m "Initialize AgentHub"
 run_agenthub doctor > "$TMP/doctor.txt"
 run_agenthub providers status > "$TMP/providers-status.txt"
+run_agenthub providers status --json > "$TMP/providers-status.json"
+grep -q '"provider": "deepseek"' "$TMP/providers-status.json"
+grep -q '"state":' "$TMP/providers-status.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

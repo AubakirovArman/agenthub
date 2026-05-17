@@ -23,7 +23,13 @@ pub fn handle_version() -> Result<()> {
 pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Result<()> {
     match command {
         ProviderCommands::List => print!("{}", providers::render_list()),
-        ProviderCommands::Status => print!("{}", providers::render_status(project_root)?),
+        ProviderCommands::Status { json } => {
+            if json {
+                print!("{}", providers::render_status_json(project_root)?);
+            } else {
+                print!("{}", providers::render_status(project_root)?);
+            }
+        }
         ProviderCommands::Setup { provider } => {
             print!("{}", providers::setup_provider(project_root, &provider)?);
         }

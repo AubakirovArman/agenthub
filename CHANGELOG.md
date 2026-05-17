@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.68-local-preview - 2026-05-17
+
+- Add `agenthub providers status --json` with redacted machine-readable DeepSeek/Kimi provider state.
+- Surface provider availability, default role marker, endpoint/model, credential source, blocker flag, and blocked detail without printing API keys.
+
 ## 0.4.67-local-preview - 2026-05-17
 
 - Add `agenthub ecosystem status` with text and JSON output for the post-1.0 MCP/A2A foundation.

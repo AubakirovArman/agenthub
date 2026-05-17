@@ -14,6 +14,7 @@ mod key_rotation;
 mod probes;
 mod rc_unblock;
 mod roles;
+mod status_json;
 mod wizard;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
@@ -23,6 +24,7 @@ pub use key_rotation::{
 };
 pub use rc_unblock::{rc_unblock_provider, RcUnblockOptions, RcUnblockResult};
 pub use roles::{set_role_fallback, set_role_provider};
+pub use status_json::{render_status_json, ProviderStatusJson};
 pub use wizard::render_wizard;
 
 pub fn supported() -> Vec<ProviderInfo> {
