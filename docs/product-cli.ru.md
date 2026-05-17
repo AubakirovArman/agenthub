@@ -163,6 +163,15 @@ Named HTTP profiles намеренно отключены в API-native mode. Pr
 
 Kimi Code CLI credentials не являются Moonshot API key. Если source file похож на Kimi CLI OAuth JSON с `access_token` или `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi` и `scripts/kimi-key-rotate.sh` отклоняют его до любой записи или provider test и не выводят token material.
 
+## Ecosystem
+
+```bash
+agenthub ecosystem status
+agenthub ecosystem status --json
+```
+
+`ecosystem status` — disabled-by-default planning surface для post-1.0 work. Команда не подключается к MCP/A2A endpoints и не включает external protocol runtime. JSON output перечисляет planned surfaces из post-1.0 roadmap: MCP, A2A, Subagents v2, async background agents, Ollama/local LLM, multimodal context, team collaboration и enterprise/marketplace. Каждая строка содержит priority, scope, transports, policy gate, dependencies, acceptance signal и next implementation files.
+
 ## Config
 
 ```bash

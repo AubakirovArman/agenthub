@@ -63,13 +63,27 @@ fn ecosystem_status_surfaces_post_1_0_protocol_plan_without_enabling_network() -
 
     assert!(rendered.contains("phase\tpost_1_0_foundation"));
     assert!(rendered.contains("default\tno_external_protocol_connections"));
+    assert!(rendered.contains("surface\tmcp"));
     assert!(rendered.contains("protocol\tmcp"));
     assert!(rendered.contains("scope\ttools,resources,prompts"));
     assert!(rendered.contains("transports\tstdio,streamable-http"));
+    assert!(rendered.contains("surface\ta2a"));
     assert!(rendered.contains("protocol\ta2a"));
     assert!(rendered.contains("scope\tagent_cards,tasks,messages,artifacts"));
+    assert!(rendered.contains("surface\tsubagents-v2"));
+    assert!(rendered.contains("scope\torchestrator,isolated_workers"));
+    assert!(rendered.contains("surface\tasync-background-agents"));
+    assert!(rendered.contains("scope\tjob_queue,daemon,checkpoints"));
+    assert!(rendered.contains("surface\tollama-local-llm"));
+    assert!(rendered.contains("scope\tlocal_provider,offline_chat"));
+    assert!(rendered.contains("surface\tmultimodal-context"));
+    assert!(rendered.contains("scope\timage_mentions,pdf_mentions"));
+    assert!(rendered.contains("surface\tteam-collaboration"));
+    assert!(rendered.contains("surface\tenterprise-marketplace"));
     assert!(rendered.contains("disabled_until_explicit_registry_approval"));
     assert!(rendered.contains("disabled_until_trusted_agent_card_approval"));
+    assert!(rendered.contains("depends_on\t"));
+    assert!(rendered.contains("acceptance\t"));
     Ok(())
 }
 
@@ -78,9 +92,21 @@ fn ecosystem_status_json_is_machine_readable() -> Result<()> {
     let rendered = ecosystem::render_status(true);
     let parsed: serde_json::Value = serde_json::from_str(&rendered)?;
 
-    assert_eq!(parsed.as_array().map(Vec::len), Some(2));
+    assert_eq!(parsed.as_array().map(Vec::len), Some(8));
+    assert_eq!(parsed[0]["id"], "mcp");
     assert_eq!(parsed[0]["protocol"], "mcp");
-    assert_eq!(parsed[1]["protocol"], "a2a");
+    assert_eq!(parsed[1]["id"], "a2a");
+    assert_eq!(parsed[2]["id"], "subagents-v2");
+    assert_eq!(parsed[3]["id"], "async-background-agents");
+    assert_eq!(parsed[4]["id"], "ollama-local-llm");
+    assert_eq!(parsed[5]["id"], "multimodal-context");
+    assert_eq!(parsed[6]["id"], "team-collaboration");
+    assert_eq!(parsed[7]["id"], "enterprise-marketplace");
+    assert_eq!(parsed[7]["priority"], "P3");
+    assert!(parsed[0]["acceptance"]
+        .as_str()
+        .unwrap()
+        .contains("transcript"));
     Ok(())
 }
 

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.74-local-preview - 2026-05-17
+
+- Expand `agenthub ecosystem status [--json]` from the initial MCP/A2A surface to the full post-1.0 roadmap surface: MCP, A2A, Subagents v2, async background agents, Ollama/local LLM, multimodal context, team collaboration, and enterprise/marketplace.
+- Add dependency, gate, acceptance, and next-file metadata for each post-1.0 surface without enabling external protocol connections before the 1.0 readiness gate.
+
 ## 0.4.73-local-preview - 2026-05-17
 
 - Add `agenthub readiness blockers [--json] [--check] [--no-refresh]`, a focused source-backed view of only the incomplete 1.0 readiness requirements and unblock commands.

@@ -163,6 +163,15 @@ For Kimi auth unblock work, `providers unblock kimi` prints the current source-b
 
 Kimi Code CLI credentials are not Moonshot API keys. If a source file looks like Kimi CLI OAuth JSON with `access_token` or `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi`, and `scripts/kimi-key-rotate.sh` reject it before any write or provider test and keep token material out of the output.
 
+## Ecosystem
+
+```bash
+agenthub ecosystem status
+agenthub ecosystem status --json
+```
+
+`ecosystem status` is a disabled-by-default planning surface for post-1.0 work. It does not connect to MCP/A2A endpoints or enable external protocol runtime. The JSON output lists the planned surfaces from the post-1.0 roadmap: MCP, A2A, Subagents v2, async background agents, Ollama/local LLM, multimodal context, team collaboration, and enterprise/marketplace. Each row includes priority, scope, transports, policy gate, dependencies, acceptance signal, and next implementation files.
+
 ## Config
 
 ```bash
