@@ -13,6 +13,7 @@ mod http;
 mod key_rotation;
 mod probes;
 mod rc_unblock;
+mod recovery;
 mod roles;
 mod status_json;
 mod wizard;
@@ -23,6 +24,7 @@ pub use key_rotation::{
     KeyRotationOptions, KeyRotationResult,
 };
 pub use rc_unblock::{rc_unblock_provider, RcUnblockOptions, RcUnblockResult};
+pub use recovery::{render_recovery, ProviderRecoveryReport};
 pub use roles::{set_role_fallback, set_role_provider};
 pub use status_json::{render_status_json, ProviderStatusJson};
 pub use wizard::render_wizard;

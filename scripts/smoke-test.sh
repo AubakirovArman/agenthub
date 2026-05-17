@@ -54,6 +54,9 @@ run_agenthub providers status > "$TMP/providers-status.txt"
 run_agenthub providers status --json > "$TMP/providers-status.json"
 grep -q '"provider": "deepseek"' "$TMP/providers-status.json"
 grep -q '"state":' "$TMP/providers-status.json"
+run_agenthub providers recovery --json > "$TMP/providers-recovery.json"
+grep -q '"objective": "api_native_provider_recovery"' "$TMP/providers-recovery.json"
+grep -q '"gate":' "$TMP/providers-recovery.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

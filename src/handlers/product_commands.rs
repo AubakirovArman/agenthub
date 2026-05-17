@@ -30,6 +30,9 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
                 print!("{}", providers::render_status(project_root)?);
             }
         }
+        ProviderCommands::Recovery { json } => {
+            print!("{}", providers::render_recovery(project_root, json)?);
+        }
         ProviderCommands::Setup { provider } => {
             print!("{}", providers::setup_provider(project_root, &provider)?);
         }

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.69-local-preview - 2026-05-17
+
+- Add `agenthub providers recovery [--json]`, a redacted provider recovery report that turns DeepSeek/Kimi status into per-provider next commands and the API-native completion-audit gate.
+- Wire the recovery report into CLI smoke and API-native completion-audit next steps so release checks cover the provider recovery automation path without printing API keys.
+
 ## 0.4.68-local-preview - 2026-05-17
 
 - Add `agenthub providers status --json` with redacted machine-readable DeepSeek/Kimi provider state.

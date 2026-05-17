@@ -9,6 +9,10 @@ pub enum ProviderCommands {
         #[arg(long)]
         json: bool,
     },
+    Recovery {
+        #[arg(long)]
+        json: bool,
+    },
     Setup {
         provider: String,
     },
