@@ -16,7 +16,7 @@ if [[ ! -x "$AGENTHUB_BIN" ]]; then
   cargo build --manifest-path "$ROOT/Cargo.toml" --locked >/dev/null
 fi
 
-mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek"
+mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/suite-stress"
 cat > "$HOME_DIR/sessions/no-project/chats/chat-demo.jsonl" <<'JSONL'
 {"at":"2026-05-17T00:00:00Z","kind":"created"}
 {"at":"2026-05-17T00:00:01Z","kind":"intent_classified","intent":"chat","mode":"chat","reason":"no project runtime in current folder","text":"hello"}
@@ -44,8 +44,19 @@ cat > "$PERF" <<'JSON'
 {"tx_count":25,"metrics":[{"name":"transactions_no_commit","success":true,"avg_ms":1200},{"name":"tx_status","success":true}]}
 JSON
 touch "$HISTORY/runs/provider-deepseek/provider-dogfood-report.json"
+cat > "$HISTORY/runs/suite-stress/dogfood-report.json" <<'JSON'
+{
+  "rc_evidence": {
+    "project_edit_sessions": 2,
+    "project_cost_receipts": 2,
+    "ops_sessions": 2,
+    "ops_cost_receipts": 2
+  }
+}
+JSON
 cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"provider-deepseek","archived_at":"2026-05-17T00:00:04Z","kind":"provider","report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
+{"run_id":"suite-stress","archived_at":"2026-05-17T00:00:05Z","kind":"suite","report":"$HISTORY/runs/suite-stress/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 JSONL
 
 AGENTHUB_HOME="$HOME_DIR" \
@@ -59,6 +70,8 @@ AGENTHUB_BIN="$AGENTHUB_BIN" \
 grep -q '"session_id":"chat-demo"' "$EVIDENCE"
 grep -q '"session_id":"tx-demo"' "$EVIDENCE"
 grep -q '"session_id":"ops-cmd-demo"' "$EVIDENCE"
+grep -q '"session_id":"dogfood-suite-stress-project-1"' "$EVIDENCE"
+grep -q '"session_id":"dogfood-suite-stress-ops-1"' "$EVIDENCE"
 grep -q '"flow":"project_edit"' "$EVIDENCE"
 grep -q '"flow":"ops"' "$EVIDENCE"
 grep -q '"provider":"deepseek"' "$EVIDENCE"
@@ -76,10 +89,10 @@ AGENTHUB_DOGFOOD_HISTORY_DIR="$HISTORY" \
 AGENTHUB_DOGFOOD_MIN_SUITE_RUNS=0 \
 AGENTHUB_DOGFOOD_MIN_DAYS=1 \
 AGENTHUB_RC_EVIDENCE="$EVIDENCE" \
-AGENTHUB_RC_MIN_REAL_SESSIONS=3 \
-AGENTHUB_RC_MIN_OPS_FLOWS=1 \
-AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=1 \
-AGENTHUB_RC_MIN_COST_RECEIPTS=3 \
+AGENTHUB_RC_MIN_REAL_SESSIONS=7 \
+AGENTHUB_RC_MIN_OPS_FLOWS=3 \
+AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS=3 \
+AGENTHUB_RC_MIN_COST_RECEIPTS=7 \
 AGENTHUB_RC_REQUIRED_PROVIDERS=deepseek \
 AGENTHUB_RC_REQUIRED_CHECKS=chat_no_bootstrap,ops_no_bootstrap,cost_receipts,ops_receipts,resume,rewind,stats,approval_ux,long_session_latency \
   "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/gate.out"

@@ -28,6 +28,13 @@ json_field() {
     | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
+number_or_zero() {
+  case "$1" in
+    ''|*[!0-9]*) printf '0' ;;
+    *) printf '%s' "$((10#$1))" ;;
+  esac
+}
+
 write_jsonl() {
   printf '%s\n' "$1" >> "$tmp"
 }
@@ -222,6 +229,50 @@ collect_provider_history() {
   return 0
 }
 
+collect_dogfood_reports() {
+  local report
+  for report in "$ROOT/target/dogfood/dogfood-report.json" "$HISTORY_DIR"/runs/*/dogfood-report.json; do
+    [[ -f "$report" ]] || continue
+    collect_dogfood_report "$report"
+  done
+  return 0
+}
+
+collect_dogfood_report() {
+  local report="$1"
+  local line run_id project_sessions project_costs ops_sessions ops_costs index
+  line="$(tr -d '\n' < "$report")"
+  run_id="$(basename "$(dirname "$report")")"
+  [[ "$run_id" == "." || "$run_id" == "target" || "$run_id" == "dogfood" ]] && run_id="current"
+  project_sessions="$(json_field "$line" project_edit_sessions)"
+  project_costs="$(json_field "$line" project_cost_receipts)"
+  ops_sessions="$(json_field "$line" ops_sessions)"
+  ops_costs="$(json_field "$line" ops_cost_receipts)"
+
+  project_sessions="$(number_or_zero "$project_sessions")"
+  project_costs="$(number_or_zero "$project_costs")"
+  ops_sessions="$(number_or_zero "$ops_sessions")"
+  ops_costs="$(number_or_zero "$ops_costs")"
+
+  for index in $(seq 1 "$project_sessions" 2>/dev/null || true); do
+    if (( index <= project_costs )); then
+      write_session "dogfood-${run_id}-project-${index}" "project" "project_edit" "dogfood" "true" "dogfood_report" "$report"
+    else
+      write_session "dogfood-${run_id}-project-${index}" "project" "project_edit" "dogfood" "false" "dogfood_report" "$report"
+    fi
+  done
+  for index in $(seq 1 "$ops_sessions" 2>/dev/null || true); do
+    if (( index <= ops_costs )); then
+      write_session "dogfood-${run_id}-ops-${index}" "ops" "ops" "local-shell" "true" "dogfood_report" "$report"
+    else
+      write_session "dogfood-${run_id}-ops-${index}" "ops" "ops" "local-shell" "false" "dogfood_report" "$report"
+    fi
+  done
+  if (( project_sessions >= LONG_SESSION_MIN_TX )); then
+    write_check "long_session_latency" "dogfood_report" "$report"
+  fi
+}
+
 collect_ops_receipts() {
   local receipts="$AGENTHUB_DATA_HOME/ops/command_receipts.jsonl"
   if [[ -f "$receipts" && -s "$receipts" ]]; then
@@ -280,6 +331,7 @@ checks_written=""
 collect_chat_dirs
 collect_project_transactions
 collect_provider_history
+collect_dogfood_reports
 collect_ops_receipts
 collect_perf_checks
 collect_script_checks

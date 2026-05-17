@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.33-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.34-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -185,7 +185,8 @@ These are the next concrete engineering steps from the current `0.4.33-local-pre
 | `0.4.31` | Kimi auth blocker diagnostics | Done: `providers diagnose deepseek|kimi` now prints safe credential source, length, SHA-256 fingerprint, and trim metadata without exposing the key, making 401 auth failures traceable to the exact env/file credential |
 | `0.4.32` | Headless Ops exec and RC acceptance rehearsal | Done: `agenthub ops exec "<command>" [--jsonl]` runs safe Ops checks without `.agent`, writes host-scoped receipts, lets the collector count real Ops receipt flows, and `scripts/rc-acceptance.sh` rehearses stats, approval UX, resume and undo/rewind mechanics |
 | `0.4.33` | Richer source-backed RC evidence collection | Done: the collector now detects resume, rewind, approval UX, stats, and perf-profile-backed long-session latency from real artifacts instead of requiring manual evidence rows |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.33` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
+| `0.4.34` | Dogfood report RC evidence summaries | Done: `scripts/dogfood.sh` can run project-edit stress and headless Ops checks, writes `rc_evidence` counts into dogfood reports, and the collector counts archived reports as source-backed RC sessions |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.34` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -199,7 +200,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.33` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, and richer source-backed evidence harvesting rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.34` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, and dogfood report RC evidence summaries rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 

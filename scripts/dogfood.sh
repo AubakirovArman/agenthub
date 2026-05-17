@@ -9,6 +9,11 @@ STRESS_STATUS_LINES=0
 STRESS_DURATION_SECS=0
 STRESS_INDEX_EXISTS=false
 STRESS_PROJECT_PATH=""
+STRESS_COST_RECEIPTS=0
+OPS_COUNT=0
+OPS_COMPLETED=0
+OPS_COST_RECEIPTS=0
+OPS_PROJECT_PATH=""
 PROVIDER_DOGFOOD_STATUS="skipped"
 PROVIDER_DOGFOOD_REPORT=""
 
@@ -89,6 +94,7 @@ YAML
   status_lines="$("$AGENTHUB_BIN" --project "$project" tx status | wc -l | tr -d ' ')"
   test "$status_lines" -ge "$count"
   test -f "$project/.agent/cache/indexes/transactions.sqlite3"
+  STRESS_COST_RECEIPTS="$(find "$project/.agent/tx" -mindepth 2 -maxdepth 2 -name cost.json -type f | wc -l | tr -d ' ')"
   finished="$(date +%s)"
 
   STRESS_COUNT="$count"
@@ -103,6 +109,36 @@ YAML
 }
 
 run_step "stress transactions" run_stress
+
+run_ops_smoke() {
+  local count="${AGENTHUB_DOGFOOD_OPS_COUNT:-0}"
+  if [[ "$count" -le 0 ]]; then
+    printf 'skip Ops dogfood; set AGENTHUB_DOGFOOD_OPS_COUNT=20 to run headless Ops checks\n'
+    return
+  fi
+
+  local tmp project index
+  tmp="$(mktemp -d "${TMPDIR:-/tmp}/agenthub-dogfood-ops.XXXXXX")"
+  project="$tmp/ops-empty"
+  mkdir -p "$project" "$ROOT/target/dogfood/ops"
+
+  for index in $(seq 1 "$count"); do
+    printf 'ops command %s/%s\n' "$index" "$count"
+    "$AGENTHUB_BIN" --project "$project" ops exec "uptime" --jsonl > "$ROOT/target/dogfood/ops/ops-$index.jsonl"
+    test ! -e "$project/.agent"
+    OPS_COMPLETED="$index"
+  done
+
+  OPS_COUNT="$count"
+  OPS_COST_RECEIPTS="$OPS_COMPLETED"
+  OPS_PROJECT_PATH="$project"
+  if [[ "${AGENTHUB_DOGFOOD_KEEP:-0}" != "1" ]]; then
+    rm -rf "$tmp"
+    OPS_PROJECT_PATH=""
+  fi
+}
+
+run_step "ops headless checks" run_ops_smoke
 
 run_provider_dogfood() {
   if [[ -z "${AGENTHUB_DOGFOOD_PROVIDER:-}" ]]; then
@@ -137,10 +173,23 @@ write_report() {
   "stress": {
     "requested_count": ${AGENTHUB_DOGFOOD_STRESS_COUNT:-0},
     "completed_count": $STRESS_COUNT,
+    "cost_receipts": $STRESS_COST_RECEIPTS,
     "status_lines": $STRESS_STATUS_LINES,
     "duration_secs": $STRESS_DURATION_SECS,
     "sqlite_index_exists": $STRESS_INDEX_EXISTS,
     "kept_project": "$(json_escape "$STRESS_PROJECT_PATH")"
+  },
+  "ops": {
+    "requested_count": ${AGENTHUB_DOGFOOD_OPS_COUNT:-0},
+    "completed_count": $OPS_COMPLETED,
+    "cost_receipts": $OPS_COST_RECEIPTS,
+    "kept_project": "$(json_escape "$OPS_PROJECT_PATH")"
+  },
+  "rc_evidence": {
+    "project_edit_sessions": $STRESS_COUNT,
+    "project_cost_receipts": $STRESS_COST_RECEIPTS,
+    "ops_sessions": $OPS_COMPLETED,
+    "ops_cost_receipts": $OPS_COST_RECEIPTS
   },
   "provider": {
     "requested_provider": "$(json_escape "${AGENTHUB_DOGFOOD_PROVIDER:-}")",

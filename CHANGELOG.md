@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.34-local-preview - 2026-05-17
+
+- Add optional dogfood Ops runs with `AGENTHUB_DOGFOOD_OPS_COUNT`, exercising headless `agenthub ops exec` without creating `.agent` in the target folder.
+- Extend dogfood reports with an `rc_evidence` summary for project-edit stress transactions and Ops checks, including source-backed cost receipt counts.
+- Teach `scripts/rc-evidence-collect.sh` to count archived dogfood report evidence as RC sessions, Ops flows, project-edit flows, cost receipts, and long-session evidence when the configured threshold is met.
+
 ## 0.4.33-local-preview - 2026-05-17
 
 - Extend `scripts/rc-evidence-collect.sh` to detect source-backed `resume`, `rewind`, and project approval UX checks from transaction artifacts such as `resume.json`, `undo.json`, `command_policy.json`, and blocked journals.
