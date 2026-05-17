@@ -172,13 +172,14 @@ chmod 600 "$TARGET"
 trap - EXIT INT TERM
 
 printf 'status\tinstalled\n'
-printf 'next\t1\tscripts/kimi-rc-unblock.sh\n'
-printf 'next\t2\tagenthub providers unblock kimi\n'
-printf 'next\t3\tagenthub providers test kimi\n'
-printf 'next\t4\tscripts/kimi-auth-check.sh\n'
-printf 'next\t5\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n'
-printf 'next\t6\tscripts/rc-evidence-collect.sh\n'
-printf 'next\t7\tscripts/rc-dogfood-gate.sh --check\n'
+printf 'next\t1\tagenthub providers rc-unblock kimi\n'
+printf 'next\t2\tscripts/kimi-rc-unblock.sh\n'
+printf 'next\t3\tagenthub providers unblock kimi\n'
+printf 'next\t4\tagenthub providers test kimi\n'
+printf 'next\t5\tscripts/kimi-auth-check.sh\n'
+printf 'next\t6\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n'
+printf 'next\t7\tscripts/rc-evidence-collect.sh\n'
+printf 'next\t8\tscripts/rc-dogfood-gate.sh --check\n'
 
 if [[ "$NO_TEST" == false ]]; then
   "$ROOT/scripts/kimi-auth-check.sh"

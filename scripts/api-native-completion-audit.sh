@@ -293,12 +293,13 @@ if [[ "$failed" == true ]]; then
   printf 'next\t1\tagenthub providers unblock kimi\n'
   printf 'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
   printf 'next\t3\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
-  printf 'next\t4\tscripts/kimi-rc-unblock.sh\n'
-  printf 'next\t5\tagenthub providers test kimi\n'
-  printf 'next\t6\tscripts/kimi-auth-check.sh\n'
-  printf 'next\t7\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n'
-  printf 'next\t8\tscripts/rc-evidence-collect.sh\n'
-  printf 'next\t9\tscripts/rc-dogfood-gate.sh --check\n'
+  printf 'next\t4\tagenthub providers rc-unblock kimi\n'
+  printf 'next\t5\tscripts/kimi-rc-unblock.sh\n'
+  printf 'next\t6\tagenthub providers test kimi\n'
+  printf 'next\t7\tscripts/kimi-auth-check.sh\n'
+  printf 'next\t8\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n'
+  printf 'next\t9\tscripts/rc-evidence-collect.sh\n'
+  printf 'next\t10\tscripts/rc-dogfood-gate.sh --check\n'
   if [[ "$CHECK" == true ]]; then
     exit 1
   fi

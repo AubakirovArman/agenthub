@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.53-local-preview - 2026-05-17
+
+- Add `agenthub providers rc-unblock kimi`, a product CLI wrapper for the Kimi RC unblock pipeline, while keeping `scripts/kimi-rc-unblock.sh` as a compatible script path.
+- Update Kimi unblock, key rotation, API-native audit, and docs so the first post-rotation path is now product CLI before falling back to scripts.
+
 ## 0.4.52-local-preview - 2026-05-17
 
 - Add `scripts/kimi-rc-unblock.sh`, a one-shot Kimi RC unblock runner that executes provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC dogfood gate in order after key rotation.

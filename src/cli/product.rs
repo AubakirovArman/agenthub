@@ -18,6 +18,15 @@ pub enum ProviderCommands {
     Unblock {
         provider: String,
     },
+    RcUnblock {
+        provider: String,
+
+        #[arg(long)]
+        skip_provider_dogfood: bool,
+
+        #[arg(long)]
+        no_check: bool,
+    },
     RotateKey {
         provider: String,
 

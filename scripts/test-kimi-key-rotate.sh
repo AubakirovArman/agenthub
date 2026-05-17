@@ -17,7 +17,8 @@ AGENTHUB_KIMI_KEY_FILE="$target" \
 grep -q $'status\tinstalled' "$TMP/file.out"
 grep -q $'source\tfile:' "$TMP/file.out"
 grep -q $'trimmed_for_write\ttrue' "$TMP/file.out"
-grep -q $'next\t1\tscripts/kimi-rc-unblock.sh' "$TMP/file.out"
+grep -q $'next\t1\tagenthub providers rc-unblock kimi' "$TMP/file.out"
+grep -q $'next\t2\tscripts/kimi-rc-unblock.sh' "$TMP/file.out"
 grep -q $'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/file.out"
 if grep -q "$secret" "$TMP/file.out"; then
   printf 'rotation output leaked the Kimi key\n' >&2

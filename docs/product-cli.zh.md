@@ -111,6 +111,7 @@ KIMI_API_KEY=... agenthub providers test kimi
 agenthub providers diagnose deepseek
 agenthub providers unblock kimi
 agenthub providers rotate-key kimi --from-file ./new-kimi.key
+agenthub providers rc-unblock kimi
 scripts/kimi-rc-unblock.sh
 agenthub providers set executor deepseek
 agenthub providers fallback chat deepseek kimi
@@ -148,7 +149,7 @@ Named HTTP profiles are intentionally disabled in API-native mode. Provider logs
 
 `providers test deepseek` and `providers test kimi` perform real OpenAI-compatible completion requests and then try optional `/v1/models`; a missing models endpoint is reported as `models unavailable`, not as a failed provider test. If the completion request fails with auth, rate-limit, timeout, transport, or server errors, the command prints a structured failure receipt with `request_id`, endpoint, model, token estimate, `reason`, `auth_hint`, and the next `providers diagnose` command, then exits non-zero for automation.
 
-For Kimi auth unblock work, `providers unblock kimi` prints the current source-backed status and exact verification sequence. After installing a replacement key with `providers rotate-key kimi`, run `scripts/kimi-rc-unblock.sh` from the AgentHub repository to execute the remaining RC path in order: provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC dogfood gate.
+For Kimi auth unblock work, `providers unblock kimi` prints the current source-backed status and exact verification sequence. After installing a replacement key with `providers rotate-key kimi`, run `providers rc-unblock kimi` from the AgentHub repository to execute the remaining RC path in order: provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC dogfood gate. `scripts/kimi-rc-unblock.sh` remains as a compatible script path.
 
 ## Config
 

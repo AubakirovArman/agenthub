@@ -127,7 +127,7 @@ scripts/dogfood.sh
 
 `scripts/kimi-auth-check.sh` — безопасный первый шаг, когда RC gate заблокирован Kimi. Он проверяет оба official Moonshot endpoints (`https://api.moonshot.ai/v1` и `https://api.moonshot.cn/v1`), пишет redacted artifacts в `target/dogfood/kimi-auth/` и report в `target/dogfood/kimi-auth-report.json`. Если оба endpoint-а возвращают `auth_failed`, Kimi/Moonshot API key нужно заменить или перевыпустить до provider dogfood.
 
-После ротации валидного Kimi/Moonshot key `scripts/kimi-rc-unblock.sh` запускает полный unblock sequence в правильном порядке: `agenthub providers test kimi`, `scripts/kimi-auth-check.sh`, live Kimi provider dogfood, `scripts/rc-evidence-collect.sh` и `scripts/rc-dogfood-gate.sh --check`.
+После ротации валидного Kimi/Moonshot key `providers rc-unblock kimi` запускает полный unblock sequence в правильном порядке: `agenthub providers test kimi`, `scripts/kimi-auth-check.sh`, live Kimi provider dogfood, `scripts/rc-evidence-collect.sh` и `scripts/rc-dogfood-gate.sh --check`.
 
 RC evidence collector читает `target/dogfood/kimi-auth-report.json`. Blocked report превращается в open critical blocker `kimi-auth` в `scripts/rc-dogfood-gate.sh --check`; passed report пишет check `kimi_auth`, но полный RC всё равно требует passed Kimi provider dogfood.
 

@@ -87,12 +87,13 @@ pub fn rotate_provider_key(
 
     install_key_atomically(&target, &new_key)?;
     out.push_str("status\tinstalled\n");
-    out.push_str("next\t1\tscripts/kimi-rc-unblock.sh\n");
-    out.push_str("next\t2\tagenthub providers test kimi\n");
-    out.push_str("next\t3\tscripts/kimi-auth-check.sh\n");
-    out.push_str("next\t4\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
-    out.push_str("next\t5\tscripts/rc-evidence-collect.sh\n");
-    out.push_str("next\t6\tscripts/rc-dogfood-gate.sh --check\n");
+    out.push_str("next\t1\tagenthub providers rc-unblock kimi\n");
+    out.push_str("next\t2\tscripts/kimi-rc-unblock.sh\n");
+    out.push_str("next\t3\tagenthub providers test kimi\n");
+    out.push_str("next\t4\tscripts/kimi-auth-check.sh\n");
+    out.push_str("next\t5\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
+    out.push_str("next\t6\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("next\t7\tscripts/rc-dogfood-gate.sh --check\n");
 
     let mut provider_test_failed = false;
     if options.test_after_install {

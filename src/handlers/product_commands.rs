@@ -40,6 +40,24 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Unblock { provider } => {
             print!("{}", providers::unblock_provider(project_root, &provider)?);
         }
+        ProviderCommands::RcUnblock {
+            provider,
+            skip_provider_dogfood,
+            no_check,
+        } => {
+            let result = providers::rc_unblock_provider(
+                project_root,
+                &provider,
+                providers::RcUnblockOptions {
+                    skip_provider_dogfood,
+                    no_check,
+                },
+            )?;
+            print!("{}", result.output);
+            if result.failed {
+                bail!("provider RC unblock failed for `{provider}`");
+            }
+        }
         ProviderCommands::RotateKey {
             provider,
             from_file,

@@ -161,14 +161,15 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock
             .contains("step\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
         assert!(unblock.contains("step\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t3\tscripts/kimi-rc-unblock.sh"));
-        assert!(unblock.contains("step\t4\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t5\tscripts/kimi-auth-check.sh"));
+        assert!(unblock.contains("step\t3\tagenthub providers rc-unblock kimi"));
+        assert!(unblock.contains("step\t4\tscripts/kimi-rc-unblock.sh"));
+        assert!(unblock.contains("step\t5\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t6\tscripts/kimi-auth-check.sh"));
         assert!(unblock.contains(
-            "step\t6\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
+            "step\t7\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
         ));
-        assert!(unblock.contains("step\t7\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t8\tscripts/rc-dogfood-gate.sh --check"));
+        assert!(unblock.contains("step\t8\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t9\tscripts/rc-dogfood-gate.sh --check"));
         Ok(())
     })
 }
@@ -202,7 +203,10 @@ fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider(
         assert!(result.output.contains("status\tinstalled"));
         assert!(result
             .output
-            .contains("next\t1\tscripts/kimi-rc-unblock.sh"));
+            .contains("next\t1\tagenthub providers rc-unblock kimi"));
+        assert!(result
+            .output
+            .contains("next\t2\tscripts/kimi-rc-unblock.sh"));
         assert!(result.output.contains(
             "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh"
         ));
@@ -212,6 +216,76 @@ fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider(
             .contains("provider_test\tok\tkimi\tcompletion_tokens:7"));
         assert!(!result.output.contains("rotated-kimi-secret"));
         assert!(joined.contains("authorization: bearer rotated-kimi-secret"));
+        Ok(())
+    })
+}
+
+#[cfg(unix)]
+#[test]
+fn providers_kimi_rc_unblock_runs_cli_owned_sequence() -> Result<()> {
+    let stub = openai_stub_server("kimi rc ok", 8)?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let scripts = dir.path().join("scripts");
+        std::fs::create_dir_all(&scripts)?;
+        write_script(&scripts.join("kimi-auth-check.sh"), "printf 'auth ok\\n'\n")?;
+        write_script(
+            &scripts.join("provider-dogfood.sh"),
+            "printf 'dogfood provider=%s live=%s\\n' \"$AGENTHUB_PROVIDER_DOGFOOD_PROVIDER\" \"$AGENTHUB_PROVIDER_DOGFOOD_LIVE\"\n",
+        )?;
+        write_script(
+            &scripts.join("rc-evidence-collect.sh"),
+            "printf 'collect ok\\n'\n",
+        )?;
+        write_script(
+            &scripts.join("rc-dogfood-gate.sh"),
+            "printf 'gate args:%s\\n' \"$*\"\n",
+        )?;
+
+        let result = providers::rc_unblock_provider(
+            dir.path(),
+            "kimi",
+            providers::RcUnblockOptions::default(),
+        )?;
+
+        assert!(!result.failed);
+        assert!(result.output.contains("step\tprovider_test\tpassed"));
+        assert!(result.output.contains("step\tkimi_auth_check\tpassed"));
+        assert!(result.output.contains("step\tprovider_dogfood\tpassed"));
+        assert!(result
+            .output
+            .contains("provider_dogfood\tstdout\tdogfood provider=kimi live=1"));
+        assert!(result.output.contains("step\trc_evidence_collect\tpassed"));
+        assert!(result.output.contains("step\trc_dogfood_gate\tpassed"));
+        assert!(result
+            .output
+            .contains("rc_dogfood_gate\tstdout\tgate args:--check"));
+        assert!(result.output.contains("status\tready"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
+    let stub = openai_error_stub_server(
+        401,
+        r#"{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}"#,
+    )?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+
+        let result = providers::rc_unblock_provider(
+            dir.path(),
+            "kimi",
+            providers::RcUnblockOptions::default(),
+        )?;
+
+        assert!(result.failed);
+        assert!(result.output.contains("step\tprovider_test\tfailed"));
+        assert!(result.output.contains("status\tblocked"));
+        assert!(result.output.contains("reason\tprovider_test_failed"));
         Ok(())
     })
 }
@@ -285,4 +359,18 @@ fn providers_kimi_status_ignores_stale_auth_blocker_after_key_change() -> Result
         assert!(!status.contains("latest Kimi auth check blocked"));
         Ok(())
     })
+}
+
+#[cfg(unix)]
+fn write_script(path: &std::path::Path, body: &str) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+
+    std::fs::write(
+        path,
+        format!("#!/usr/bin/env bash\nset -euo pipefail\n{body}"),
+    )?;
+    let mut permissions = std::fs::metadata(path)?.permissions();
+    permissions.set_mode(0o755);
+    std::fs::set_permissions(path, permissions)?;
+    Ok(())
 }

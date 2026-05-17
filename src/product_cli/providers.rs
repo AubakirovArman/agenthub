@@ -12,11 +12,13 @@ mod diagnostics;
 mod http;
 mod key_rotation;
 mod probes;
+mod rc_unblock;
 mod roles;
 mod wizard;
 
 pub use catalog::{ProviderInfo, ProviderStatus};
 pub use key_rotation::{rotate_provider_key, KeyRotationOptions, KeyRotationResult};
+pub use rc_unblock::{rc_unblock_provider, RcUnblockOptions, RcUnblockResult};
 pub use roles::{set_role_fallback, set_role_provider};
 pub use wizard::render_wizard;
 
@@ -409,22 +411,23 @@ fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
     } else {
         out.push_str("step\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
     }
+    out.push_str("step\t3\tagenthub providers rc-unblock kimi\n");
     let rc_unblock_script = project_root.join("scripts/kimi-rc-unblock.sh");
     if rc_unblock_script.exists() {
-        out.push_str(&format!("step\t3\t{}\n", rc_unblock_script.display()));
+        out.push_str(&format!("step\t4\t{}\n", rc_unblock_script.display()));
     } else {
-        out.push_str("step\t3\tscripts/kimi-rc-unblock.sh\n");
+        out.push_str("step\t4\tscripts/kimi-rc-unblock.sh\n");
     }
-    out.push_str("step\t4\tagenthub providers test kimi\n");
+    out.push_str("step\t5\tagenthub providers test kimi\n");
     let script = project_root.join("scripts/kimi-auth-check.sh");
     if script.exists() {
-        out.push_str(&format!("step\t5\t{}\n", script.display()));
+        out.push_str(&format!("step\t6\t{}\n", script.display()));
     } else {
-        out.push_str("step\t5\tscripts/kimi-auth-check.sh\n");
+        out.push_str("step\t6\tscripts/kimi-auth-check.sh\n");
     }
-    out.push_str("step\t6\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
-    out.push_str("step\t7\tscripts/rc-evidence-collect.sh\n");
-    out.push_str("step\t8\tscripts/rc-dogfood-gate.sh --check\n");
+    out.push_str("step\t7\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
+    out.push_str("step\t8\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("step\t9\tscripts/rc-dogfood-gate.sh --check\n");
 }
 
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {

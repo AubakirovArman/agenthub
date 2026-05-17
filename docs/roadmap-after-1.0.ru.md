@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.52-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.53-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -204,7 +204,8 @@ These are the next concrete engineering steps from the current `0.4.52-local-pre
 | `0.4.50` | Kimi key rotation helper | Done: `scripts/kimi-key-rotate.sh` installs replacement Kimi/Moonshot keys atomically, never prints the secret, reports safe fingerprints, and can run the auth check after rotation |
 | `0.4.51` | First-class Kimi key rotation CLI | Done: `agenthub providers rotate-key kimi` installs replacement keys from file/env/stdin without secret output, supports dry-run/target overrides, warns when env keys override the target file, and can run the provider test immediately |
 | `0.4.52` | One-shot Kimi RC unblock path | Done: `scripts/kimi-rc-unblock.sh`, `providers unblock kimi`, key rotation output, and the completion audit all include the required Kimi provider dogfood step before RC evidence collection and gate checks |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.52` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, passed DeepSeek/Kimi provider dogfood, and no Kimi/auth/latency/approval blockers |
+| `0.4.53` | Product CLI Kimi RC unblock | Done: `agenthub providers rc-unblock kimi` runs the same post-rotation provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and RC gate sequence from the product CLI |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.53` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, passed DeepSeek/Kimi provider dogfood, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -218,12 +219,12 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.52` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, provider-test exit-code release smoke, Kimi blocked status visibility, Kimi auth retest from blocked status, provider unblock CLI runbooks, API-native completion audits, safe Kimi key rotation, first-class Kimi key rotation CLI UX, and one-shot Kimi RC unblock orchestration rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.53` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, provider-test exit-code release smoke, Kimi blocked status visibility, Kimi auth retest from blocked status, provider unblock CLI runbooks, API-native completion audits, safe Kimi key rotation, first-class Kimi key rotation CLI UX, one-shot Kimi RC unblock orchestration, and product CLI RC unblock UX rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 
 1. Run `AGENTHUB_DOGFOOD_ACCEPTANCE=1 scripts/dogfood.sh` or `scripts/rc-acceptance.sh` as a local rehearsal after risky runtime changes; it proves stats, Ops no-bootstrap, approval UX, resume and undo/rewind still produce inspectable artifacts.
-2. After rotating a valid Kimi/Moonshot key, run `scripts/kimi-rc-unblock.sh`; it performs `providers test kimi`, `kimi-auth-check`, live Kimi provider dogfood, RC evidence collection, and the RC gate in the correct order.
+2. After rotating a valid Kimi/Moonshot key, run `providers rc-unblock kimi`; it performs `providers test kimi`, `kimi-auth-check`, live Kimi provider dogfood, RC evidence collection, and the RC gate in the correct order.
 3. Run `scripts/api-native-completion-audit.sh --check`, review the generated `target/dogfood/rc-evidence.jsonl`, fill any remaining real daily evidence, and pass `scripts/rc-dogfood-gate.sh --check` without lowering thresholds.
 4. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.
 5. Stabilize release blockers found by dogfooding: Kimi auth/key setup, long-session latency, Ops receipts, resume/rewind, and approval UX.

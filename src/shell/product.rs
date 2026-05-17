@@ -49,6 +49,17 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             "{}",
             providers::unblock_provider(root, required(&args, 1, "provider")?)?
         ),
+        "rc-unblock" => {
+            let result = providers::rc_unblock_provider(
+                root,
+                required(&args, 1, "provider")?,
+                providers::RcUnblockOptions::default(),
+            )?;
+            print!("{}", result.output);
+            if result.failed {
+                return Err(anyhow!("provider RC unblock failed"));
+            }
+        }
         "set" => print!(
             "{}",
             providers::set_role_provider(
