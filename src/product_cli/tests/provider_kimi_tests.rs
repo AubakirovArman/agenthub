@@ -158,10 +158,11 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock.contains("status\tblocked"));
         assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
         assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
-        assert!(unblock.contains("step\t1\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t2\tscripts/kimi-auth-check.sh"));
-        assert!(unblock.contains("step\t3\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t4\tscripts/rc-dogfood-gate.sh --check"));
+        assert!(unblock.contains("step\t1\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
+        assert!(unblock.contains("step\t2\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t3\tscripts/kimi-auth-check.sh"));
+        assert!(unblock.contains("step\t4\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t5\tscripts/rc-dogfood-gate.sh --check"));
         Ok(())
     })
 }

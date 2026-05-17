@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.50-local-preview - 2026-05-17
+
+- Add `scripts/kimi-key-rotate.sh`, a safe Kimi/Moonshot key rotation helper that installs a replacement key atomically, trims surrounding whitespace, avoids printing secrets, reports old/new fingerprints, and can immediately run the Kimi auth check.
+- Wire the key rotation helper into `providers unblock kimi`, the API-native completion audit next steps, and release readiness fixture coverage.
+
 ## 0.4.49-local-preview - 2026-05-17
 
 - Add `scripts/api-native-completion-audit.sh`, a source-backed completion audit for the API-native 1.0 bridge that maps roadmap files, provider surface, RC evidence, Kimi auth state, and the RC dogfood gate into explicit checklist rows.

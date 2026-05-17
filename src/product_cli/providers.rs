@@ -397,15 +397,24 @@ pub fn unblock_provider(project_root: &Path, provider: &str) -> Result<String> {
 
 fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
     out.push_str("action\treplace_or_rotate_kimi_moonshot_key_if_auth_failed\n");
-    out.push_str("step\t1\tagenthub providers test kimi\n");
+    let rotate_script = project_root.join("scripts/kimi-key-rotate.sh");
+    if rotate_script.exists() {
+        out.push_str(&format!(
+            "step\t1\t{} --from-file <new-key-file>\n",
+            rotate_script.display()
+        ));
+    } else {
+        out.push_str("step\t1\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n");
+    }
+    out.push_str("step\t2\tagenthub providers test kimi\n");
     let script = project_root.join("scripts/kimi-auth-check.sh");
     if script.exists() {
-        out.push_str(&format!("step\t2\t{}\n", script.display()));
+        out.push_str(&format!("step\t3\t{}\n", script.display()));
     } else {
-        out.push_str("step\t2\tscripts/kimi-auth-check.sh\n");
+        out.push_str("step\t3\tscripts/kimi-auth-check.sh\n");
     }
-    out.push_str("step\t3\tscripts/rc-evidence-collect.sh\n");
-    out.push_str("step\t4\tscripts/rc-dogfood-gate.sh --check\n");
+    out.push_str("step\t4\tscripts/rc-evidence-collect.sh\n");
+    out.push_str("step\t5\tscripts/rc-dogfood-gate.sh --check\n");
 }
 
 pub fn diagnose_provider(project_root: &Path, provider: &str) -> Result<String> {
