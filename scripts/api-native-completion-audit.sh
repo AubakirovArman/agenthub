@@ -89,20 +89,137 @@ csv_add_unique() {
   fi
 }
 
+check_blocker_kind() {
+  local id="$1"
+  local detail="$2"
+
+  if [[ "$id" == "kimi_auth" ]]; then
+    printf 'external_credential'
+    return
+  fi
+  if [[ "$id" == "open_blockers" && "$detail" == *"kimi-auth"* ]]; then
+    printf 'external_credential'
+    return
+  fi
+  if [[ "$id" == "provider_kimi" ]]; then
+    printf 'external_provider_evidence'
+    return
+  fi
+  if [[ "$id" == "rc_dogfood_gate" ]]; then
+    printf 'dependent_gate'
+    return
+  fi
+}
+
+check_next_commands() {
+  local id="$1"
+  local detail="$2"
+
+  if [[ "$id" == "kimi_auth" ]]; then
+    printf '%s\n' \
+      'agenthub providers inspect-key kimi' \
+      'agenthub providers inspect-key kimi --from-file <new-key-file>' \
+      'agenthub providers preflight-key kimi --from-file <new-key-file>' \
+      'agenthub providers rc-unblock kimi --from-file <new-key-file>' \
+      'agenthub providers test kimi' \
+      'scripts/kimi-auth-check.sh'
+    return
+  fi
+  if [[ "$id" == "provider_kimi" ]]; then
+    printf '%s\n' \
+      'agenthub providers inspect-key kimi --from-file <new-key-file>' \
+      'agenthub providers preflight-key kimi --from-file <new-key-file>' \
+      'agenthub providers rc-unblock kimi --from-file <new-key-file>' \
+      'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
+    return
+  fi
+  if [[ "$id" == "open_blockers" ]]; then
+    if [[ "$detail" == *"kimi-auth"* ]]; then
+      printf '%s\n' \
+        'agenthub providers inspect-key kimi' \
+        'agenthub providers rc-unblock kimi --from-file <new-key-file>'
+    fi
+    printf '%s\n' \
+      'scripts/rc-evidence-collect.sh' \
+      'agenthub readiness blockers --json --check'
+    return
+  fi
+  if [[ "$id" == "rc_dogfood_gate" ]]; then
+    printf '%s\n' \
+      'agenthub readiness blockers --json --check' \
+      'scripts/rc-evidence-collect.sh' \
+      'scripts/rc-dogfood-gate.sh --check'
+    return
+  fi
+  if [[ "$id" == provider_* ]]; then
+    printf 'agenthub providers test %s\n' "${id#provider_}"
+    return
+  fi
+  if [[ "$id" == rc_check_* ]]; then
+    printf '%s\n' \
+      'scripts/rc-evidence-collect.sh' \
+      'scripts/rc-dogfood-gate.sh --check'
+    return
+  fi
+  case "$id" in
+    real_sessions | ops_flows | project_edit_flows | cost_receipts)
+      printf '%s\n' \
+        'AGENTHUB_DOGFOOD_ACCEPTANCE=1 scripts/dogfood.sh' \
+        'scripts/rc-evidence-collect.sh' \
+        'agenthub readiness audit --json --check'
+      ;;
+    provider_surface)
+      printf '%s\n' \
+        'agenthub providers status --json' \
+        'agenthub providers recovery --json'
+      ;;
+  esac
+}
+
 failed=false
 check_ids=()
 check_statuses=()
 check_details=()
+check_blocker_kinds=()
+check_next_lists=()
 next_commands=()
 emit_check() {
   local id="$1"
   local status="$2"
   local detail="$3"
+  local blocker_kind=""
+  local next_list=""
+  local command
+  local next_index=1
+
+  if [[ "$status" != "passed" ]]; then
+    blocker_kind="$(check_blocker_kind "$id" "$detail")"
+    while IFS= read -r command; do
+      [[ -z "$command" ]] && continue
+      if [[ -z "$next_list" ]]; then
+        next_list="$command"
+      else
+        next_list="${next_list}"$'\037'"$command"
+      fi
+    done < <(check_next_commands "$id" "$detail")
+  fi
+
   check_ids+=("$id")
   check_statuses+=("$status")
   check_details+=("$detail")
+  check_blocker_kinds+=("$blocker_kind")
+  check_next_lists+=("$next_list")
   if [[ "$JSON" != true ]]; then
     printf 'check\t%s\t%s\t%s\n' "$id" "$status" "$detail"
+    if [[ -n "$blocker_kind" ]]; then
+      printf 'check_blocker_kind\t%s\t%s\n' "$id" "$blocker_kind"
+    fi
+    if [[ -n "$next_list" ]]; then
+      while IFS= read -r command; do
+        printf 'check_next\t%s\t%s\t%s\n' "$id" "$next_index" "$command"
+        next_index=$((next_index + 1))
+      done < <(printf '%s\n' "$next_list" | tr $'\037' '\n')
+    fi
   fi
   if [[ "$status" != "passed" ]]; then
     failed=true
@@ -140,8 +257,63 @@ json_bool() {
   fi
 }
 
+collect_blocker_kinds() {
+  local csv=""
+  local index
+  for index in "${!check_ids[@]}"; do
+    if [[ "${check_statuses[$index]}" == "passed" ]]; then
+      continue
+    fi
+    csv="$(csv_add_unique "$csv" "${check_blocker_kinds[$index]}")"
+  done
+  if [[ -z "$csv" ]]; then
+    return
+  fi
+  printf '%s\n' "$csv" | tr ',' '\n' | sort -u | paste -sd, -
+}
+
+completion_blocker_scope() {
+  if [[ "$failed" != true ]]; then
+    return
+  fi
+
+  local has_external=false
+  local has_unknown_or_local=false
+  local index
+  local kind
+  for index in "${!check_ids[@]}"; do
+    if [[ "${check_statuses[$index]}" == "passed" ]]; then
+      continue
+    fi
+    kind="${check_blocker_kinds[$index]}"
+    case "$kind" in
+      external_*)
+        has_external=true
+        ;;
+      dependent_gate)
+        ;;
+      *)
+        has_unknown_or_local=true
+        ;;
+    esac
+  done
+
+  if [[ "$has_external" == true && "$has_unknown_or_local" != true ]]; then
+    printf 'external_only'
+  elif [[ "$has_external" == true ]]; then
+    printf 'mixed'
+  else
+    printf 'local_or_unknown'
+  fi
+}
+
 render_json() {
   local final_status="$1"
+  local blocker_scope
+  local blocker_kinds
+  blocker_scope="$(completion_blocker_scope)"
+  blocker_kinds="$(collect_blocker_kinds)"
+
   printf '{\n'
   printf '  "objective": '
   json_string 'API-native 1.0 bridge with DeepSeek/Kimi, Chat/Ops/Project, memory, observability, RC dogfood evidence, and post-1.0 roadmap sequencing'
@@ -152,6 +324,24 @@ render_json() {
   printf '  "failed": '
   json_bool "$failed"
   printf ',\n'
+  if [[ -n "$blocker_scope" ]]; then
+    printf '  "blocker_scope": '
+    json_string "$blocker_scope"
+    printf ',\n'
+    printf '  "blocker_kinds": [\n'
+    IFS=',' read -r -a blocker_kind_items <<< "$blocker_kinds"
+    local blocker_kind_index
+    for blocker_kind_index in "${!blocker_kind_items[@]}"; do
+      printf '    '
+      json_string "${blocker_kind_items[$blocker_kind_index]}"
+      if (( blocker_kind_index + 1 == ${#blocker_kind_items[@]} )); then
+        printf '\n'
+      else
+        printf ',\n'
+      fi
+    done
+    printf '  ],\n'
+  fi
   printf '  "sources": {\n'
   printf '    "api_native_plan": '
   json_string "$V04_PLAN"
@@ -195,7 +385,34 @@ render_json() {
     printf ',\n'
     printf '      "detail": '
     json_string "${check_details[$index]}"
-    printf '\n'
+    if [[ -n "${check_blocker_kinds[$index]}" ]]; then
+      printf ',\n'
+      printf '      "blocker_kind": '
+      json_string "${check_blocker_kinds[$index]}"
+    fi
+    if [[ -n "${check_next_lists[$index]}" ]]; then
+      printf ',\n'
+      printf '      "next_commands": [\n'
+      local command_index=0
+      local command_count=0
+      local command
+      while IFS= read -r command; do
+        command_count=$((command_count + 1))
+      done < <(printf '%s\n' "${check_next_lists[$index]}" | tr $'\037' '\n')
+      while IFS= read -r command; do
+        command_index=$((command_index + 1))
+        printf '        '
+        json_string "$command"
+        if (( command_index == command_count )); then
+          printf '\n'
+        else
+          printf ',\n'
+        fi
+      done < <(printf '%s\n' "${check_next_lists[$index]}" | tr $'\037' '\n')
+      printf '      ]\n'
+    else
+      printf '\n'
+    fi
     if (( index + 1 == ${#check_ids[@]} )); then
       printf '    }\n'
     else

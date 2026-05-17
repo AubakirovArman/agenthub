@@ -73,19 +73,33 @@ grep -q '"failed": false' "$TMP/ready.json"
 grep -q '"id": "provider_surface"' "$TMP/ready.json"
 grep -q '"id": "provider_kimi"' "$TMP/ready.json"
 grep -q '"real_sessions": 3' "$TMP/ready.json"
+if grep -q '"blocker_scope"' "$TMP/ready.json"; then
+  printf 'ready JSON audit must not emit blocker_scope\n' >&2
+  exit 1
+fi
 
 cat > "$kimi" <<'JSON'
 {"provider":"kimi","status":"blocked","auth_key_sha256_12":"f117c7b5fb4e","auth_key_source":"file:/tmp/.kimi","credential_warning":"Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead","next_action":"replace or rotate the Kimi/Moonshot API key with a plain Moonshot OpenAI-compatible API key"}
 JSON
+grep -v '"provider":"kimi"' "$evidence" > "$TMP/evidence-no-kimi"
+mv "$TMP/evidence-no-kimi" "$evidence"
+grep -v '"provider":"kimi"' "$history/index.jsonl" > "$TMP/history-no-kimi"
+mv "$TMP/history-no-kimi" "$history/index.jsonl"
 printf '{"kind":"blocker","id":"kimi-auth","severity":"critical","status":"open"}\n' >> "$evidence"
 if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --check --no-refresh > "$TMP/blocked.out" 2>&1; then
   printf 'expected API-native completion audit to fail while Kimi auth is blocked\n' >&2
   exit 1
 fi
 grep -q $'check\tkimi_auth\tblocked' "$TMP/blocked.out"
+grep -q $'check_blocker_kind\tkimi_auth\texternal_credential' "$TMP/blocked.out"
+grep -q $'check_next\tkimi_auth\t1\tagenthub providers inspect-key kimi' "$TMP/blocked.out"
+grep -q $'check_next\tkimi_auth\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
 grep -q 'source:file:/tmp/.kimi' "$TMP/blocked.out"
 grep -q 'warning:Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead' "$TMP/blocked.out"
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
+grep -q $'check_blocker_kind\topen_blockers\texternal_credential' "$TMP/blocked.out"
+grep -q $'check_blocker_kind\tprovider_kimi\texternal_provider_evidence' "$TMP/blocked.out"
+grep -q $'check_blocker_kind\trc_dogfood_gate\tdependent_gate' "$TMP/blocked.out"
 grep -q $'status\tincomplete' "$TMP/blocked.out"
 grep -q $'next\t1\tagenthub providers recovery --json' "$TMP/blocked.out"
 grep -q $'next\t2\tagenthub providers inspect-key kimi' "$TMP/blocked.out"
@@ -105,8 +119,14 @@ if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --json 
 fi
 grep -q '"status": "incomplete"' "$TMP/blocked.json"
 grep -q '"failed": true' "$TMP/blocked.json"
+grep -q '"blocker_scope": "external_only"' "$TMP/blocked.json"
+grep -q '"external_credential"' "$TMP/blocked.json"
+grep -q '"external_provider_evidence"' "$TMP/blocked.json"
+grep -q '"dependent_gate"' "$TMP/blocked.json"
 grep -q '"id": "kimi_auth"' "$TMP/blocked.json"
 grep -q '"status": "blocked"' "$TMP/blocked.json"
+grep -q '"blocker_kind": "external_credential"' "$TMP/blocked.json"
+grep -q '"next_commands":' "$TMP/blocked.json"
 grep -q '"open_blockers": 1' "$TMP/blocked.json"
 grep -q '"agenthub providers recovery --json"' "$TMP/blocked.json"
 grep -q '"agenthub readiness blockers --json --check"' "$TMP/blocked.json"

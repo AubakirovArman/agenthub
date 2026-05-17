@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.92-local-preview - 2026-05-17
+
+- Add `blocker_scope` and `blocker_kinds` to `scripts/api-native-completion-audit.sh --json`, matching the product readiness JSON surface.
+- Add per-check `blocker_kind` and `next_commands` to incomplete completion-audit JSON rows, plus matching `check_blocker_kind` and `check_next` lines in text output.
+- Keep the current Kimi-gated completion audit classified as `external_only` when the remaining blockers are the Kimi external credential/evidence path and its dependent RC dogfood gate.
+
 ## 0.4.91-local-preview - 2026-05-17
 
 - Add `--json` output to `agenthub providers inspect-key kimi` for machine-readable, redacted offline Kimi credential inspection.
