@@ -116,7 +116,7 @@ pub(super) fn openai_stub_server(content: &str, tokens: usize) -> Result<OpenAiS
     let models_body = r#"{"data":[{"id":"stub-chat"},{"id":"stub-code"}]}"#.to_string();
     let (requests_tx, requests_rx) = mpsc::channel();
     thread::spawn(move || {
-        for _ in 0..2 {
+        for _ in 0..8 {
             let Ok((mut stream, _)) = listener.accept() else {
                 return;
             };

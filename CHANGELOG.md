@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.59-local-preview - 2026-05-17
+
+- Make `agenthub providers rc-unblock kimi --from-file <new-key-file>` run the no-write Kimi key preflight before installing the replacement key.
+- When preflight finds that the replacement key only works on a different official Moonshot region, automatically reuse that endpoint for the RC unblock provider test and provider dogfood sequence without printing the secret.
+
 ## 0.4.58-local-preview - 2026-05-17
 
 - Make `agenthub providers preflight-key kimi --from-file <new-key-file>` test both official Moonshot endpoints when the configured Kimi endpoint is official, without writing `.kimi` or printing the secret.

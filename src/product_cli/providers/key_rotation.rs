@@ -40,6 +40,8 @@ pub struct KeyPreflightOptions {
 pub struct KeyPreflightResult {
     pub output: String,
     pub provider_test_failed: bool,
+    pub configured_endpoint: Option<String>,
+    pub passed_endpoint: Option<String>,
 }
 
 pub fn preflight_provider_key(
@@ -175,6 +177,8 @@ pub fn preflight_provider_key(
     Ok(KeyPreflightResult {
         output: out,
         provider_test_failed,
+        configured_endpoint,
+        passed_endpoint,
     })
 }
 

@@ -32,7 +32,26 @@ pub fn rc_unblock_provider(
     let mut out = String::from("AgentHub Kimi RC unblock\n");
     out.push_str("provider\tkimi\n");
 
+    let mut endpoint_override = None;
     if let Some(rotation_options) = options.rotate_key {
+        if let Some(preflight_options) = preflight_options_from_rotation(&rotation_options) {
+            let preflight = run_key_preflight(project_root, &mut out, preflight_options)?;
+            if preflight.provider_test_failed {
+                append_blocked(&mut out, "key_preflight_failed");
+                return Ok(RcUnblockResult {
+                    output: out,
+                    failed: true,
+                });
+            }
+            if let Some(passed_endpoint) = preflight.passed_endpoint {
+                if preflight.configured_endpoint.as_deref() != Some(passed_endpoint.as_str()) {
+                    out.push_str(&format!(
+                        "endpoint_override\tKIMI_API_BASE_URL\t{passed_endpoint}\n"
+                    ));
+                    endpoint_override = Some(passed_endpoint);
+                }
+            }
+        }
         if !run_key_rotation(project_root, &mut out, rotation_options)? {
             append_blocked(&mut out, "key_rotation_provider_test_failed");
             return Ok(RcUnblockResult {
@@ -42,8 +61,12 @@ pub fn rc_unblock_provider(
         }
     }
 
-    if !run_provider_test(project_root, &mut out)? {
-        run_auth_check_after_provider_failure(project_root, &mut out)?;
+    if !run_provider_test(project_root, &mut out, endpoint_override.as_deref())? {
+        run_auth_check_after_provider_failure(
+            project_root,
+            &mut out,
+            endpoint_override.as_deref(),
+        )?;
         append_blocked(&mut out, "provider_test_failed");
         return Ok(RcUnblockResult {
             output: out,
@@ -58,6 +81,7 @@ pub fn rc_unblock_provider(
         &script(project_root, "kimi-auth-check.sh"),
         &[],
         &[],
+        endpoint_override.as_deref(),
     )? {
         append_blocked(&mut out, "kimi_auth_check_failed");
         return Ok(RcUnblockResult {
@@ -79,6 +103,7 @@ pub fn rc_unblock_provider(
             ("AGENTHUB_PROVIDER_DOGFOOD_PROVIDER", "kimi"),
             ("AGENTHUB_PROVIDER_DOGFOOD_LIVE", "1"),
         ],
+        endpoint_override.as_deref(),
     )? {
         append_blocked(&mut out, "provider_dogfood_failed");
         out.push_str("next\t1\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
@@ -95,6 +120,7 @@ pub fn rc_unblock_provider(
         &script(project_root, "rc-evidence-collect.sh"),
         &[],
         &[],
+        endpoint_override.as_deref(),
     )? {
         append_blocked(&mut out, "rc_evidence_collect_failed");
         return Ok(RcUnblockResult {
@@ -120,6 +146,7 @@ pub fn rc_unblock_provider(
         &script(project_root, "rc-dogfood-gate.sh"),
         &gate_args,
         &[],
+        endpoint_override.as_deref(),
     )? {
         append_blocked(&mut out, "rc_dogfood_gate_failed");
         return Ok(RcUnblockResult {
@@ -138,6 +165,37 @@ pub fn rc_unblock_provider(
         output: out,
         failed: false,
     })
+}
+
+fn preflight_options_from_rotation(
+    options: &super::KeyRotationOptions,
+) -> Option<super::KeyPreflightOptions> {
+    if options.from_file.is_none() && options.from_env.is_none() && options.stdin_value.is_none() {
+        return None;
+    }
+    Some(super::KeyPreflightOptions {
+        from_file: options.from_file.clone(),
+        from_env: options.from_env.clone(),
+        stdin_value: options.stdin_value.clone(),
+    })
+}
+
+fn run_key_preflight(
+    project_root: &Path,
+    out: &mut String,
+    options: super::KeyPreflightOptions,
+) -> Result<super::KeyPreflightResult> {
+    out.push_str("step\tkey_preflight\tbegin\n");
+    let result = super::preflight_provider_key(project_root, "kimi", options)?;
+    for line in result.output.lines() {
+        out.push_str(&format!("key_preflight\t{line}\n"));
+    }
+    if result.provider_test_failed {
+        out.push_str("step\tkey_preflight\tfailed\n");
+    } else {
+        out.push_str("step\tkey_preflight\tpassed\n");
+    }
+    Ok(result)
 }
 
 fn run_key_rotation(
@@ -159,9 +217,27 @@ fn run_key_rotation(
     }
 }
 
-fn run_provider_test(project_root: &Path, out: &mut String) -> Result<bool> {
+fn run_provider_test(
+    project_root: &Path,
+    out: &mut String,
+    endpoint_override: Option<&str>,
+) -> Result<bool> {
     out.push_str("step\tprovider_test\tbegin\n");
-    let report = super::test_provider(project_root, "kimi")?;
+    let report = if let Some(endpoint) = endpoint_override {
+        let mut status = super::status_for(project_root, "kimi")?;
+        status.endpoint = Some(endpoint.to_string());
+        if super::api_key_for_status(&status).is_none() {
+            format!(
+                "missing\t{}\t{}\n",
+                status.info.id,
+                super::status_detail(&status)
+            )
+        } else {
+            super::http::test_provider(status)?
+        }
+    } else {
+        super::test_provider(project_root, "kimi")?
+    };
     for line in report.lines() {
         out.push_str(&format!("provider_test\t{line}\n"));
     }
@@ -174,10 +250,22 @@ fn run_provider_test(project_root: &Path, out: &mut String) -> Result<bool> {
     }
 }
 
-fn run_auth_check_after_provider_failure(project_root: &Path, out: &mut String) -> Result<()> {
+fn run_auth_check_after_provider_failure(
+    project_root: &Path,
+    out: &mut String,
+    endpoint_override: Option<&str>,
+) -> Result<()> {
     let path = script(project_root, "kimi-auth-check.sh");
     if path.exists() {
-        let _ = run_script(project_root, out, "kimi_auth_check", &path, &[], &[])?;
+        let _ = run_script(
+            project_root,
+            out,
+            "kimi_auth_check",
+            &path,
+            &[],
+            &[],
+            endpoint_override,
+        )?;
     } else {
         out.push_str("step\tkimi_auth_check\tskipped\tmissing_script\n");
     }
@@ -191,6 +279,7 @@ fn run_script(
     path: &Path,
     args: &[&str],
     envs: &[(&str, &str)],
+    endpoint_override: Option<&str>,
 ) -> Result<bool> {
     out.push_str(&format!("step\t{label}\tbegin\n"));
     out.push_str(&format!("script\t{label}\t{}\n", path.display()));
@@ -205,6 +294,9 @@ fn run_script(
 
     let mut command = Command::new(path);
     command.current_dir(project_root).args(args);
+    if let Some(endpoint) = endpoint_override {
+        command.env("KIMI_API_BASE_URL", endpoint);
+    }
     for (key, value) in envs {
         command.env(key, value);
     }
