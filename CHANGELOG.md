@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.91-local-preview - 2026-05-17
+
+- Add `--json` output to `agenthub providers inspect-key kimi` for machine-readable, redacted offline Kimi credential inspection.
+- Keep inspect-key JSON aligned with text output by reporting safe credential source, fingerprint, shape classification, write/network policy, failure state, and next commands without printing secrets.
+
 ## 0.4.90-local-preview - 2026-05-17
 
 - Add top-level `blocker_scope` and `blocker_kinds` metadata to `agenthub providers recovery` JSON/text output.

@@ -62,6 +62,9 @@ pub enum ProviderCommands {
         provider: String,
 
         #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
         from_file: Option<PathBuf>,
 
         #[arg(long)]

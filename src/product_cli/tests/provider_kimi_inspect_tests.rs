@@ -77,6 +77,44 @@ fn providers_kimi_inspect_key_reports_plain_candidate_without_network_or_write()
 }
 
 #[test]
+fn providers_kimi_inspect_key_json_is_machine_readable_without_secret() -> Result<()> {
+    with_kimi_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let source = dir.path().join("candidate-kimi-key.txt");
+        std::fs::write(&source, "  candidate-kimi-secret  \n")?;
+
+        let result = providers::inspect_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyInspectOptions {
+                json: true,
+                from_file: Some(source.clone()),
+                ..Default::default()
+            },
+        )?;
+        let parsed: serde_json::Value = serde_json::from_str(&result.output)?;
+
+        assert!(!result.failed);
+        assert_eq!(parsed["provider"], "kimi");
+        assert_eq!(parsed["source"], format!("file:{}", source.display()));
+        assert_eq!(parsed["classification"], "plain_api_key_candidate");
+        assert_eq!(parsed["status"], "candidate");
+        assert_eq!(parsed["trimmed_for_request"], true);
+        assert_eq!(parsed["writes_key"], false);
+        assert_eq!(parsed["network"], false);
+        assert_eq!(
+            parsed["next_commands"][0],
+            format!(
+                "agenthub providers preflight-key kimi --from-file {}",
+                source.display()
+            )
+        );
+        assert!(!result.output.contains("candidate-kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
 fn providers_kimi_inspect_key_can_read_from_env_without_printing_value() -> Result<()> {
     with_env_vars(
         &[("KIMI_API_KEY", Some("env-kimi-secret".to_string()))],

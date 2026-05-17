@@ -197,11 +197,15 @@ fn preflight_key_options_from_args(
 
 fn inspect_key_options_from_args(args: &[&str]) -> Result<(String, providers::KeyInspectOptions)> {
     let provider = required(args, 1, "provider")?.to_string();
+    let mut json = false;
     let mut from_file = None;
     let mut from_env = None;
     let mut index = 2;
     while index < args.len() {
         match args[index] {
+            "--json" => {
+                json = true;
+            }
             "--from-file" => {
                 index += 1;
                 from_file = Some(PathBuf::from(required(args, index, "from-file")?));
@@ -222,6 +226,7 @@ fn inspect_key_options_from_args(args: &[&str]) -> Result<(String, providers::Ke
     Ok((
         provider,
         providers::KeyInspectOptions {
+            json,
             from_file,
             from_env,
             stdin_value: None,

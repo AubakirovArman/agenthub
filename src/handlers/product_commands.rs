@@ -123,6 +123,7 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         }
         ProviderCommands::InspectKey {
             provider,
+            json,
             from_file,
             from_env,
             stdin,
@@ -138,6 +139,7 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
                 project_root,
                 &provider,
                 providers::KeyInspectOptions {
+                    json,
                     from_file,
                     from_env,
                     stdin_value,

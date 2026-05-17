@@ -4,11 +4,13 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
+use serde::Serialize;
 
 use super::key_rotation::unsupported_kimi_credential_reason;
 
 #[derive(Debug, Default)]
 pub struct KeyInspectOptions {
+    pub json: bool,
     pub from_file: Option<PathBuf>,
     pub from_env: Option<String>,
     pub stdin_value: Option<String>,
@@ -18,6 +20,22 @@ pub struct KeyInspectOptions {
 pub struct KeyInspectResult {
     pub output: String,
     pub failed: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct KeyInspectionReport {
+    pub provider: String,
+    pub source: String,
+    pub key_sha256_12: String,
+    pub key_chars: usize,
+    pub trimmed_for_request: bool,
+    pub writes_key: bool,
+    pub network: bool,
+    pub classification: String,
+    pub status: String,
+    pub detail: String,
+    pub failed: bool,
+    pub next_commands: Vec<String>,
 }
 
 pub fn inspect_provider_key(
@@ -36,6 +54,7 @@ pub fn inspect_provider_key(
     if source_count > 1 {
         return Err(anyhow!("choose at most one key source"));
     }
+    let render_json = options.json;
 
     let (raw_key, source, source_args) = if source_count == 0 {
         active_kimi_key_source(project_root)?
@@ -59,37 +78,61 @@ pub fn inspect_provider_key(
         super::sha256_prefix(inspection.key.as_bytes())
     };
 
+    let next_commands = if failed {
+        vec![
+            "create a plain Moonshot OpenAI-compatible API key".to_string(),
+            "agenthub providers preflight-key kimi --from-file <new-key-file>".to_string(),
+            "agenthub providers rc-unblock kimi --from-file <new-key-file>".to_string(),
+        ]
+    } else {
+        vec![
+            format!("agenthub providers preflight-key kimi {source_args}"),
+            format!("agenthub providers rc-unblock kimi {source_args}"),
+        ]
+    };
+    let report = KeyInspectionReport {
+        provider: "kimi".to_string(),
+        source,
+        key_sha256_12: fp,
+        key_chars: inspection.key.chars().count(),
+        trimmed_for_request: inspection.trimmed_for_request,
+        writes_key: false,
+        network: false,
+        classification: inspection.classification.to_string(),
+        status: inspection.status.to_string(),
+        detail: inspection.detail,
+        failed,
+        next_commands,
+    };
+
+    let output = if render_json {
+        format!("{}\n", serde_json::to_string_pretty(&report)?)
+    } else {
+        render_text_report(&report)
+    };
+
+    Ok(KeyInspectResult { output, failed })
+}
+
+fn render_text_report(report: &KeyInspectionReport) -> String {
     let mut out = String::from("AgentHub Kimi key inspection\n");
     out.push_str("provider\tkimi\n");
-    out.push_str(&format!("source\t{source}\n"));
-    out.push_str(&format!("key_sha256_12\t{fp}\n"));
-    out.push_str(&format!("key_chars\t{}\n", inspection.key.chars().count()));
+    out.push_str(&format!("source\t{}\n", report.source));
+    out.push_str(&format!("key_sha256_12\t{}\n", report.key_sha256_12));
+    out.push_str(&format!("key_chars\t{}\n", report.key_chars));
     out.push_str(&format!(
         "trimmed_for_request\t{}\n",
-        inspection.trimmed_for_request
+        report.trimmed_for_request
     ));
     out.push_str("writes_key\tfalse\n");
     out.push_str("network\tfalse\n");
-    out.push_str(&format!("classification\t{}\n", inspection.classification));
-    out.push_str(&format!("status\t{}\n", inspection.status));
-    out.push_str(&format!("detail\t{}\n", inspection.detail));
-    if failed {
-        out.push_str("next\t1\tcreate a plain Moonshot OpenAI-compatible API key\n");
-        out.push_str("next\t2\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
-        out.push_str("next\t3\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
-    } else {
-        out.push_str(&format!(
-            "next\t1\tagenthub providers preflight-key kimi {source_args}\n"
-        ));
-        out.push_str(&format!(
-            "next\t2\tagenthub providers rc-unblock kimi {source_args}\n"
-        ));
+    out.push_str(&format!("classification\t{}\n", report.classification));
+    out.push_str(&format!("status\t{}\n", report.status));
+    out.push_str(&format!("detail\t{}\n", report.detail));
+    for (index, command) in report.next_commands.iter().enumerate() {
+        out.push_str(&format!("next\t{}\t{}\n", index + 1, command));
     }
-
-    Ok(KeyInspectResult {
-        output: out,
-        failed,
-    })
+    out
 }
 
 struct RawKeyInspection {
