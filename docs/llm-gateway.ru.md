@@ -71,6 +71,8 @@ KIMI_THINKING
 
 Для thinking-capable моделей Kimi K2.6/K2.5 AgentHub по умолчанию отправляет `thinking: {"type":"disabled"}`, чтобы chat/project turns оставались быстрыми и ограниченными по стоимости. Установите `AGENTHUB_KIMI_THINKING=enabled`, если явно нужен thinking mode Kimi.
 
+У Kimi есть official Moonshot endpoints для global и China-region платформ: `https://api.moonshot.ai/v1` и `https://api.moonshot.cn/v1`. Когда `agenthub providers test kimi` получает 401 auth failure, receipt печатает оба endpoint-варианта; если оба возвращают 401 с одним и тем же ключом, Kimi/Moonshot API key нужно заменить или перевыпустить.
+
 ## Budget Policy
 
 Set a transaction budget through `topology.routing.max_estimated_cost_usd`:

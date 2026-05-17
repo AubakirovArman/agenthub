@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.36-local-preview - 2026-05-17
+
+- Add Kimi-region endpoint hints to `agenthub providers test kimi` auth failure receipts, listing the official global and China-region Moonshot base URLs.
+- Clarify that a 401 on both Kimi endpoints means the configured Kimi/Moonshot API key must be rotated or replaced rather than retrying AgentHub setup.
+
 ## 0.4.35-local-preview - 2026-05-17
 
 - Add optional dogfood RC acceptance rehearsal via `AGENTHUB_DOGFOOD_ACCEPTANCE=1`, covering stats, Ops no-bootstrap, approval UX, transaction resume, and undo/rewind.
