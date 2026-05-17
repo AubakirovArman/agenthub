@@ -1,6 +1,6 @@
 # AgentHub
 
-AgentHub — AI coding agents үшін жергілікті transactional runtime. Ол DeepSeek, Kimi, Kimi немесе OpenAI-compatible tools орнына жүрмейді. Ол оларды isolated worktrees, command policy, verifier checks, rollback, memory, reports және dashboards арқылы басқарады.
+AgentHub — AI coding agents үшін жергілікті transactional runtime. Оның user-facing LLM provider surface — API-native DeepSeek және Kimi; AgentHub provider work-ті isolated worktrees, command policy, verifier checks, rollback, memory, reports және dashboards арқылы басқарады.
 
 Тілдер: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 

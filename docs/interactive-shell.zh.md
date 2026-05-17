@@ -93,4 +93,4 @@ edit/e     open draft in $VISUAL or $EDITOR, then revalidate it
 
 ## 边界
 
-Shell 不替代 DeepSeek、Kimi、Kimi 或 OpenAI-compatible model。它在 provider work 外层提供 transaction control、approvals、logs、rollback、reports、memory 和 dashboard visibility。
+Shell uses AgentHub-owned DeepSeek/Kimi API providers for LLM work. It gives transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.

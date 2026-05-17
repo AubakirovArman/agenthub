@@ -10,6 +10,7 @@ AGENTHUB_BIN="${AGENTHUB_BIN:-agenthub}"
 PERF_REPORT="${AGENTHUB_RC_PERF_REPORT:-$ROOT/target/perf/perf-profile.json}"
 KIMI_AUTH_REPORT="${AGENTHUB_RC_KIMI_AUTH_REPORT:-$ROOT/target/dogfood/kimi-auth-report.json}"
 LONG_SESSION_MIN_TX="${AGENTHUB_RC_LONG_SESSION_MIN_TX:-25}"
+API_PROVIDERS="${AGENTHUB_RC_API_PROVIDERS:-${AGENTHUB_RC_REQUIRED_PROVIDERS:-deepseek,kimi}}"
 
 tmp="$(mktemp "${TMPDIR:-/tmp}/agenthub-rc-evidence.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT INT TERM
@@ -40,6 +41,20 @@ write_jsonl() {
   printf '%s\n' "$1" >> "$tmp"
 }
 
+csv_contains() {
+  local csv="$1"
+  local value="$2"
+  case ",$csv," in
+    *,"$value",*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+api_provider_allowed() {
+  local provider="$1"
+  [[ -n "$provider" ]] && csv_contains "$API_PROVIDERS" "$provider"
+}
+
 write_session() {
   local id="$1"
   local mode="$2"
@@ -66,6 +81,7 @@ write_provider() {
   local source="$2"
   local path="$3"
   [[ -z "$provider" ]] && return 0
+  api_provider_allowed "$provider" || return 0
   case ",$providers_written," in
     *,"$provider",*) return 0 ;;
   esac

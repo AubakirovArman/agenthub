@@ -93,4 +93,4 @@ Expert commands such as `agenthub run`, `agenthub tx report`, `agenthub tx diff`
 
 ## Boundary
 
-The shell does not replace DeepSeek, Kimi, Kimi, or an OpenAI-compatible model. It provides transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.
+The shell uses AgentHub-owned DeepSeek/Kimi API providers for LLM work. It provides transaction control, approvals, logs, rollback, reports, memory, and dashboard visibility around provider work.

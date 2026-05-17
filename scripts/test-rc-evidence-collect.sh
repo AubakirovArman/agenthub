@@ -16,7 +16,7 @@ if [[ ! -x "$AGENTHUB_BIN" ]]; then
   cargo build --manifest-path "$ROOT/Cargo.toml" --locked >/dev/null
 fi
 
-mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/suite-stress" "$HISTORY/runs/suite-acceptance"
+mkdir -p "$HOME_DIR/sessions/no-project/chats" "$HOME_DIR/ops" "$PROJECT/.agent/tx/tx-demo" "$PROJECT/.agent/tx/tx-control" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/provider-codex" "$HISTORY/runs/suite-stress" "$HISTORY/runs/suite-acceptance"
 cat > "$HOME_DIR/sessions/no-project/chats/chat-demo.jsonl" <<'JSONL'
 {"at":"2026-05-17T00:00:00Z","kind":"created"}
 {"at":"2026-05-17T00:00:01Z","kind":"intent_classified","intent":"chat","mode":"chat","reason":"no project runtime in current folder","text":"hello"}
@@ -44,6 +44,7 @@ cat > "$PERF" <<'JSON'
 {"tx_count":25,"metrics":[{"name":"transactions_no_commit","success":true,"avg_ms":1200},{"name":"tx_status","success":true}]}
 JSON
 touch "$HISTORY/runs/provider-deepseek/provider-dogfood-report.json"
+touch "$HISTORY/runs/provider-codex/provider-dogfood-report.json"
 cat > "$HISTORY/runs/suite-stress/dogfood-report.json" <<'JSON'
 {
   "rc_evidence": {
@@ -63,6 +64,7 @@ cat > "$HISTORY/runs/suite-acceptance/rc-acceptance-evidence.jsonl" <<'JSONL'
 JSONL
 cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"provider-deepseek","archived_at":"2026-05-17T00:00:04Z","kind":"provider","report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
+{"run_id":"provider-codex","archived_at":"2026-05-17T00:00:04Z","kind":"provider","report":"$HISTORY/runs/provider-codex/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-codex/provider-dogfood-report.json","provider":"codex","provider_status":"passed","tx_id":"tx-legacy"}
 {"run_id":"suite-stress","archived_at":"2026-05-17T00:00:05Z","kind":"suite","report":"$HISTORY/runs/suite-stress/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 JSONL
 
@@ -85,6 +87,10 @@ grep -q '"source":"acceptance_rehearsal"' "$EVIDENCE"
 grep -q '"flow":"project_edit"' "$EVIDENCE"
 grep -q '"flow":"ops"' "$EVIDENCE"
 grep -q '"provider":"deepseek"' "$EVIDENCE"
+if grep -q '"provider":"codex"' "$EVIDENCE"; then
+  printf 'legacy codex provider should not be collected as 1.0 API-native evidence\n' >&2
+  exit 1
+fi
 grep -q '"id":"chat_no_bootstrap"' "$EVIDENCE"
 grep -q '"id":"ops_no_bootstrap"' "$EVIDENCE"
 grep -q '"id":"cost_receipts"' "$EVIDENCE"

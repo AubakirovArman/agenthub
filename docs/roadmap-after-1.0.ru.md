@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.39-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.40-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -191,7 +191,8 @@ These are the next concrete engineering steps from the current `0.4.39-local-pre
 | `0.4.37` | Kimi auth unblock runbook | Done: `scripts/kimi-auth-check.sh` tests both official Kimi endpoints, writes redacted artifacts/report, and gives the exact next action before provider dogfood |
 | `0.4.38` | Kimi auth blocker evidence | Done: the collector ingests `kimi-auth-report.json` and turns blocked Kimi auth reports into source-backed critical RC blockers |
 | `0.4.39` | 1.0 preparation Kimi gate | Done: `prepare-1.0-release.sh` refreshes Kimi auth evidence and supports `AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1` for final gating |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.39` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
+| `0.4.40` | API-native RC evidence purity | Done: RC evidence and gate summaries ignore legacy CLI provider history such as old `codex` runs and count only allowed API-native providers |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.40` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -205,7 +206,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.39` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, and 1.0 preparation Kimi gating rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.40` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, and API-native RC evidence purity rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 

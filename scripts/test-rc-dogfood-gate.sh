@@ -7,17 +7,19 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 
 HISTORY="$TMP/history"
 EVIDENCE="$TMP/rc-evidence.jsonl"
-mkdir -p "$HISTORY/runs/suite-1" "$HISTORY/runs/suite-2" "$HISTORY/runs/suite-3" "$HISTORY/runs/provider-deepseek"
+mkdir -p "$HISTORY/runs/suite-1" "$HISTORY/runs/suite-2" "$HISTORY/runs/suite-3" "$HISTORY/runs/provider-deepseek" "$HISTORY/runs/provider-codex"
 touch "$HISTORY/runs/suite-1/dogfood-report.json"
 touch "$HISTORY/runs/suite-2/dogfood-report.json"
 touch "$HISTORY/runs/suite-3/dogfood-report.json"
 touch "$HISTORY/runs/provider-deepseek/provider-dogfood-report.json"
+touch "$HISTORY/runs/provider-codex/provider-dogfood-report.json"
 
 cat > "$HISTORY/index.jsonl" <<JSONL
 {"run_id":"suite-1","archived_at":"2026-05-14T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-1/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 {"run_id":"suite-2","archived_at":"2026-05-15T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-2/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 {"run_id":"suite-3","archived_at":"2026-05-16T00:00:00Z","kind":"suite","report":"$HISTORY/runs/suite-3/dogfood-report.json","provider_report":"","provider":"","provider_status":"skipped","tx_id":""}
 {"run_id":"provider-deepseek","archived_at":"2026-05-16T01:00:00Z","kind":"provider","report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-deepseek/provider-dogfood-report.json","provider":"deepseek","provider_status":"passed","tx_id":"tx-demo"}
+{"run_id":"provider-codex","archived_at":"2026-05-16T01:30:00Z","kind":"provider","report":"$HISTORY/runs/provider-codex/provider-dogfood-report.json","provider_report":"$HISTORY/runs/provider-codex/provider-dogfood-report.json","provider":"codex","provider_status":"passed","tx_id":"tx-legacy"}
 JSONL
 
 cat > "$EVIDENCE" <<'JSONL'
@@ -25,6 +27,7 @@ cat > "$EVIDENCE" <<'JSONL'
 {"kind":"session","session_id":"ops-1","mode":"ops","flow":"ops","status":"passed","cost_receipt":true}
 {"kind":"session","session_id":"proj-1","mode":"project","flow":"project_edit","status":"passed","cost_receipt":true}
 {"kind":"provider","provider":"deepseek","status":"passed"}
+{"kind":"provider","provider":"codex","status":"passed"}
 {"kind":"check","id":"chat_no_bootstrap","status":"passed"}
 {"kind":"check","id":"ops_no_bootstrap","status":"passed"}
 {"kind":"check","id":"resume","status":"passed"}
@@ -48,6 +51,12 @@ common_env=(
 
 env "${common_env[@]}" "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/pass.out"
 grep -q '1.0 RC dogfood gate: ready' "$TMP/pass.out"
+grep -q 'providers passed: deepseek' "$TMP/pass.out"
+grep -q 'providers ignored: codex' "$TMP/pass.out"
+if grep -q 'providers passed: .*codex' "$TMP/pass.out"; then
+  printf 'legacy codex provider should not count as API-native provider evidence\n' >&2
+  exit 1
+fi
 
 printf '{"kind":"blocker","id":"kimi-auth","severity":"critical","status":"open"}\n' >> "$EVIDENCE"
 if env "${common_env[@]}" "$ROOT/scripts/rc-dogfood-gate.sh" --check > "$TMP/fail.out" 2>&1; then

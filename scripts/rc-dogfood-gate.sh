@@ -15,6 +15,7 @@ min_ops="${AGENTHUB_RC_MIN_OPS_FLOWS:-20}"
 min_project="${AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS:-20}"
 min_cost="${AGENTHUB_RC_MIN_COST_RECEIPTS:-$min_sessions}"
 required_providers="${AGENTHUB_RC_REQUIRED_PROVIDERS:-deepseek,kimi}"
+api_providers="${AGENTHUB_RC_API_PROVIDERS:-$required_providers}"
 required_checks="${AGENTHUB_RC_REQUIRED_CHECKS:-chat_no_bootstrap,ops_no_bootstrap,resume,rewind,stats,cost_receipts,ops_receipts,approval_ux,long_session_latency}"
 
 json_field() {
@@ -56,6 +57,7 @@ ops_flows=0
 project_edit_flows=0
 cost_receipts=0
 provider_passed=""
+provider_ignored=""
 checks_passed=""
 open_blockers=0
 
@@ -86,7 +88,12 @@ if [[ -f "$EVIDENCE" ]]; then
     fi
 
     if [[ "$kind" == "provider" && "$status" == "passed" ]]; then
-      provider_passed="$(csv_add_unique "$provider_passed" "$(json_field "$line" provider)")"
+      provider="$(json_field "$line" provider)"
+      if csv_contains "$api_providers" "$provider"; then
+        provider_passed="$(csv_add_unique "$provider_passed" "$provider")"
+      else
+        provider_ignored="$(csv_add_unique "$provider_ignored" "$provider")"
+      fi
     fi
 
     if [[ "$kind" == "blocker" ]]; then
@@ -106,7 +113,12 @@ if [[ -f "$index" ]]; then
     kind="$(json_field "$line" kind)"
     provider_status="$(json_field "$line" provider_status)"
     if [[ "$kind" == "provider" && "$provider_status" == "passed" ]]; then
-      provider_passed="$(csv_add_unique "$provider_passed" "$(json_field "$line" provider)")"
+      provider="$(json_field "$line" provider)"
+      if csv_contains "$api_providers" "$provider"; then
+        provider_passed="$(csv_add_unique "$provider_passed" "$provider")"
+      else
+        provider_ignored="$(csv_add_unique "$provider_ignored" "$provider")"
+      fi
     fi
   done < "$index"
 fi
@@ -126,6 +138,7 @@ printf 'ops flows: %s/%s\n' "$ops_flows" "$min_ops"
 printf 'project-edit flows: %s/%s\n' "$project_edit_flows" "$min_project"
 printf 'cost receipts: %s/%s\n' "$cost_receipts" "$min_cost"
 printf 'providers passed: %s\n' "${provider_passed:-none}"
+printf 'providers ignored: %s\n' "${provider_ignored:-none}"
 printf 'checks passed: %s\n' "${checks_passed:-none}"
 printf 'open blocker/critical blockers: %s\n' "$open_blockers"
 

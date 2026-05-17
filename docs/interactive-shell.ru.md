@@ -93,4 +93,4 @@ Expert commands вроде `agenthub run`, `agenthub tx report`, `agenthub tx di
 
 ## Граница
 
-Shell не заменяет DeepSeek, Kimi, Kimi или OpenAI-compatible model. Он даёт transaction control, approvals, logs, rollback, reports, memory и dashboard visibility вокруг provider work.
+Shell использует AgentHub-owned DeepSeek/Kimi API providers для LLM work. Он даёт transaction control, approvals, logs, rollback, reports, memory и dashboard visibility вокруг provider work.

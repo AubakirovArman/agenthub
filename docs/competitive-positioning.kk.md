@@ -1,6 +1,6 @@
 # Competitive Positioning
 
-AgentHub — тағы бір coding agent емес. Ол DeepSeek, Kimi, Kimi, command-line tools және OpenAI-compatible endpoints айналасындағы local transactional runtime.
+AgentHub — тағы бір coding agent емес. Ол API-native DeepSeek/Kimi provider work және deterministic command execution айналасындағы local transactional runtime.
 
 ## Орны
 

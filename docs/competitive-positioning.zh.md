@@ -1,6 +1,6 @@
 # Competitive Positioning
 
-AgentHub 不是另一个 coding agent。它是围绕 DeepSeek、Kimi、Kimi、command-line tools 和 OpenAI-compatible endpoints 的本地事务型 runtime。
+AgentHub 不是另一个 coding agent。它是围绕 API-native DeepSeek/Kimi provider work 和 deterministic command execution 的本地事务型 runtime。
 
 ## 定位
 

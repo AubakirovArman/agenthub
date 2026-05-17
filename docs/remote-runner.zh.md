@@ -2,7 +2,7 @@
 
 语言: [English](remote-runner.en.md), [Русский](remote-runner.ru.md), [中文](remote-runner.zh.md), [Қазақша](remote-runner.kk.md)
 
-当 `execution.sandbox.level` 为 `2` 或更高，并且配置了 enterprise remote runner 时，Remote runner execution 会调度 external agent adapter CLI calls、`execution.commands`、repair commands、review commands 和 verifier commands。
+当 `execution.sandbox.level` 为 `2` 或更高，并且配置了 enterprise remote runner 时，Remote runner execution 会调度 API-provider-generated commands、`execution.commands`、repair commands、review commands 和 verifier commands。
 
 ## Policy
 

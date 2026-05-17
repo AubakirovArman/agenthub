@@ -2,7 +2,7 @@
 
 Languages: [English](remote-runner.en.md), [Русский](remote-runner.ru.md), [中文](remote-runner.zh.md), [Қазақша](remote-runner.kk.md)
 
-Remote runner execution dispatches external agent adapter CLI calls, `execution.commands`, repair commands, review commands, and verifier commands when `execution.sandbox.level` is `2` or higher and an enterprise remote runner is configured.
+Remote runner execution dispatches API-provider-generated commands, `execution.commands`, repair commands, review commands, and verifier commands when `execution.sandbox.level` is `2` or higher and an enterprise remote runner is configured.
 
 ## Policy
 

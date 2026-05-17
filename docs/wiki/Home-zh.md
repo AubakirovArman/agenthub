@@ -1,6 +1,6 @@
 # AgentHub Wiki
 
-AgentHub 是面向 AI coding agents 的本地事务型 runtime。它用 isolated worktrees、verifier checks、rollback、memory、reports 和 dashboards 包装 DeepSeek、Kimi、Kimi、command adapters 以及 OpenAI-compatible endpoints。
+AgentHub 是面向 AI coding agents 的本地事务型 runtime。它用 isolated worktrees、verifier checks、rollback、memory、reports 和 dashboards 包装 API-native DeepSeek/Kimi provider work 和 deterministic command execution。
 
 语言: [English](Home) · [Русский](Home-ru) · [中文](Home-zh) · [Қазақша](Home-kk)
 

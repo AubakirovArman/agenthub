@@ -93,4 +93,4 @@ edit/e     draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 
 ## Boundary
 
-Shell DeepSeek, Kimi, Kimi немесе OpenAI-compatible model орнына жүрмейді. Ол provider work үстінен transaction control, approvals, logs, rollback, reports, memory және dashboard visibility береді.
+Shell AgentHub-owned DeepSeek/Kimi API providers арқылы LLM work орындайды. Ол provider work үстінен transaction control, approvals, logs, rollback, reports, memory және dashboard visibility береді.

@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.40-local-preview - 2026-05-17
+
+- Keep 1.0 RC provider evidence API-native by filtering legacy CLI provider records out of `rc-evidence`.
+- Update the RC dogfood gate to count only allowed API providers such as DeepSeek/Kimi while showing ignored legacy provider history separately.
+- Add regression coverage proving old `codex` dogfood records cannot satisfy API-native provider requirements.
+
 ## 0.4.39-local-preview - 2026-05-17
 
 - Wire `scripts/kimi-auth-check.sh` into `scripts/prepare-1.0-release.sh` so 1.0 preparation refreshes source-backed Kimi auth blocker evidence before the RC gate.

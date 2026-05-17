@@ -1,6 +1,6 @@
 # AgentHub
 
-AgentHub 是面向 AI coding agents 的本地事务型 runtime。它不替代 DeepSeek、Kimi、Kimi 或 OpenAI-compatible tools，而是用 isolated worktrees、command policy、verifier checks、rollback、memory、reports 和 dashboards 包住这些工具。
+AgentHub 是面向 AI coding agents 的本地事务型 runtime。它的 user-facing LLM provider surface 是 API-native DeepSeek 和 Kimi，并用 isolated worktrees、command policy、verifier checks、rollback、memory、reports 和 dashboards 包住 provider work。
 
 语言: [English](README.md), [Русский](README.ru.md), [中文](README.zh.md), [Қазақша](README.kk.md)
 

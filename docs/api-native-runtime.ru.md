@@ -18,7 +18,7 @@ AgentHub должен перестать быть оболочкой над чу
 
 На сервере можно положить ключи в `.deepseek` и `.kimi` в project directory или любой parent directory. AgentHub читает эти файлы как runtime secrets и не сохраняет содержимое в config.
 
-DeepSeek API, Kimi API, legacy aliases и generic custom profiles больше не являются user-facing provider surface.
+Codex CLI, Gemini CLI, Kimi CLI, legacy CLI aliases и generic custom profiles больше не являются user-facing provider surface.
 
 ## Текущий статус
 

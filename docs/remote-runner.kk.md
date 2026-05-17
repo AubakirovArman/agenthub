@@ -2,7 +2,7 @@
 
 Тілдер: [English](remote-runner.en.md), [Русский](remote-runner.ru.md), [中文](remote-runner.zh.md), [Қазақша](remote-runner.kk.md)
 
-`execution.sandbox.level` `2` немесе одан жоғары болса және enterprise remote runner бапталса, Remote runner execution external agent adapter CLI calls, `execution.commands`, repair commands, review commands және verifier commands dispatch жасайды.
+`execution.sandbox.level` `2` немесе одан жоғары болса және enterprise remote runner бапталса, Remote runner execution API-provider-generated commands, `execution.commands`, repair commands, review commands және verifier commands dispatch жасайды.
 
 ## Policy
 
