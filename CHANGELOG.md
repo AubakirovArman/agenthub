@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.64-local-preview - 2026-05-17
+
+- Surface Kimi auth `credential_warning` in `agenthub providers status` and setup output when the latest blocked auth report matches the current key fingerprint.
+- Surface the same warning in `agenthub doctor` so the normal provider health path explains that Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys.
+
 ## 0.4.63-local-preview - 2026-05-17
 
 - Make `scripts/kimi-auth-check.sh` print and record a `credential_warning` that Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys.

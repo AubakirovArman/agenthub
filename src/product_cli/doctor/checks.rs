@@ -177,10 +177,18 @@ fn provider_auth_report_checks(project_root: &Path, checks: &mut Vec<DoctorCheck
         .filter(|value| !value.is_empty())
         .map(|value| format!(" key:{value}"))
         .unwrap_or_default();
+    let warning = report
+        .get("credential_warning")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(|value| format!("; warning:{value}"))
+        .unwrap_or_default();
     let message = match status {
         "passed" => "latest Kimi auth check passed".to_string(),
-        "blocked" => format!("latest Kimi auth check blocked:{fingerprint}; {next_action}"),
-        other => format!("latest Kimi auth check {other}:{fingerprint}; {next_action}"),
+        "blocked" => {
+            format!("latest Kimi auth check blocked:{fingerprint}{warning}; {next_action}")
+        }
+        other => format!("latest Kimi auth check {other}:{fingerprint}{warning}; {next_action}"),
     };
     let level = if status == "passed" {
         CheckLevel::Ok

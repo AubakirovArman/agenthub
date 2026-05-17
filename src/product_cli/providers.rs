@@ -271,8 +271,14 @@ fn matching_kimi_auth_blocker(project_root: &Path, current_key: &str) -> Option<
         .get("next_action")
         .and_then(Value::as_str)
         .unwrap_or("run scripts/kimi-auth-check.sh");
+    let warning = report
+        .get("credential_warning")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+        .map(|value| format!("; warning:{value}"))
+        .unwrap_or_default();
     Some(format!(
-        "latest Kimi auth check {status}: key:{report_key}; {next_action}"
+        "latest Kimi auth check {status}: key:{report_key}{warning}; {next_action}"
     ))
 }
 
