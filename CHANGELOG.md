@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.62-local-preview - 2026-05-17
+
+- Add an explicit `providers unblock kimi` warning that Kimi Code CLI OAuth JSON is not a Moonshot OpenAI-compatible API key.
+- Keep the Kimi unblock runbook pointed at plain replacement API keys before preflight, rotation, RC unblock, provider dogfood, and RC gate checks.
+
 ## 0.4.61-local-preview - 2026-05-17
 
 - Reject Kimi Code CLI OAuth credential JSON during `providers preflight-key kimi`, `providers rotate-key kimi`, and `scripts/kimi-key-rotate.sh` before any write or provider test.

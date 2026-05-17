@@ -404,6 +404,9 @@ pub fn unblock_provider(project_root: &Path, provider: &str) -> Result<String> {
 
 fn append_kimi_unblock_steps(project_root: &Path, out: &mut String) {
     out.push_str("action\treplace_or_rotate_kimi_moonshot_key_if_auth_failed\n");
+    out.push_str(
+        "warning\tkimi_cli_credentials_not_api_key\tKimi Code CLI OAuth JSON with access_token/refresh_token is not a Moonshot OpenAI-compatible API key; create a plain Moonshot API key instead\n",
+    );
     out.push_str("step\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>\n");
     out.push_str("step\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
     out.push_str("step\t3\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");

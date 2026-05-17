@@ -158,6 +158,8 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock.contains("status\tblocked"));
         assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
         assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
+        assert!(unblock.contains("warning\tkimi_cli_credentials_not_api_key"));
+        assert!(unblock.contains("not a Moonshot OpenAI-compatible API key"));
         assert!(unblock
             .contains("step\t1\tagenthub providers preflight-key kimi --from-file <new-key-file>"));
         assert!(unblock
