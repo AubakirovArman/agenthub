@@ -49,6 +49,18 @@ fn readiness_audit_json_reports_blocked_kimi_without_secret() -> Result<()> {
         assert!(result.output.contains("1 blocker/critical open: kimi-auth"));
         assert!(result.output.contains(r#""id": "kimi_auth""#));
         assert!(result.output.contains(r#""status": "blocked""#));
+        let kimi_auth = parsed["checks"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entry| entry["id"] == "kimi_auth")
+            .expect("kimi auth check");
+        assert!(kimi_auth["next_commands"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|command| command
+                == "agenthub providers rc-unblock kimi --from-file <new-key-file>"));
         assert!(result
             .output
             .contains("agenthub readiness audit --json --check"));
@@ -75,6 +87,9 @@ fn readiness_audit_text_keeps_human_checklist() -> Result<()> {
             .output
             .contains("AgentHub API-native readiness audit"));
         assert!(result.output.contains("check\tkimi_auth\tblocked"));
+        assert!(result.output.contains(
+            "check_next\tkimi_auth\t2\tagenthub providers rc-unblock kimi --from-file <new-key-file>"
+        ));
         assert!(result.output.contains("status\tincomplete"));
         assert!(result
             .output

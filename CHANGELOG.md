@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.79-local-preview - 2026-05-17
+
+- Add per-check `next_commands` to `agenthub readiness audit --json`, so the full API-native readiness gate is actionable without jumping to the focused blocker view.
+- Render matching `check_next` lines in the text readiness audit and make `agenthub readiness blockers` reuse the same command set from audit checks.
+
 ## 0.4.78-local-preview - 2026-05-17
 
 - Add per-blocker `next_commands` to `agenthub readiness blockers --json`, so each incomplete readiness row carries its own source-backed recovery commands.

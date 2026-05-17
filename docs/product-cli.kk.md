@@ -154,6 +154,15 @@ For Kimi auth unblock work, `providers unblock kimi` prints the current source-b
 
 Kimi Code CLI credentials are not Moonshot API keys. If a source file looks like Kimi CLI OAuth JSON with `access_token` or `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi`, and `scripts/kimi-key-rotate.sh` reject it before any write or provider test and keep token material out of the output.
 
+## Readiness
+
+```bash
+agenthub readiness audit --json --check
+agenthub readiness blockers --json --check
+```
+
+`readiness audit` is the full API-native 1.0 gate. JSON output includes source paths, RC evidence metrics, every check row, and per-check `next_commands` for incomplete rows. Text output renders matching `check_next` lines. `readiness blockers` is the short view for humans and automation; it reuses the same recovery commands as the full audit.
+
 ## Config
 
 ```bash

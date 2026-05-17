@@ -163,6 +163,15 @@ Named HTTP profiles намеренно отключены в API-native mode. Pr
 
 Kimi Code CLI credentials не являются Moonshot API key. Если source file похож на Kimi CLI OAuth JSON с `access_token` или `refresh_token`, `providers preflight-key kimi`, `providers rotate-key kimi` и `scripts/kimi-key-rotate.sh` отклоняют его до любой записи или provider test и не выводят token material.
 
+## Readiness
+
+```bash
+agenthub readiness audit --json --check
+agenthub readiness blockers --json --check
+```
+
+`readiness audit` — полный API-native 1.0 gate. JSON output включает source paths, RC evidence metrics, все check rows и per-check `next_commands` для незакрытых rows. Text output печатает соответствующие `check_next` строки. `readiness blockers` — короткий view для людей и automation; он использует тот же набор recovery commands, что и полный audit.
+
 ## Ecosystem
 
 ```bash

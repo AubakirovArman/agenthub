@@ -10,6 +10,7 @@ use serde_json::Value;
 use crate::product_cli::{ecosystem, providers};
 
 use super::{
+    next::check_next_commands,
     render::render_text,
     types::{
         env_usize, next_commands, AuditConfig, AuditOptions, AuditRenderResult, EvidenceSummary,
@@ -445,6 +446,7 @@ fn push_passed(checks: &mut Vec<ReadinessCheck>, id: &str, detail: &str) {
         id: id.to_string(),
         status: "passed".to_string(),
         detail: detail.to_string(),
+        next_commands: Vec::new(),
     });
 }
 
@@ -453,6 +455,7 @@ fn push_missing(checks: &mut Vec<ReadinessCheck>, id: &str, detail: &str) {
         id: id.to_string(),
         status: "missing".to_string(),
         detail: detail.to_string(),
+        next_commands: check_next_commands(id, detail),
     });
 }
 
@@ -461,6 +464,7 @@ fn push_blocked(checks: &mut Vec<ReadinessCheck>, id: &str, detail: &str) {
         id: id.to_string(),
         status: "blocked".to_string(),
         detail: detail.to_string(),
+        next_commands: check_next_commands(id, detail),
     });
 }
 

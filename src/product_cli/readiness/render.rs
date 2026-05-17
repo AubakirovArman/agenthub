@@ -24,6 +24,14 @@ pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
             "check\t{}\t{}\t{}\n",
             check.id, check.status, check.detail
         ));
+        for (index, command) in check.next_commands.iter().enumerate() {
+            out.push_str(&format!(
+                "check_next\t{}\t{}\t{}\n",
+                check.id,
+                index + 1,
+                command
+            ));
+        }
     }
     out.push_str(&format!("status\t{}\n", report.status));
     for (index, command) in report.next.iter().enumerate() {

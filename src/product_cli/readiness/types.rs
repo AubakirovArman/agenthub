@@ -69,6 +69,8 @@ pub struct ReadinessCheck {
     pub id: String,
     pub status: String,
     pub detail: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub next_commands: Vec<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
