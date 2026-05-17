@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.81-local-preview - 2026-05-17
+
+- Make `agenthub providers recovery [--json]` mark already available providers as `ready` instead of emitting redundant provider-test commands.
+- Keep provider recovery next steps focused on the active Kimi/readiness blockers while preserving missing-provider setup guidance.
+
 ## 0.4.80-local-preview - 2026-05-17
 
 - Clarify public docs around API-native provider routes: DeepSeek/Kimi are the user-facing providers, while `command` is only the internal deterministic runner.

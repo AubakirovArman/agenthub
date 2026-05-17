@@ -132,7 +132,7 @@ fn provider_action(status: &ProviderStatus, blocked: bool) -> String {
     } else if !status.available {
         "configure_api_key".to_string()
     } else {
-        "run_provider_test".to_string()
+        "ready".to_string()
     }
 }
 
@@ -145,18 +145,13 @@ fn provider_next_commands(status: &ProviderStatus, state: &str) -> Vec<String> {
             "agenthub readiness blockers --json --check".to_string(),
             "agenthub readiness audit --json --check".to_string(),
         ],
-        "kimi" => vec![
-            "agenthub providers test kimi".to_string(),
-            "AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh".to_string(),
-            "agenthub readiness blockers --json --check".to_string(),
-            "agenthub readiness audit --json --check".to_string(),
-        ],
+        "kimi" => Vec::new(),
         "deepseek" if state == "missing" => vec![
             "agenthub providers diagnose deepseek".to_string(),
             "agenthub providers test deepseek".to_string(),
         ],
-        "deepseek" => vec!["agenthub providers test deepseek".to_string()],
-        other => vec![format!("agenthub providers test {other}")],
+        "deepseek" => Vec::new(),
+        _ => Vec::new(),
     }
 }
 
