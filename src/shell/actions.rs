@@ -5,8 +5,8 @@ use anyhow::{anyhow, Context, Result};
 use serde_json::json;
 
 use crate::{
-    agent_dir, enterprise, memory, skill_registry, tx_control, tx_explain, tx_inspect, tx_undo,
-    tx_watch,
+    agent_dir, enterprise, memory, ops, skill_registry, tx_control, tx_explain, tx_inspect,
+    tx_undo, tx_watch,
 };
 
 use super::{format, status};
@@ -102,6 +102,60 @@ pub(super) fn print_memory(root: &Path, mode: Option<&str>) -> Result<()> {
             print_section("Active decisions", &summary.active_decisions);
             print_section("Known failures", &summary.known_failures);
         }
+    }
+    Ok(())
+}
+
+pub(super) fn print_ops(root: &Path, mode: Option<&str>) -> Result<()> {
+    enterprise::authorize(root, "memory.read")?;
+    let mode = mode.unwrap_or("hosts").trim();
+    let (command, rest) = mode.split_once(' ').unwrap_or((mode, ""));
+    match command {
+        "" | "hosts" => {
+            println!("Ops hosts:");
+            for host in ops::list_hosts(root)? {
+                println!(
+                    "- {} {} trust {} commands {}",
+                    host.id,
+                    host.target,
+                    host.trust.as_str(),
+                    host.command_count
+                );
+            }
+        }
+        "runbooks" => {
+            let host = rest
+                .trim()
+                .strip_prefix("--host ")
+                .map(str::trim)
+                .filter(|value| !value.is_empty());
+            println!("Ops runbooks:");
+            for card in ops::list_runbook_cards(root, host)? {
+                println!(
+                    "- {} {} command {}",
+                    card.id,
+                    card.title,
+                    card.command.as_deref().unwrap_or("")
+                );
+            }
+        }
+        "receipts" => {
+            println!("Ops receipts:");
+            for receipt in ops::list_receipts(root, 20, None)? {
+                println!(
+                    "- {} {} trust {} success {} {}",
+                    receipt.id,
+                    receipt.target,
+                    receipt.trust.as_str(),
+                    receipt
+                        .success
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| "n/a".to_string()),
+                    receipt.command
+                );
+            }
+        }
+        _ => println!("usage: /ops [hosts|runbooks [--host <target>]|receipts]"),
     }
     Ok(())
 }

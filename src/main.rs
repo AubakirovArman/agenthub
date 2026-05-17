@@ -140,6 +140,7 @@ fn run() -> Result<()> {
             }
         },
         Commands::Memory { command } => handlers::handle_memory(&project_root, command)?,
+        Commands::Ops { command } => handlers::handle_ops(&project_root, command)?,
         Commands::Skills { command } => match command {
             SkillCommands::List => {
                 enterprise::authorize(&project_root, "skills.read")?;

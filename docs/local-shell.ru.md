@@ -30,6 +30,7 @@ Shell создаёт draft plan, показывает scope, commands, patch pre
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
 /memory inbox         review memory candidates
+/ops                  host profiles, runbooks, receipts
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context
@@ -45,6 +46,7 @@ Shell создаёт draft plan, показывает scope, commands, patch pre
 - Shell history: `.agent/shell/history.txt` для initialized projects или AgentHub user data directory для Chat/Ops Mode
 - Chats: `.agent/shell/chats/` для initialized projects или AgentHub user data directory для Chat/Ops Mode
 - Memory: `.agent/memory/` для initialized projects или AgentHub user data directory для Chat/Ops Mode
+- Ops state: host profiles, runbooks и command receipts в AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

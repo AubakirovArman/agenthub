@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.28-local-preview - 2026-05-16
+
+- Add Ops host profiles under the AgentHub user data directory, including stable host ids, alias/note metadata, trust levels, last-seen timestamps, and command counts.
+- Add Ops runbook cards backed by committed `ops/runbook_step` memory and expose them through `agenthub ops runbooks` and `/ops runbooks`.
+- Record safer Ops command receipts for explicit `!` shell commands, including target host, trust level, approval/risk reason, log paths, redacted tails, and matching runbook card ids; untrusted hosts now require approval even for otherwise read-only Ops commands.
+
 ## 0.4.27-local-preview - 2026-05-16
 
 - Add a shared memory inbox review view with duplicate/conflict grouping, confidence bands, ranked candidates, and per-item promotion diff previews.

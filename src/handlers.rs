@@ -9,6 +9,7 @@ use crate::cli::EnterpriseCommands;
 
 mod aal_commands;
 mod memory_commands;
+mod ops_commands;
 mod plugin_commands;
 mod product_commands;
 mod run_commands;
@@ -127,3 +128,4 @@ pub fn handle_enterprise(project_root: &Path, command: EnterpriseCommands) -> Re
     Ok(())
 }
 pub use memory_commands::handle_memory;
+pub use ops_commands::handle_ops;

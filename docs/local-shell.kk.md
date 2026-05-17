@@ -30,6 +30,7 @@ Shell draft plan жасайды, scope, commands, patch preview, verifier plan, 
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
 /memory inbox         review memory candidates
+/ops                  host profiles, runbooks, receipts
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context
@@ -45,6 +46,7 @@ Ordinary text — негізгі жол. `ask`, `run`, `mode`, `watch`, `approve
 - Shell history: initialized projects үшін `.agent/shell/history.txt`, Chat/Ops Mode үшін AgentHub user data directory
 - Chats: initialized projects үшін `.agent/shell/chats/`, Chat/Ops Mode үшін AgentHub user data directory
 - Memory: initialized projects үшін `.agent/memory/`, Chat/Ops Mode үшін AgentHub user data directory
+- Ops state: host profiles, runbooks, and command receipts under the AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

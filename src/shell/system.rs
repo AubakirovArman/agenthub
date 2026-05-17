@@ -13,26 +13,33 @@ use crate::command_policy;
 use crate::command_runner::{run_shell_with_sandbox_logged, CommandResult, CommandSandbox};
 use crate::home;
 use crate::observability::redact_text;
+use crate::ops;
 use crate::tool_permissions::{self, ToolPermissionDecision};
 
 use super::format;
 
-pub(super) fn run(root: &Path, command: &str) -> Result<()> {
+pub(super) fn run(root: &Path, command: &str) -> Result<Option<CommandResult>> {
     if command.trim().is_empty() {
         format::error("shell command is empty");
-        return Ok(());
+        return Ok(None);
     }
     let permission = permission_decision(command);
     print_permission(&permission);
+    print_ops_context(command, &permission);
     let policy = command_policy::classify_shell_command(root, command)?;
     if policy.classification == "restricted" {
         format::error(&format!("blocked restricted command: {command}"));
-        return Ok(());
+        return Ok(None);
     }
     let policy_needs_approval = policy.classification == "needs_approval";
-    if permission.approval_required || policy_needs_approval {
+    let untrusted_ops_host = permission.profile == tool_permissions::ToolPermissionProfile::OpsHost
+        && ops::command_trust(command).unwrap_or(ops::OpsHostTrust::Unknown)
+            == ops::OpsHostTrust::Untrusted;
+    if permission.approval_required || policy_needs_approval || untrusted_ops_host {
         let reason = if permission.approval_required {
             permission.reason.as_str()
+        } else if untrusted_ops_host {
+            "Ops target is marked untrusted"
         } else {
             policy
                 .matched_policy
@@ -41,7 +48,7 @@ pub(super) fn run(root: &Path, command: &str) -> Result<()> {
         };
         if !confirm(&format!("Approve command `{command}` ({reason})?"), false)? {
             println!("command skipped");
-            return Ok(());
+            return Ok(None);
         }
     }
     let logs = if home::project_has_shell_state(root) {
@@ -57,8 +64,8 @@ pub(super) fn run(root: &Path, command: &str) -> Result<()> {
     println!("stderr_log {}", stderr_log.display());
     println!("Hint: press Ctrl-C to return to prompt after the command exits; logs are live.");
     let result = run_with_live_tail(root, command, &logs, &prefix, &stdout_log, &stderr_log)?;
-    print_result(result);
-    Ok(())
+    print_result(result.clone());
+    Ok(Some(result))
 }
 
 pub(super) fn permission_decision(command: &str) -> ToolPermissionDecision {
@@ -74,6 +81,16 @@ fn print_permission(decision: &ToolPermissionDecision) {
         decision.approval_required
     );
     println!("reason {}", decision.reason);
+}
+
+fn print_ops_context(command: &str, decision: &ToolPermissionDecision) {
+    if decision.profile != tool_permissions::ToolPermissionProfile::OpsHost {
+        return;
+    }
+    println!("ops_target {}", ops::command_target(command));
+    let trust = ops::command_trust(command).unwrap_or(ops::OpsHostTrust::Unknown);
+    println!("ops_trust {}", trust.as_str());
+    println!("ops_receipt enabled");
 }
 
 fn run_with_live_tail(

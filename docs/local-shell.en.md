@@ -30,6 +30,7 @@ The shell creates a draft plan, shows scope, commands, patch preview, verifier p
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
 /memory inbox         review memory candidates
+/ops                  host profiles, runbooks, receipts
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context
@@ -45,6 +46,7 @@ Plain text is the main path. Expert commands like `ask`, `run`, `mode`, `watch`,
 - Shell history: `.agent/shell/history.txt` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
 - Chats: `.agent/shell/chats/` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
 - Memory: `.agent/memory/` for initialized projects, or the AgentHub user data directory for Chat/Ops Mode
+- Ops state: host profiles, runbooks, and command receipts under the AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

@@ -18,6 +18,8 @@ Draft-only flows тоже остаются lazy: `plan`, `ask` и shell draft cr
 
 Explicit `!command` shell actions теперь получают AgentHub-owned tool permission decision до выполнения. Transcript записывает `tool_permission` events с profile (`chat`, `read-only`, `workspace-write`, `ops-host`), risk, `approval_required` и reason; high-risk destructive local commands, package changes, mutating HTTP calls и mutating Ops host/container/cluster commands спрашивают approval перед запуском.
 
+Для Ops Mode explicit shell commands также пишут host-scoped receipts. AgentHub извлекает targets из `ssh`, `scp`, `rsync`, `kubectl`, `helm`, `systemctl`, `journalctl`, `docker` и `terraform`, хранит host profiles в AgentHub user data directory, записывает trust metadata и связывает подходящие runbook cards. Hosts со статусом `untrusted` требуют approval даже для иначе read-only Ops commands.
+
 Используй `/` для commands, `/cd <folder>` для смены project без перезапуска, `@path` для context, `!command` для policy-checked shell commands и `# note` для memory. В Chat/Ops Mode память хранится в user data directory AgentHub; initialized projects продолжают использовать `.agent/memory`.
 
 Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху. Если chat JSONL transcript содержит corrupt line, AgentHub сохраняет valid events и показывает `session_recovery` event вместо потери всего transcript.
@@ -191,6 +193,19 @@ agenthub memory inbox reject mem-inbox-12345678,mem-inbox-87654321
 Completed Chat/Ops turns и successful Project transactions могут добавлять automatic candidates в этот inbox. Каждый candidate содержит source, scope, confidence, evidence excerpts и diff metadata, но остаётся inactive до explicit approval.
 
 API chat turns записывают compaction receipt в `memory/compacted/context_receipt.json` внутри активного memory scope. Там фиксируются selected committed memory, expired records, conflict suppression, budget drops, prompt token estimate и подтверждение, что pending inbox memory не была injected в prompt.
+
+## Ops
+
+```bash
+agenthub ops hosts
+agenthub ops hosts add prod.example.com --alias prod --trust trusted --note "primary app host"
+agenthub ops hosts trust prod.example.com untrusted
+agenthub ops runbooks
+agenthub ops runbooks add "Check nginx before restart" --host prod.example.com --command "systemctl status nginx"
+agenthub ops receipts --host prod.example.com --limit 10
+```
+
+`ops hosts` показывает host profiles со stable ids, alias/note metadata, trust level, last-seen timestamp и command count. `ops runbooks` показывает reusable runbook cards на основе committed `ops/runbook_step` memory; `add` сразу пишет reviewed memory fact для явно добавленного пользователем runbook. `ops receipts` показывает recent explicit Ops shell commands с target, trust, risk, approval requirement, success, command и log pointers. В shell доступны те же stores через `/ops hosts`, `/ops runbooks` и `/ops receipts`.
 
 ## Skills
 

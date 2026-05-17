@@ -71,6 +71,7 @@ Inside the shell:
 - `/chats`, `/search`, `/rename`, `/pin`, and `/unpin` manage chat sessions without leaving the shell; `/chats status:COMMITTED provider:deepseek date:today` filters sessions.
 - `/stats` shows chat turns, token totals, estimated cost, and provider-level usage from the AgentHub event store.
 - `/memory inbox` lists grouped, ranked review-gated memory candidates with confidence bands and promotion previews; `/memory inbox approve <id...>` promotes one or more candidates into committed memory.
+- `/ops` shows host profiles, reusable runbook cards, and command receipts for Ops Mode; explicit `!ssh`, `!kubectl`, `!systemctl`, and similar commands write host-scoped receipts without creating `.agent`.
 - `/context` previews the current chat, recent messages, memory summary, selected transaction, and mention hints.
 - Corrupt chat JSONL lines are recovered as `session_recovery` events so valid transcript messages, search hits, and TUI event rail state remain available.
 - Direct API chat includes budgeted relevant committed memory in the provider prompt, writes a context compaction receipt, and leaves pending inbox candidates out until approval.
@@ -83,6 +84,9 @@ Scriptable commands still exist for automation:
 ```bash
 agenthub exec "answer with one word: ok" --jsonl
 agenthub stats
+agenthub ops hosts
+agenthub ops runbooks
+agenthub ops receipts --limit 10
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-commit
 agenthub run "create a Django web application" --no-watch
 agenthub run "create docs/agenthub-check.md with a one-line AgentHub check" --no-watch
@@ -183,7 +187,7 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
 - DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
-- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI with live tool cards, automatic review-only memory extraction, and grouped/ranked memory inbox review are available; Ops host profiles and final dogfooding gates remain before 1.0.
+- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI with live tool cards, automatic review-only memory extraction, grouped/ranked memory inbox review, and Ops host profiles/runbook receipts are available; final dogfooding gates remain before 1.0.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 

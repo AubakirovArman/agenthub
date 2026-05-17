@@ -2,7 +2,7 @@ use std::path::Path;
 
 use anyhow::Result;
 
-use crate::{agent_dir, chat_usage};
+use crate::{agent_dir, chat_usage, ops};
 
 use super::{
     actions,
@@ -54,6 +54,7 @@ pub(super) fn handle(
         ShellCommand::Approvals => actions::print_approvals(root)?,
         ShellCommand::Doctor => product::print_doctor(root)?,
         ShellCommand::Stats => print!("{}", chat_usage::render(root)?),
+        ShellCommand::Ops(args) => actions::print_ops(root, args.as_deref())?,
         ShellCommand::Providers(args) => product::handle_providers(root, args.as_deref())?,
         ShellCommand::Config(args) => product::handle_config(root, args.as_deref())?,
         ShellCommand::Dashboard => product::open_dashboard(root)?,
@@ -69,7 +70,12 @@ pub(super) fn handle(
             )?;
             chat::append_tool_permission(current_chat, &permission)?;
             chat::append_command(current_chat, "ops_command", &command)?;
-            system::run(root, &command)?;
+            let result = system::run(root, &command)?;
+            if let Some(receipt) =
+                ops::record_command(root, &command, &permission, result.as_ref())?
+            {
+                chat::append_ops_receipt(current_chat, &receipt)?;
+            }
         }
         ShellCommand::MemoryAdd(note) => memory_note::add(root, &note)?,
         ShellCommand::Open(tx_id) => open_tx(root, current_tx, &tx_id)?,

@@ -25,6 +25,7 @@ pub mod llm_gateway;
 pub mod local_server;
 pub mod memory;
 pub mod observability;
+pub mod ops;
 pub mod plugin_registry;
 pub mod product_cli;
 pub mod report;

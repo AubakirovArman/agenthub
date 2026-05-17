@@ -180,6 +180,7 @@ pub(super) const SLASH_COMMANDS: &[SlashCommand] = &[
     item("/providers", "setup or inspect DeepSeek/Kimi APIs"),
     item("/stats", "show chat token and cost usage"),
     item("/memory", "inspect project memory"),
+    item("/ops", "inspect Ops hosts, runbooks, and receipts"),
     item("/skills", "list built-in and project skills"),
     item("/chats", "list or filter chat sessions"),
     item("/messages", "show current chat transcript"),

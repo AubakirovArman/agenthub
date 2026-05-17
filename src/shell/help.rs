@@ -20,6 +20,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /providers         provider status and setup actions");
     println!("  /stats             chat token and cost usage");
     println!("  /memory            project memory summary");
+    println!("  /ops               host profiles, runbooks, and receipts");
     println!("  /skills            available skills");
     println!();
     println!("Transactions:");

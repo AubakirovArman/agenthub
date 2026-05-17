@@ -118,6 +118,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: MemoryCommands,
     },
+    Ops {
+        #[command(subcommand)]
+        command: OpsCommands,
+    },
     Skills {
         #[command(subcommand)]
         command: SkillCommands,
@@ -213,6 +217,66 @@ pub enum MemoryInboxCommands {
     Reject {
         #[arg(required = true)]
         ids: Vec<String>,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum OpsCommands {
+    Hosts {
+        #[command(subcommand)]
+        command: Option<OpsHostCommands>,
+    },
+    Runbooks {
+        #[command(subcommand)]
+        command: Option<OpsRunbookCommands>,
+    },
+    Receipts {
+        #[arg(long)]
+        host: Option<String>,
+
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum OpsHostCommands {
+    List,
+    Add {
+        target: String,
+
+        #[arg(long)]
+        alias: Option<String>,
+
+        #[arg(long, default_value = "unknown")]
+        trust: String,
+
+        #[arg(long)]
+        note: Option<String>,
+    },
+    Trust {
+        target: String,
+        trust: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum OpsRunbookCommands {
+    List {
+        #[arg(long)]
+        host: Option<String>,
+    },
+    Add {
+        title: String,
+
+        #[arg(long)]
+        host: Option<String>,
+
+        #[arg(long)]
+        command: Option<String>,
+
+        #[arg(long)]
+        note: Option<String>,
     },
 }
 

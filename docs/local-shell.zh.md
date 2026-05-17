@@ -30,6 +30,7 @@ Shell 会创建 draft plan，显示 scope、commands、patch preview、verifier 
 /explain [tx]         result explanation
 /serve [addr]         local live dashboard
 /memory inbox         review memory candidates
+/ops                  host profiles, runbooks, receipts
 /new                  new chat
 /exit                 exit
 @path                 attach file/folder context
@@ -45,6 +46,7 @@ Shell 会创建 draft plan，显示 scope、commands、patch preview、verifier 
 - Shell history: initialized projects 使用 `.agent/shell/history.txt`，Chat/Ops Mode 使用 AgentHub user data directory
 - Chats: initialized projects 使用 `.agent/shell/chats/`，Chat/Ops Mode 使用 AgentHub user data directory
 - Memory: initialized projects 使用 `.agent/memory/`，Chat/Ops Mode 使用 AgentHub user data directory
+- Ops state: host profiles, runbooks, and command receipts under the AgentHub user data directory
 - Transactions: `.agent/tx/<tx-id>/`
 - Dashboard: `.agent/reports/dashboard/index.html`
 

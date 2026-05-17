@@ -9,6 +9,7 @@ use uuid::Uuid;
 use crate::llm_gateway::estimate_cost;
 use crate::memory::{AutoMemoryExtractionReceipt, MemoryContextReceipt};
 use crate::observability::write_jsonl;
+use crate::ops::OpsCommandReceipt;
 use crate::tool_permissions::ToolPermissionDecision;
 use crate::{chat_index, home};
 
@@ -182,6 +183,33 @@ pub(super) fn append_tool_permission(
             "risk": decision.risk.as_str(),
             "reason": decision.reason.as_str(),
             "text": decision.text()
+        }),
+    )
+}
+
+pub(super) fn append_ops_receipt(
+    session: &ChatSession,
+    receipt: &OpsCommandReceipt,
+) -> Result<Value> {
+    append_event(
+        session,
+        "ops_command_receipt",
+        json!({
+            "id": receipt.id,
+            "host_id": receipt.host_id,
+            "target": receipt.target,
+            "trust": receipt.trust.as_str(),
+            "risk": receipt.risk,
+            "approval_required": receipt.approval_required,
+            "success": receipt.success,
+            "exit_code": receipt.exit_code,
+            "runbook_cards": receipt.runbook_cards,
+            "text": format!(
+                "ops receipt {} target {} trust {}",
+                receipt.id,
+                receipt.target,
+                receipt.trust.as_str()
+            )
         }),
     )
 }
