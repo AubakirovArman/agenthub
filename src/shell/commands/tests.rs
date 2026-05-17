@@ -4,7 +4,11 @@ use super::{parse_line, ShellCommand, ShellMode};
 
 #[test]
 fn parses_shell_commands_and_plain_text() {
-    assert_eq!(parse_line("sessions"), ShellCommand::Sessions);
+    assert_eq!(parse_line("sessions"), ShellCommand::Chats(None));
+    assert_eq!(
+        parse_line("/sessions provider:deepseek"),
+        ShellCommand::Chats(Some("provider:deepseek".into()))
+    );
     assert_eq!(parse_line("chats"), ShellCommand::Chats(None));
     assert_eq!(
         parse_line("chats status:COMMITTED provider:deepseek"),
@@ -43,7 +47,7 @@ fn parses_shell_commands_and_plain_text() {
         parse_line("session latest"),
         ShellCommand::Open("latest".into())
     );
-    assert_eq!(parse_line("/sessions"), ShellCommand::Sessions);
+    assert_eq!(parse_line("/transactions"), ShellCommand::Sessions);
     assert_eq!(parse_line("/rewind"), ShellCommand::Rewind);
     assert_eq!(
         parse_line("/save before-refactor"),

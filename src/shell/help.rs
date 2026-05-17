@@ -41,7 +41,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /restore <name>    restore a saved checkpoint");
     println!();
     println!("Chats:");
-    println!("  /chats             list chats; filter with status:, provider:, date:");
+    println!("  /sessions, /chats  list chats; filter with status:, provider:, date:");
     println!("  /search <text>     search chat titles and messages");
     println!("  /context           preview current chat, memory, and tx context");
     println!("  /rename <title>    rename the current chat");

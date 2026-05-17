@@ -71,6 +71,7 @@ edit/e     draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 /memory           memory inspect
 /hosts            Ops host profiles тізімі
 /connect <host>   Ops host profile қосу немесе ашу
+/sessions         chat sessions тізімі немесе filter
 /skills           skills inspect
 /transactions     recent transactions
 /new              new chat
@@ -86,9 +87,10 @@ edit/e     draft-ты $VISUAL немесе $EDITOR ішінде ашып, қай
 /exit             exit
 ```
 
-`/chats` shell ішінен filter жасай алады:
+`/sessions` және `/chats` shell ішінен filter жасай алады:
 
 ```text
+/sessions provider:deepseek
 /chats status:COMMITTED
 /chats provider:deepseek
 /chats date:today

@@ -71,6 +71,7 @@ edit/e     open the draft in $VISUAL or $EDITOR, then revalidate it
 /memory           inspect memory
 /hosts            list Ops host profiles
 /connect <host>   add or reopen an Ops host profile
+/sessions         list or filter chat sessions
 /skills           inspect skills
 /transactions     list recent transactions
 /new              start a new chat
@@ -86,9 +87,10 @@ edit/e     open the draft in $VISUAL or $EDITOR, then revalidate it
 /exit             exit
 ```
 
-`/chats` can be filtered without leaving the shell:
+`/sessions` and `/chats` can be filtered without leaving the shell:
 
 ```text
+/sessions provider:deepseek
 /chats status:COMMITTED
 /chats provider:deepseek
 /chats date:today

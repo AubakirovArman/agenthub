@@ -71,6 +71,7 @@ edit/e     open draft in $VISUAL or $EDITOR, then revalidate it
 /memory           inspect memory
 /hosts            list Ops host profiles
 /connect <host>   add or reopen an Ops host profile
+/sessions         list or filter chat sessions
 /skills           inspect skills
 /transactions     recent transactions
 /new              新 chat
@@ -86,9 +87,10 @@ edit/e     open draft in $VISUAL or $EDITOR, then revalidate it
 /exit             退出
 ```
 
-`/chats` 可以直接在 shell 中过滤：
+`/sessions` and `/chats` 可以直接在 shell 中过滤：
 
 ```text
+/sessions provider:deepseek
 /chats status:COMMITTED
 /chats provider:deepseek
 /chats date:today

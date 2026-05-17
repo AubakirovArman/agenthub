@@ -24,7 +24,7 @@ Explicit `!command` shell actions теперь получают AgentHub-owned t
 
 Shell также напрямую поддерживает alias-команды из API-native плана: `/mode chat|devops|project` записывает явное предпочтение workspace mode для следующих turns, `/provider <id>` выбирает готовый DeepSeek/Kimi API provider, `/cost` повторяет `/stats`, `/balance` показывает local spend и поясняет, что provider balance APIs недоступны, `/hosts` выводит Ops host profiles, а `/connect <host>` добавляет или открывает host profile без создания project runtime.
 
-Chat sessions восстанавливаются автоматически. Используй `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху. Если chat JSONL transcript содержит corrupt line, AgentHub сохраняет valid events и показывает `session_recovery` event вместо потери всего transcript.
+Chat sessions восстанавливаются автоматически. Используй `/sessions` или `/chats`, чтобы увидеть sessions с auto titles и pin state, `/search <text>` для поиска по titles/messages, `/rename <title>` для названия текущего chat и `/pin` или `/unpin`, чтобы держать важную работу сверху. Если chat JSONL transcript содержит corrupt line, AgentHub сохраняет valid events и показывает `session_recovery` event вместо потери всего transcript.
 
 Используй `/context` перед задачей, чтобы увидеть current chat title, recent messages, memory summary, selected transaction report и поддерживаемые mention forms.
 

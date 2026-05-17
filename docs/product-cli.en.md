@@ -24,7 +24,7 @@ Use `/` for commands, `/cd <folder>` to switch projects without restarting, `@pa
 
 The shell also exposes the API-native plan aliases directly: `/mode chat|devops|project` records an explicit workspace-mode preference for following turns, `/provider <id>` selects a ready DeepSeek/Kimi API provider, `/cost` mirrors `/stats`, `/balance` shows local spend with a note that provider balance APIs are not available, `/hosts` lists Ops host profiles, and `/connect <host>` adds or reopens a host profile without creating a project runtime.
 
-Chat sessions are restored automatically. Use `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top. If a chat JSONL transcript contains a corrupt line, AgentHub keeps the valid events and exposes a `session_recovery` event instead of dropping the whole transcript.
+Chat sessions are restored automatically. Use `/sessions` or `/chats` to list sessions with auto titles and pin state, `/search <text>` to search titles/messages, `/rename <title>` to name the current chat, and `/pin` or `/unpin` to keep important work at the top. If a chat JSONL transcript contains a corrupt line, AgentHub keeps the valid events and exposes a `session_recovery` event instead of dropping the whole transcript.
 
 Use `/context` before a task to preview the current chat title, recent messages, memory summary, selected transaction report, and supported mention forms.
 

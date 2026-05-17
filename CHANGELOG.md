@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.106-local-preview - 2026-05-17
+
+- Align the API-native shell command table by making `/sessions` a first-class alias for chat sessions while keeping transaction history on `/transactions`, `/tx`, and `/history`.
+- Add `/sessions` to shell help, slash completion, product docs, and the roadmap bridge notes so the interactive UX matches the plan file.
+
 ## 0.4.105-local-preview - 2026-05-17
 
 - Add shell-facing plan aliases from the API-native roadmap: `/mode chat|devops|project`, `/cost`, `/balance`, `/hosts`, and `/connect <host>`.

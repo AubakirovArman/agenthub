@@ -71,6 +71,7 @@ edit/e     открыть draft в $VISUAL или $EDITOR и затем пров
 /memory           memory inspect
 /hosts            список Ops host profiles
 /connect <host>   добавить или открыть Ops host profile
+/sessions         список или фильтр chat sessions
 /skills           skills inspect
 /transactions     recent transactions
 /new              новый chat
@@ -86,9 +87,10 @@ edit/e     открыть draft в $VISUAL или $EDITOR и затем пров
 /exit             выйти
 ```
 
-`/chats` можно фильтровать, не выходя из shell:
+`/sessions` и `/chats` можно фильтровать, не выходя из shell:
 
 ```text
+/sessions provider:deepseek
 /chats status:COMMITTED
 /chats provider:deepseek
 /chats date:today

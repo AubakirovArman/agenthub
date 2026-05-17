@@ -188,6 +188,7 @@ pub(super) const SLASH_COMMANDS: &[SlashCommand] = &[
     item("/hosts", "list Ops host profiles"),
     item("/connect", "add or reopen an Ops host profile"),
     item("/skills", "list built-in and project skills"),
+    item("/sessions", "list or filter chat sessions"),
     item("/chats", "list or filter chat sessions"),
     item("/messages", "show current chat transcript"),
     item("/context", "preview selected files, memory, and tx"),
