@@ -440,9 +440,10 @@ if [[ "$failed" == true ]]; then
   emit_next 9 'agenthub providers test kimi'
   emit_next 10 'scripts/kimi-auth-check.sh'
   emit_next 11 'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
-  emit_next 12 'agenthub readiness audit --json --check'
-  emit_next 13 'scripts/rc-evidence-collect.sh'
-  emit_next 14 'scripts/rc-dogfood-gate.sh --check'
+  emit_next 12 'agenthub readiness blockers --json --check'
+  emit_next 13 'agenthub readiness audit --json --check'
+  emit_next 14 'scripts/rc-evidence-collect.sh'
+  emit_next 15 'scripts/rc-dogfood-gate.sh --check'
   if [[ "$JSON" == true ]]; then
     render_json incomplete
   fi

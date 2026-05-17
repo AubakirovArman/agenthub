@@ -95,7 +95,8 @@ grep -q $'next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>
 grep -q $'next\t7\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
 grep -q $'next\t8\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
 grep -q $'next\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
-grep -q $'next\t12\tagenthub readiness audit --json --check' "$TMP/blocked.out"
+grep -q $'next\t12\tagenthub readiness blockers --json --check' "$TMP/blocked.out"
+grep -q $'next\t13\tagenthub readiness audit --json --check' "$TMP/blocked.out"
 if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --json --check --no-refresh > "$TMP/blocked.json" 2>&1; then
   printf 'expected JSON API-native completion audit to fail while Kimi auth is blocked\n' >&2
   exit 1
@@ -106,6 +107,7 @@ grep -q '"id": "kimi_auth"' "$TMP/blocked.json"
 grep -q '"status": "blocked"' "$TMP/blocked.json"
 grep -q '"open_blockers": 1' "$TMP/blocked.json"
 grep -q '"agenthub providers recovery --json"' "$TMP/blocked.json"
+grep -q '"agenthub readiness blockers --json --check"' "$TMP/blocked.json"
 grep -q '"agenthub readiness audit --json --check"' "$TMP/blocked.json"
 grep -q 'source:file:/tmp/.kimi' "$TMP/blocked.json"
 

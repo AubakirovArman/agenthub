@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.83-local-preview - 2026-05-17
+
+- Align `scripts/api-native-completion-audit.sh --json --check` with the product recovery path by listing `agenthub readiness blockers --json --check` before the full readiness audit.
+- Extend the completion-audit regression script so both text and JSON blocked paths verify the focused blocker command is present.
+
 ## 0.4.82-local-preview - 2026-05-17
 
 - Keep `agenthub readiness audit --json --check` and `agenthub readiness blockers --json --check` machine-readable when they refresh RC evidence by capturing collector stdout/stderr instead of leaking it into JSON output.
