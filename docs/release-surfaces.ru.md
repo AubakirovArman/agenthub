@@ -44,3 +44,11 @@ scripts/prepare-1.0-release.sh
 ```
 
 Ставь `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1`, если скрипт должен падать, пока `scripts/dogfood-readiness.sh --check` не проходит.
+
+Для финальной `1.0 RC` репетиции также включай product evidence gate:
+
+```bash
+AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
+```
+
+Этот gate запускает `scripts/rc-dogfood-gate.sh --check`: он требует real-session evidence для Chat/Ops/Project usage, provider dogfood для DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, отсутствие Chat/Ops bootstrap side effects и отсутствие open blocker/critical release issues.

@@ -37,7 +37,8 @@
           <h2>Release Gate</h2>
           <pre><code>scripts/release-readiness.sh
 scripts/dogfood-readiness.sh --check
-AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 scripts/prepare-1.0-release.sh</code></pre>
+scripts/rc-dogfood-gate.sh --check
+AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh</code></pre>
         </div>
       </section>
 
@@ -49,7 +50,7 @@ AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 scripts/prepare-1.0-release.sh</code></pre>
           </article>
           <article class="tile">
             <h2>Evidence</h2>
-            <p>Dogfood history contains passing local transaction, provider dry-run, dashboard, rollback, and fixture runs.</p>
+            <p>Dogfood history contains passing local transaction, provider dry-run, dashboard, rollback, fixture runs, and RC evidence for 100+ real sessions.</p>
           </article>
           <article class="tile">
             <h2>Docs</h2>

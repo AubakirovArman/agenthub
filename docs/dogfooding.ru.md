@@ -57,6 +57,26 @@ scripts/dogfood-readiness.sh --check
 
 `--check` uses `AGENTHUB_DOGFOOD_MIN_SUITE_RUNS`, `AGENTHUB_DOGFOOD_MIN_PROVIDER_PASSED`, and `AGENTHUB_DOGFOOD_MIN_DAYS` thresholds. The defaults require 3 suite runs, 1 passed provider run, and 2 distinct dogfood days.
 
+Перед `1.0 RC` запускай более строгий product gate:
+
+```bash
+scripts/rc-dogfood-gate.sh
+scripts/rc-dogfood-gate.sh --check
+```
+
+RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`. Дефолтные пороги требуют 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts для каждой учтённой сессии, passed DeepSeek и Kimi provider evidence, отсутствие open blocker/critical blockers, а также явные passed checks для Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX и long-session latency. `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS` и `AGENTHUB_RC_REQUIRED_CHECKS` используй только для локальных test fixtures или осознанно суженных release rehearsals.
+
+Примеры строк RC evidence:
+
+```jsonl
+{"kind":"session","session_id":"chat-001","mode":"chat","status":"passed","cost_receipt":true}
+{"kind":"session","session_id":"ops-001","mode":"ops","flow":"ops","status":"passed","cost_receipt":true}
+{"kind":"session","session_id":"project-001","mode":"project","flow":"project_edit","status":"passed","cost_receipt":true}
+{"kind":"provider","provider":"deepseek","status":"passed"}
+{"kind":"check","id":"chat_no_bootstrap","status":"passed"}
+{"kind":"blocker","id":"kimi-auth","severity":"critical","status":"open"}
+```
+
 For stress runs the report includes requested count, completed count, `tx status` row count, elapsed seconds, and whether `.agent/cache/indexes/transactions.sqlite3` existed. Use `AGENTHUB_DOGFOOD_KEEP=1` to keep the temporary stress project path in the report for manual inspection.
 
 Use an installed binary instead of building from source:

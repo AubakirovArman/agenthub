@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.28-local-preview}"
+EXPECTED="${AGENTHUB_RELEASE_VERSION:-0.4.29-local-preview}"
 WORK="$ROOT/target/release-readiness"
 DIST="$WORK/dist"
 INSTALL="$WORK/install"
@@ -24,6 +24,7 @@ cargo test --manifest-path "$ROOT/Cargo.toml" --locked
 "$ROOT/scripts/check-module-size.sh" 500
 "$ROOT/scripts/test-package-manifests.sh"
 "$ROOT/scripts/test-dogfood-readiness.sh"
+"$ROOT/scripts/test-rc-dogfood-gate.sh"
 "$ROOT/scripts/test-release-surfaces.sh"
 
 AGENTHUB_DOGFOOD_FULL="${AGENTHUB_DOGFOOD_FULL:-0}" "$ROOT/scripts/dogfood.sh"

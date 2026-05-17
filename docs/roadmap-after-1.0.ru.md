@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.28-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.29-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -180,7 +180,8 @@ These are the next concrete engineering steps from the current `0.4.28-local-pre
 | `0.4.26` | TUI live tool cards | Done: `agenthub tui` now shows live cards for chat tool permissions, approval stops, memory extraction, turn cost/tokens, native command-plan receipts, builtin tool-result reinjection receipts, policy summaries, and artifact links |
 | `0.4.27` | Memory inbox UX and ranking | Done: `agenthub memory inbox` and `/memory inbox` now show grouped/ranked review views with duplicate/conflict groups, confidence bands, per-item promotion diffs, and batch approve/reject with preflight validation |
 | `0.4.28` | Ops host profiles and runbooks | Done: `agenthub ops` and `/ops` now expose host profiles, trusted/untrusted metadata, reusable runbook cards backed by committed Ops memory, and host-scoped command receipts for explicit Ops shell commands |
-| `1.0 RC` | Dogfooding gate | 100+ real sessions, stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows |
+| `0.4.29` | 1.0 RC evidence gate | Done: `scripts/rc-dogfood-gate.sh` now checks 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, cost receipts, required DeepSeek/Kimi provider evidence, explicit resume/rewind/stats/bootstrap/approval checks, and open blocker/critical issues |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.29` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -194,10 +195,11 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.28` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, and Ops host profiles/runbook receipts rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.29` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, and 1.0 RC evidence gating rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 
-1. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.
-2. Stabilize release blockers found by dogfooding: Kimi auth/key setup, long-session latency, Ops receipts, resume/rewind, and approval UX.
-3. Post-1.0: start MCP stdio client only after Chat/Ops/Project, memory review, TUI visibility, and Ops host safety are stable in daily use.
+1. Fill `target/dogfood/rc-evidence.jsonl` with real daily evidence and pass `scripts/rc-dogfood-gate.sh --check` without lowering thresholds.
+2. `1.0 RC`: dogfood the product against real work before starting MCP/A2A. The release gate is daily usability, not only green tests.
+3. Stabilize release blockers found by dogfooding: Kimi auth/key setup, long-session latency, Ops receipts, resume/rewind, and approval UX.
+4. Post-1.0: start MCP stdio client only after Chat/Ops/Project, memory review, TUI visibility, and Ops host safety are stable in daily use.

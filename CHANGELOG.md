@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.29-local-preview - 2026-05-16
+
+- Add a `scripts/rc-dogfood-gate.sh` release gate for 1.0 RC evidence, covering 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, cost receipts, required DeepSeek/Kimi provider dogfood, explicit resume/rewind/stats/bootstrap/approval checks, and open blocker detection.
+- Add deterministic regression coverage for the RC dogfood gate and wire it into release readiness.
+- Extend 1.0 preparation docs so final tagging can require both basic dogfood history and the richer RC evidence ledger.
+
 ## 0.4.28-local-preview - 2026-05-16
 
 - Add Ops host profiles under the AgentHub user data directory, including stable host ids, alias/note metadata, trust levels, last-seen timestamps, and command counts.
