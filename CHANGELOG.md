@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.55-local-preview - 2026-05-17
+
+- Keep the new Kimi RC auth-diagnostic regression test Unix-only, matching the existing script-execution coverage and restoring Windows CI for the release matrix.
+- Supersede `0.4.54-local-preview`, whose runtime behavior was correct locally but whose Windows test build failed before the release gate could pass.
+
 ## 0.4.54-local-preview - 2026-05-17
 
 - Run Kimi auth diagnostics during `agenthub providers rc-unblock kimi` even when the first provider test fails, so the unblock path refreshes the redacted two-endpoint auth report before returning `blocked`.

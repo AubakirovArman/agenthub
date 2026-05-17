@@ -266,6 +266,7 @@ fn providers_kimi_rc_unblock_runs_cli_owned_sequence() -> Result<()> {
     })
 }
 
+#[cfg(unix)]
 #[test]
 fn providers_kimi_rc_unblock_stops_on_provider_test_failure() -> Result<()> {
     let stub = openai_error_stub_server(
