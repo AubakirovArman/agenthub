@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.57-local-preview - 2026-05-17
+
+- Add `agenthub providers preflight-key kimi --from-file <new-key-file>` to live-test a replacement Kimi/Moonshot key without writing `.kimi` or printing the secret.
+- Wire the no-write preflight into `/providers preflight-key`, Kimi unblock next steps, API-native completion audit guidance, dogfooding docs, release surfaces, and roadmap files.
+
 ## 0.4.56-local-preview - 2026-05-17
 
 - Add one-shot Kimi RC unblock rotation: `agenthub providers rc-unblock kimi --from-file <new-key-file>` installs a replacement key without printing the secret, then runs the RC unblock pipeline.

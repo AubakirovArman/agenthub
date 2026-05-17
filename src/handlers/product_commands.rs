@@ -83,6 +83,33 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
                 bail!("provider RC unblock failed for `{provider}`");
             }
         }
+        ProviderCommands::PreflightKey {
+            provider,
+            from_file,
+            from_env,
+            stdin,
+        } => {
+            let stdin_value = if stdin {
+                let mut value = String::new();
+                std::io::stdin().read_to_string(&mut value)?;
+                Some(value)
+            } else {
+                None
+            };
+            let result = providers::preflight_provider_key(
+                project_root,
+                &provider,
+                providers::KeyPreflightOptions {
+                    from_file,
+                    from_env,
+                    stdin_value,
+                },
+            )?;
+            print!("{}", result.output);
+            if result.provider_test_failed {
+                bail!("provider key preflight failed for `{provider}`");
+            }
+        }
         ProviderCommands::RotateKey {
             provider,
             from_file,

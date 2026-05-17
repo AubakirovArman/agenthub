@@ -26,6 +26,98 @@ pub struct KeyRotationResult {
     pub provider_test_failed: bool,
 }
 
+#[derive(Debug, Default)]
+pub struct KeyPreflightOptions {
+    pub from_file: Option<PathBuf>,
+    pub from_env: Option<String>,
+    pub stdin_value: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct KeyPreflightResult {
+    pub output: String,
+    pub provider_test_failed: bool,
+}
+
+pub fn preflight_provider_key(
+    project_root: &Path,
+    provider: &str,
+    options: KeyPreflightOptions,
+) -> Result<KeyPreflightResult> {
+    if provider != "kimi" {
+        return Err(anyhow!(
+            "provider key preflight is only supported for `kimi` right now"
+        ));
+    }
+    let source_count = usize::from(options.from_file.is_some())
+        + usize::from(options.from_env.is_some())
+        + usize::from(options.stdin_value.is_some());
+    if source_count != 1 {
+        return Err(anyhow!("choose exactly one key source"));
+    }
+
+    let source_args = key_source_args(&options);
+    let source_options = KeyRotationOptions {
+        from_file: options.from_file,
+        from_env: options.from_env,
+        stdin_value: options.stdin_value,
+        ..Default::default()
+    };
+    let (raw_key, source) = rotation_source(&source_options)?;
+    let (candidate_key, trimmed_for_request) = normalize_replacement_key(raw_key)?;
+    let candidate_fp = super::sha256_prefix(candidate_key.as_bytes());
+    let mut status = super::status_for(project_root, "kimi")?;
+    status.available = true;
+    status.state = None;
+    status.state_note = None;
+
+    let mut out = String::from("AgentHub Kimi key preflight\n");
+    out.push_str("provider\tkimi\n");
+    out.push_str(&format!("source\t{source}\n"));
+    out.push_str(&format!("key_sha256_12\t{candidate_fp}\n"));
+    out.push_str(&format!("key_chars\t{}\n", candidate_key.chars().count()));
+    out.push_str(&format!("trimmed_for_request\t{trimmed_for_request}\n"));
+    out.push_str("writes_key\tfalse\n");
+    out.push_str(&format!(
+        "endpoint\t{}\n",
+        status.endpoint.as_deref().unwrap_or("missing")
+    ));
+    out.push_str(&format!(
+        "model\t{}\n",
+        status.model.as_deref().unwrap_or("default")
+    ));
+
+    let report = super::http::test_provider_with_key(status, Some(candidate_key))?;
+    let provider_test_failed = super::test_report_failed(&report);
+    out.push_str("provider_test\tbegin\n");
+    for line in report.lines() {
+        out.push_str(&format!("provider_test\t{line}\n"));
+    }
+    if provider_test_failed {
+        out.push_str("provider_test\tfailed\n");
+        out.push_str("status\tblocked\n");
+        out.push_str(&format!(
+            "next\t1\tagenthub providers preflight-key kimi {source_args}\n"
+        ));
+        out.push_str("next\t2\treplace or rotate the Kimi/Moonshot API key candidate\n");
+        out.push_str(
+            "next\t3\ttry MOONSHOT_BASE_URL=https://api.moonshot.cn/v1 for China-region keys\n",
+        );
+    } else {
+        out.push_str("provider_test\tpassed\n");
+        out.push_str("status\tvalid\n");
+        out.push_str(&format!(
+            "next\t1\tagenthub providers rc-unblock kimi {source_args}\n"
+        ));
+        out.push_str("next\t2\tagenthub providers unblock kimi\n");
+    }
+
+    Ok(KeyPreflightResult {
+        output: out,
+        provider_test_failed,
+    })
+}
+
 pub fn rotate_provider_key(
     project_root: &Path,
     provider: &str,
@@ -45,16 +137,7 @@ pub fn rotate_provider_key(
 
     let target = kimi_key_rotation_target(project_root, options.target.as_deref())?;
     let (raw_key, source) = rotation_source(&options)?;
-    let new_key = raw_key.trim().to_string();
-    let trimmed_for_write = raw_key != new_key;
-    if new_key.is_empty() {
-        return Err(anyhow!("replacement key is empty after trimming"));
-    }
-    if new_key.chars().any(char::is_whitespace) {
-        return Err(anyhow!(
-            "replacement key contains embedded whitespace after trimming"
-        ));
-    }
+    let (new_key, trimmed_for_write) = normalize_replacement_key(raw_key)?;
 
     let old_key = fs::read_to_string(&target)
         .ok()
@@ -110,6 +193,30 @@ pub fn rotate_provider_key(
         output: out,
         provider_test_failed,
     })
+}
+
+fn key_source_args(options: &KeyPreflightOptions) -> String {
+    if let Some(path) = &options.from_file {
+        return format!("--from-file {}", path.display());
+    }
+    if let Some(env_name) = &options.from_env {
+        return format!("--from-env {env_name}");
+    }
+    "--stdin".to_string()
+}
+
+fn normalize_replacement_key(raw_key: String) -> Result<(String, bool)> {
+    let key = raw_key.trim().to_string();
+    let trimmed = raw_key != key;
+    if key.is_empty() {
+        return Err(anyhow!("replacement key is empty after trimming"));
+    }
+    if key.chars().any(char::is_whitespace) {
+        return Err(anyhow!(
+            "replacement key contains embedded whitespace after trimming"
+        ));
+    }
+    Ok((key, trimmed))
 }
 
 fn rotation_source(options: &KeyRotationOptions) -> Result<(String, String)> {

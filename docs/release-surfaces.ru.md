@@ -48,9 +48,10 @@ scripts/prepare-1.0-release.sh
 Для финальной `1.0 RC` репетиции также включай product evidence gate:
 
 ```bash
+agenthub providers preflight-key kimi --from-file <new-key-file>
 agenthub providers rc-unblock kimi --from-file <new-key-file>
 scripts/rc-evidence-collect.sh
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 
-`providers rc-unblock kimi --from-file <new-key-file>` устанавливает replacement key без вывода secret, затем запускает Kimi provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection и RC gate в правильном порядке. Если provider test падает, команда всё равно запускает Kimi auth diagnostics, чтобы redacted two-endpoint auth report был актуальным перед возвратом `blocked`. Preparation gate запускает `scripts/rc-dogfood-gate.sh --check`: он требует real-session evidence для Chat/Ops/Project usage, provider dogfood для DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, отсутствие Chat/Ops bootstrap side effects и отсутствие open blocker/critical release issues.
+`providers preflight-key kimi --from-file <new-key-file>` проверяет candidate key без записи и без вывода secret. `providers rc-unblock kimi --from-file <new-key-file>` затем устанавливает replacement key без вывода secret и запускает Kimi provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection и RC gate в правильном порядке. Если provider test падает, команда всё равно запускает Kimi auth diagnostics, чтобы redacted two-endpoint auth report был актуальным перед возвратом `blocked`. Preparation gate запускает `scripts/rc-dogfood-gate.sh --check`: он требует real-session evidence для Chat/Ops/Project usage, provider dogfood для DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, отсутствие Chat/Ops bootstrap side effects и отсутствие open blocker/critical release issues.

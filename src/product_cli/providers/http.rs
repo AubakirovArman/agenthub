@@ -9,13 +9,24 @@ pub(super) fn is_http_provider(status: &ProviderStatus) -> bool {
 }
 
 pub(super) fn test_provider(status: ProviderStatus) -> Result<String> {
+    test_provider_with_key(status, None)
+}
+
+pub(super) fn test_provider_with_key(
+    status: ProviderStatus,
+    explicit_api_key: Option<String>,
+) -> Result<String> {
     let Some(endpoint) = status.endpoint.clone() else {
         return Ok(format!(
             "missing\t{}\t{}\n",
             status.info.id, status.info.note
         ));
     };
-    let provider = HttpProvider::new(endpoint, api_key(&status), model(&status));
+    let provider = HttpProvider::new(
+        endpoint,
+        explicit_api_key.or_else(|| api_key(&status)),
+        model(&status),
+    );
     let request = test_request(&status);
     let response = match complete_with_retry(&provider, request.clone(), &one_attempt(), None) {
         Ok(response) => response,

@@ -6,6 +6,7 @@ use super::{config, doctor, providers};
 
 mod bootstrap_tests;
 mod open_tests;
+mod provider_kimi_preflight_tests;
 mod provider_kimi_tests;
 mod support;
 use support::{openai_error_stub_server, openai_stub_server, with_deepseek_env};

@@ -39,6 +39,18 @@ pub enum ProviderCommands {
         #[arg(long)]
         no_check: bool,
     },
+    PreflightKey {
+        provider: String,
+
+        #[arg(long)]
+        from_file: Option<PathBuf>,
+
+        #[arg(long)]
+        from_env: Option<String>,
+
+        #[arg(long)]
+        stdin: bool,
+    },
     RotateKey {
         provider: String,
 

@@ -48,9 +48,10 @@ Set `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1` when you want the script to fail until 
 For a final 1.0 RC rehearsal, also require the product evidence gate:
 
 ```bash
+agenthub providers preflight-key kimi --from-file <new-key-file>
 agenthub providers rc-unblock kimi --from-file <new-key-file>
 scripts/rc-evidence-collect.sh
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_KIMI_AUTH=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 
-`providers rc-unblock kimi --from-file <new-key-file>` installs the replacement key without printing the secret, then runs the Kimi provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC gate in the required order. If the provider test fails, it still runs Kimi auth diagnostics so the redacted two-endpoint auth report is current before the command returns `blocked`. The preparation gate runs `scripts/rc-dogfood-gate.sh --check`, which requires real-session evidence for Chat/Ops/Project usage, provider dogfood for DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, no Chat/Ops bootstrap side effects, and no open blocker/critical release issues.
+`providers preflight-key kimi --from-file <new-key-file>` tests the candidate key without writing it or printing the secret. `providers rc-unblock kimi --from-file <new-key-file>` then installs the replacement key without printing the secret and runs the Kimi provider test, Kimi auth check, live Kimi provider dogfood, RC evidence collection, and the RC gate in the required order. If the provider test fails, it still runs Kimi auth diagnostics so the redacted two-endpoint auth report is current before the command returns `blocked`. The preparation gate runs `scripts/rc-dogfood-gate.sh --check`, which requires real-session evidence for Chat/Ops/Project usage, provider dogfood for DeepSeek/Kimi, cost receipts, resume/rewind/stats checks, no Chat/Ops bootstrap side effects, and no open blocker/critical release issues.
