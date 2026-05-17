@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.75-local-preview - 2026-05-17
+
+- Add an `ecosystem_surfaces` row to `agenthub readiness audit [--json]`, so the API-native readiness gate verifies that the post-1.0 roadmap surface exists in the product CLI instead of only checking that roadmap files are present.
+- Cover the new readiness row in the readiness audit fixture tests while keeping MCP/A2A and other post-1.0 runtimes disabled until the 1.0 gate passes.
+
 ## 0.4.74-local-preview - 2026-05-17
 
 - Expand `agenthub ecosystem status [--json]` from the initial MCP/A2A surface to the full post-1.0 roadmap surface: MCP, A2A, Subagents v2, async background agents, Ollama/local LLM, multimodal context, team collaboration, and enterprise/marketplace.

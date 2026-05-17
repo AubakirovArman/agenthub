@@ -7,7 +7,7 @@ use std::{
 use anyhow::{Context, Result};
 use serde_json::Value;
 
-use crate::product_cli::providers;
+use crate::product_cli::{ecosystem, providers};
 
 use super::{
     render::render_text,
@@ -58,6 +58,13 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
     push_file_check(&mut checks, "api_native_plan", &config.v04_plan);
     push_file_check(&mut checks, "post_1_0_plan", &config.after_plan);
     push_file_check(&mut checks, "repo_roadmap", &config.roadmap_doc);
+    push_check(
+        &mut checks,
+        "ecosystem_surfaces",
+        ecosystem_surface_status(),
+        "all post-1.0 roadmap surfaces are exposed by ecosystem status",
+        "ecosystem status must expose every post-1.0 roadmap surface",
+    );
     push_check(
         &mut checks,
         "provider_surface",
@@ -320,6 +327,24 @@ fn provider_surface_status(project_root: &Path) -> Result<bool> {
         && !ids
             .iter()
             .any(|id| matches!(id.as_str(), "codex" | "gemini" | "kimi-api" | "command")))
+}
+
+fn ecosystem_surface_status() -> bool {
+    let required = [
+        "mcp",
+        "a2a",
+        "subagents-v2",
+        "async-background-agents",
+        "ollama-local-llm",
+        "multimodal-context",
+        "team-collaboration",
+        "enterprise-marketplace",
+    ];
+    let ids = ecosystem::surfaces()
+        .into_iter()
+        .map(|surface| surface.id)
+        .collect::<HashSet<_>>();
+    required.iter().all(|id| ids.contains(id))
 }
 
 fn line_starts_with(text: &str, id: &str) -> bool {

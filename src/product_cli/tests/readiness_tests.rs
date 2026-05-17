@@ -21,6 +21,7 @@ fn readiness_audit_json_reports_ready_fixture() -> Result<()> {
         assert_eq!(parsed["status"], "ready");
         assert_eq!(parsed["failed"], false);
         assert_eq!(parsed["metrics"]["real_sessions"], 3);
+        assert!(result.output.contains(r#""id": "ecosystem_surfaces""#));
         assert!(result.output.contains(r#""id": "provider_surface""#));
         assert!(result.output.contains(r#""id": "provider_kimi""#));
         assert!(!result.output.contains("kimi-secret"));
