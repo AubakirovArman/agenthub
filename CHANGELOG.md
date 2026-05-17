@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.49-local-preview - 2026-05-17
+
+- Add `scripts/api-native-completion-audit.sh`, a source-backed completion audit for the API-native 1.0 bridge that maps roadmap files, provider surface, RC evidence, Kimi auth state, and the RC dogfood gate into explicit checklist rows.
+- Add fixture coverage so the audit reports `ready` only when DeepSeek/Kimi, required RC checks, sessions, cost receipts, and blockers all satisfy the gate, and reports `incomplete` when Kimi auth remains blocked.
+
 ## 0.4.48-local-preview - 2026-05-17
 
 - Add `agenthub providers unblock <provider>` and `/providers unblock <provider>` as a concise provider unblock runbook that reports current status, safe credential source, endpoint/model, and next verification commands.
