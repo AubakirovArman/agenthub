@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.97-local-preview - 2026-05-17
+
+- Add per-provider `blocker_kind` metadata to `agenthub providers status --json`, classifying missing or blocked DeepSeek/Kimi rows as external credential blockers.
+- Keep ready provider status rows quiet by omitting `blocker_kind` when a provider is healthy.
+
 ## 0.4.96-local-preview - 2026-05-17
 
 - Add top-level `blocked_checks` metadata to `agenthub providers recovery --json`, listing blocked provider and completion-gate IDs before automation enters the readiness gate.

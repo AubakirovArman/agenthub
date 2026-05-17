@@ -134,6 +134,8 @@ agenthub providers fallback reviewer deepseek kimi
 
 Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next setup/diagnose/test commands.
 
+`providers status --json` is the raw machine-readable provider state. Blocked or missing DeepSeek/Kimi rows include `blocker_kind: "external_credential"` so automation can classify auth/setup blockers before entering recovery.
+
 Supported providers:
 
 - `deepseek`: DeepSeek OpenAI-compatible API endpoint. Defaults to `https://api.deepseek.com/v1`; reads `DEEPSEEK_API_KEY`, with `ANTHROPIC_AUTH_TOKEN` accepted for DeepSeek-compatible deployments.

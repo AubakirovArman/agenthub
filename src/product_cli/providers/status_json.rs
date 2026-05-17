@@ -19,27 +19,33 @@ pub struct ProviderStatusJson {
     pub api_key_file: Option<String>,
     pub credential_source: Option<String>,
     pub blocked: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocker_kind: Option<String>,
 }
 
 pub fn render_status_json(project_root: &Path) -> Result<String> {
     let status = statuses(project_root)?
         .into_iter()
-        .map(|status| ProviderStatusJson {
-            provider: status.info.id.clone(),
-            state: status_state(&status).to_string(),
-            available: status.available,
-            default: status.is_default,
-            detail: status_detail(&status),
-            endpoint: status.endpoint.clone(),
-            model: status.model.clone(),
-            profile_kind: status.profile_kind.clone(),
-            api_key_env: status.api_key_env.clone(),
-            api_key_file: status
-                .api_key_file
-                .as_ref()
-                .map(|path| path.display().to_string()),
-            credential_source: credential_source(&status),
-            blocked: status.state.as_deref() == Some("blocked"),
+        .map(|status| {
+            let state = status_state(&status).to_string();
+            ProviderStatusJson {
+                provider: status.info.id.clone(),
+                state: state.clone(),
+                available: status.available,
+                default: status.is_default,
+                detail: status_detail(&status),
+                endpoint: status.endpoint.clone(),
+                model: status.model.clone(),
+                profile_kind: status.profile_kind.clone(),
+                api_key_env: status.api_key_env.clone(),
+                api_key_file: status
+                    .api_key_file
+                    .as_ref()
+                    .map(|path| path.display().to_string()),
+                credential_source: credential_source(&status),
+                blocked: status.state.as_deref() == Some("blocked"),
+                blocker_kind: blocker_kind(&status, &state).map(str::to_string),
+            }
         })
         .collect::<Vec<_>>();
     Ok(format!("{}\n", serde_json::to_string_pretty(&status)?))
@@ -48,6 +54,22 @@ pub fn render_status_json(project_root: &Path) -> Result<String> {
 fn status_state(status: &ProviderStatus) -> &str {
     let fallback_state = if status.available { "ok" } else { "missing" };
     status.state.as_deref().unwrap_or(fallback_state)
+}
+
+fn blocker_kind(status: &ProviderStatus, state: &str) -> Option<&'static str> {
+    if state == "ok" {
+        return None;
+    }
+    if matches!(status.info.id.as_str(), "deepseek" | "kimi") && !status.available {
+        return Some("external_credential");
+    }
+    if status.info.id == "kimi" && state == "blocked" {
+        return Some("external_credential");
+    }
+    if state == "blocked" {
+        return Some("external_provider");
+    }
+    None
 }
 
 fn credential_source(status: &ProviderStatus) -> Option<String> {

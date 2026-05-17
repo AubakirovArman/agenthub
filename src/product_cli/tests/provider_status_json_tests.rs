@@ -23,6 +23,7 @@ fn providers_status_json_surfaces_blocked_kimi_without_secret() -> Result<()> {
 
         assert_eq!(kimi["state"], "blocked");
         assert_eq!(kimi["blocked"], true);
+        assert_eq!(kimi["blocker_kind"], "external_credential");
         assert_eq!(kimi["credential_source"], "env:KIMI_API_KEY");
         assert!(kimi["detail"]
             .as_str()
