@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.70-local-preview - 2026-05-17
+
+- Add `--json` to `scripts/api-native-completion-audit.sh` so the final API-native 1.0 readiness answer is available as machine-readable redacted evidence.
+- Cover ready and blocked Kimi completion-audit JSON fixtures, including metrics, check rows, recovery commands, and JSON validity.
+
 ## 0.4.69-local-preview - 2026-05-17
 
 - Add `agenthub providers recovery [--json]`, a redacted provider recovery report that turns DeepSeek/Kimi status into per-provider next commands and the API-native completion-audit gate.

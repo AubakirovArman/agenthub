@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHECK=false
 REFRESH=true
+JSON=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -12,6 +13,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-refresh)
       REFRESH=false
+      ;;
+    --json)
+      JSON=true
       ;;
     *)
       printf 'unknown argument: %s\n' "$1" >&2
@@ -86,14 +90,131 @@ csv_add_unique() {
 }
 
 failed=false
+check_ids=()
+check_statuses=()
+check_details=()
+next_commands=()
 emit_check() {
   local id="$1"
   local status="$2"
   local detail="$3"
-  printf 'check\t%s\t%s\t%s\n' "$id" "$status" "$detail"
+  check_ids+=("$id")
+  check_statuses+=("$status")
+  check_details+=("$detail")
+  if [[ "$JSON" != true ]]; then
+    printf 'check\t%s\t%s\t%s\n' "$id" "$status" "$detail"
+  fi
   if [[ "$status" != "passed" ]]; then
     failed=true
   fi
+}
+
+emit_next() {
+  local index="$1"
+  local command="$2"
+  next_commands+=("$command")
+  if [[ "$JSON" != true ]]; then
+    printf 'next\t%s\t%s\n' "$index" "$command"
+  fi
+}
+
+json_escape() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\t'/\\t}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\n'/\\n}"
+  printf '%s' "$value"
+}
+
+json_string() {
+  printf '"%s"' "$(json_escape "$1")"
+}
+
+json_bool() {
+  if [[ "$1" == true ]]; then
+    printf 'true'
+  else
+    printf 'false'
+  fi
+}
+
+render_json() {
+  local final_status="$1"
+  printf '{\n'
+  printf '  "objective": '
+  json_string 'API-native 1.0 bridge with DeepSeek/Kimi, Chat/Ops/Project, memory, observability, RC dogfood evidence, and post-1.0 roadmap sequencing'
+  printf ',\n'
+  printf '  "status": '
+  json_string "$final_status"
+  printf ',\n'
+  printf '  "failed": '
+  json_bool "$failed"
+  printf ',\n'
+  printf '  "sources": {\n'
+  printf '    "api_native_plan": '
+  json_string "$V04_PLAN"
+  printf ',\n'
+  printf '    "post_1_0_plan": '
+  json_string "$AFTER_PLAN"
+  printf ',\n'
+  printf '    "repo_roadmap": '
+  json_string "$ROADMAP_DOC"
+  printf '\n'
+  printf '  },\n'
+  printf '  "evidence": '
+  json_string "$EVIDENCE"
+  printf ',\n'
+  printf '  "dogfood_history": '
+  json_string "$HISTORY_DIR/index.jsonl"
+  printf ',\n'
+  printf '  "kimi_auth_report": '
+  json_string "$KIMI_REPORT"
+  printf ',\n'
+  printf '  "metrics": {\n'
+  printf '    "real_sessions": %s,\n' "$real_sessions"
+  printf '    "required_sessions": %s,\n' "$MIN_SESSIONS"
+  printf '    "ops_flows": %s,\n' "$ops_flows"
+  printf '    "required_ops_flows": %s,\n' "$MIN_OPS"
+  printf '    "project_edit_flows": %s,\n' "$project_edit_flows"
+  printf '    "required_project_edit_flows": %s,\n' "$MIN_PROJECT"
+  printf '    "cost_receipts": %s,\n' "$cost_receipts"
+  printf '    "required_cost_receipts": %s,\n' "$MIN_COST"
+  printf '    "open_blockers": %s\n' "$open_blockers"
+  printf '  },\n'
+  printf '  "checks": [\n'
+  local index
+  for index in "${!check_ids[@]}"; do
+    printf '    {\n'
+    printf '      "id": '
+    json_string "${check_ids[$index]}"
+    printf ',\n'
+    printf '      "status": '
+    json_string "${check_statuses[$index]}"
+    printf ',\n'
+    printf '      "detail": '
+    json_string "${check_details[$index]}"
+    printf '\n'
+    if (( index + 1 == ${#check_ids[@]} )); then
+      printf '    }\n'
+    else
+      printf '    },\n'
+    fi
+  done
+  printf '  ],\n'
+  printf '  "next": [\n'
+  for index in "${!next_commands[@]}"; do
+    printf '    '
+    json_string "${next_commands[$index]}"
+    if (( index + 1 == ${#next_commands[@]} )); then
+      printf '\n'
+    else
+      printf ',\n'
+    fi
+  done
+  printf '  ]\n'
+  printf '}\n'
 }
 
 if [[ "$REFRESH" == true && -x "$ROOT/scripts/rc-evidence-collect.sh" ]]; then
@@ -172,14 +293,16 @@ if [[ -z "$provider_status" ]]; then
   fi
 fi
 
-printf 'AgentHub API-native completion audit\n'
-printf 'objective\t%s\n' 'API-native 1.0 bridge with DeepSeek/Kimi, Chat/Ops/Project, memory, observability, RC dogfood evidence, and post-1.0 roadmap sequencing'
-printf 'source\tapi_native_plan\t%s\n' "$V04_PLAN"
-printf 'source\tpost_1_0_plan\t%s\n' "$AFTER_PLAN"
-printf 'source\trepo_roadmap\t%s\n' "$ROADMAP_DOC"
-printf 'evidence\t%s\n' "$EVIDENCE"
-printf 'dogfood_history\t%s\n' "$HISTORY_DIR/index.jsonl"
-printf 'kimi_auth_report\t%s\n' "$KIMI_REPORT"
+if [[ "$JSON" != true ]]; then
+  printf 'AgentHub API-native completion audit\n'
+  printf 'objective\t%s\n' 'API-native 1.0 bridge with DeepSeek/Kimi, Chat/Ops/Project, memory, observability, RC dogfood evidence, and post-1.0 roadmap sequencing'
+  printf 'source\tapi_native_plan\t%s\n' "$V04_PLAN"
+  printf 'source\tpost_1_0_plan\t%s\n' "$AFTER_PLAN"
+  printf 'source\trepo_roadmap\t%s\n' "$ROADMAP_DOC"
+  printf 'evidence\t%s\n' "$EVIDENCE"
+  printf 'dogfood_history\t%s\n' "$HISTORY_DIR/index.jsonl"
+  printf 'kimi_auth_report\t%s\n' "$KIMI_REPORT"
+fi
 
 for pair in \
   "api_native_plan:$V04_PLAN" \
@@ -299,23 +422,32 @@ else
 fi
 
 if [[ "$failed" == true ]]; then
-  printf 'status\tincomplete\n'
-  printf 'next\t1\tagenthub providers recovery --json\n'
-  printf 'next\t2\tagenthub providers preflight-key kimi --from-file <new-key-file>\n'
-  printf 'next\t3\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n'
-  printf 'next\t4\tagenthub providers unblock kimi\n'
-  printf 'next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
-  printf 'next\t6\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
-  printf 'next\t7\tagenthub providers rc-unblock kimi\n'
-  printf 'next\t8\tscripts/kimi-rc-unblock.sh\n'
-  printf 'next\t9\tagenthub providers test kimi\n'
-  printf 'next\t10\tscripts/kimi-auth-check.sh\n'
-  printf 'next\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n'
-  printf 'next\t12\tscripts/rc-evidence-collect.sh\n'
-  printf 'next\t13\tscripts/rc-dogfood-gate.sh --check\n'
+  if [[ "$JSON" != true ]]; then
+    printf 'status\tincomplete\n'
+  fi
+  emit_next 1 'agenthub providers recovery --json'
+  emit_next 2 'agenthub providers preflight-key kimi --from-file <new-key-file>'
+  emit_next 3 'agenthub providers rc-unblock kimi --from-file <new-key-file>'
+  emit_next 4 'agenthub providers unblock kimi'
+  emit_next 5 'agenthub providers rotate-key kimi --from-file <new-key-file>'
+  emit_next 6 'scripts/kimi-key-rotate.sh --from-file <new-key-file>'
+  emit_next 7 'agenthub providers rc-unblock kimi'
+  emit_next 8 'scripts/kimi-rc-unblock.sh'
+  emit_next 9 'agenthub providers test kimi'
+  emit_next 10 'scripts/kimi-auth-check.sh'
+  emit_next 11 'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
+  emit_next 12 'scripts/rc-evidence-collect.sh'
+  emit_next 13 'scripts/rc-dogfood-gate.sh --check'
+  if [[ "$JSON" == true ]]; then
+    render_json incomplete
+  fi
   if [[ "$CHECK" == true ]]; then
     exit 1
   fi
 else
-  printf 'status\tready\n'
+  if [[ "$JSON" == true ]]; then
+    render_json ready
+  else
+    printf 'status\tready\n'
+  fi
 fi

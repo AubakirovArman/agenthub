@@ -67,6 +67,12 @@ env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --check --
 grep -q $'check\tprovider_surface\tpassed' "$TMP/ready.out"
 grep -q $'check\tprovider_kimi\tpassed' "$TMP/ready.out"
 grep -q $'status\tready' "$TMP/ready.out"
+env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --json --check --no-refresh > "$TMP/ready.json"
+grep -q '"status": "ready"' "$TMP/ready.json"
+grep -q '"failed": false' "$TMP/ready.json"
+grep -q '"id": "provider_surface"' "$TMP/ready.json"
+grep -q '"id": "provider_kimi"' "$TMP/ready.json"
+grep -q '"real_sessions": 3' "$TMP/ready.json"
 
 cat > "$kimi" <<'JSON'
 {"provider":"kimi","status":"blocked","auth_key_sha256_12":"f117c7b5fb4e","auth_key_source":"file:/tmp/.kimi","credential_warning":"Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys; create a plain Moonshot API key instead","next_action":"replace or rotate the Kimi/Moonshot API key with a plain Moonshot OpenAI-compatible API key"}
@@ -89,5 +95,21 @@ grep -q $'next\t5\tagenthub providers rotate-key kimi --from-file <new-key-file>
 grep -q $'next\t7\tagenthub providers rc-unblock kimi' "$TMP/blocked.out"
 grep -q $'next\t8\tscripts/kimi-rc-unblock.sh' "$TMP/blocked.out"
 grep -q $'next\t11\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh' "$TMP/blocked.out"
+if env "${common_env[@]}" "$ROOT/scripts/api-native-completion-audit.sh" --json --check --no-refresh > "$TMP/blocked.json" 2>&1; then
+  printf 'expected JSON API-native completion audit to fail while Kimi auth is blocked\n' >&2
+  exit 1
+fi
+grep -q '"status": "incomplete"' "$TMP/blocked.json"
+grep -q '"failed": true' "$TMP/blocked.json"
+grep -q '"id": "kimi_auth"' "$TMP/blocked.json"
+grep -q '"status": "blocked"' "$TMP/blocked.json"
+grep -q '"open_blockers": 1' "$TMP/blocked.json"
+grep -q '"agenthub providers recovery --json"' "$TMP/blocked.json"
+grep -q 'source:file:/tmp/.kimi' "$TMP/blocked.json"
+
+if command -v python3 >/dev/null 2>&1; then
+  python3 -m json.tool "$TMP/ready.json" >/dev/null
+  python3 -m json.tool "$TMP/blocked.json" >/dev/null
+fi
 
 printf 'agenthub API-native completion audit test passed\n'
