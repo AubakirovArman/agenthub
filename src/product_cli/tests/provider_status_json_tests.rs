@@ -113,17 +113,30 @@ fn providers_recovery_json_marks_ready_providers_without_noise() -> Result<()> {
 
 #[test]
 fn providers_recovery_text_includes_completion_audit_gate() -> Result<()> {
-    let dir = tempfile::tempdir()?;
+    with_env_vars(
+        &[
+            ("DEEPSEEK_API_KEY", None),
+            ("DEEPSEEK_API_KEY_FILE", None),
+            ("KIMI_API_KEY", None),
+            ("KIMI_API_KEY_FILE", None),
+            ("MOONSHOT_API_KEY", None),
+            ("MOONSHOT_API_KEY_FILE", None),
+            ("AGENTHUB_KIMI_AUTH_REPORT", None),
+        ],
+        || {
+            let dir = tempfile::tempdir()?;
 
-    let rendered = providers::render_recovery(dir.path(), false)?;
+            let rendered = providers::render_recovery(dir.path(), false)?;
 
-    assert!(rendered.contains("Provider Recovery"));
-    assert!(rendered.contains("objective\tapi_native_provider_recovery"));
-    assert!(rendered.contains(
-        "gate\tapi_native_completion_audit\tblocked\tagenthub readiness audit --json --check"
-    ));
-    assert!(rendered.contains(
-        "gate_next\tapi_native_completion_audit\t1\tagenthub readiness blockers --json --check"
-    ));
-    Ok(())
+            assert!(rendered.contains("Provider Recovery"));
+            assert!(rendered.contains("objective\tapi_native_provider_recovery"));
+            assert!(rendered.contains(
+                "gate\tapi_native_completion_audit\tblocked\tagenthub readiness audit --json --check"
+            ));
+            assert!(rendered.contains(
+                "gate_next\tapi_native_completion_audit\t1\tagenthub readiness blockers --json --check"
+            ));
+            Ok(())
+        },
+    )
 }

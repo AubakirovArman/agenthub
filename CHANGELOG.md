@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.87-local-preview - 2026-05-17
+
+- Make provider recovery text coverage deterministic by clearing provider credential environment in the test fixture, fixing macOS tag CI when external provider state is present.
+- Supersede the `0.4.86` release attempt with the same runtime behavior plus isolated provider recovery test coverage.
+
 ## 0.4.86-local-preview - 2026-05-17
 
 - Add machine-readable `blocker_kind` metadata to readiness audit and focused blocker reports, so Kimi auth failures are classified as external credential blockers instead of looking like unfinished product code.
