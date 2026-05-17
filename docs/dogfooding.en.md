@@ -60,11 +60,14 @@ scripts/dogfood-readiness.sh --check
 Before a 1.0 RC, run the richer product gate:
 
 ```bash
+scripts/rc-evidence-collect.sh
 scripts/rc-dogfood-gate.sh
 scripts/rc-dogfood-gate.sh --check
 ```
 
-The RC gate reads `target/dogfood/rc-evidence.jsonl` by default. The default thresholds require 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts for every counted session, passed DeepSeek and Kimi provider evidence, no open blocker/critical blockers, and explicit passed checks for Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX, and long-session latency. Use `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS`, and `AGENTHUB_RC_REQUIRED_CHECKS` only for local test fixtures or intentionally narrower release rehearsals.
+`scripts/rc-evidence-collect.sh` writes `target/dogfood/rc-evidence.jsonl` from observed AgentHub artifacts: global/project chat `turn_finished` events, project transaction reports with cost receipts, provider dogfood history, and Ops command receipts. It is intentionally conservative: it only emits source-backed passed checks and leaves resume, rewind, long-session latency, or other unobserved checks absent until real evidence exists.
+
+The RC gate reads `target/dogfood/rc-evidence.jsonl` by default. The default thresholds require 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts for every counted session, passed DeepSeek and Kimi provider evidence, no open blocker/critical blockers, and explicit passed checks for Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX, and long-session latency. Use `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_SOURCE_ROOT`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS`, and `AGENTHUB_RC_REQUIRED_CHECKS` only for local test fixtures or intentionally narrower release rehearsals.
 
 Example RC evidence lines:
 

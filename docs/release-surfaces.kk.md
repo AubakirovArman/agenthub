@@ -48,6 +48,7 @@ Dogfood readiness өтпесе script fail болсын десең, `AGENTHUB_PR
 For a final 1.0 RC rehearsal, also require the product evidence gate:
 
 ```bash
+scripts/rc-evidence-collect.sh
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 

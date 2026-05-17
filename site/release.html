@@ -37,6 +37,7 @@
           <h2>Release Gate</h2>
           <pre><code>scripts/release-readiness.sh
 scripts/dogfood-readiness.sh --check
+scripts/rc-evidence-collect.sh
 scripts/rc-dogfood-gate.sh --check
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh</code></pre>
         </div>

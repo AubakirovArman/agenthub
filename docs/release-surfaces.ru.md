@@ -48,6 +48,7 @@ scripts/prepare-1.0-release.sh
 Для финальной `1.0 RC` репетиции также включай product evidence gate:
 
 ```bash
+scripts/rc-evidence-collect.sh
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 

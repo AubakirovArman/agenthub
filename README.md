@@ -172,6 +172,7 @@ Run product checks:
 ```bash
 scripts/dogfood.sh
 scripts/dogfood-readiness.sh
+scripts/rc-evidence-collect.sh
 scripts/rc-dogfood-gate.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh
 scripts/perf-profile.sh
@@ -188,7 +189,7 @@ AgentHub is an installable local developer preview, not a hosted team product ye
 - Local sandboxing is process supervision plus policy checks, not a full untrusted-code security boundary.
 - Hosted/team surfaces currently generate local export payloads; there is no shared server, browser login, or team account system yet.
 - DeepSeek and Kimi use AgentHub-owned API requests and environment-based API keys.
-- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI with live tool cards, automatic review-only memory extraction, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, and a 1.0 RC dogfood evidence gate are available; final real-world dogfooding evidence remains before 1.0.
+- Streaming chat, API-native project command execution, budgeted memory-aware chat context, an event-backed TUI with live tool cards, automatic review-only memory extraction, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC dogfood evidence collection, and the RC gate are available; final real-world dogfooding evidence remains before 1.0.
 
 See [Known Limitations](docs/known-limitations.en.md) and [Security Hardening](docs/security-hardening.en.md).
 

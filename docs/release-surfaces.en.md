@@ -48,6 +48,7 @@ Set `AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1` when you want the script to fail until 
 For a final 1.0 RC rehearsal, also require the product evidence gate:
 
 ```bash
+scripts/rc-evidence-collect.sh
 AGENTHUB_PREPARE_REQUIRE_DOGFOOD=1 AGENTHUB_PREPARE_REQUIRE_RC_DOGFOOD=1 scripts/prepare-1.0-release.sh
 ```
 

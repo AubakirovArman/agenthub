@@ -60,11 +60,14 @@ scripts/dogfood-readiness.sh --check
 Перед `1.0 RC` запускай более строгий product gate:
 
 ```bash
+scripts/rc-evidence-collect.sh
 scripts/rc-dogfood-gate.sh
 scripts/rc-dogfood-gate.sh --check
 ```
 
-RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`. Дефолтные пороги требуют 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts для каждой учтённой сессии, passed DeepSeek и Kimi provider evidence, отсутствие open blocker/critical blockers, а также явные passed checks для Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX и long-session latency. `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS` и `AGENTHUB_RC_REQUIRED_CHECKS` используй только для локальных test fixtures или осознанно суженных release rehearsals.
+`scripts/rc-evidence-collect.sh` пишет `target/dogfood/rc-evidence.jsonl` из наблюдаемых AgentHub artifacts: global/project chat `turn_finished` events, project transaction reports с cost receipts, provider dogfood history и Ops command receipts. Collector намеренно консервативный: он пишет только source-backed passed checks и оставляет resume, rewind, long-session latency и другие ненаблюдаемые checks отсутствующими, пока нет реальной evidence.
+
+RC gate по умолчанию читает `target/dogfood/rc-evidence.jsonl`. Дефолтные пороги требуют 100 passed real sessions, 20 Ops flows, 20 project-edit flows, cost/token receipts для каждой учтённой сессии, passed DeepSeek и Kimi provider evidence, отсутствие open blocker/critical blockers, а также явные passed checks для Chat/Ops no-bootstrap, resume, rewind, stats, cost receipts, Ops receipts, approval UX и long-session latency. `AGENTHUB_RC_EVIDENCE`, `AGENTHUB_RC_SOURCE_ROOT`, `AGENTHUB_RC_MIN_REAL_SESSIONS`, `AGENTHUB_RC_MIN_OPS_FLOWS`, `AGENTHUB_RC_MIN_PROJECT_EDIT_FLOWS`, `AGENTHUB_RC_REQUIRED_PROVIDERS` и `AGENTHUB_RC_REQUIRED_CHECKS` используй только для локальных test fixtures или осознанно суженных release rehearsals.
 
 Примеры строк RC evidence:
 

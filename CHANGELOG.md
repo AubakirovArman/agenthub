@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.30-local-preview - 2026-05-17
+
+- Add `scripts/rc-evidence-collect.sh` to build `target/dogfood/rc-evidence.jsonl` from real AgentHub chat sessions, project transaction reports, provider dogfood history, and Ops receipts.
+- Keep 1.0 RC evidence conservative: the collector records only observed passed sessions, cost receipts, provider passes, and source-backed checks, leaving resume/rewind/latency and other unobserved checks absent instead of fabricating readiness.
+- Add regression coverage for collected RC evidence and wire it into release readiness.
+
 ## 0.4.29-local-preview - 2026-05-16
 
 - Add a `scripts/rc-dogfood-gate.sh` release gate for 1.0 RC evidence, covering 100+ real sessions, 20+ Ops flows, 20+ project-edit flows, cost receipts, required DeepSeek/Kimi provider dogfood, explicit resume/rewind/stats/bootstrap/approval checks, and open blocker detection.
