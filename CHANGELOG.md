@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.104-local-preview - 2026-05-17
+
+- Add `agenthub readiness completion [--json] [--check] [--no-refresh]`, a single source-backed completion bundle that combines the final readiness decision with readiness-next, checklist, evidence, provider status, sources, blocker scope, blocked checks, and verification commands.
+- Cover the completion bundle in unit and smoke tests, and update the 1.0/post-1.0 roadmap docs so release triage can answer "what is done, what remains, and why is it blocked" without manually joining multiple reports.
+
 ## 0.4.103-local-preview - 2026-05-17
 
 - Add `agenthub readiness next [--json] [--check] [--no-refresh]`, a prioritized action-plan surface that summarizes the current readiness phase, focus, stop reason, next milestone, immediate commands, verification commands, and deferred post-1.0 tracks.

@@ -75,6 +75,11 @@ grep -q '"status": "blocked"' "$TMP/readiness-next.json"
 grep -q '"phase":' "$TMP/readiness-next.json"
 grep -q '"immediate_commands":' "$TMP/readiness-next.json"
 grep -q '"deferred_tracks":' "$TMP/readiness-next.json"
+run_agenthub readiness completion --json --no-refresh > "$TMP/readiness-completion.json"
+grep -q '"completion_status":' "$TMP/readiness-completion.json"
+grep -q '"current_action":' "$TMP/readiness-completion.json"
+grep -q '"prompt_to_artifact":' "$TMP/readiness-completion.json"
+grep -q '"provider_statuses":' "$TMP/readiness-completion.json"
 run_agenthub config show > "$TMP/config-show.txt"
 
 cat > "$SPEC" <<'YAML'

@@ -173,6 +173,7 @@ Run product checks:
 scripts/dogfood.sh
 scripts/dogfood-readiness.sh
 scripts/rc-evidence-collect.sh
+agenthub readiness completion --json --check
 agenthub readiness next --json --check
 scripts/rc-dogfood-gate.sh
 AGENTHUB_DOGFOOD_FULL=1 scripts/dogfood.sh

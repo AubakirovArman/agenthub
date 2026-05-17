@@ -224,6 +224,20 @@ pub fn handle_ecosystem(command: EcosystemCommands) -> Result<()> {
 
 pub fn handle_readiness(project_root: &Path, command: ReadinessCommands) -> Result<()> {
     match command {
+        ReadinessCommands::Completion {
+            json,
+            check,
+            no_refresh,
+        } => {
+            let result = readiness::render_completion(
+                project_root,
+                readiness::AuditOptions { json, no_refresh },
+            )?;
+            print!("{}", result.output);
+            if check && result.failed {
+                bail!("readiness completion incomplete");
+            }
+        }
         ReadinessCommands::Next {
             json,
             check,

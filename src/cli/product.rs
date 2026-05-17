@@ -120,6 +120,16 @@ pub enum EcosystemCommands {
 
 #[derive(Debug, Subcommand)]
 pub enum ReadinessCommands {
+    Completion {
+        #[arg(long)]
+        json: bool,
+
+        #[arg(long)]
+        check: bool,
+
+        #[arg(long)]
+        no_refresh: bool,
+    },
     Next {
         #[arg(long)]
         json: bool,

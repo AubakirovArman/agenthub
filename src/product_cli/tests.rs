@@ -11,6 +11,7 @@ mod provider_kimi_preflight_tests;
 mod provider_kimi_rc_unblock_tests;
 mod provider_kimi_tests;
 mod provider_status_json_tests;
+mod readiness_completion_tests;
 mod readiness_support;
 mod readiness_tests;
 mod support;
