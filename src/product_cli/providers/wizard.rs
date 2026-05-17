@@ -76,6 +76,7 @@ fn append_profiles(out: &mut String, statuses: &[ProviderStatus]) {
 fn append_next_actions(out: &mut String, statuses: &[ProviderStatus]) {
     let provider = recommended_provider(statuses);
     out.push_str("\nNext actions:\n");
+    out.push_str(&format!("  /provider {provider}\n"));
     out.push_str(&format!("  /providers setup {provider}\n"));
     out.push_str(&format!("  /providers diagnose {provider}\n"));
     out.push_str(&format!("  /providers test {provider}\n"));

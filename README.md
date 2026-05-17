@@ -104,6 +104,7 @@ AgentHub v0.4 is API-native. Configure DeepSeek or Kimi with environment variabl
 
 ```bash
 export DEEPSEEK_API_KEY=...
+agenthub providers select deepseek
 agenthub providers setup deepseek
 agenthub providers diagnose deepseek
 agenthub providers test deepseek
@@ -114,6 +115,7 @@ Kimi uses the same flow:
 
 ```bash
 export KIMI_API_KEY=...
+agenthub providers select kimi
 agenthub providers setup kimi
 agenthub providers test kimi
 ```

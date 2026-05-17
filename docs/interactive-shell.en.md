@@ -65,7 +65,7 @@ edit/e     open the draft in $VISUAL or $EDITOR, then revalidate it
 /mode chat|devops|project  prefer workspace mode for following turns
 /status           show current project and transaction
 /provider <id>    select DeepSeek or Kimi when ready
-/providers        provider wizard with status, roles, profiles, and next actions
+/providers        provider wizard with status, selection, roles, profiles, and next actions
 /cost             show chat token and cost usage
 /balance          show local spend; provider balances are not exposed by APIs
 /memory           inspect memory

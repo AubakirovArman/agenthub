@@ -90,7 +90,7 @@ fn parses_shell_commands_and_plain_text() {
     );
     assert_eq!(
         parse_line("provider deepseek"),
-        ShellCommand::Providers(Some("setup deepseek".into()))
+        ShellCommand::Providers(Some("select deepseek".into()))
     );
     assert_eq!(
         parse_line("config set default_provider deepseek"),

@@ -65,7 +65,7 @@ edit/e     открыть draft в $VISUAL или $EDITOR и затем пров
 /mode chat|devops|project  предпочесть workspace mode для следующих turns
 /status           текущий project и transaction
 /provider <id>    выбрать DeepSeek или Kimi, если provider готов
-/providers        provider wizard: status, roles, profiles и next actions
+/providers        provider wizard: status, selection, roles, profiles и next actions
 /cost             token/cost usage текущего scope
 /balance          local spend; provider balances API не отдаёт
 /memory           memory inspect

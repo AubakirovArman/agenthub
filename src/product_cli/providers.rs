@@ -306,6 +306,54 @@ pub fn setup_provider(project_root: &Path, provider: &str) -> Result<String> {
     Ok(diagnostics::setup_success(&status))
 }
 
+pub fn select_provider(project_root: &Path, provider: &str) -> Result<String> {
+    let status = status_for(project_root, provider)?;
+    let fallback_state = if status.available { "ok" } else { "missing" };
+    let state = status.state.as_deref().unwrap_or(fallback_state);
+    if !status.available {
+        let mut out = String::new();
+        out.push_str(&format!("not_selected\t{}\t{state}\n", status.info.id));
+        out.push_str(&format!("detail\t{}\n", status_detail(&status)));
+        append_selection_profile(&mut out, &status);
+        append_selection_recovery(project_root, &mut out, &status);
+        return Ok(out);
+    }
+
+    let path = config::set_value(project_root, "default_provider", &status.info.id)?;
+    let mut out = String::new();
+    out.push_str(&format!("selected\t{}\n", status.info.id));
+    out.push_str(&format!("default_provider\t{}\n", status.info.id));
+    append_selection_profile(&mut out, &status);
+    out.push_str(&format!("config\t{}\n", path.display()));
+    out.push_str("next\tagenthub exec \"answer with one word: ok\" --jsonl\n");
+    Ok(out)
+}
+
+fn append_selection_profile(out: &mut String, status: &ProviderStatus) {
+    if let Some(endpoint) = &status.endpoint {
+        out.push_str(&format!("endpoint\t{endpoint}\n"));
+    }
+    if let Some(model) = &status.model {
+        out.push_str(&format!("model\t{model}\n"));
+    }
+}
+
+fn append_selection_recovery(project_root: &Path, out: &mut String, status: &ProviderStatus) {
+    match status.info.id.as_str() {
+        "kimi" => append_kimi_unblock_steps(project_root, out),
+        "deepseek" => {
+            out.push_str("next\t1\tagenthub providers diagnose deepseek\n");
+            out.push_str("next\t2\tagenthub providers test deepseek\n");
+        }
+        provider => {
+            out.push_str(&format!(
+                "next\t1\tagenthub providers diagnose {provider}\n"
+            ));
+            out.push_str(&format!("next\t2\tagenthub providers test {provider}\n"));
+        }
+    }
+}
+
 pub fn test_provider(project_root: &Path, provider: &str) -> Result<String> {
     let status = status_for(project_root, provider)?;
     if http::is_http_provider(&status) {

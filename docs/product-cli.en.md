@@ -115,6 +115,8 @@ agenthub undo tx-20260515123000-abcd1234
 ```bash
 agenthub providers list
 agenthub providers status
+agenthub providers select deepseek
+agenthub providers select kimi
 agenthub providers setup deepseek
 agenthub providers setup kimi
 DEEPSEEK_API_KEY=... agenthub providers test deepseek
@@ -134,7 +136,7 @@ agenthub providers fallback chat deepseek kimi
 agenthub providers fallback reviewer deepseek kimi
 ```
 
-Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next setup/diagnose/test commands.
+Inside the interactive shell, `/providers` opens a provider wizard with API readiness, default markers, role assignments, fallbacks, and the next select/setup/diagnose/test commands.
 
 `providers status --json` is the raw machine-readable provider state. Each row includes a readiness `check_id`, and blocked or missing DeepSeek/Kimi rows include `blocker_kind: "external_credential"` plus `next_commands` so automation can move from raw state to safe recovery commands without parsing `detail`. Kimi rows can also include redacted `credential_classification` values such as `kimi_code_cli_oauth` or `kimi_code_cli_oauth_reported`. When a Kimi row matches a blocked auth report, the same JSON row also includes redacted `auth_status`, `auth_key_sha256_12`, `auth_key_source`, `credential_warning`, and `next_action` fields.
 
@@ -147,7 +149,9 @@ The local command runner is internal to the transaction kernel; it is not a user
 
 AgentHub also reads key files named `.deepseek` and `.kimi` from the project directory, current shell directory, or their parent directories. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE`, and `MOONSHOT_API_KEY_FILE` can point at explicit key files.
 
-`setup` configures a provider only when it is available. On success it records `default_provider`, prints the endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
+`select` is the lightweight daily command for choosing the default API provider. It writes `default_provider` only when the provider is ready, does not run a live request, and prints redacted recovery steps instead of mutating config when the provider is missing or blocked.
+
+`setup` remains the fuller bootstrap path. It configures a provider only when it is available. On success it records `default_provider`, prints the endpoint, reports the dry-run mode, and shows the next `agenthub ask` command.
 
 Example:
 

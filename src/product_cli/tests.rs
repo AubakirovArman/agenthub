@@ -131,10 +131,14 @@ fn providers_deepseek_reports_missing_without_key() -> Result<()> {
         let dir = tempfile::tempdir()?;
 
         let setup = providers::setup_provider(dir.path(), "deepseek")?;
+        let selected = providers::select_provider(dir.path(), "deepseek")?;
         let test = providers::test_provider(dir.path(), "deepseek")?;
         let status = providers::render_status(dir.path())?;
 
         assert!(setup.contains("missing\tdeepseek"));
+        assert!(selected.contains("not_selected\tdeepseek\tmissing"));
+        assert!(selected.contains("next\t1\tagenthub providers diagnose deepseek"));
+        assert!(selected.contains("next\t2\tagenthub providers test deepseek"));
         assert!(test.contains("missing\tdeepseek"));
         assert!(status.contains("deepseek\tmissing"));
         assert!(!config::path(dir.path()).exists());
@@ -199,12 +203,16 @@ fn providers_deepseek_test_calls_stub_server() -> Result<()> {
     with_deepseek_env(Some(&stub.endpoint), Some("test-key"), || {
         let dir = tempfile::tempdir()?;
 
+        let selected = providers::select_provider(dir.path(), "deepseek")?;
         let setup = providers::setup_provider(dir.path(), "deepseek")?;
         let test = providers::test_provider(dir.path(), "deepseek")?;
         let requests = stub.received_requests(2)?;
         let joined = requests.join("\n---\n");
         let lower = joined.to_ascii_lowercase();
 
+        assert!(selected.contains("selected\tdeepseek"));
+        assert!(selected.contains("default_provider\tdeepseek"));
+        assert!(selected.contains("next\tagenthub exec \"answer with one word: ok\" --jsonl"));
         assert!(setup.contains("configured\tdeepseek"));
         assert!(setup.contains("default_provider\tdeepseek"));
         assert!(test.contains("ok\tdeepseek\tcompletion_tokens:3"));

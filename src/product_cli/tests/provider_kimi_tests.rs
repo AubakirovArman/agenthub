@@ -106,15 +106,14 @@ fn providers_kimi_status_surfaces_matching_auth_blocker() -> Result<()> {
         )?;
         std::env::set_var("AGENTHUB_KIMI_AUTH_REPORT", &report);
 
-        let status = providers::render_status(dir.path())?;
         let setup = providers::setup_provider(dir.path(), "kimi")?;
+        let selected = providers::select_provider(dir.path(), "kimi")?;
 
-        assert!(status.contains("kimi\tblocked\t-"));
-        assert!(status.contains("latest Kimi auth check blocked: key:5e0492f3799a"));
-        assert!(status.contains("source:file:/tmp/.kimi; warning:plain Moonshot API key required"));
-        assert!(status.contains("; replace key"));
         assert!(setup.contains("missing\tkimi\tlatest Kimi auth check blocked"));
-        assert!(setup.contains("source:file:/tmp/.kimi; warning:plain Moonshot API key required"));
+        assert!(selected.contains("not_selected\tkimi\tblocked"));
+        assert!(selected
+            .contains("step\t4\tagenthub providers rc-unblock kimi --from-file <new-key-file>"));
+        assert!(!selected.contains("kimi-test-key"));
         Ok(())
     })
 }

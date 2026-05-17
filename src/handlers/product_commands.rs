@@ -38,6 +38,9 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         ProviderCommands::Setup { provider } => {
             print!("{}", providers::setup_provider(project_root, &provider)?);
         }
+        ProviderCommands::Select { provider } => {
+            print!("{}", providers::select_provider(project_root, &provider)?);
+        }
         ProviderCommands::Test { provider } => {
             let report = providers::test_provider(project_root, &provider)?;
             print!("{}", report);

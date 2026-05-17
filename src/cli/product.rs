@@ -16,6 +16,9 @@ pub enum ProviderCommands {
     Setup {
         provider: String,
     },
+    Select {
+        provider: String,
+    },
     Test {
         provider: String,
     },

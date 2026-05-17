@@ -179,7 +179,7 @@ pub(super) const SLASH_COMMANDS: &[SlashCommand] = &[
     item("/mode", "prefer chat, devops, project, plan, or run mode"),
     item("/status", "show project, provider, and current tx"),
     item("/provider", "select DeepSeek or Kimi"),
-    item("/providers", "setup or inspect DeepSeek/Kimi APIs"),
+    item("/providers", "select, setup, or inspect DeepSeek/Kimi APIs"),
     item("/stats", "show chat token and cost usage"),
     item("/cost", "show chat token and cost usage"),
     item("/balance", "show provider availability and local spend"),

@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.107-local-preview - 2026-05-17
+
+- Add a first-class API-native provider selection path: `agenthub providers select <id>` and shell `/provider <id>` now choose a ready DeepSeek/Kimi provider without entering the setup workflow.
+- Keep blocked or missing providers from mutating config; selection now prints redacted endpoint/model details plus concrete recovery commands for DeepSeek/Kimi, including the Kimi key inspection and RC unblock path.
+
 ## 0.4.106-local-preview - 2026-05-17
 
 - Align the API-native shell command table by making `/sessions` a first-class alias for chat sessions while keeping transaction history on `/transactions`, `/tx`, and `/history`.

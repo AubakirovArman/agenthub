@@ -115,6 +115,8 @@ agenthub undo tx-20260515123000-abcd1234
 ```bash
 agenthub providers list
 agenthub providers status
+agenthub providers select deepseek
+agenthub providers select kimi
 agenthub providers setup deepseek
 agenthub providers setup kimi
 DEEPSEEK_API_KEY=... agenthub providers test deepseek
@@ -134,7 +136,7 @@ agenthub providers fallback chat deepseek kimi
 agenthub providers fallback reviewer deepseek kimi
 ```
 
-В interactive shell команда `/providers` открывает wizard с API readiness, default markers, role assignments, fallbacks и следующими setup/diagnose/test командами.
+В interactive shell команда `/providers` открывает wizard с API readiness, default markers, role assignments, fallbacks и следующими select/setup/diagnose/test командами.
 
 `providers status --json` — raw machine-readable provider state. Каждая row включает readiness `check_id`, а blocked или missing DeepSeek/Kimi rows включают `blocker_kind: "external_credential"` и `next_commands`, чтобы automation переходила от raw state к safe recovery commands без parsing `detail`. Kimi rows также могут включать redacted `credential_classification`, например `kimi_code_cli_oauth` или `kimi_code_cli_oauth_reported`. Если Kimi row совпадает с blocked auth report, тот же JSON row добавляет redacted `auth_status`, `auth_key_sha256_12`, `auth_key_source`, `credential_warning` и `next_action`.
 
@@ -147,7 +149,9 @@ agenthub providers fallback reviewer deepseek kimi
 
 AgentHub также читает key files `.deepseek` и `.kimi` из project directory или любой parent directory. `DEEPSEEK_API_KEY_FILE`, `ANTHROPIC_AUTH_TOKEN_FILE`, `KIMI_API_KEY_FILE` и `MOONSHOT_API_KEY_FILE` могут указывать на explicit key files.
 
-`setup` настраивает provider только если он доступен. При успехе он записывает `default_provider`, печатает endpoint, показывает dry-run mode и следующую команду `agenthub ask`.
+`select` — лёгкая daily-команда для выбора default API provider. Она записывает `default_provider` только если provider готов, не запускает live request и при missing/blocked provider печатает redacted recovery steps вместо изменения config.
+
+`setup` остаётся более полным bootstrap-путём. Он настраивает provider только если он доступен. При успехе он записывает `default_provider`, печатает endpoint, показывает dry-run mode и следующую команду `agenthub ask`.
 
 Пример:
 

@@ -19,7 +19,7 @@ pub(super) fn print(mode: ShellMode) {
     println!("  /mode chat|devops|project  prefer workspace mode for following turns");
     println!("  /status            project, provider, selected transaction");
     println!("  /provider <id>     select DeepSeek or Kimi when ready");
-    println!("  /providers         provider status and setup actions");
+    println!("  /providers         provider status, select, and setup actions");
     println!("  /stats             chat token and cost usage");
     println!("  /cost, /balance    cost usage; provider balance is not exposed by APIs");
     println!("  /memory            project memory summary");

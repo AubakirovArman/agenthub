@@ -28,6 +28,10 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
             "{}",
             providers::setup_provider(root, required(&args, 1, "provider")?)?
         ),
+        "select" => print!(
+            "{}",
+            providers::select_provider(root, required(&args, 1, "provider")?)?
+        ),
         "add" => {
             return Err(anyhow!(
             "custom provider profiles are disabled in API-native mode; use `deepseek` or `kimi`"
@@ -90,12 +94,10 @@ pub(super) fn handle_providers(root: &Path, args: Option<&str>) -> Result<()> {
                 .collect::<Vec<_>>();
             print!("{}", providers::set_role_fallback(root, role, &fallback)?);
         }
-        other if provider_exists(root, other)? => {
-            print!("{}", providers::setup_provider(root, other)?)
-        }
+        other if provider_exists(root, other)? => print!("{}", providers::select_provider(root, other)?),
         other => {
             return Err(anyhow!(
-            "unknown providers command `{other}`; use `/providers setup {other}` or `/providers`"
+            "unknown providers command `{other}`; use `/providers select {other}`, `/providers setup {other}`, or `/providers`"
         ))
         }
     }

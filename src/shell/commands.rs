@@ -129,7 +129,7 @@ pub(super) fn parse_line(line: &str) -> ShellCommand {
         "hosts" => ShellCommand::Ops(Some("hosts".to_string())),
         "connect" => ShellCommand::Connect(rest.trim().to_string()),
         "providers" => ShellCommand::Providers(optional(rest)),
-        "provider" => ShellCommand::Providers(Some(format!("setup {}", rest.trim()))),
+        "provider" => ShellCommand::Providers(Some(format!("select {}", rest.trim()))),
         "config" => ShellCommand::Config(optional(rest)),
         "dashboard" => ShellCommand::Dashboard,
         "serve" => ShellCommand::Serve(optional(rest)),

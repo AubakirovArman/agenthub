@@ -2,7 +2,7 @@
 
 Languages: [English](known-limitations.en.md), [Русский](known-limitations.ru.md), [中文](known-limitations.zh.md), [Қазақша](known-limitations.kk.md)
 
-AgentHub `0.4.106-local-preview` is an installable local developer preview, not a stable public or enterprise product.
+AgentHub `0.4.107-local-preview` is an installable local developer preview, not a stable public or enterprise product.
 
 ## License
 
