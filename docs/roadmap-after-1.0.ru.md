@@ -159,7 +159,7 @@ Acceptance:
 
 ## Near-Term Implementation Steps
 
-These are the next concrete engineering steps from the current `0.4.50-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
+These are the next concrete engineering steps from the current `0.4.51-local-preview` bridge toward `1.0`. They are intentionally before MCP/A2A and marketplace work.
 
 | Release | Focus | Acceptance |
 |---|---|---|
@@ -202,7 +202,8 @@ These are the next concrete engineering steps from the current `0.4.50-local-pre
 | `0.4.48` | Provider unblock CLI runbook | Done: `providers unblock <provider>` prints status, safe credential source, endpoint/model, and next verification commands for Kimi/DeepSeek unblock work |
 | `0.4.49` | API-native completion audit | Done: `scripts/api-native-completion-audit.sh` maps roadmap files, provider surface, RC evidence, Kimi auth state, and the RC dogfood gate into a source-backed completion checklist |
 | `0.4.50` | Kimi key rotation helper | Done: `scripts/kimi-key-rotate.sh` installs replacement Kimi/Moonshot keys atomically, never prints the secret, reports safe fingerprints, and can run the auth check after rotation |
-| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.50` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
+| `0.4.51` | First-class Kimi key rotation CLI | Done: `agenthub providers rotate-key kimi` installs replacement keys from file/env/stdin without secret output, supports dry-run/target overrides, warns when env keys override the target file, and can run the provider test immediately |
+| `1.0 RC` | Real dogfooding gate | Collect and pass the `0.4.51` evidence gate with real daily usage, including stable resume/rewind/stats, 20+ Ops and 20+ project-edit flows, and no Kimi/auth/latency/approval blockers |
 
 ## Current 0.4.x Bridge
 
@@ -216,7 +217,7 @@ The immediate bridge from 0.4.x to 1.0 is:
 - inject only committed/review-approved memory into API chat context;
 - keep project transaction safety inside `.agent` only after lazy bootstrap.
 
-This is why the `v0.4.8` through `v0.4.50` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, provider-test exit-code release smoke, Kimi blocked status visibility, Kimi auth retest from blocked status, provider unblock CLI runbooks, API-native completion audits, and safe Kimi key rotation rather than starting MCP/A2A early.
+This is why the `v0.4.8` through `v0.4.51` bridge releases focus on global Chat/Ops memory, a review-gated memory inbox, budgeted memory-aware chat context, provider diagnostics, visible mode routing, explainable tool permissions, lazy project bootstrap, context compaction receipts, event-backed TUI visibility, visible transaction approval receipts, CI-friendly headless approval receipts, recoverable session reads, native DeepSeek/Kimi command-plan tool-call receipts, dashboard observability, API-native tool-result reinjection, tool registry policy hardening, review-only automatic memory extraction, terminal live tool cards, grouped/ranked memory inbox review, Ops host profiles/runbook receipts, 1.0 RC evidence collection, 1.0 RC evidence gating, safer Kimi auth-blocker diagnostics, headless Ops execution, RC acceptance rehearsal, richer source-backed evidence harvesting, dogfood report RC evidence summaries, archived acceptance rehearsal evidence, clearer Kimi endpoint/auth failure receipts, a Kimi unblock runbook, source-backed Kimi auth blocker evidence, 1.0 preparation Kimi gating, API-native RC evidence purity, Kimi auth doctor visibility, Windows CI Ops stability, Windows tag CI smoke stability, provider-test exit-code hardening, provider-test exit-code release smoke, Kimi blocked status visibility, Kimi auth retest from blocked status, provider unblock CLI runbooks, API-native completion audits, safe Kimi key rotation, and first-class Kimi key rotation CLI UX rather than starting MCP/A2A early.
 
 ## Next Implementation Sequence
 

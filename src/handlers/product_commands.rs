@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{io::Read, path::Path};
 
 use anyhow::{bail, Result};
 
@@ -39,6 +39,39 @@ pub fn handle_providers(project_root: &Path, command: ProviderCommands) -> Resul
         }
         ProviderCommands::Unblock { provider } => {
             print!("{}", providers::unblock_provider(project_root, &provider)?);
+        }
+        ProviderCommands::RotateKey {
+            provider,
+            from_file,
+            from_env,
+            stdin,
+            target,
+            dry_run,
+            no_test,
+        } => {
+            let stdin_value = if stdin {
+                let mut value = String::new();
+                std::io::stdin().read_to_string(&mut value)?;
+                Some(value)
+            } else {
+                None
+            };
+            let result = providers::rotate_provider_key(
+                project_root,
+                &provider,
+                providers::KeyRotationOptions {
+                    from_file,
+                    from_env,
+                    stdin_value,
+                    target,
+                    dry_run,
+                    test_after_install: !no_test,
+                },
+            )?;
+            print!("{}", result.output);
+            if result.provider_test_failed {
+                bail!("provider key rotation test failed for `{provider}`");
+            }
         }
         ProviderCommands::Set { role, provider } => {
             print!(

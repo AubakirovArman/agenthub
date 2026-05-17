@@ -156,7 +156,8 @@ printf 'trimmed_for_write\t%s\n' "$trimmed_for_write"
 
 if [[ "$DRY_RUN" == true ]]; then
   printf 'status\tdry_run\n'
-  printf 'next\t1\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
+  printf 'next\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
   exit 0
 fi
 

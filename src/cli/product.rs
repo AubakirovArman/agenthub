@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::Subcommand;
 
 #[derive(Debug, Subcommand)]
@@ -15,6 +17,27 @@ pub enum ProviderCommands {
     },
     Unblock {
         provider: String,
+    },
+    RotateKey {
+        provider: String,
+
+        #[arg(long)]
+        from_file: Option<PathBuf>,
+
+        #[arg(long)]
+        from_env: Option<String>,
+
+        #[arg(long)]
+        stdin: bool,
+
+        #[arg(long)]
+        target: Option<PathBuf>,
+
+        #[arg(long)]
+        dry_run: bool,
+
+        #[arg(long)]
+        no_test: bool,
     },
     Set {
         role: String,

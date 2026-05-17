@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.51-local-preview - 2026-05-17
+
+- Add `agenthub providers rotate-key kimi`, a first-class CLI key rotation command that installs Kimi/Moonshot keys from file/env/stdin without printing secrets, supports dry-run and explicit target paths, writes file keys atomically, and can immediately run the provider test.
+- Update Kimi unblock and API-native completion audit next steps to prefer the product CLI command while keeping `scripts/kimi-key-rotate.sh` as a compatible script path.
+
 ## 0.4.50-local-preview - 2026-05-17
 
 - Add `scripts/kimi-key-rotate.sh`, a safe Kimi/Moonshot key rotation helper that installs a replacement key atomically, trims surrounding whitespace, avoids printing secrets, reports old/new fingerprints, and can immediately run the Kimi auth check.

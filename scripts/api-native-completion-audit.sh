@@ -291,11 +291,12 @@ fi
 if [[ "$failed" == true ]]; then
   printf 'status\tincomplete\n'
   printf 'next\t1\tagenthub providers unblock kimi\n'
-  printf 'next\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
-  printf 'next\t3\tagenthub providers test kimi\n'
-  printf 'next\t4\tscripts/kimi-auth-check.sh\n'
-  printf 'next\t5\tscripts/rc-evidence-collect.sh\n'
-  printf 'next\t6\tscripts/rc-dogfood-gate.sh --check\n'
+  printf 'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>\n'
+  printf 'next\t3\tscripts/kimi-key-rotate.sh --from-file <new-key-file>\n'
+  printf 'next\t4\tagenthub providers test kimi\n'
+  printf 'next\t5\tscripts/kimi-auth-check.sh\n'
+  printf 'next\t6\tscripts/rc-evidence-collect.sh\n'
+  printf 'next\t7\tscripts/rc-dogfood-gate.sh --check\n'
   if [[ "$CHECK" == true ]]; then
     exit 1
   fi

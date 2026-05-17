@@ -158,11 +158,102 @@ fn providers_kimi_unblock_renders_source_backed_next_steps() -> Result<()> {
         assert!(unblock.contains("status\tblocked"));
         assert!(unblock.contains("detail\tlatest Kimi auth check blocked"));
         assert!(unblock.contains("api_key_env\tKIMI_API_KEY"));
-        assert!(unblock.contains("step\t1\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
-        assert!(unblock.contains("step\t2\tagenthub providers test kimi"));
-        assert!(unblock.contains("step\t3\tscripts/kimi-auth-check.sh"));
-        assert!(unblock.contains("step\t4\tscripts/rc-evidence-collect.sh"));
-        assert!(unblock.contains("step\t5\tscripts/rc-dogfood-gate.sh --check"));
+        assert!(unblock
+            .contains("step\t1\tagenthub providers rotate-key kimi --from-file <new-key-file>"));
+        assert!(unblock.contains("step\t2\tscripts/kimi-key-rotate.sh --from-file <new-key-file>"));
+        assert!(unblock.contains("step\t3\tagenthub providers test kimi"));
+        assert!(unblock.contains("step\t4\tscripts/kimi-auth-check.sh"));
+        assert!(unblock.contains("step\t5\tscripts/rc-evidence-collect.sh"));
+        assert!(unblock.contains("step\t6\tscripts/rc-dogfood-gate.sh --check"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_kimi_rotate_key_installs_without_leaking_secret_and_tests_provider() -> Result<()> {
+    let stub = openai_stub_server("rotated kimi ok", 7)?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), None, || {
+        let dir = tempfile::tempdir()?;
+        let source = dir.path().join("new-kimi-key.txt");
+        std::fs::write(&source, "  rotated-kimi-secret  \n")?;
+
+        let result = providers::rotate_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyRotationOptions {
+                from_file: Some(source.clone()),
+                test_after_install: true,
+                ..Default::default()
+            },
+        )?;
+        let stored = std::fs::read_to_string(dir.path().join(".kimi"))?;
+        let requests = stub.received_requests(2)?;
+        let joined = requests.join("\n---\n").to_ascii_lowercase();
+
+        assert!(!result.provider_test_failed);
+        assert_eq!(stored, "rotated-kimi-secret\n");
+        assert!(result.output.contains("AgentHub Kimi key rotation"));
+        assert!(result.output.contains("source\tfile:"));
+        assert!(result.output.contains("status\tinstalled"));
+        assert!(result.output.contains("trimmed_for_write\ttrue"));
+        assert!(result
+            .output
+            .contains("provider_test\tok\tkimi\tcompletion_tokens:7"));
+        assert!(!result.output.contains("rotated-kimi-secret"));
+        assert!(joined.contains("authorization: bearer rotated-kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_kimi_rotate_key_dry_run_does_not_overwrite_target() -> Result<()> {
+    with_kimi_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let source = dir.path().join("new-kimi-key.txt");
+        let target = dir.path().join(".kimi");
+        std::fs::write(&source, "new-kimi-secret")?;
+        std::fs::write(&target, "old-kimi-secret\n")?;
+
+        let result = providers::rotate_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyRotationOptions {
+                from_file: Some(source),
+                dry_run: true,
+                test_after_install: true,
+                ..Default::default()
+            },
+        )?;
+
+        assert_eq!(std::fs::read_to_string(target)?, "old-kimi-secret\n");
+        assert!(!result.provider_test_failed);
+        assert!(result.output.contains("status\tdry_run"));
+        assert!(!result.output.contains("new-kimi-secret"));
+        assert!(!result.output.contains("old-kimi-secret"));
+        Ok(())
+    })
+}
+
+#[test]
+fn providers_kimi_rotate_key_rejects_embedded_whitespace() -> Result<()> {
+    with_kimi_env(None, None, || {
+        let dir = tempfile::tempdir()?;
+        let error = providers::rotate_provider_key(
+            dir.path(),
+            "kimi",
+            providers::KeyRotationOptions {
+                stdin_value: Some("bad kimi secret".to_string()),
+                test_after_install: false,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+
+        assert!(error
+            .to_string()
+            .contains("replacement key contains embedded whitespace"));
+        assert!(!dir.path().join(".kimi").exists());
         Ok(())
     })
 }

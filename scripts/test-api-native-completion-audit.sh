@@ -79,5 +79,6 @@ fi
 grep -q $'check\tkimi_auth\tblocked' "$TMP/blocked.out"
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
 grep -q $'status\tincomplete' "$TMP/blocked.out"
+grep -q $'next\t2\tagenthub providers rotate-key kimi --from-file <new-key-file>' "$TMP/blocked.out"
 
 printf 'agenthub API-native completion audit test passed\n'
