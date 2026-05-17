@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.42-local-preview - 2026-05-17
+
+- Fix Windows CI stability for Ops tests by replacing a Unix-only `uptime` fixture command with a portable shell command.
+- Harden the test environment helper so a panic inside an `AGENTHUB_HOME` scoped test restores the environment and does not poison later tests.
+
 ## 0.4.41-local-preview - 2026-05-17
 
 - Teach `agenthub doctor` to read the latest local `kimi-auth-report.json` and surface blocked Kimi auth as a warning with the safe key fingerprint and next action.

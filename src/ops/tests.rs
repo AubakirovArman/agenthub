@@ -72,7 +72,7 @@ fn ops_exec_records_headless_receipt_without_project_runtime() -> Result<()> {
     let home = tempfile::tempdir()?;
 
     with_agenthub_home(home.path(), || {
-        let outcome = exec_command(root.path(), "uptime")?;
+        let outcome = exec_command(root.path(), "printf ops-ok")?;
 
         assert_eq!(outcome.status, OpsExecStatus::Completed);
         assert!(outcome.result.as_ref().is_some_and(|result| result.success));
