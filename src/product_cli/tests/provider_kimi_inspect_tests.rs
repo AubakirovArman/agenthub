@@ -113,14 +113,15 @@ fn providers_kimi_inspect_key_uses_matching_auth_report_for_plain_shaped_blocker
     let source = dir.path().join(".kimi");
     let report = dir.path().join("kimi-auth-report.json");
     std::fs::write(&source, key)?;
-    std::fs::write(
-        &report,
-        format!(
-            r#"{{"provider":"kimi","status":"blocked","auth_key_sha256_12":"{}","auth_key_source":"file:{}","credential_warning":"Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys","next_action":"replace key"}}"#,
-            sha256_prefix(key.as_bytes()),
-            source.display()
-        ),
-    )?;
+    let report_json = serde_json::json!({
+        "provider": "kimi",
+        "status": "blocked",
+        "auth_key_sha256_12": sha256_prefix(key.as_bytes()),
+        "auth_key_source": format!("file:{}", source.display()),
+        "credential_warning": "Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compatible API keys",
+        "next_action": "replace key"
+    });
+    std::fs::write(&report, report_json.to_string())?;
 
     with_env_vars(
         &[

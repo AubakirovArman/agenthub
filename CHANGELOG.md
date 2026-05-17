@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.85-local-preview - 2026-05-17
+
+- Fix the cross-platform Kimi inspect-key blocker fixture by serializing the auth report as JSON, so Windows paths cannot break CI parsing.
+- Supersede the `0.4.84` release attempt with the same runtime behavior plus green release-matrix test coverage.
+
 ## 0.4.84-local-preview - 2026-05-17
 
 - Add `agenthub providers inspect-key kimi`, an offline, no-write Kimi credential inspection command that redacts secrets, reports fingerprint/shape/network/write policy, and uses matching Kimi auth blocker evidence to identify known Kimi Code CLI OAuth material.
