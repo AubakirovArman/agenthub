@@ -37,11 +37,12 @@ pub fn rc_unblock_provider(
         if let Some(preflight_options) = preflight_options_from_rotation(&rotation_options) {
             let preflight = run_key_preflight(project_root, &mut out, preflight_options)?;
             if preflight.provider_test_failed {
-                append_blocked(&mut out, "key_preflight_failed");
-                return Ok(RcUnblockResult {
-                    output: out,
-                    failed: true,
-                });
+                return blocked_result(
+                    project_root,
+                    out,
+                    "key_preflight_failed",
+                    endpoint_override.as_deref(),
+                );
             }
             if let Some(passed_endpoint) = preflight.passed_endpoint {
                 if preflight.configured_endpoint.as_deref() != Some(passed_endpoint.as_str()) {
@@ -53,11 +54,12 @@ pub fn rc_unblock_provider(
             }
         }
         if !run_key_rotation(project_root, &mut out, rotation_options)? {
-            append_blocked(&mut out, "key_rotation_provider_test_failed");
-            return Ok(RcUnblockResult {
-                output: out,
-                failed: true,
-            });
+            return blocked_result(
+                project_root,
+                out,
+                "key_rotation_provider_test_failed",
+                endpoint_override.as_deref(),
+            );
         }
     }
 
@@ -67,11 +69,12 @@ pub fn rc_unblock_provider(
             &mut out,
             endpoint_override.as_deref(),
         )?;
-        append_blocked(&mut out, "provider_test_failed");
-        return Ok(RcUnblockResult {
-            output: out,
-            failed: true,
-        });
+        return blocked_result(
+            project_root,
+            out,
+            "provider_test_failed",
+            endpoint_override.as_deref(),
+        );
     }
 
     if !run_script(
@@ -83,11 +86,12 @@ pub fn rc_unblock_provider(
         &[],
         endpoint_override.as_deref(),
     )? {
-        append_blocked(&mut out, "kimi_auth_check_failed");
-        return Ok(RcUnblockResult {
-            output: out,
-            failed: true,
-        });
+        return blocked_result(
+            project_root,
+            out,
+            "kimi_auth_check_failed",
+            endpoint_override.as_deref(),
+        );
     }
 
     if options.skip_provider_dogfood {
@@ -105,12 +109,13 @@ pub fn rc_unblock_provider(
         ],
         endpoint_override.as_deref(),
     )? {
-        append_blocked(&mut out, "provider_dogfood_failed");
         out.push_str("next\t1\tAGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh\n");
-        return Ok(RcUnblockResult {
-            output: out,
-            failed: true,
-        });
+        return blocked_result(
+            project_root,
+            out,
+            "provider_dogfood_failed",
+            endpoint_override.as_deref(),
+        );
     }
 
     if !run_script(
@@ -122,11 +127,12 @@ pub fn rc_unblock_provider(
         &[],
         endpoint_override.as_deref(),
     )? {
-        append_blocked(&mut out, "rc_evidence_collect_failed");
-        return Ok(RcUnblockResult {
-            output: out,
-            failed: true,
-        });
+        return blocked_result(
+            project_root,
+            out,
+            "rc_evidence_collect_failed",
+            endpoint_override.as_deref(),
+        );
     }
 
     let gate_args = if options.no_check {
@@ -148,18 +154,24 @@ pub fn rc_unblock_provider(
         &[],
         endpoint_override.as_deref(),
     )?;
-    super::operator_receipt::append_kimi_rc_operator_receipt(
-        project_root,
-        &mut out,
-        endpoint_override.as_deref(),
-    )?;
     if !gate_passed {
+        super::operator_receipt::append_kimi_rc_blocked_operator_receipt(
+            project_root,
+            &mut out,
+            endpoint_override.as_deref(),
+            "rc_dogfood_gate_failed",
+        )?;
         append_blocked(&mut out, "rc_dogfood_gate_failed");
         return Ok(RcUnblockResult {
             output: out,
             failed: true,
         });
     }
+    super::operator_receipt::append_kimi_rc_operator_receipt(
+        project_root,
+        &mut out,
+        endpoint_override.as_deref(),
+    )?;
 
     if options.no_check {
         out.push_str("status\tunchecked\n");
@@ -340,6 +352,25 @@ fn append_blocked(out: &mut String, reason: &str) {
     out.push_str("next\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>\n");
     out.push_str("next\t6\tagenthub providers rotate-key kimi --from-file <new-key-file>\n");
     out.push_str("next\t7\tagenthub providers unblock kimi\n");
+}
+
+fn blocked_result(
+    project_root: &Path,
+    mut out: String,
+    reason: &str,
+    endpoint_override: Option<&str>,
+) -> Result<RcUnblockResult> {
+    super::operator_receipt::append_kimi_rc_blocked_operator_receipt(
+        project_root,
+        &mut out,
+        endpoint_override,
+        reason,
+    )?;
+    append_blocked(&mut out, reason);
+    Ok(RcUnblockResult {
+        output: out,
+        failed: true,
+    })
 }
 
 fn script(project_root: &Path, name: &str) -> PathBuf {

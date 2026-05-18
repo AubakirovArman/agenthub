@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use super::providers;
 #[cfg(unix)]
-use super::support::{openai_stub_server, with_kimi_env, write_script};
+use super::support::{openai_error_stub_server, openai_stub_server, with_kimi_env, write_script};
 
 #[cfg(unix)]
 #[test]
@@ -60,6 +60,9 @@ printf 'dogfood provider=%s live=%s\n' "$AGENTHUB_PROVIDER_DOGFOOD_PROVIDER" "$A
         assert!(result.output.contains("operator_receipt\tprovider\tkimi"));
         assert!(result
             .output
+            .contains("operator_receipt\tattempt_status\tcompleted"));
+        assert!(result
+            .output
             .contains("operator_receipt\tmodel\tmoonshot-test"));
         assert!(result
             .output
@@ -84,11 +87,83 @@ printf 'dogfood provider=%s live=%s\n' "$AGENTHUB_PROVIDER_DOGFOOD_PROVIDER" "$A
         let receipt: serde_json::Value =
             serde_json::from_str(&std::fs::read_to_string(receipt_path)?)?;
         assert_eq!(receipt["provider"].as_str(), Some("kimi"));
+        assert_eq!(receipt["attempt"]["status"].as_str(), Some("completed"));
         assert_eq!(receipt["model"].as_str(), Some("moonshot-test"));
         assert_eq!(receipt["endpoint"].as_str(), Some(endpoint.as_str()));
         assert_eq!(
             receipt["dogfood"]["run_id"].as_str(),
             Some("provider-kimi-001")
+        );
+        Ok(())
+    })
+}
+
+#[cfg(unix)]
+#[test]
+fn providers_kimi_rc_unblock_writes_blocked_operator_receipt() -> Result<()> {
+    let stub = openai_error_stub_server(
+        401,
+        r#"{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}"#,
+    )?;
+    let endpoint = format!("{}/v1", stub.endpoint);
+    with_kimi_env(Some(&endpoint), Some("kimi-test-key"), || {
+        let dir = tempfile::tempdir()?;
+        let scripts = dir.path().join("scripts");
+        std::fs::create_dir_all(&scripts)?;
+        write_script(
+            &scripts.join("kimi-auth-check.sh"),
+            r#"mkdir -p target/dogfood
+cat > target/dogfood/kimi-auth-report.json <<'JSON'
+{
+  "provider": "kimi",
+  "status": "blocked",
+  "auth_key_sha256_12": "abc123abc123",
+  "auth_key_source": "file:/tmp/.kimi",
+  "credential_warning": "plain Moonshot API key required",
+  "next_action": "replace key"
+}
+JSON
+printf 'auth blocked\n'
+"#,
+        )?;
+
+        let result = providers::rc_unblock_provider(
+            dir.path(),
+            "kimi",
+            providers::RcUnblockOptions::default(),
+        )?;
+
+        assert!(result.failed);
+        assert!(result.output.contains("step\tprovider_test\tfailed"));
+        assert!(result
+            .output
+            .contains("operator_receipt\tattempt_status\tblocked"));
+        assert!(result
+            .output
+            .contains("operator_receipt\tattempt_reason\tprovider_test_failed"));
+        assert!(result
+            .output
+            .contains("operator_receipt\tcredential_auth_status\tblocked"));
+        assert!(result
+            .output
+            .contains("operator_receipt\tcredential_warning\tplain Moonshot API key required"));
+        assert!(result.output.contains("status\tblocked"));
+        assert!(result.output.contains("reason\tprovider_test_failed"));
+        assert!(!result.output.contains("kimi-test-key"));
+
+        let receipt_path = dir
+            .path()
+            .join("target/dogfood/kimi-rc-operator-receipt.json");
+        let receipt: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(receipt_path)?)?;
+        assert_eq!(receipt["attempt"]["status"].as_str(), Some("blocked"));
+        assert_eq!(
+            receipt["attempt"]["reason"].as_str(),
+            Some("provider_test_failed")
+        );
+        assert_eq!(
+            receipt["credential"]["credential_warning"].as_str(),
+            Some("plain Moonshot API key required")
         );
         Ok(())
     })

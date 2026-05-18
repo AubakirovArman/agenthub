@@ -11,6 +11,37 @@ pub(super) fn append_kimi_rc_operator_receipt(
     out: &mut String,
     endpoint_override: Option<&str>,
 ) -> Result<()> {
+    append_kimi_rc_operator_receipt_with_attempt(
+        project_root,
+        out,
+        endpoint_override,
+        "completed",
+        None,
+    )
+}
+
+pub(super) fn append_kimi_rc_blocked_operator_receipt(
+    project_root: &Path,
+    out: &mut String,
+    endpoint_override: Option<&str>,
+    reason: &str,
+) -> Result<()> {
+    append_kimi_rc_operator_receipt_with_attempt(
+        project_root,
+        out,
+        endpoint_override,
+        "blocked",
+        Some(reason),
+    )
+}
+
+fn append_kimi_rc_operator_receipt_with_attempt(
+    project_root: &Path,
+    out: &mut String,
+    endpoint_override: Option<&str>,
+    attempt_status: &str,
+    attempt_reason: Option<&str>,
+) -> Result<()> {
     let mut status = super::status_for(project_root, "kimi")?;
     if let Some(endpoint) = endpoint_override {
         status.endpoint = Some(endpoint.to_string());
@@ -20,6 +51,8 @@ pub(super) fn append_kimi_rc_operator_receipt(
 
     let provider_report_path = project_root.join("target/dogfood/provider-dogfood-report.json");
     let provider_report = read_json(&provider_report_path);
+    let auth_report_path = project_root.join("target/dogfood/kimi-auth-report.json");
+    let auth_report = read_json(&auth_report_path);
     let latest_path = project_root.join("target/dogfood/history/latest.json");
     let latest = read_json(&latest_path);
     let latest_is_kimi = json_string(latest.as_ref(), "provider").as_deref() == Some("kimi");
@@ -60,12 +93,24 @@ pub(super) fn append_kimi_rc_operator_receipt(
         "provider": "kimi",
         "model": model,
         "endpoint": endpoint,
+        "attempt": {
+            "status": attempt_status,
+            "reason": attempt_reason,
+        },
         "token_cost_receipt": token_cost_receipt,
         "dogfood": {
             "status": dogfood_status,
             "run_id": dogfood_run_id,
             "tx_id": dogfood_tx_id,
             "report": provider_report_path,
+        },
+        "credential": {
+            "auth_status": json_string(auth_report.as_ref(), "status"),
+            "auth_key_source": json_string(auth_report.as_ref(), "auth_key_source"),
+            "auth_key_sha256_12": json_string(auth_report.as_ref(), "auth_key_sha256_12"),
+            "credential_warning": json_string(auth_report.as_ref(), "credential_warning"),
+            "next_action": json_string(auth_report.as_ref(), "next_action"),
+            "report": auth_report_path,
         },
         "readiness": {
             "completion_status": completion_status,
@@ -93,6 +138,16 @@ fn append_receipt_rows(out: &mut String, receipt_path: &Path, receipt: &Value) {
     ));
     out.push_str("operator_receipt\tprovider\tkimi\n");
     out.push_str(&format!(
+        "operator_receipt\tattempt_status\t{}\n",
+        receipt_value(receipt["attempt"]["status"].as_str().unwrap_or("unknown"))
+    ));
+    if let Some(reason) = receipt["attempt"]["reason"].as_str() {
+        out.push_str(&format!(
+            "operator_receipt\tattempt_reason\t{}\n",
+            receipt_value(reason)
+        ));
+    }
+    out.push_str(&format!(
         "operator_receipt\tmodel\t{}\n",
         receipt_value(receipt["model"].as_str().unwrap_or("unknown"))
     ));
@@ -118,6 +173,18 @@ fn append_receipt_rows(out: &mut String, receipt_path: &Path, receipt: &Value) {
         out.push_str(&format!(
             "operator_receipt\tdogfood_tx_id\t{}\n",
             receipt_value(tx_id)
+        ));
+    }
+    if let Some(auth_status) = receipt["credential"]["auth_status"].as_str() {
+        out.push_str(&format!(
+            "operator_receipt\tcredential_auth_status\t{}\n",
+            receipt_value(auth_status)
+        ));
+    }
+    if let Some(warning) = receipt["credential"]["credential_warning"].as_str() {
+        out.push_str(&format!(
+            "operator_receipt\tcredential_warning\t{}\n",
+            receipt_value(warning)
         ));
     }
     out.push_str(&format!(
