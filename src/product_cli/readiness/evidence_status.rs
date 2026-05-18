@@ -30,6 +30,9 @@ struct EvidenceStatusReport {
     evidence: String,
     dogfood_history: String,
     kimi_auth_report: String,
+    kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    latest_kimi_rc_attempt: Option<super::types::KimiRcOperatorReceiptSummary>,
     metrics: ReadinessMetrics,
     history: DogfoodHistoryStatus,
     thresholds: Vec<EvidenceThreshold>,
@@ -128,6 +131,8 @@ fn evidence_status_report(audit: ReadinessAuditReport) -> Result<EvidenceStatusR
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        kimi_rc_operator_receipt: audit.kimi_rc_operator_receipt,
+        latest_kimi_rc_attempt: audit.latest_kimi_rc_attempt,
         metrics: audit.metrics,
         history,
         thresholds,

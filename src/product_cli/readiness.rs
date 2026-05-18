@@ -7,6 +7,7 @@ mod evidence;
 mod evidence_status;
 mod gaps;
 mod next;
+mod operator_receipt;
 mod render;
 mod types;
 

@@ -11,6 +11,7 @@ use crate::product_cli::{ecosystem, providers};
 use super::{
     evidence::refresh_evidence,
     next::{blocked_checks, blocker_kinds, blocker_scope, check_blocker_kind, check_next_commands},
+    operator_receipt,
     render::render_text,
     types::{
         env_usize, next_commands, AuditConfig, AuditOptions, AuditRenderResult, EvidenceSummary,
@@ -157,6 +158,7 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
         );
     }
 
+    let latest_kimi_rc_attempt = operator_receipt::summarize(&config.kimi_operator_receipt);
     let failed = checks.iter().any(|check| check.status != "passed");
     let blocker_kinds = blocker_kinds(&checks);
     let blocked_checks = blocked_checks(&checks);
@@ -177,6 +179,8 @@ fn audit_report(project_root: &Path, config: &AuditConfig) -> Result<ReadinessAu
         evidence: config.evidence.display().to_string(),
         dogfood_history: history_index.display().to_string(),
         kimi_auth_report: config.kimi_report.display().to_string(),
+        kimi_rc_operator_receipt: config.kimi_operator_receipt.display().to_string(),
+        latest_kimi_rc_attempt,
         metrics,
         checks,
         next: if failed { next_commands() } else { Vec::new() },

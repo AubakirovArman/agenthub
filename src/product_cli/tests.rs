@@ -15,6 +15,7 @@ mod provider_kimi_tests;
 mod provider_status_json_tests;
 mod readiness_completion_tests;
 mod readiness_gap_tests;
+mod readiness_operator_receipt_tests;
 mod readiness_support;
 mod readiness_tests;
 mod support;

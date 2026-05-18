@@ -6,6 +6,7 @@ use crate::product_cli::version;
 
 use super::{
     audit::build_report,
+    operator_receipt,
     types::{
         AuditOptions, AuditRenderResult, ReadinessBlocker, ReadinessBlockerReport, ReadinessCheck,
         ReadinessSources,
@@ -37,6 +38,8 @@ pub fn render_blockers(project_root: &Path, options: AuditOptions) -> Result<Aud
         evidence: report.evidence,
         dogfood_history: report.dogfood_history,
         kimi_auth_report: report.kimi_auth_report,
+        kimi_rc_operator_receipt: report.kimi_rc_operator_receipt,
+        latest_kimi_rc_attempt: report.latest_kimi_rc_attempt,
         metrics: report.metrics,
         blockers,
         next: if failed { report.next } else { Vec::new() },
@@ -72,6 +75,13 @@ fn render_blockers_text(report: &ReadinessBlockerReport) -> String {
     out.push_str(&format!("evidence\t{}\n", report.evidence));
     out.push_str(&format!("dogfood_history\t{}\n", report.dogfood_history));
     out.push_str(&format!("kimi_auth_report\t{}\n", report.kimi_auth_report));
+    out.push_str(&format!(
+        "kimi_rc_operator_receipt\t{}\n",
+        report.kimi_rc_operator_receipt
+    ));
+    if let Some(summary) = &report.latest_kimi_rc_attempt {
+        operator_receipt::render_summary(&mut out, summary);
+    }
     out.push_str(&format!(
         "metrics\treal_sessions\t{}/{}\n",
         report.metrics.real_sessions, report.metrics.required_sessions

@@ -7,6 +7,7 @@ use crate::product_cli::{ecosystem, version};
 
 use super::{
     audit::build_report,
+    operator_receipt,
     types::{AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessSources, OBJECTIVE},
 };
 
@@ -30,6 +31,9 @@ struct ReadinessNextReport {
     evidence: String,
     dogfood_history: String,
     kimi_auth_report: String,
+    kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    latest_kimi_rc_attempt: Option<super::types::KimiRcOperatorReceiptSummary>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     immediate_commands: Vec<String>,
     verification_commands: Vec<String>,
@@ -82,6 +86,8 @@ fn next_report(audit: ReadinessAuditReport) -> ReadinessNextReport {
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        kimi_rc_operator_receipt: audit.kimi_rc_operator_receipt,
+        latest_kimi_rc_attempt: audit.latest_kimi_rc_attempt,
         immediate_commands,
         verification_commands,
         deferred_tracks: deferred_tracks(),
@@ -263,6 +269,13 @@ fn render_next_text(report: &ReadinessNextReport) -> String {
     out.push_str(&format!("evidence\t{}\n", report.evidence));
     out.push_str(&format!("dogfood_history\t{}\n", report.dogfood_history));
     out.push_str(&format!("kimi_auth_report\t{}\n", report.kimi_auth_report));
+    out.push_str(&format!(
+        "kimi_rc_operator_receipt\t{}\n",
+        report.kimi_rc_operator_receipt
+    ));
+    if let Some(summary) = &report.latest_kimi_rc_attempt {
+        operator_receipt::render_summary(&mut out, summary);
+    }
     for (index, command) in report.immediate_commands.iter().enumerate() {
         out.push_str(&format!("immediate\t{}\t{}\n", index + 1, command));
     }

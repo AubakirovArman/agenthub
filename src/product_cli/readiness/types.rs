@@ -31,6 +31,9 @@ pub struct ReadinessAuditReport {
     pub evidence: String,
     pub dogfood_history: String,
     pub kimi_auth_report: String,
+    pub kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_kimi_rc_attempt: Option<KimiRcOperatorReceiptSummary>,
     pub metrics: ReadinessMetrics,
     pub checks: Vec<ReadinessCheck>,
     pub next: Vec<String>,
@@ -52,6 +55,9 @@ pub struct ReadinessBlockerReport {
     pub evidence: String,
     pub dogfood_history: String,
     pub kimi_auth_report: String,
+    pub kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_kimi_rc_attempt: Option<KimiRcOperatorReceiptSummary>,
     pub metrics: ReadinessMetrics,
     pub blockers: Vec<ReadinessBlocker>,
     pub next: Vec<String>,
@@ -72,6 +78,9 @@ pub struct ReadinessChecklistReport {
     pub evidence: String,
     pub dogfood_history: String,
     pub kimi_auth_report: String,
+    pub kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_kimi_rc_attempt: Option<KimiRcOperatorReceiptSummary>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub gaps: Vec<ReadinessGap>,
     pub requirements: Vec<ReadinessRequirement>,
@@ -163,6 +172,24 @@ pub struct ReadinessBlocker {
     pub next_commands: Vec<String>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+pub struct KimiRcOperatorReceiptSummary {
+    pub generated_at: String,
+    pub attempt_status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attempt_reason: Option<String>,
+    pub provider: String,
+    pub model: String,
+    pub endpoint: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_auth_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub credential_warning: Option<String>,
+    pub readiness_completion_status: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub remaining_blockers: Vec<String>,
+}
+
 #[derive(Default)]
 pub(super) struct EvidenceSummary {
     pub real_sessions: usize,
@@ -179,6 +206,7 @@ pub(super) struct AuditConfig {
     pub evidence: PathBuf,
     pub history_dir: PathBuf,
     pub kimi_report: PathBuf,
+    pub kimi_operator_receipt: PathBuf,
     pub v04_plan: PathBuf,
     pub after_plan: PathBuf,
     pub roadmap_doc: PathBuf,
@@ -225,6 +253,10 @@ impl AuditConfig {
                     "AGENTHUB_KIMI_AUTH_REPORT",
                 ],
                 project_root.join("target/dogfood/kimi-auth-report.json"),
+            ),
+            kimi_operator_receipt: env_path(
+                &["AGENTHUB_API_AUDIT_KIMI_RC_OPERATOR_RECEIPT"],
+                project_root.join("target/dogfood/kimi-rc-operator-receipt.json"),
             ),
             v04_plan: env_path(
                 &["AGENTHUB_API_AUDIT_V04_PLAN"],

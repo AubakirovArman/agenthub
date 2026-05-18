@@ -1,4 +1,4 @@
-use super::types::ReadinessAuditReport;
+use super::{operator_receipt, types::ReadinessAuditReport};
 
 pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
     let mut out = String::new();
@@ -34,6 +34,13 @@ pub(super) fn render_text(report: &ReadinessAuditReport) -> String {
     out.push_str(&format!("evidence\t{}\n", report.evidence));
     out.push_str(&format!("dogfood_history\t{}\n", report.dogfood_history));
     out.push_str(&format!("kimi_auth_report\t{}\n", report.kimi_auth_report));
+    out.push_str(&format!(
+        "kimi_rc_operator_receipt\t{}\n",
+        report.kimi_rc_operator_receipt
+    ));
+    if let Some(summary) = &report.latest_kimi_rc_attempt {
+        operator_receipt::render_summary(&mut out, summary);
+    }
     for check in &report.checks {
         out.push_str(&format!(
             "check\t{}\t{}\t{}\n",

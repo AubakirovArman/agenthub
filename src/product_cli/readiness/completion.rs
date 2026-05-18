@@ -11,6 +11,7 @@ use super::{
     audit::build_report,
     checklist, evidence_status,
     gaps::{readiness_gaps, render_gaps},
+    operator_receipt,
     types::{
         AuditOptions, AuditRenderResult, ReadinessAuditReport, ReadinessGap, ReadinessSources,
         OBJECTIVE,
@@ -35,6 +36,9 @@ struct ReadinessCompletionReport {
     evidence: String,
     dogfood_history: String,
     kimi_auth_report: String,
+    kimi_rc_operator_receipt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    latest_kimi_rc_attempt: Option<super::types::KimiRcOperatorReceiptSummary>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     gaps: Vec<ReadinessGap>,
     current_action: Value,
@@ -111,6 +115,8 @@ fn completion_report(
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        kimi_rc_operator_receipt: audit.kimi_rc_operator_receipt,
+        latest_kimi_rc_attempt: audit.latest_kimi_rc_attempt,
         gaps,
         current_action,
         prompt_to_artifact,
@@ -186,6 +192,13 @@ fn render_completion_text(report: &ReadinessCompletionReport) -> String {
         report.sources.repo_roadmap
     ));
     out.push_str(&format!("evidence\t{}\n", report.evidence));
+    out.push_str(&format!(
+        "kimi_rc_operator_receipt\t{}\n",
+        report.kimi_rc_operator_receipt
+    ));
+    if let Some(summary) = &report.latest_kimi_rc_attempt {
+        operator_receipt::render_summary(&mut out, summary);
+    }
     render_gaps(&mut out, &report.gaps);
     render_current_action(&mut out, &report.current_action);
     render_requirements(&mut out, &report.prompt_to_artifact);

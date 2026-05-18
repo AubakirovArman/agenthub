@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.121-local-preview - 2026-05-18
+
+- Surface `target/dogfood/kimi-rc-operator-receipt.json` directly in readiness audit/next/blockers/checklist/evidence/completion JSON.
+- Add a redacted `latest_kimi_rc_attempt` summary with attempt status, reason, credential auth status, readiness status, and remaining blockers.
+- Print matching human-readable `latest_kimi_rc_attempt` rows so blocked Kimi RC attempts can be reviewed from readiness output without opening raw receipts.
+
 ## 0.4.120-local-preview - 2026-05-18
 
 - Write the same Kimi RC operator receipt on blocked `agenthub providers rc-unblock kimi` attempts, not only on successful runs.

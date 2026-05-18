@@ -162,6 +162,8 @@ fn checklist_report(audit: ReadinessAuditReport) -> ReadinessChecklistReport {
         evidence: audit.evidence,
         dogfood_history: audit.dogfood_history,
         kimi_auth_report: audit.kimi_auth_report,
+        kimi_rc_operator_receipt: audit.kimi_rc_operator_receipt,
+        latest_kimi_rc_attempt: audit.latest_kimi_rc_attempt,
         gaps: readiness_gaps(&audit.checks),
         requirements,
         next: if failed { audit.next } else { Vec::new() },
