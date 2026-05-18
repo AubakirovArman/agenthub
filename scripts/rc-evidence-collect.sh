@@ -267,7 +267,7 @@ collect_dogfood_reports() {
 
 collect_dogfood_report() {
   local report="$1"
-  local line run_id project_sessions project_costs ops_sessions ops_costs shell_ux_status shell_ux_artifact kimi_rehearsal_status kimi_rehearsal_artifact index
+  local line run_id project_sessions project_costs ops_sessions ops_costs shell_ux_status shell_ux_artifact kimi_rehearsal_status kimi_rehearsal_artifact long_session_status long_session_artifact index
   line="$(tr -d '\n' < "$report")"
   run_id="$(basename "$(dirname "$report")")"
   [[ "$run_id" == "." || "$run_id" == "target" || "$run_id" == "dogfood" ]] && run_id="current"
@@ -279,6 +279,8 @@ collect_dogfood_report() {
   shell_ux_artifact="$(json_field "$line" shell_ux_artifact)"
   kimi_rehearsal_status="$(json_field "$line" kimi_rehearsal_status)"
   kimi_rehearsal_artifact="$(json_field "$line" kimi_rehearsal_artifact)"
+  long_session_status="$(json_field "$line" long_session_status)"
+  long_session_artifact="$(json_field "$line" long_session_artifact)"
 
   project_sessions="$(number_or_zero "$project_sessions")"
   project_costs="$(number_or_zero "$project_costs")"
@@ -299,8 +301,8 @@ collect_dogfood_report() {
       write_session "dogfood-${run_id}-ops-${index}" "ops" "ops" "local-shell" "false" "dogfood_report" "$report"
     fi
   done
-  if (( project_sessions >= LONG_SESSION_MIN_TX )); then
-    write_check "long_session_latency" "dogfood_report" "$report"
+  if [[ "$long_session_status" == "passed" ]]; then
+    write_check "long_session_latency" "dogfood_report" "${long_session_artifact:-$report}"
   fi
   if [[ "$shell_ux_status" == "passed" ]]; then
     write_check "shell_ux_aliases" "dogfood_report" "${shell_ux_artifact:-$report}"
@@ -424,13 +426,21 @@ collect_script_checks() {
 
 collect_perf_checks() {
   [[ -f "$PERF_REPORT" ]] || return 0
-  local tx_count success_false
+  local tx_count cost_receipts success_false
   tx_count="$(json_field "$(tr -d '\n' < "$PERF_REPORT")" tx_count)"
+  cost_receipts="$(json_field "$(tr -d '\n' < "$PERF_REPORT")" cost_receipts)"
   success_false="$(grep -c '"success"[[:space:]]*:[[:space:]]*false' "$PERF_REPORT" || true)"
   case "$tx_count" in
     ''|*[!0-9]*) return 0 ;;
   esac
-  if (( tx_count >= LONG_SESSION_MIN_TX )) && [[ "$success_false" == "0" ]]; then
+  cost_receipts="$(number_or_zero "$cost_receipts")"
+  if (( tx_count >= LONG_SESSION_MIN_TX )) \
+    && (( cost_receipts >= LONG_SESSION_MIN_TX )) \
+    && [[ "$success_false" == "0" ]] \
+    && grep -q '"context_compressed"[[:space:]]*:[[:space:]]*true' "$PERF_REPORT" \
+    && grep -q '"pending_memory_included"[[:space:]]*:[[:space:]]*false' "$PERF_REPORT" \
+    && grep -q '"resume_receipt_exists"[[:space:]]*:[[:space:]]*true' "$PERF_REPORT" \
+    && grep -q '"rewind_receipt_exists"[[:space:]]*:[[:space:]]*true' "$PERF_REPORT"; then
     write_check "long_session_latency" "perf_profile" "$PERF_REPORT"
   fi
   return 0

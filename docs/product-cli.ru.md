@@ -245,6 +245,7 @@ agenthub serve --addr 127.0.0.1:4318 --refresh-ms 1000
 agenthub memory inspect
 agenthub memory summary
 agenthub memory audit
+agenthub memory context --domain code --max-memory-records 1 --json
 agenthub memory inbox
 agenthub memory inbox add "Prefer reviewed memory facts"
 agenthub memory inbox approve mem-inbox-12345678 mem-inbox-87654321
@@ -257,7 +258,7 @@ agenthub memory inbox reject mem-inbox-12345678,mem-inbox-87654321
 
 Completed Chat/Ops turns и successful Project transactions могут добавлять automatic candidates в этот inbox. Каждый candidate содержит source, scope, confidence, evidence excerpts и diff metadata, но остаётся inactive до explicit approval.
 
-API chat turns записывают compaction receipt в `memory/compacted/context_receipt.json` внутри активного memory scope. Там фиксируются selected committed memory, expired records, conflict suppression, budget drops, prompt token estimate и подтверждение, что pending inbox memory не была injected в prompt.
+API chat turns записывают compaction receipt в `memory/compacted/context_receipt.json` внутри активного memory scope. `agenthub memory context` строит тот же committed-memory context без live provider call и пишет тот же receipt для dogfood/perf verification. Там фиксируются selected committed memory, expired records, conflict suppression, budget drops, prompt token estimate и подтверждение, что pending inbox memory не была injected в prompt.
 
 ## Ops
 

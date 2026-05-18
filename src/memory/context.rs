@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use chrono::Utc;
@@ -119,13 +119,17 @@ pub fn build_context(
 }
 
 pub fn write_context_receipt(root: &Path, receipt: &MemoryContextReceipt) -> Result<()> {
-    let paths = memory_paths(root)?;
-    let path = paths.memory.join("compacted/context_receipt.json");
+    let path = context_receipt_path(root)?;
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }
     fs::write(&path, serde_json::to_string_pretty(receipt)?)
         .with_context(|| format!("write {}", path.display()))
+}
+
+pub fn context_receipt_path(root: &Path) -> Result<PathBuf> {
+    let paths = memory_paths(root)?;
+    Ok(paths.memory.join("compacted/context_receipt.json"))
 }
 
 fn render_record(record: &MemoryRecord) -> String {

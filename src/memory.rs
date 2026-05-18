@@ -30,7 +30,8 @@ use crate::spec::WorkspaceProfile;
 pub use audit::{run_audit, MemoryAudit};
 pub use auto_extract::{extract_to_inbox, AutoMemoryExtractionInput, AutoMemoryExtractionReceipt};
 pub use context::{
-    build_context, write_context_receipt, MemoryContext, MemoryContextBudget, MemoryContextReceipt,
+    build_context, context_receipt_path, write_context_receipt, MemoryContext, MemoryContextBudget,
+    MemoryContextReceipt,
 };
 pub use inbox::{
     add_inbox_candidate, list_inbox, review_inbox, review_inbox_many, review_inbox_view,

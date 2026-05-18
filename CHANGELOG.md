@@ -4,6 +4,12 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.115-local-preview - 2026-05-18
+
+- Add `agenthub memory context`, a no-network CLI path that builds and writes the active memory context receipt so compaction, budget drops, and pending-memory exclusion can be verified outside a live provider call.
+- Harden long-session evidence: perf profiling now records cost receipts, memory-context compaction, resume receipts, and rewind receipts; RC evidence collection only counts perf-backed long-session latency when those receipts are present.
+- Add a release-gated long-session compaction smoke that proves the enriched perf profile feeds `rc_check_long_session_latency` through the source-backed RC evidence collector.
+
 ## 0.4.114-local-preview - 2026-05-18
 
 - Harden daily shell/TUI regression coverage: `scripts/test-shell-ux-aliases.sh` now verifies the no-bootstrap TUI status line, composer, event rail, live tool cards, provider panel, and next actions after `/mode`, `/provider`, and `!command` shell flows.

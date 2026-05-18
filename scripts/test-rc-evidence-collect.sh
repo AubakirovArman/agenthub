@@ -41,7 +41,26 @@ printf '{"resumed_tx_id":"tx-resumed","status":"COMMITTED"}\n' > "$PROJECT/.agen
 printf '{"tx_id":"tx-control","revert_head":"abc"}\n' > "$PROJECT/.agent/tx/tx-control/undo.json"
 printf '{"commands":[{"classification":"needs_approval"}]}\n' > "$PROJECT/.agent/tx/tx-control/command_policy.json"
 cat > "$PERF" <<'JSON'
-{"tx_count":25,"metrics":[{"name":"transactions_no_commit","success":true,"avg_ms":1200},{"name":"tx_status","success":true}]}
+{
+  "tx_count": 25,
+  "cost_receipts": 25,
+  "memory_context": {
+    "status": "passed",
+    "context_compressed": true,
+    "pending_memory_included": false
+  },
+  "control": {
+    "resume_receipt_exists": true,
+    "rewind_receipt_exists": true
+  },
+  "metrics": [
+    {"name":"transactions_no_commit","success":true,"avg_ms":1200},
+    {"name":"memory_context_compaction","success":true},
+    {"name":"tx_resume","success":true},
+    {"name":"tx_undo","success":true},
+    {"name":"tx_status","success":true}
+  ]
+}
 JSON
 touch "$HISTORY/runs/provider-deepseek/provider-dogfood-report.json"
 touch "$HISTORY/runs/provider-codex/provider-dogfood-report.json"

@@ -199,6 +199,25 @@ pub enum MemoryCommands {
     Inspect,
     Summary,
     Audit,
+    Context {
+        #[arg(long, default_value = "code")]
+        domain: String,
+
+        #[arg(long, default_value_t = 6_000)]
+        max_prompt_tokens: usize,
+
+        #[arg(long, default_value_t = 800)]
+        max_memory_tokens: usize,
+
+        #[arg(long, default_value_t = 6)]
+        max_memory_records: usize,
+
+        #[arg(long, default_value_t = 8)]
+        max_recent_messages: usize,
+
+        #[arg(long)]
+        json: bool,
+    },
     Inbox {
         #[command(subcommand)]
         command: Option<MemoryInboxCommands>,

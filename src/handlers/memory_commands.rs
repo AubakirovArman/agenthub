@@ -17,8 +17,65 @@ pub fn handle_memory(project_root: &Path, command: MemoryCommands) -> Result<()>
         }
         MemoryCommands::Summary => print_summary(project_root)?,
         MemoryCommands::Audit => print_audit(project_root)?,
+        MemoryCommands::Context {
+            domain,
+            max_prompt_tokens,
+            max_memory_tokens,
+            max_memory_records,
+            max_recent_messages,
+            json,
+        } => print_context(
+            project_root,
+            memory::MemoryContextBudget {
+                max_prompt_tokens,
+                max_memory_tokens,
+                max_memory_records,
+                max_recent_messages,
+            },
+            &domain,
+            json,
+        )?,
         MemoryCommands::Inbox { command } => handle_inbox(project_root, command)?,
     }
+    Ok(())
+}
+
+fn print_context(
+    project_root: &Path,
+    budget: memory::MemoryContextBudget,
+    domain: &str,
+    json_output: bool,
+) -> Result<()> {
+    let context = memory::build_context(project_root, domain, budget)?;
+    memory::write_context_receipt(project_root, &context.receipt)?;
+    let path = memory::context_receipt_path(project_root)?;
+    if json_output {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&json!({
+                "domain": domain,
+                "receipt_path": path.display().to_string(),
+                "rendered": context.rendered,
+                "receipt": context.receipt,
+            }))?
+        );
+        return Ok(());
+    }
+    println!("context_receipt\t{}", path.display());
+    println!(
+        "memory_records\t{}/{}",
+        context.receipt.memory_records_selected, context.receipt.memory_records_available
+    );
+    println!(
+        "memory_budget_dropped\t{}",
+        context.receipt.memory_records_budget_dropped
+    );
+    println!("compressed\t{}", context.receipt.compressed);
+    println!(
+        "pending_memory_included\t{}",
+        context.receipt.pending_memory_included
+    );
+    println!("{}", context.rendered);
     Ok(())
 }
 

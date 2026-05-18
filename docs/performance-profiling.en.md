@@ -50,8 +50,11 @@ The report includes:
 - transaction count;
 - `tx status` row count;
 - whether `.agent/cache/indexes/transactions.sqlite3` exists;
+- cost receipt count for the long no-commit run;
+- memory context compaction status from `agenthub memory context`, including the receipt path, budget drops, and pending-memory exclusion;
+- resume and rewind control receipt presence;
 - total and average duration for the no-commit transaction loop;
-- latency for `tx status`, `tx explain latest`, and dashboard generation;
+- latency for memory context compaction, `tx status`, `tx explain latest`, resume/rewind, and dashboard generation;
 - optional kept project path when `AGENTHUB_PERF_KEEP=1`.
 
 ## How To Use It

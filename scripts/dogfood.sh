@@ -24,6 +24,10 @@ SHELL_UX_STATUS="skipped"
 SHELL_UX_ARTIFACT="${AGENTHUB_DOGFOOD_SHELL_UX_ARTIFACT:-$ROOT/target/dogfood/shell-ux-aliases.out}"
 KIMI_REHEARSAL_STATUS="skipped"
 KIMI_REHEARSAL_ARTIFACT="${AGENTHUB_DOGFOOD_KIMI_REHEARSAL_ARTIFACT:-$ROOT/target/dogfood/kimi-unblock-rehearsal.out}"
+LONG_SESSION_MIN_TX="${AGENTHUB_RC_LONG_SESSION_MIN_TX:-25}"
+LONG_SESSION_STATUS="skipped"
+LONG_SESSION_ARTIFACT="${AGENTHUB_DOGFOOD_LONG_SESSION_ARTIFACT:-$ROOT/target/dogfood/long-session-compaction.json}"
+LONG_SESSION_CONTEXT_RECEIPT=""
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -63,6 +67,28 @@ run_kimi_rehearsal_smoke() {
 }
 
 run_step "Kimi unblock rehearsal smoke" run_kimi_rehearsal_smoke
+
+run_memory_context_compaction() {
+  local project="$1"
+  local output="$2"
+  local add_one add_two add_pending approve id_one id_two
+  add_one="$output.add-one.txt"
+  add_two="$output.add-two.txt"
+  add_pending="$output.add-pending.txt"
+  approve="$output.approve.txt"
+  "$AGENTHUB_BIN" --project "$project" memory inbox add "Keep long-session context budget deterministic" --domain code --kind architecture_decision > "$add_one"
+  "$AGENTHUB_BIN" --project "$project" memory inbox add "Require compaction receipts before 1.0 RC" --domain code --kind route > "$add_two"
+  "$AGENTHUB_BIN" --project "$project" memory inbox add "Pending dogfood memory remains inactive" --domain code --kind style_rule > "$add_pending"
+  id_one="$(awk '$1 == "candidate:" {print $2; exit}' "$add_one")"
+  id_two="$(awk '$1 == "candidate:" {print $2; exit}' "$add_two")"
+  test -n "$id_one"
+  test -n "$id_two"
+  "$AGENTHUB_BIN" --project "$project" memory inbox approve "$id_one" "$id_two" > "$approve"
+  "$AGENTHUB_BIN" --project "$project" memory context --domain code --max-memory-records 1 --json > "$output"
+  grep -q '"compressed": true' "$output"
+  grep -q '"pending_memory_included": false' "$output"
+  grep -Eq '"memory_records_budget_dropped": [1-9][0-9]*' "$output"
+}
 
 run_stress() {
   local count="${AGENTHUB_DOGFOOD_STRESS_COUNT:-0}"
@@ -126,6 +152,14 @@ YAML
   STRESS_DURATION_SECS="$((finished - started))"
   STRESS_INDEX_EXISTS=true
   STRESS_PROJECT_PATH="$project"
+  if (( count >= LONG_SESSION_MIN_TX )) && (( STRESS_COST_RECEIPTS >= count )); then
+    mkdir -p "$(dirname "$LONG_SESSION_ARTIFACT")"
+    run_memory_context_compaction "$project" "$LONG_SESSION_ARTIFACT"
+    LONG_SESSION_CONTEXT_RECEIPT="$(sed -n 's/[[:space:]]*"receipt_path": "\([^"]*\)",*/\1/p' "$LONG_SESSION_ARTIFACT" | head -n1)"
+    test -n "$LONG_SESSION_CONTEXT_RECEIPT"
+    test -f "$LONG_SESSION_CONTEXT_RECEIPT"
+    LONG_SESSION_STATUS="passed"
+  fi
   if [[ "${AGENTHUB_DOGFOOD_KEEP:-0}" != "1" ]]; then
     rm -rf "$tmp"
     STRESS_PROJECT_PATH=""
@@ -225,6 +259,14 @@ write_report() {
   "kimi_unblock_rehearsal": {
     "status": "$(json_escape "$KIMI_REHEARSAL_STATUS")",
     "artifact": "$(json_escape "$KIMI_REHEARSAL_ARTIFACT")"
+  },
+  "long_session_status": "$(json_escape "$LONG_SESSION_STATUS")",
+  "long_session_artifact": "$(json_escape "$LONG_SESSION_ARTIFACT")",
+  "long_session": {
+    "status": "$(json_escape "$LONG_SESSION_STATUS")",
+    "min_tx": $LONG_SESSION_MIN_TX,
+    "artifact": "$(json_escape "$LONG_SESSION_ARTIFACT")",
+    "context_receipt": "$(json_escape "$LONG_SESSION_CONTEXT_RECEIPT")"
   },
   "stress": {
     "requested_count": ${AGENTHUB_DOGFOOD_STRESS_COUNT:-0},
