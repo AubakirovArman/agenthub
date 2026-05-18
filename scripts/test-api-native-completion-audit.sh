@@ -100,6 +100,8 @@ grep -q 'warning:Kimi Code CLI OAuth credentials are not Moonshot OpenAI-compati
 grep -q $'check\topen_blockers\tblocked' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\topen_blockers\texternal_credential' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\tprovider_kimi\texternal_provider_evidence' "$TMP/blocked.out"
+grep -q $'check_next\tprovider_kimi\t1\tagenthub providers inspect-key kimi' "$TMP/blocked.out"
+grep -q $'check_next\tprovider_kimi\t7\tscripts/kimi-auth-check.sh' "$TMP/blocked.out"
 grep -q $'check_blocker_kind\trc_dogfood_gate\tdependent_gate' "$TMP/blocked.out"
 grep -q $'check_next\tkimi_auth\t3\tagenthub providers rehearse-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"
 grep -q $'check_next\tkimi_auth\t5\tagenthub providers rc-unblock kimi --from-file <new-key-file>' "$TMP/blocked.out"

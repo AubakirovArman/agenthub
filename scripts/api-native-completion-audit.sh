@@ -128,10 +128,13 @@ check_next_commands() {
   fi
   if [[ "$id" == "provider_kimi" ]]; then
     printf '%s\n' \
+      'agenthub providers inspect-key kimi' \
       'agenthub providers inspect-key kimi --from-file <new-key-file>' \
       'agenthub providers rehearse-unblock kimi --from-file <new-key-file>' \
       'agenthub providers preflight-key kimi --from-file <new-key-file>' \
       'agenthub providers rc-unblock kimi --from-file <new-key-file>' \
+      'agenthub providers test kimi' \
+      'scripts/kimi-auth-check.sh' \
       'AGENTHUB_PROVIDER_DOGFOOD_PROVIDER=kimi AGENTHUB_PROVIDER_DOGFOOD_LIVE=1 scripts/provider-dogfood.sh'
     return
   fi

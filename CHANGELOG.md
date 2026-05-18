@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.117-local-preview - 2026-05-18
+
+- Keep Kimi provider-dogfood recovery self-contained at the individual check level: `provider_kimi.next_commands` now starts with current credential inspection, includes candidate inspection/rehearsal/preflight/RC unblock, then repeats provider test, Kimi auth check, and live provider dogfood.
+- Apply the same command sequence to the compatible script-level completion audit so product readiness JSON/text and `scripts/api-native-completion-audit.sh` stay aligned.
+
 ## 0.4.116-local-preview - 2026-05-18
 
 - Surface per-check recovery commands inside named readiness gaps, so `completion`, `evidence`, and `checklist` JSON can show the exact Kimi unblock or RC refresh commands beside the unresolved check that needs them.
