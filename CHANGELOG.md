@@ -4,6 +4,11 @@ All notable AgentHub changes are tracked here.
 
 ## Unreleased
 
+## 0.4.114-local-preview - 2026-05-18
+
+- Harden daily shell/TUI regression coverage: `scripts/test-shell-ux-aliases.sh` now verifies the no-bootstrap TUI status line, composer, event rail, live tool cards, provider panel, and next actions after `/mode`, `/provider`, and `!command` shell flows.
+- Add an exact text snapshot test for the TUI shell surface so event rail and cost/status panels are covered by unit-level rendering checks, not only broad smoke assertions.
+
 ## 0.4.113-local-preview - 2026-05-18
 
 - Add named readiness gap summaries to `agenthub readiness completion`, `agenthub readiness evidence`, and `agenthub readiness checklist` so shell UX, Kimi, dogfood, latency, and approval gaps are visible without reading raw RC evidence JSONL.

@@ -2,7 +2,11 @@ use std::fs;
 
 use anyhow::Result;
 
-use super::dashboard_text;
+use super::{
+    dashboard_text, render_dashboard, ApprovalPanel, ComposerPanel, Dashboard, DashboardSummary,
+    EventRailItem, MemoryPanel, ProviderPanel, ProviderRoleLine, ProviderStatusLine, ShellPanel,
+    ShellStatusLine, SlashPaletteItem, ToolCard, TransactionSummary, TranscriptLine,
+};
 use crate::agent_dir::init_project;
 use crate::product_cli::{config, providers};
 
@@ -142,4 +146,209 @@ fn renders_terminal_dashboard_panels() -> Result<()> {
     assert!(dashboard.contains("[Next Actions]"));
     assert!(dashboard.contains("agenthub tx report tx-20260101000000-demo"));
     Ok(())
+}
+
+#[test]
+fn renders_shell_tui_regression_snapshot() {
+    let dashboard = Dashboard {
+        project: "/workspace/site2".to_string(),
+        shell: ShellPanel {
+            status: ShellStatusLine {
+                mode: "ops".to_string(),
+                provider: "deepseek".to_string(),
+                provider_ready: true,
+                model: Some("deepseek-chat".to_string()),
+                git_state: "git optional".to_string(),
+                agent_state: "global session".to_string(),
+                chat_id: Some("chat-shell-smoke".to_string()),
+                chat_title: Some("Ops smoke".to_string()),
+                prompt_tokens: Some(12),
+                total_tokens: Some(18),
+                estimated_cost_usd: Some(0.0000042),
+                controls: vec![
+                    "Ctrl-C interrupt".to_string(),
+                    "/resume".to_string(),
+                    "/messages".to_string(),
+                    "/context".to_string(),
+                ],
+            },
+            composer: ComposerPanel {
+                prompt: "Type a request, / command, @ context, ! shell command, or # memory note"
+                    .to_string(),
+                slash_palette: vec![
+                    SlashPaletteItem {
+                        command: "/status".to_string(),
+                        summary: "show mode, provider, git, and current tx".to_string(),
+                    },
+                    SlashPaletteItem {
+                        command: "/providers".to_string(),
+                        summary: "inspect DeepSeek/Kimi API setup".to_string(),
+                    },
+                ],
+                context_mentions: vec![
+                    "@file".to_string(),
+                    "@tx:latest".to_string(),
+                    "@chat:chat-shell-smoke".to_string(),
+                ],
+            },
+            transcript: vec![
+                TranscriptLine {
+                    at: "2026-05-18T01:00:00Z".to_string(),
+                    speaker: "user".to_string(),
+                    text: "/mode ops".to_string(),
+                },
+                TranscriptLine {
+                    at: "2026-05-18T01:00:01Z".to_string(),
+                    speaker: "tool".to_string(),
+                    text: "shell classified as read-only (approval not required, risk: low)"
+                        .to_string(),
+                },
+            ],
+            event_rail: vec![
+                EventRailItem {
+                    at: "2026-05-18T01:00:02Z".to_string(),
+                    state: "ready".to_string(),
+                    label: "tool permission".to_string(),
+                    detail: "read-only risk low approval false".to_string(),
+                },
+                EventRailItem {
+                    at: "2026-05-18T01:00:03Z".to_string(),
+                    state: "done".to_string(),
+                    label: "turn finished".to_string(),
+                    detail: "deepseek succeeded turn succeeded".to_string(),
+                },
+            ],
+            tool_cards: vec![
+                ToolCard {
+                    kind: "tool_permission".to_string(),
+                    state: "ready".to_string(),
+                    title: "shell read-only".to_string(),
+                    detail: "risk low approval false action printf shell-smoke-ok".to_string(),
+                    link: None,
+                },
+                ToolCard {
+                    kind: "cost".to_string(),
+                    state: "done".to_string(),
+                    title: "deepseek turn succeeded".to_string(),
+                    detail: "tokens prompt 12 completion 6 total 18 cost 0.000004 USD".to_string(),
+                    link: None,
+                },
+            ],
+        },
+        summary: DashboardSummary {
+            total: 0,
+            committed: 0,
+            rolled_back: 0,
+            blocked: 0,
+            running: 0,
+        },
+        transactions: vec![TransactionSummary {
+            id: "tx-shell-smoke".to_string(),
+            status: "NOOP".to_string(),
+        }],
+        latest: None,
+        providers: ProviderPanel {
+            default_provider: "deepseek".to_string(),
+            ready: 1,
+            missing: 1,
+            profiles: 2,
+            statuses: vec![
+                ProviderStatusLine {
+                    id: "deepseek".to_string(),
+                    state: "ok".to_string(),
+                    is_default: true,
+                    detail: "https://api.deepseek.com/v1".to_string(),
+                    model: Some("deepseek-chat".to_string()),
+                },
+                ProviderStatusLine {
+                    id: "kimi".to_string(),
+                    state: "blocked".to_string(),
+                    is_default: false,
+                    detail: "external credential".to_string(),
+                    model: Some("kimi-k2.6".to_string()),
+                },
+            ],
+            roles: vec![ProviderRoleLine {
+                role: "executor".to_string(),
+                provider: "deepseek".to_string(),
+                available: Some(true),
+                fallback: vec!["deepseek".to_string(), "kimi".to_string()],
+            }],
+        },
+        memory: MemoryPanel {
+            committed: 0,
+            failed_attempts: 0,
+            recent_changes: 0,
+        },
+        approvals: ApprovalPanel {
+            specs: Vec::new(),
+            blocked_transactions: Vec::new(),
+        },
+        next_actions: vec!["agenthub run \"describe the change\" --no-commit".to_string()],
+    };
+
+    let expected = "\
+AgentHub TUI Dashboard
+Project: /workspace/site2
+Tabs: Chat | Events | Run | Transactions | Diff | Logs | Effects | Approvals | Memory | Providers
+
+[Status Line]
+- mode: ops | provider: deepseek ok model:deepseek-chat | git optional | global session
+- chat: chat-shell-smoke Ops smoke
+- tokens: prompt 12 total 18 | cost: 0.000004 USD
+- controls: Ctrl-C interrupt | /resume | /messages | /context
+
+[Composer]
+- prompt: Type a request, / command, @ context, ! shell command, or # memory note
+- slash palette:
+  - /status      show mode, provider, git, and current tx
+  - /providers   inspect DeepSeek/Kimi API setup
+- context mentions: @file @tx:latest @chat:chat-shell-smoke
+
+[Chat Transcript]
+- 01:00:00 user: /mode ops
+- 01:00:01 tool: shell classified as read-only (approval not required, risk: low)
+
+[Event Rail]
+- 01:00:02 [ready] tool permission: read-only risk low approval false
+- 01:00:03 [done] turn finished: deepseek succeeded turn succeeded
+
+[Live Tool Cards]
+- [ready] tool_permission: shell read-only
+  risk low approval false action printf shell-smoke-ok
+- [done] cost: deepseek turn succeeded
+  tokens prompt 12 completion 6 total 18 cost 0.000004 USD
+
+[Summary]
+- total transactions: 0
+- committed: 0 | rolled back: 0 | blocked: 0 | running: 0
+
+[Transactions]
+- tx-shell-smoke NOOP
+
+[Latest Transaction]
+- none
+
+[Providers]
+- default: deepseek
+- ready: 1 | missing: 1 | profiles: 2
+- deepseek [ok default] https://api.deepseek.com/v1 model:deepseek-chat
+- kimi [blocked] external credential model:kimi-k2.6
+- roles:
+  - executor -> deepseek (ok) fallback:deepseek,kimi
+
+[Memory]
+- committed records: 0
+- failed attempts: 0
+- recent workspace changes: 0
+
+[Approvals]
+- pending specs: 0
+- blocked transactions: 0
+
+[Next Actions]
+- agenthub run \"describe the change\" --no-commit
+";
+
+    assert_eq!(render_dashboard(&dashboard), expected);
 }
